@@ -90,7 +90,6 @@ PageType {
             IconButtonType {
                 id: editButton
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/edit-3.svg"
 
                 onClicked: serverNameEditDrawer.open()
@@ -109,7 +108,6 @@ PageType {
             id: tabBar
 
             Layout.fillWidth: true
-            Layout.topMargin: 16
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 

@@ -49,10 +49,6 @@ PageType {
                 description: qsTr("Setup guides on the Amnezia website")
             }
 
-            Item {
-                Layout.preferredHeight: 16
-            }
-
             Repeater {
                 model: root.instructionsModel
 

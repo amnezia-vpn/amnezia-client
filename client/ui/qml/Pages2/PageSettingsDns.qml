@@ -47,10 +47,9 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 24
 
                 spacing: 12
 

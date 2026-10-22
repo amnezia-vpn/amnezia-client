@@ -61,7 +61,7 @@ SheetType {
                     id: contentArea
 
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
+                    Layout.topMargin: 32
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin

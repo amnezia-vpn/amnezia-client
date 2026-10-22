@@ -106,7 +106,6 @@ PageType {
                 title: qsTr("XRay VLESS settings")
 
                 IconButtonType {
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/more-vertical.svg"
                     onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
                 }
@@ -116,7 +115,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
                 visible: !flickable.enabled
                 color: AmneziaStyle.color.textSecondary
                 text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")

@@ -134,7 +134,6 @@ Window  {
 
         bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        variant: SnackbarType.Destructive
         closable: true
         duration: 0
     }

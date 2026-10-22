@@ -42,7 +42,6 @@ PageType {
                 id: removeButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

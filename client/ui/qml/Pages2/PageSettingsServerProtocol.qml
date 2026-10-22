@@ -33,7 +33,6 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: ContainersModel.getProcessedContainerName() + qsTr(" settings")
                 description: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""

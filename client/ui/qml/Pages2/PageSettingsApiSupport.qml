@@ -39,10 +39,6 @@ PageType {
                 description: qsTr("Our technical support specialists are available to assist you at any time")
             }
 
-            Item {
-                Layout.preferredHeight: 16
-            }
-
             ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16

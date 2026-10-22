@@ -272,7 +272,6 @@ PageType {
             IconButtonType {
                 id: settingsButton
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/settings.svg"
 
                 onClicked: root.openServerInfo()
@@ -314,7 +313,7 @@ PageType {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 24
             }
         ]
 

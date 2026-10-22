@@ -77,18 +77,10 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: root.title !== "" ? 12 : 0
 
                 spacing: 0
 
                 opacity: 1 - root.collapseProgress
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: largeTitleMetrics.height
-
-                    visible: root.title !== ""
-                }
 
                 Loader {
                     Layout.fillWidth: true
@@ -128,28 +120,43 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.topMargin: PageController.safeAreaTopMargin
-            height: 48
+            height: 56
 
             IconButtonType {
                 id: backButton
 
-                x: 16
+                x: 4
                 y: 4
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/arrow-left.svg"
+                Accessible.name: qsTr("Back")
 
                 onClicked: PageController.closePage()
+            }
+
+            H3TextType {
+                readonly property real sideWidth: Math.max(48, navigationButtonsRow.width)
+
+                x: 4 + sideWidth
+                y: (navigationRow.height - height) / 2
+                width: navigationRow.width - 8 - 2 * sideWidth
+
+                font.weight: 600
+                font.letterSpacing: 0
+
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.NoWrap
+                maximumLineCount: 1
+                elide: Text.ElideRight
+                text: root.title
             }
 
             Row {
                 id: navigationButtonsRow
 
                 anchors.right: parent.right
-                anchors.rightMargin: 16
+                anchors.rightMargin: 4
                 y: 4
-
-                spacing: 8
             }
         }
     }
@@ -178,56 +185,6 @@ Item {
 
             spacing: 0
         }
-    }
-
-    H1TextType {
-        id: largeTitleMetrics
-
-        visible: false
-        text: movingTitle.text
-    }
-
-    H1TextType {
-        id: movingTitle
-
-        readonly property real compactScale: compactTitle.font.pixelSize / movingTitle.font.pixelSize
-        readonly property real titleScale: 1 - (1 - movingTitle.compactScale) * root.collapseProgress
-        readonly property real expandedX: 16
-        readonly property real compactX: (root.width - compactTitle.width) / 2
-        readonly property real expandedY: topBar.height + 12 - Math.min(0, root.listScrolled)
-        readonly property real compactY: navigationRow.y + (navigationRow.height - compactTitle.height) / 2
-        readonly property real currentX: movingTitle.expandedX + (movingTitle.compactX - movingTitle.expandedX) * root.collapseProgress
-        readonly property real currentY: Math.max(movingTitle.compactY, movingTitle.expandedY - Math.max(0, root.listScrolled))
-
-        x: movingTitle.currentX
-        y: movingTitle.currentY
-        width: Math.min(movingTitle.implicitWidth, root.width - 32)
-
-        transformOrigin: Item.TopLeft
-        scale: movingTitle.titleScale
-        opacity: 1 - root.collapseProgress
-
-        wrapMode: Text.NoWrap
-        maximumLineCount: 1
-        elide: Text.ElideRight
-        text: root.title
-    }
-
-    H3TextType {
-        id: compactTitle
-
-        x: movingTitle.currentX
-        y: movingTitle.currentY
-        width: Math.min(compactTitle.implicitWidth, root.width - 32)
-
-        transformOrigin: Item.TopLeft
-        scale: movingTitle.titleScale / movingTitle.compactScale
-        opacity: root.collapseProgress
-
-        wrapMode: Text.NoWrap
-        maximumLineCount: 1
-        elide: Text.ElideRight
-        text: root.title
     }
 
     ScrollBarType {

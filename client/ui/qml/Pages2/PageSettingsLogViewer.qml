@@ -125,42 +125,46 @@ PageType {
         title: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
 
         IconButtonType {
-            id: refreshButton
-
-            size: IconButtonType.Small
-
-            icon.source: "qrc:/images/controls/refresh-cw.svg"
-            enabled: !root.isLoading
-
-            onClicked: {
-                root.reload()
-            }
-        }
-
-        IconButtonType {
-            id: copyButton
-
-            size: IconButtonType.Small
-
-            icon.source: "qrc:/images/controls/copy.svg"
-            enabled: root.hasText
-
-            onClicked: {
-                LogsController.copyLoaded()
-                PageController.showNotificationMessage(qsTr("Copied"))
-            }
-        }
-
-        IconButtonType {
             id: exportButton
-
-            size: IconButtonType.Small
 
             icon.source: GC.isMobile() ? "qrc:/images/controls/share-2.svg" : "qrc:/images/controls/save.svg"
             enabled: root.hasText
 
             onClicked: {
                 root.exportCurrentStream()
+            }
+        }
+
+        IconButtonType {
+            id: moreButton
+
+            icon.source: "qrc:/images/controls/more-vertical.svg"
+
+            onClicked: moreActionsMenu.openBelow(moreButton)
+        }
+    }
+
+    PopupMenuType {
+        id: moreActionsMenu
+
+        PopupMenuItemType {
+            text: qsTr("Refresh")
+            enabled: !root.isLoading
+
+            onClicked: {
+                moreActionsMenu.close()
+                root.reload()
+            }
+        }
+
+        PopupMenuItemType {
+            text: qsTr("Copy")
+            enabled: root.hasText
+
+            onClicked: {
+                moreActionsMenu.close()
+                LogsController.copyLoaded()
+                PageController.showNotificationMessage(qsTr("Copied"))
             }
         }
     }

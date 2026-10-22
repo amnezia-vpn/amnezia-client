@@ -163,29 +163,57 @@ PageType {
                 Layout.fillWidth: true
 
                 title: qsTr("Local proxy")
-                description: qsTr("Used by specific apps (e.g., CensorTracker extension) via Amnezia Premium.\nOnly one can be active at a time: VPN or local proxy")
+            }
 
-                header.showSwitcher: ServersUiController.processedServerIsPremium
-                header.switcher.checked: root.isEnabledForThisServer
-                header.switcher.enabled: !root.isOwnedByOtherServer
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                Connections {
-                    target: navigationBar.header
+                spacing: 8
 
-                    function onSwitcherToggled(checked) {
-                        if (checked !== root.isEnabledForThisServer) {
-                            root.handleLocalProxyToggle(checked)
-                        }
-                        navigationBar.header.switcher.checked = Qt.binding(function() {
-                            return root.isEnabledForThisServer
-                        })
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: GC.isDesktop() && ServersUiController.processedServerIsPremium
+                    enabled: !root.isOwnedByOtherServer
+
+                    text: qsTr("Local proxy")
+
+                    onClicked: {
+                        localProxySwitch.toggle()
+                        localProxySwitch.toggled()
                     }
+
+                    SwitchType {
+                        id: localProxySwitch
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: root.isEnabledForThisServer
+
+                        onToggled: {
+                            if (checked !== root.isEnabledForThisServer) {
+                                root.handleLocalProxyToggle(checked)
+                            }
+                            localProxySwitch.checked = Qt.binding(function() {
+                                return root.isEnabledForThisServer
+                            })
+                        }
+                    }
+                }
+
+                BodyTextType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Used by specific apps (e.g., CensorTracker extension) via Amnezia Premium.\nOnly one can be active at a time: VPN or local proxy")
+                    color: AmneziaStyle.color.textSecondary
                 }
             }
 
             NotificationType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

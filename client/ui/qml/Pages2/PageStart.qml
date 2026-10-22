@@ -328,13 +328,11 @@ PageType {
                     if (!SettingsController.isOnTv()) {
                         var hasServerWithWriteAccess = ServersUiController.hasServerWithWriteAccess()
                         shareTabButton.visible = hasServerWithWriteAccess
-                        shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                     }
                 }
             }
 
             visible: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess() ? undefined : 0
 
             text: qsTr("Share")
             icon.source: "qrc:/images/controls/share-2.svg"

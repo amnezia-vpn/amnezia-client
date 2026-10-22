@@ -32,7 +32,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
@@ -51,7 +51,6 @@ PageType {
                 id: header
 
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("OpenVPN Settings")
             }

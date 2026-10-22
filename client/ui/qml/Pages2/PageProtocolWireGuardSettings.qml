@@ -24,7 +24,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
@@ -41,7 +41,6 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 4
 
                 title: qsTr("WG settings")
             }

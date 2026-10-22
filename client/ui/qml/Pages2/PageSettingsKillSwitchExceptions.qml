@@ -52,7 +52,6 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("DNS Exceptions")
                 description: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")

@@ -49,7 +49,7 @@ SheetType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: searchField.top
-            anchors.topMargin: 16
+            anchors.topMargin: 32
             anchors.bottomMargin: 8
 
             leftMargin: 16

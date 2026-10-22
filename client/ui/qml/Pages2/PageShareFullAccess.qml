@@ -26,7 +26,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: shareButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         contentHeight: content.implicitHeight
 
@@ -53,7 +53,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
                 Layout.bottomMargin: 16
 
                 drawerHeight: 0.4375

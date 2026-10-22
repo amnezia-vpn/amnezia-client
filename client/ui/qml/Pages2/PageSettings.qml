@@ -47,10 +47,7 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
-                toolbarVisible: false
-                backButtonVisible: false
                 title: qsTr("Settings")
             }
 

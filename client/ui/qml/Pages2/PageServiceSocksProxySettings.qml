@@ -33,7 +33,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: changeSettingsButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         contentHeight: content.implicitHeight
 
@@ -56,7 +56,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
 
                 dense: true
                 overline: qsTr("Host")
@@ -181,7 +180,7 @@ PageType {
                     SectionHeaderType {
                         Layout.fillWidth: true
                         Layout.topMargin: 16
-                        Layout.bottomMargin: 12
+                        Layout.bottomMargin: 20
 
                         headerText: qsTr("SOCKS5 settings")
                     }

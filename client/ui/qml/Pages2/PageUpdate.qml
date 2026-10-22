@@ -48,7 +48,6 @@ PageType {
         IconButtonType {
             id: supportButton
 
-            size: IconButtonType.Small
             icon.source: "qrc:/images/controls/headphones.svg"
 
             onClicked: supportDrawer.open()

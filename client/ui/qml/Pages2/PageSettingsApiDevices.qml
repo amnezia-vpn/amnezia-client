@@ -40,7 +40,6 @@ PageType {
 
             NotificationType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.bottomMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16

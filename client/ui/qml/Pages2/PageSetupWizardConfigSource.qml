@@ -50,13 +50,11 @@ PageType {
 
                 title: qsTr("Connection")
                 description: qsTr("Insert the key, add a configuration file or scan the QR-code")
-                backButtonVisible: root.stackView !== null && root.stackView.depth > 1
 
                 IconButtonType {
                     id: moreButton
 
                     visible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/more-vertical.svg"
 
                     onClicked: moreActionsDrawer.open()
@@ -65,7 +63,6 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -77,11 +74,17 @@ PageType {
                     Layout.fillWidth: true
 
                     headerText: qsTr("Insert key")
-                    buttonText: qsTr("Insert")
+                    buttonText: textField.text === "" ? qsTr("Insert") : ""
+                    trailingIconSource: textField.text === "" ? "" : "qrc:/images/controls/close.svg"
 
                     clickedFunc: function() {
                         textField.text = ""
                         textField.paste()
+                    }
+
+                    onTrailingClicked: {
+                        textField.clear()
+                        textField.forceActiveFocus()
                     }
                 }
 

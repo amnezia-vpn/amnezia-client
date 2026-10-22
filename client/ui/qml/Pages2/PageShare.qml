@@ -185,7 +185,7 @@ PageType {
 
             SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 24
+                Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -233,11 +233,9 @@ PageType {
 
                 Layout.fillWidth: true
 
-                backButtonVisible: false
                 title: qsTr("Share VPN Access")
 
                 IconButtonType {
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/more-vertical.svg"
 
                     onClicked: shareFullAccessDrawer.open()
@@ -248,7 +246,6 @@ PageType {
                 id: accessTypeSelector
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

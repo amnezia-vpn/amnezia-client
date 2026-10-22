@@ -60,7 +60,6 @@ PageType {
 
             ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -198,7 +197,7 @@ PageType {
             SectionHeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                Layout.bottomMargin: 24
+                Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

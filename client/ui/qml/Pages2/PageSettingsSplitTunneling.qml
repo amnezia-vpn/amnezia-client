@@ -99,17 +99,31 @@ PageType {
                 Layout.fillWidth: true
 
                 title: qsTr("Split tunneling")
+            }
 
-                header.showSwitcher: true
-                header.switcher.checked: IpSplitTunnelingController.isSplitTunnelingEnabled
-                header.switcher.enabled: root.pageEnabled
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                Connections {
-                    target: navigationBar.header
+                visible: GC.isDesktop()
+                enabled: root.pageEnabled
 
-                    function onSwitcherToggled(checked) {
-                        IpSplitTunnelingController.toggleSplitTunneling(checked)
-                    }
+                text: qsTr("Split tunneling")
+
+                onClicked: {
+                    splitTunnelingSwitch.toggle()
+                    splitTunnelingSwitch.toggled()
+                }
+
+                SwitchType {
+                    id: splitTunnelingSwitch
+
+                    focusPolicy: Qt.NoFocus
+
+                    checked: IpSplitTunnelingController.isSplitTunnelingEnabled
+
+                    onToggled: IpSplitTunnelingController.toggleSplitTunneling(checked)
                 }
             }
 
@@ -117,7 +131,7 @@ PageType {
                 id: modeSelector
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: GC.isDesktop() ? 24 : 0
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

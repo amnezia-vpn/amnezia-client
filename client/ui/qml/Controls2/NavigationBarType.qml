@@ -10,14 +10,10 @@ Item {
 
     property string title
     property string description
-    property bool backButtonVisible: true
-    property bool toolbarVisible: true
+    property bool backButtonVisible: d.page === null || d.page.stackView === null || d.page.stackView.depth > 1
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
 
     default property alias actions: actionsRow.data
-
-    readonly property alias header: header
-    readonly property real collapseProgress: d.collapseProgress
 
     signal backClicked()
 
@@ -27,18 +23,22 @@ Item {
 
     onBackClicked: PageController.closePage()
 
-    Component.onCompleted: d.flickable = d.findFlickable()
+    Component.onCompleted: {
+        d.flickable = d.findFlickable()
+        d.page = d.findPage()
+    }
 
     QtObject {
         id: d
 
         property Item flickable: null
+        property PageType page: null
 
         readonly property real toolbarTop: PageController.safeAreaTopMargin
-        readonly property real titleHeight: header.visible ? header.titleItem.height : 0
+        readonly property real sideWidth: Math.max(48, actionsRow.width)
 
         readonly property real scrolled: {
-            if (!d.flickable || !root.toolbarVisible) {
+            if (!d.flickable) {
                 return 0
             }
             d.flickable.contentY
@@ -47,11 +47,16 @@ Item {
             return Math.max(0, -root.mapToItem(d.flickable, 0, 0).y)
         }
 
-        readonly property real collapseProgress: d.titleHeight > 0
-                                                 ? Math.max(0, Math.min(1, (d.scrolled - 12 - d.titleHeight / 2) / (d.titleHeight / 2)))
-                                                 : 0
-
-        readonly property real barHeight: 48 - 4 * d.collapseProgress
+        function findPage() {
+            let item = root.parent
+            while (item) {
+                if (item instanceof PageType) {
+                    return item
+                }
+                item = item.parent
+            }
+            return null
+        }
 
         function findFlickable() {
             let item = root.parent
@@ -76,22 +81,24 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.topMargin: d.toolbarTop
-            Layout.preferredHeight: root.toolbarVisible ? 48 : 0
+            Layout.preferredHeight: 56
         }
 
-        HeaderType {
-            id: header
-
+        BodyTextType {
             Layout.fillWidth: true
-            Layout.topMargin: 12
+            Layout.topMargin: 16
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            Layout.bottomMargin: 16
 
-            visible: root.title !== ""
+            visible: root.description !== ""
 
-            headerText: root.title
-            descriptionText: root.description
+            text: root.description
+            color: AmneziaStyle.color.textSecondary
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.description !== "" ? 24 : 16
         }
     }
 
@@ -99,10 +106,9 @@ Item {
         id: toolbar
 
         width: root.width
-        height: d.toolbarTop + d.barHeight
+        height: d.toolbarTop + 56
         y: d.scrolled
 
-        visible: root.toolbarVisible
         color: d.scrolled > 0 ? AmneziaStyle.color.bgBase : AmneziaStyle.color.transparent
 
         MouseArea {
@@ -115,11 +121,10 @@ Item {
         IconButtonType {
             id: backButton
 
-            x: 16
-            y: d.toolbarTop + (d.barHeight - height) / 2
+            x: 4
+            y: d.toolbarTop + 4
 
             visible: root.backButtonVisible
-            size: IconButtonType.Small
             icon.source: root.backButtonImage
             Accessible.name: qsTr("Back")
 
@@ -127,15 +132,14 @@ Item {
         }
 
         H3TextType {
-            readonly property real sideInset: 16 + 36 + 16
+            x: 4 + d.sideWidth
+            y: d.toolbarTop + (56 - height) / 2
+            width: root.width - 8 - 2 * d.sideWidth
 
-            x: Math.max(sideInset, (root.width - width) / 2)
-            y: d.toolbarTop + (d.barHeight - height) / 2
-            width: Math.min(implicitWidth, root.width - 2 * sideInset)
+            font.weight: 600
+            font.letterSpacing: 0
 
-            visible: opacity > 0
-            opacity: d.collapseProgress
-
+            horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.NoWrap
             maximumLineCount: 1
             elide: Text.ElideRight
@@ -146,10 +150,8 @@ Item {
             id: actionsRow
 
             anchors.right: parent.right
-            anchors.rightMargin: 16
-            y: d.toolbarTop + (d.barHeight - height) / 2
-
-            spacing: 16
+            anchors.rightMargin: 4
+            y: d.toolbarTop + 4
         }
     }
 }

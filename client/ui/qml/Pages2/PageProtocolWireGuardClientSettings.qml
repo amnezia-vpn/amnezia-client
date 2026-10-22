@@ -25,7 +25,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         contentHeight: content.implicitHeight
 
@@ -40,7 +40,6 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("WG settings")
             }

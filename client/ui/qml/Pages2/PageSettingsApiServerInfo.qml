@@ -115,7 +115,6 @@ PageType {
                 description: root.serviceDescription
 
                 IconButtonType {
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/edit-3.svg"
 
                     onClicked: serverNameEditDrawer.open()

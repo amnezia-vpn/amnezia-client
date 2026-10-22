@@ -172,7 +172,7 @@ AbstractButton {
                     id: titleLabel
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
+                    Layout.bottomMargin: 32
                     Layout.fillWidth: true
 
                     headerText: root.headerText

@@ -178,8 +178,8 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: 8
 
                 text: qsTr("For router setup or the AmneziaWG app")
                 color: AmneziaStyle.color.textSecondary
@@ -220,7 +220,7 @@ PageType {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 12
+                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 24
             }
         ]
 
