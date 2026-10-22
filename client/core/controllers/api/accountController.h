@@ -62,8 +62,8 @@ public:
     explicit AccountController(SecureAppSettingsRepository *appSettingsRepository);
 
     amnezia::ErrorCode requestEmailCode(const EmailCodeRequest &request, Captcha &captcha, Error &error, int &retryAfterSec);
-    amnezia::ErrorCode consumeEmailCode(const QString &email, const QString &code, const QString &idempotencyKey,
-                                        Session &session, Error &error, int &retryAfterSec);
+    amnezia::ErrorCode consumeEmailCode(const QString &email, const QString &code, const QString &userCountryCode,
+                                        const QString &idempotencyKey, Session &session, Error &error, int &retryAfterSec);
 
     static Error classifyReply(const Reply &reply);
     static Session sessionFromResponse(const QJsonObject &response);

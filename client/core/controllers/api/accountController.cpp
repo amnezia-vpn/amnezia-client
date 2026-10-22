@@ -62,12 +62,13 @@ ErrorCode AccountController::requestEmailCode(const EmailCodeRequest &request, C
     return ErrorCode::NoError;
 }
 
-ErrorCode AccountController::consumeEmailCode(const QString &email, const QString &code, const QString &idempotencyKey,
-                                              Session &session, Error &error, int &retryAfterSec)
+ErrorCode AccountController::consumeEmailCode(const QString &email, const QString &code, const QString &userCountryCode,
+                                              const QString &idempotencyKey, Session &session, Error &error, int &retryAfterSec)
 {
     const QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                            .addField(apiDefs::key::email, email)
                                            .addField(apiDefs::key::code, code)
+                                           .addField(apiDefs::key::userCountryCode, userCountryCode)
                                            .addField(apiDefs::key::idempotencyKey, idempotencyKey)
                                            .build();
 

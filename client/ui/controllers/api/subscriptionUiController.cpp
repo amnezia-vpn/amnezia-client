@@ -804,8 +804,9 @@ bool SubscriptionUiController::confirmFreeEmailCode(const QString &code)
         int retryAfterSec = 0;
         AccountController::Session session;
         const ErrorCode errorCode = m_accountController->consumeEmailCode(m_freeAccount.email, trimmedCode,
-                                                                              m_freeAccount.consumeIdempotencyKey,
-                                                                              session, error, retryAfterSec);
+                                                                          m_freeAccount.userCountryCode,
+                                                                          m_freeAccount.consumeIdempotencyKey,
+                                                                          session, error, retryAfterSec);
         if (errorCode != ErrorCode::NoError) {
             qWarning().noquote() << "[FreeAccount] Code confirmation failed, errorCode =" << static_cast<int>(errorCode);
             emit freeAccountLoginFailed(freeAccountErrorKind(error), retryAfterSec);
