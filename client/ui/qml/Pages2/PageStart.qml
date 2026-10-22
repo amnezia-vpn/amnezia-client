@@ -168,8 +168,7 @@ PageType {
             if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
-                PageController.goToStartPage()
-                PageController.goToPage(PageEnum.PageSettingsServersList)
+                tabBarStackView.popServerSettingsPages()
             }
             PageController.showNotificationMessage(finishedMessage)
         }
@@ -248,8 +247,7 @@ PageType {
             if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
-                PageController.goToStartPage()
-                PageController.goToPage(PageEnum.PageSettingsServersList)
+                tabBarStackView.popServerSettingsPages()
             }
             PageController.showNotificationMessage(message)
         }
@@ -289,6 +287,24 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+        }
+
+        function popServerSettingsPages() {
+            var serverSettingsPages = [
+                PageController.getPagePath(PageEnum.PageSettingsServerInfo),
+                PageController.getPagePath(PageEnum.PageSettingsApiServerInfo),
+                PageController.getPagePath(PageEnum.PageSettingsApiAvailableCountries)
+            ]
+
+            for (var i = 1; i < tabBarStackView.depth; i++) {
+                var item = tabBarStackView.get(i)
+                if (item && serverSettingsPages.indexOf(item.objectName) !== -1) {
+                    tabBarStackView.pop(tabBarStackView.get(i - 1, StackView.ForceLoad))
+                    return
+                }
+            }
+
+            PageController.goToStartPage()
         }
 
         Component.onCompleted: {

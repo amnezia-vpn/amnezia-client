@@ -117,7 +117,7 @@ Popup {
 
         function onVisibleChanged() {
             if (!root.parent.visible && root.visible) {
-                root.reopenWithParent = true
+                root.reopenWithParent = root.opened
                 root.close()
             } else if (root.parent.visible && root.reopenWithParent) {
                 root.reopenWithParent = false
