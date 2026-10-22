@@ -31,7 +31,7 @@ PageType {
     function submit() {
         var value = emailField.textField.text.trim()
         if (!root.isValidEmail(value)) {
-            emailField.errorText = qsTr("Invalid email")
+            emailField.errorText = qsTr("Invalid email address. Check it and try again")
             return
         }
         emailField.errorText = ""
@@ -113,7 +113,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Email")
-                textField.placeholderText: qsTr("Enter email")
+                textField.placeholderText: qsTr("Enter your email")
                 textField.inputMethodHints: Qt.ImhEmailCharactersOnly | Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
                 textField.onTextChanged: {

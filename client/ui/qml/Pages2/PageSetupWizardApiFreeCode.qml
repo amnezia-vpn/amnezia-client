@@ -152,7 +152,7 @@ PageType {
                 if (root.failedAttempts >= root.maxAttempts) {
                     root.lock(qsTr("Too many attempts. Try again later"))
                 } else {
-                    codeField.errorText = qsTr("The code is invalid. Check it and try again")
+                    codeField.errorText = qsTr("Incorrect code. Check it and try again")
                 }
                 break
             case "rateLimited":

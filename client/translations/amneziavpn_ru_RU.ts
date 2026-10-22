@@ -5375,7 +5375,7 @@ Create one from the current settings.</source>
         <translation>Слишком много попыток. Попробуйте позже</translation>
     </message>
     <message>
-        <source>The code is invalid. Check it and try again</source>
+        <source>Incorrect code. Check it and try again</source>
         <translation>Код не подходит. Проверьте и введите заново</translation>
     </message>
     <message>
@@ -5434,7 +5434,7 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardApiFreeEmail</name>
     <message>
-        <source>Invalid email</source>
+        <source>Invalid email address. Check it and try again</source>
         <translation>Неверный email</translation>
     </message>
     <message>
@@ -5450,7 +5450,7 @@ Create one from the current settings.</source>
         <translation>Почта</translation>
     </message>
     <message>
-        <source>Enter email</source>
+        <source>Enter your email</source>
         <translation>Введите Email</translation>
     </message>
     <message>
