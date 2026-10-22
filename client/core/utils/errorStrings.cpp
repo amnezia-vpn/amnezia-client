@@ -99,6 +99,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
 
     // VPN errors
+    case (ErrorCode::VpnConnectionTimeout): errorMessage = QObject::tr("VPN connection timed out. Please try again."); break;
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;
     case (ErrorCode::OpenVpnTapAdapterError): errorMessage = QObject::tr("Can't setup OpenVPN TAP network adapter"); break;
     case (ErrorCode::AddressPoolError): errorMessage = QObject::tr("VPN pool error: no available addresses"); break;

@@ -14,6 +14,7 @@
 #include "platforms/windows/windowscommons.h"
 #include "platforms/windows/windowsutils.h"
 #include "windowsdaemon.h"
+#include "windowstunnelpipe.h"
 
 #define TUNNEL_NAMED_PIPE \
   "\\\\."                 \
@@ -124,7 +125,7 @@ bool WindowsTunnelService::start(const QString& configData) {
     }
     m_logthread.quit();
     m_logthread.wait();
-    delete m_logworker;
+    // QThread::finished already schedules the worker's deletion.
     m_logworker = nullptr;
   });
 
@@ -236,51 +237,7 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
 }
 
 QString WindowsTunnelService::uapiCommand(const QString& command) {
-  // Create a pipe to the tunnel service.
-  LPTSTR tunnelName = (LPTSTR)TEXT(TUNNEL_NAMED_PIPE);
-  HANDLE pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                           OPEN_EXISTING, 0, nullptr);
-  if (pipe == INVALID_HANDLE_VALUE) {
-    return QString();
-  }
-
-  auto guard = qScopeGuard([&] { CloseHandle(pipe); });
-  if (!WaitNamedPipe(tunnelName, 1000)) {
-    WindowsUtils::windowsLog("Failed to wait for named pipes");
-    return QString();
-  }
-
-  DWORD mode = PIPE_READMODE_BYTE;
-  if (!SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr)) {
-    WindowsUtils::windowsLog("Failed to set the read-mode on pipe");
-    return QString();
-  }
-
-  // Write the UAPI command into the pipe.
-  QByteArray message = command.toLocal8Bit();
-  DWORD written;
-  while (!message.endsWith("\n\n")) {
-    message.append('\n');
-  }
-  if (!WriteFile(pipe, message.constData(), message.length(), &written,
-                 nullptr)) {
-    WindowsUtils::windowsLog("Failed to write into the pipe");
-    return QString();
-  }
-
-  // Receive the response from the pipe.
-  QByteArray reply;
-  while (!reply.contains("\n\n")) {
-    char buffer[512];
-    DWORD read = 0;
-    if (!ReadFile(pipe, buffer, sizeof(buffer), &read, nullptr)) {
-      break;
-    }
-
-    reply.append(buffer, read);
-  }
-
-  return QString::fromUtf8(reply).trimmed();
+  return WindowsTunnelPipe::request(QStringLiteral(TUNNEL_NAMED_PIPE), command);
 }
 
 // static
