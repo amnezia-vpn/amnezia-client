@@ -229,7 +229,8 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 }
 
 ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                                               const QString &accessToken)
+                                                               const QString &accessToken, const QString &captchaId,
+                                                               const QString &captchaSolution, CaptchaInfo &captchaInfo)
 {
     if (accessToken.isEmpty()) {
         return ErrorCode::ApiAccountSessionError;
@@ -239,10 +240,18 @@ ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &us
                                            .addField(apiDefs::key::accessToken, accessToken)
                                            .addField(apiDefs::key::userCountryCode, userCountryCode)
                                            .addField(apiDefs::key::serviceType, serviceType)
+                                           .addField(apiDefs::key::captchaId, captchaId)
+                                           .addField(apiDefs::key::captchaSolution, normalizeCaptchaSolution(captchaSolution))
                                            .build();
 
     QByteArray responseBody;
     const ErrorCode errorCode = executeRequest(QString("%1v1/free_account"), apiPayload, responseBody);
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError || errorCode == ErrorCode::ApiCaptchaInvalidError
+        || errorCode == ErrorCode::ApiCaptchaRefreshError) {
+        fillCaptchaInfoFromResponse(responseBody, captchaInfo);
+        qInfo().noquote() << "[FreeAccount] Captcha required for account request, errorCode =" << static_cast<int>(errorCode);
+        return errorCode;
+    }
     if (errorCode != ErrorCode::NoError) {
         const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
         qWarning().noquote() << "[FreeAccount] Account request failed, errorCode =" << static_cast<int>(errorCode)

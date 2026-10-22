@@ -45,7 +45,8 @@ public:
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
     ErrorCode importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                           const QString &accessToken);
+                                           const QString &accessToken, const QString &captchaId,
+                                           const QString &captchaSolution, CaptchaInfo &captchaInfo);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);

@@ -698,6 +698,11 @@ bool SubscriptionUiController::beginFreeAccountLogin()
 void SubscriptionUiController::refreshFreeAccountCaptcha()
 {
     m_freeAccount.captchaSolution.clear();
+    if (m_freeAccount.session.isValid()) {
+        m_freeAccount.captchaId.clear();
+        importFreeAccountConfig();
+        return;
+    }
     sendFreeEmailCode(true);
 }
 
@@ -710,6 +715,9 @@ bool SubscriptionUiController::solveFreeAccountCaptcha(const QString &solution)
     }
 
     m_freeAccount.captchaSolution = trimmedSolution;
+    if (m_freeAccount.session.isValid()) {
+        return importFreeAccountConfig();
+    }
     return sendFreeEmailCode(false);
 }
 
@@ -820,9 +828,20 @@ bool SubscriptionUiController::confirmFreeEmailCode(const QString &code)
 
 bool SubscriptionUiController::importFreeAccountConfig()
 {
-    const ErrorCode importError = m_subscriptionController->importFreeAccountFromGateway(m_freeAccount.userCountryCode,
-                                                                                         m_freeAccount.serviceType,
-                                                                                         m_freeAccount.session.accessToken);
+    SubscriptionController::CaptchaInfo captchaInfo;
+    const ErrorCode importError = m_subscriptionController->importFreeAccountFromGateway(
+            m_freeAccount.userCountryCode, m_freeAccount.serviceType, m_freeAccount.session.accessToken,
+            m_freeAccount.captchaId, m_freeAccount.captchaSolution, captchaInfo);
+    if (captchaInfo.isRequired) {
+        m_freeAccount.captchaId = captchaInfo.captchaId;
+        m_freeAccount.captchaSolution.clear();
+        emit freeAccountCaptchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
+                                        captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
+        if (importError == ErrorCode::ApiCaptchaInvalidError) {
+            emit freeAccountLoginFailed(QStringLiteral("captchaInvalid"), 0);
+        }
+        return false;
+    }
     if (importError != ErrorCode::NoError) {
         qWarning().noquote() << "[FreeAccount] Account import failed, errorCode =" << static_cast<int>(importError);
         emit errorOccurred(importError);
