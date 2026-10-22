@@ -448,12 +448,11 @@ bool SubscriptionUiController::importFreeFromGateway()
     }
 
     SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(serviceProtocol);
-    SubscriptionController::ImportData importData;
-    importData.protocolData = protocolData;
     SubscriptionController::CaptchaInfo captchaInfo;
 
     ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(userCountryCode, serviceType,
-                                                                             serviceProtocol, importData, &captchaInfo);
+                                                                             serviceProtocol, protocolData,
+                                                                             captchaInfo);
 
     if (errorCode == ErrorCode::NoError) {
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
@@ -496,17 +495,14 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
     protocolData.wireGuardClientPubKey = m_captchaState.wireguardClientPubKey;
     protocolData.xrayUuid = m_captchaState.xrayUuid;
 
-    SubscriptionController::ImportData importData;
-    importData.protocolData = protocolData;
-    importData.captchaId = captchaId;
-    importData.captchaSolution = solution;
-
     SubscriptionController::CaptchaInfo retryCaptcha;
-    ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(
+    ErrorCode errorCode = m_subscriptionController->resolveImportServiceCaptcha(
             m_captchaState.userCountryCode,
             m_captchaState.serviceType,
             m_captchaState.serviceProtocol,
-            importData,
+            protocolData,
+            captchaId,
+            solution,
             &retryCaptcha);
 
     if (errorCode == ErrorCode::NoError) {
@@ -567,16 +563,14 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
     protocolData.wireGuardClientPubKey = m_captchaState.wireguardClientPubKey;
     protocolData.xrayUuid = m_captchaState.xrayUuid;
 
-    SubscriptionController::ImportData importData;
-    importData.protocolData = protocolData;
     SubscriptionController::CaptchaInfo captchaInfo;
 
     ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(
             m_captchaState.userCountryCode,
             m_captchaState.serviceType,
             m_captchaState.serviceProtocol,
-            importData,
-            &captchaInfo);
+            protocolData,
+            captchaInfo);
 
     if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfo.isRequired) {
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
@@ -677,8 +671,7 @@ bool SubscriptionUiController::startFreeAccountLoginForKey(const QJsonObject &ke
     m_freeAccount = FreeAccountState{};
 
     const ApiV2ServerConfig keyServer = ApiV2ServerConfig::fromJson(keyConfig);
-    const QJsonObject authData = keyServer.authData.toJson();
-    if (!keyServer.isFree() || authData.isEmpty() || keyServer.apiConfig.serviceProtocol.isEmpty()) {
+    if (!keyServer.isFree()) {
         emit errorOccurred(ErrorCode::ImportInvalidConfigError);
         emit freeAccountLoginFailed(QString(), 0);
         return false;
@@ -688,8 +681,6 @@ bool SubscriptionUiController::startFreeAccountLoginForKey(const QJsonObject &ke
     m_freeAccount.serviceType = keyServer.apiConfig.serviceType;
     m_freeAccount.serviceProtocol = keyServer.apiConfig.serviceProtocol;
     m_freeAccount.serviceName = keyServer.name.isEmpty() ? QStringLiteral("Amnezia Free") : keyServer.name;
-    m_freeAccount.authData = authData;
-    m_freeAccount.vpnKey = keyServer.apiConfig.vpnKey;
     return beginFreeAccountLogin();
 }
 
@@ -701,18 +692,12 @@ bool SubscriptionUiController::beginFreeAccountLogin()
         emit freeAccountLoginFailed(QString(), 0);
         return false;
     }
-
-    m_freeAccount.protocolData = SubscriptionController::generateProtocolData(m_freeAccount.serviceProtocol);
     return true;
 }
 
 void SubscriptionUiController::refreshFreeAccountCaptcha()
 {
     m_freeAccount.captchaSolution.clear();
-    if (m_freeAccount.session.isValid()) {
-        importFreeAccountConfig();
-        return;
-    }
     sendFreeEmailCode(true);
 }
 
@@ -725,9 +710,6 @@ bool SubscriptionUiController::solveFreeAccountCaptcha(const QString &solution)
     }
 
     m_freeAccount.captchaSolution = trimmedSolution;
-    if (m_freeAccount.session.isValid()) {
-        return importFreeAccountConfig();
-    }
     return sendFreeEmailCode(false);
 }
 
@@ -837,31 +819,11 @@ bool SubscriptionUiController::confirmFreeEmailCode(const QString &code)
 
 bool SubscriptionUiController::importFreeAccountConfig()
 {
-    SubscriptionController::ImportData importData;
-    importData.protocolData = m_freeAccount.protocolData;
-    importData.userId = m_freeAccount.session.userId;
-    importData.accessToken = m_freeAccount.session.accessToken;
-    importData.captchaId = m_freeAccount.captchaId;
-    importData.captchaSolution = m_freeAccount.captchaSolution;
-    importData.authData = m_freeAccount.authData;
-    importData.vpnKey = m_freeAccount.vpnKey;
-
-    SubscriptionController::CaptchaInfo retryCaptcha;
-    const ErrorCode importError = m_subscriptionController->importServiceFromGateway(m_freeAccount.userCountryCode,
-                                                                                     m_freeAccount.serviceType,
-                                                                                     m_freeAccount.serviceProtocol,
-                                                                                     importData, &retryCaptcha);
+    const ErrorCode importError = m_subscriptionController->importFreeAccountFromGateway(m_freeAccount.userCountryCode,
+                                                                                         m_freeAccount.serviceType,
+                                                                                         m_freeAccount.session.accessToken);
     if (importError != ErrorCode::NoError) {
-        qWarning().noquote() << "[FreeAccount] Config import failed, errorCode =" << static_cast<int>(importError);
-        if (retryCaptcha.isRequired) {
-            m_freeAccount.captchaId = retryCaptcha.captchaId;
-            m_freeAccount.captchaSolution.clear();
-            emit freeAccountCaptchaRequired(retryCaptcha.captchaId, retryCaptcha.captchaImageBase64,
-                                            retryCaptcha.hint.isEmpty() ? tr("Enter the digits from the image to continue") : retryCaptcha.hint);
-            emit freeAccountLoginFailed(importError == ErrorCode::ApiCaptchaInvalidError ? QStringLiteral("captchaInvalid")
-                                                                                         : QStringLiteral("captchaRetry"), 0);
-            return false;
-        }
+        qWarning().noquote() << "[FreeAccount] Account import failed, errorCode =" << static_cast<int>(importError);
         emit errorOccurred(importError);
         emit freeAccountLoginFailed(QStringLiteral("config"), 0);
         return false;

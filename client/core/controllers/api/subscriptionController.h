@@ -32,16 +32,6 @@ public:
         bool isRequired = false;
     };
 
-    struct ImportData {
-        ProtocolData protocolData;
-        QString userId;
-        QString accessToken;
-        QString captchaId;
-        QString captchaSolution;
-        QJsonObject authData;
-        QString vpnKey;
-    };
-
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
@@ -50,10 +40,12 @@ public:
     static QString publicKeyForProtocol(const QString &protocol, const ProtocolData &protocolData);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                      const QString &serviceProtocol, const ImportData &importData,
-                                      CaptchaInfo *captchaInfoOut = nullptr);
+                                      const QString &serviceProtocol, const ProtocolData &protocolData,
+                                      CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
+    ErrorCode importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                           const QString &accessToken);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
@@ -87,6 +79,11 @@ public:
     ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
     QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
 
+    ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
+                                          const QString &serviceProtocol, const ProtocolData &protocolData,
+                                          const QString &captchaId, const QString &captchaSolution,
+                                          CaptchaInfo *retryCaptchaOut = nullptr);
+
 #ifdef AMNEZIA_BUILD_TESTS
     // Exposes the gateway response parsing path without performing a network request.
     ErrorCode applyImportedServiceConfigForTest(const QString &userCountryCode, const QString &serviceType,
@@ -112,7 +109,8 @@ private:
                                         const ProtocolData &protocolData, const QByteArray &responseBody);
     ErrorCode applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
                                          const QString &serviceProtocol, const ProtocolData &protocolData,
-                                         const QByteArray &responseBody, const QString &vpnKey = QString());
+                                         const QByteArray &responseBody);
+    ErrorCode applyFreeAccountConfig(const QByteArray &responseBody);
     void markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2);
     void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType,
                                 const QString &serviceProtocol, const QString &userCountryCode,

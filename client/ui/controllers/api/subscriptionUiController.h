@@ -183,9 +183,6 @@ private:
         QString serviceType;
         QString serviceProtocol;
         QString serviceName;
-        QJsonObject authData;
-        QString vpnKey;
-        SubscriptionController::ProtocolData protocolData;
         QString captchaId;
         QString captchaSolution;
         QString email;

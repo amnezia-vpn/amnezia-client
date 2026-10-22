@@ -203,45 +203,100 @@ ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const 
 }
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                                            const QString &serviceProtocol, const ImportData &importData,
-                                                            CaptchaInfo *captchaInfoOut)
+                                                            const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                            CaptchaInfo &captchaInfo)
 {
-    GatewayPayloadBuilder builder(m_appSettingsRepository);
-    builder.addField(apiDefs::key::userCountryCode, userCountryCode)
-            .addField(apiDefs::key::serviceType, serviceType)
-            .addField(apiDefs::key::serviceProtocol, serviceProtocol)
-            .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, importData.protocolData))
-            .addField(apiDefs::key::userId, importData.userId)
-            .addField(apiDefs::key::accessToken, importData.accessToken)
-            .addField(apiDefs::key::captchaId, importData.captchaId)
-            .addField(apiDefs::key::captchaSolution, normalizeCaptchaSolution(importData.captchaSolution));
-    if (!importData.authData.isEmpty()) {
-        builder.addField(apiDefs::key::authData, importData.authData);
-    }
-    const QJsonObject apiPayload = builder.build();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                     .addField(apiDefs::key::serviceType, serviceType)
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
+                                     .build();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
-    if (errorCode != ErrorCode::NoError) {
-        const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
-        qWarning().noquote() << "[Subscription] Config request failed, errorCode =" << static_cast<int>(errorCode)
-                             << "http status =" << response.value(apiDefs::key::httpStatus).toInt()
-                             << "message:" << response.value(apiDefs::key::message).toString();
-        if (captchaInfoOut
-            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
-                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
-            fillCaptchaInfoFromResponse(responseBody, *captchaInfoOut);
-        }
+
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
+        fillCaptchaInfoFromResponse(responseBody, captchaInfo);
         return errorCode;
     }
 
-    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, importData.protocolData, responseBody,
-                                      importData.vpnKey);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+}
+
+ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                                               const QString &accessToken)
+{
+    if (accessToken.isEmpty()) {
+        return ErrorCode::ApiAccountSessionError;
+    }
+
+    const QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                           .addField(apiDefs::key::accessToken, accessToken)
+                                           .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                           .addField(apiDefs::key::serviceType, serviceType)
+                                           .build();
+
+    QByteArray responseBody;
+    const ErrorCode errorCode = executeRequest(QString("%1v1/free_account"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+        qWarning().noquote() << "[FreeAccount] Account request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "http status =" << response.value(apiDefs::key::httpStatus).toInt()
+                             << "message:" << response.value(apiDefs::key::message).toString();
+        return errorCode;
+    }
+
+    return applyFreeAccountConfig(responseBody);
+}
+
+ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &responseBody)
+{
+    const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+
+    QString vpnKey;
+    QJsonObject configObject;
+    if (response.value(QStringLiteral("key")).isString()) {
+        vpnKey = response.value(QStringLiteral("key")).toString();
+        vpnKey.replace(QStringLiteral("vpn://"), QString());
+        QByteArray configString = QByteArray::fromBase64(vpnKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        const QByteArray configUncompressed = qUncompress(configString);
+        if (!configUncompressed.isEmpty()) {
+            configString = configUncompressed;
+        }
+        configObject = QJsonDocument::fromJson(configString).object();
+    } else if (response.contains(configKey::configVersion)) {
+        configObject = response;
+    } else if (response.value(QStringLiteral("config")).isObject()) {
+        configObject = response.value(QStringLiteral("config")).toObject();
+    }
+
+    if (configObject.isEmpty()) {
+        qWarning().noquote() << "[FreeAccount] Account response has no config, keys =" << response.keys();
+        return ErrorCode::ApiConfigDownloadError;
+    }
+    if (!serverConfigUtils::isConfigFormatVersionSupported(configObject)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
+    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
+        return ErrorCode::InternalError;
+    }
+
+    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
+    apiV2ServerConfig.apiConfig.vpnKey = vpnKey;
+    apiV2ServerConfig.crc = qChecksum(QJsonDocument(configObject).toJson());
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
+    return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
                                                              const QString &serviceProtocol, const ProtocolData &protocolData,
-                                                             const QByteArray &responseBody, const QString &vpnKey)
+                                                             const QByteArray &responseBody)
 {
     QJsonObject serverConfigJson;
     ErrorCode errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
@@ -259,9 +314,6 @@ ErrorCode SubscriptionController::applyImportedServiceConfig(const QString &user
     }
 
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(serverConfigJson);
-    if (!vpnKey.isEmpty()) {
-        apiV2ServerConfig.apiConfig.vpnKey = vpnKey;
-    }
     m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
                                    serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;
@@ -822,3 +874,33 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     return promise->future();
 }
 
+ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &userCountryCode,
+                                                              const QString &serviceType,
+                                                              const QString &serviceProtocol,
+                                                              const ProtocolData &protocolData,
+                                                              const QString &captchaId,
+                                                              const QString &captchaSolution,
+                                                              CaptchaInfo *retryCaptchaOut)
+{
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                     .addField(apiDefs::key::serviceType, serviceType)
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
+                                     .addField(apiDefs::key::captchaId, captchaId)
+                                     .addField(apiDefs::key::captchaSolution, normalizeCaptchaSolution(captchaSolution))
+                                     .build();
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        if (retryCaptchaOut
+            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
+            fillCaptchaInfoFromResponse(responseBody, *retryCaptchaOut);
+        }
+        return errorCode;
+    }
+
+    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+}
