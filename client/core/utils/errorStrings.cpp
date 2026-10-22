@@ -138,6 +138,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
     case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
     case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiGatewayUnreachableError): errorMessage = QObject::tr("Could not connect to the Amnezia server. Check your internet connection and try again later"); break;
     case (ErrorCode::ApiPurchasePendingError):
 #if defined(Q_OS_ANDROID)
         errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");

@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QFuture>
+#include <QHash>
 #include <QJsonObject>
 #include <QObject>
 #include <QPair>
@@ -30,7 +31,7 @@ public:
 
 private:
     void prepareRequest();
-    QStringList requestHosts() const;
+    QStringList requestHosts(QHash<QString, QStringList> *lastKnown = nullptr) const;
 
     QPair<amnezia::ErrorCode, QByteArray> executePost(const QString &endpoint, const QJsonObject &apiPayload);
     static amnezia::ErrorCode mapResultCode(const int code, const QByteArray &responseBody);
@@ -41,6 +42,8 @@ private:
     SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
 
     agw_client_handle m_client = 0;
+    agw_cancel_handle m_cancel = 0;
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> m_inFlight;
     bool m_publicKeyMissing = false;
     QByteArray m_lastPersistedState;
 };
