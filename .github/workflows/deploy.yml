@@ -1546,5 +1546,5 @@ jobs:
           arch: x86_64
           emulator-options: -no-snapshot -no-window -no-audio -no-boot-anim -accel on
           disable-animations: true
-          script: bash ci_run_android_tests.sh
+          script: bash client/tests/run_android_tests.sh --wait-boot
 
