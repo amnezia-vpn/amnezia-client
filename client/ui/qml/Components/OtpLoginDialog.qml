@@ -51,24 +51,24 @@ Popup {
     function formattedTime() {
         var minutes = Math.floor(root.secondsLeft / 60)
         var seconds = root.secondsLeft % 60
-        return (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds
+        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds
     }
 
     function titleText() {
         if (root.dialogState === "expired") {
-            return qsTr("Code has expired")
+            return qsTr("Code expired")
         }
         if (root.dialogState === "error") {
             switch (root.errorKind) {
             case "noNetwork": return qsTr("No connection")
-            case "purchaseNotFound": return qsTr("Purchase not received yet")
+            case "purchaseNotFound": return qsTr("Purchase hasn't reached us yet")
             case "rateLimited": return qsTr("Service is busy")
             case "receiptRejected":
             case "receiptRejectedAgain": return qsTr("Couldn't verify the purchase")
-            default: return qsTr("Couldn't get the code")
+            default: return qsTr("Couldn't get a code")
             }
         }
-        return qsTr("Login code")
+        return qsTr("Code for your account")
     }
 
     function subtitleText() {
@@ -77,10 +77,10 @@ Popup {
         }
         if (root.dialogState === "error") {
             switch (root.errorKind) {
-            case "noNetwork": return qsTr("Check your internet and try again")
-            case "purchaseNotFound": return qsTr("This happens right after a payment or plan change. Try again in a minute")
+            case "noNetwork": return qsTr("Check your connection and retry")
+            case "purchaseNotFound": return qsTr("This happens right after payment or a plan change. Retry in a minute")
             case "receiptRejected": return qsTr("Try again")
-            case "receiptRejectedAgain": return qsTr("Contact support, we'll help you sort it out")
+            case "receiptRejectedAgain": return qsTr("Contact support and we'll help you sort it out")
             default: return qsTr("Try again later")
             }
         }
@@ -321,7 +321,7 @@ Popup {
 
                     horizontalAlignment: Text.AlignHCenter
                     color: AmneziaStyle.color.textTertiary
-                    text: qsTr("Time left %1").arg(root.formattedTime())
+                    text: qsTr("%1 left").arg(root.formattedTime())
                 }
             }
         }
@@ -335,7 +335,7 @@ Popup {
             visible: root.showsCode
             horizontalAlignment: Text.AlignHCenter
             color: AmneziaStyle.color.textTertiary
-            text: qsTr("Never share this code with anyone, including support")
+            text: qsTr("Don't share this code with anyone, even support")
         }
 
         RowLayout {

@@ -277,7 +277,7 @@ PageType {
 
                     visible: root.isStorePlatform
 
-                    text: qsTr("Login code for the website")
+                    text: qsTr("Code for the web account")
                     subtitle: qsTr("To sign in or add a subscription")
                     trailingIconSource: "qrc:/images/controls/external-link.svg"
 

@@ -4087,7 +4087,7 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
-        <source>Login code for the website</source>
+        <source>Code for the web account</source>
         <translation>Код для кабинета на сайте</translation>
     </message>
     <message>
@@ -7723,7 +7723,7 @@ Remove the server from the app to continue.</source>
 <context>
     <name>OtpLoginDialog</name>
     <message>
-        <source>Login code</source>
+        <source>Code for your account</source>
         <translation>Код для кабинета</translation>
     </message>
     <message>
@@ -7731,11 +7731,11 @@ Remove the server from the app to continue.</source>
         <translation>Введите его на cp.amnezia.org, чтобы подтвердить, что подписка ваша</translation>
     </message>
     <message>
-        <source>Time left %1</source>
+        <source>%1 left</source>
         <translation>Осталось %1</translation>
     </message>
     <message>
-        <source>Never share this code with anyone, including support</source>
+        <source>Don&apos;t share this code with anyone, even support</source>
         <translation>Никому не сообщайте код, даже поддержке</translation>
     </message>
     <message>
@@ -7755,7 +7755,7 @@ Remove the server from the app to continue.</source>
         <translation>Код принят</translation>
     </message>
     <message>
-        <source>Code has expired</source>
+        <source>Code expired</source>
         <translation>Код устарел</translation>
     </message>
     <message>
@@ -7779,15 +7779,15 @@ Remove the server from the app to continue.</source>
         <translation>Нет соединения</translation>
     </message>
     <message>
-        <source>Check your internet and try again</source>
+        <source>Check your connection and retry</source>
         <translation>Проверьте интернет и повторите</translation>
     </message>
     <message>
-        <source>Purchase not received yet</source>
+        <source>Purchase hasn&apos;t reached us yet</source>
         <translation>Покупка еще не дошла</translation>
     </message>
     <message>
-        <source>This happens right after a payment or plan change. Try again in a minute</source>
+        <source>This happens right after payment or a plan change. Retry in a minute</source>
         <translation>Так бывает сразу после оплаты или смены тарифа. Повторите через минуту</translation>
     </message>
     <message>
@@ -7807,11 +7807,11 @@ Remove the server from the app to continue.</source>
         <translation>Повторите</translation>
     </message>
     <message>
-        <source>Contact support, we&apos;ll help you sort it out</source>
+        <source>Contact support and we&apos;ll help you sort it out</source>
         <translation>Напишите в поддержку, поможем разобраться</translation>
     </message>
     <message>
-        <source>Couldn&apos;t get the code</source>
+        <source>Couldn&apos;t get a code</source>
         <translation>Не удалось получить код</translation>
     </message>
 </context>
