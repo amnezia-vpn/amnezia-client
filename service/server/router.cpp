@@ -119,7 +119,7 @@ bool Router::StopRoutingIpv6()
 #ifdef Q_OS_WIN
     return RouterWin::Instance().StopRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    return true;// todo fixme
+    return RouterMac::Instance().StopRoutingIpv6();
 #elif defined Q_OS_LINUX
     return RouterLinux::Instance().StopRoutingIpv6();
 #endif
@@ -130,7 +130,7 @@ bool Router::StartRoutingIpv6()
 #ifdef Q_OS_WIN
     return RouterWin::Instance().StartRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    return true;// todo fixme
+    return RouterMac::Instance().StartRoutingIpv6();
 #elif defined Q_OS_LINUX
     return RouterLinux::Instance().StartRoutingIpv6();
 #endif
