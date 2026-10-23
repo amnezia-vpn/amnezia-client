@@ -19,6 +19,10 @@
 #   bash client/tests/run_android_tests.sh --abi arm64-v8a         # physical ARM device
 #   bash client/tests/run_android_tests.sh --test openssl          # only openssl test
 #   bash client/tests/run_android_tests.sh --test restore_backup   # only restore-backup test
+#   bash client/tests/run_android_tests.sh --test api              # selected API tests
+#   bash client/tests/run_android_tests.sh --test account_info     # account info model test
+#   bash client/tests/run_android_tests.sh --test subscription_controller
+#   bash client/tests/run_android_tests.sh --test services_model_and_controller
 #   bash client/tests/run_android_tests.sh --wait-boot             # wait for emulator to boot first
 
 set -euo pipefail
@@ -33,7 +37,7 @@ ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-28}"
 ABI="${ABI:-x86_64}"
 ABI_DIR="${ABI//-/_}"
 BUILD_DIR="${BUILD_DIR:-build/android_${ABI_DIR}}"
-TEST_FILTER="all"   # "all" | "openssl" | "restore_backup"
+TEST_FILTER="all"
 WAIT_BOOT=false     # set to true or pass --wait-boot to wait for emulator startup
 DEVICE_SERIAL=""    # specific device serial; empty = use ANDROID_SERIAL or first device
 # ──────────────────────────────────────────────────────────────────────────────
@@ -262,6 +266,9 @@ case "$TEST_FILTER" in
   all)
     run_test test_android_openssl
     run_test test_android_restore_backup
+    run_test test_ui_api_account_info_model
+    run_test test_ui_subscription_controller
+    run_test test_ui_services_model_and_controller
     ;;
   openssl)
     run_test test_android_openssl
@@ -269,8 +276,13 @@ case "$TEST_FILTER" in
   restore_backup)
     run_test test_android_restore_backup
     ;;
+  api)
+    run_test test_ui_api_account_info_model
+    run_test test_ui_subscription_controller
+    run_test test_ui_services_model_and_controller
+    ;;
   *)
-    echo "Unknown --test value: $TEST_FILTER (use 'all', 'openssl', or 'restore_backup')"
+    echo "Unknown --test value: $TEST_FILTER (use 'all', 'openssl', 'restore_backup', or 'api')"
     exit 1
     ;;
 esac
