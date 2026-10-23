@@ -59,10 +59,30 @@ class WireguardUtils : public QObject {
     return ok;
   }
 
+  virtual bool deleteRoutePrefixes(const QList<IPAddress>& prefixes) {
+    bool ok = true;
+    for (const IPAddress& prefix : prefixes) {
+      if (!deleteRoutePrefix(prefix)) {
+        ok = false;
+      }
+    }
+    return ok;
+  }
+
   virtual bool addExclusionRoutes(const QList<IPAddress>& prefixes) {
     bool ok = true;
     for (const IPAddress& prefix : prefixes) {
       if (!addExclusionRoute(prefix)) {
+        ok = false;
+      }
+    }
+    return ok;
+  }
+
+  virtual bool deleteExclusionRoutes(const QList<IPAddress>& prefixes) {
+    bool ok = true;
+    for (const IPAddress& prefix : prefixes) {
+      if (!deleteExclusionRoute(prefix)) {
         ok = false;
       }
     }
