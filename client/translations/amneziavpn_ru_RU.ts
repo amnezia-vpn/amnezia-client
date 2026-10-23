@@ -4087,6 +4087,14 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
+        <source>Code for the web account</source>
+        <translation>Код для кабинета на сайте</translation>
+    </message>
+    <message>
+        <source>To sign in or add a subscription</source>
+        <translation>Для входа или чтобы добавить подписку</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
         <translation>Статус подписки</translation>
@@ -6607,6 +6615,10 @@ Create one from the current settings.</source>
         <translation>Не удалось обработать покупку</translation>
     </message>
     <message>
+        <source>Unable to get the login code. Please try again in a minute</source>
+        <translation>Не удалось получить код для входа. Попробуйте через минуту</translation>
+    </message>
+    <message>
         <location filename="../core/utils/errorStrings.cpp" line="134"/>
         <source>No active subscription found</source>
         <translation>Активная подписка не найдена</translation>
@@ -7706,6 +7718,101 @@ Remove the server from the app to continue.</source>
         <location filename="../ui/qml/main2.qml" line="320"/>
         <source>Cannot remove server during active connection</source>
         <translation>Невозможно удалить сервер во время активного соединения</translation>
+    </message>
+</context>
+<context>
+    <name>OtpLoginDialog</name>
+    <message>
+        <source>Code for your account</source>
+        <translation>Код для кабинета</translation>
+    </message>
+    <message>
+        <source>Enter it at cp.amnezia.org to confirm the subscription is yours</source>
+        <translation>Введите его на cp.amnezia.org, чтобы подтвердить, что подписка ваша</translation>
+    </message>
+    <message>
+        <source>%1 left</source>
+        <translation>Осталось %1</translation>
+    </message>
+    <message>
+        <source>Don&apos;t share this code with anyone, even support</source>
+        <translation>Никому не сообщайте код, даже поддержке</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрыть</translation>
+    </message>
+    <message>
+        <source>Open account</source>
+        <translation>Открыть кабинет</translation>
+    </message>
+    <message>
+        <source>Code copied</source>
+        <translation>Код скопирован</translation>
+    </message>
+    <message>
+        <source>Code accepted</source>
+        <translation>Код принят</translation>
+    </message>
+    <message>
+        <source>Code expired</source>
+        <translation>Код устарел</translation>
+    </message>
+    <message>
+        <source>Request a new code</source>
+        <translation>Запросите новый код</translation>
+    </message>
+    <message>
+        <source>Get a new code</source>
+        <translation>Получить новый код</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторить</translation>
+    </message>
+    <message>
+        <source>Contact support</source>
+        <translation>Написать в поддержку</translation>
+    </message>
+    <message>
+        <source>No connection</source>
+        <translation>Нет соединения</translation>
+    </message>
+    <message>
+        <source>Check your connection and retry</source>
+        <translation>Проверьте интернет и повторите</translation>
+    </message>
+    <message>
+        <source>Purchase hasn&apos;t reached us yet</source>
+        <translation>Покупка еще не дошла</translation>
+    </message>
+    <message>
+        <source>This happens right after payment or a plan change. Retry in a minute</source>
+        <translation>Так бывает сразу после оплаты или смены тарифа. Повторите через минуту</translation>
+    </message>
+    <message>
+        <source>Service is busy</source>
+        <translation>Сервис занят</translation>
+    </message>
+    <message>
+        <source>Try again later</source>
+        <translation>Повторите позже</translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t verify the purchase</source>
+        <translation>Не удалось проверить покупку</translation>
+    </message>
+    <message>
+        <source>Try again</source>
+        <translation>Повторите</translation>
+    </message>
+    <message>
+        <source>Contact support and we&apos;ll help you sort it out</source>
+        <translation>Напишите в поддержку, поможем разобраться</translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t get a code</source>
+        <translation>Не удалось получить код</translation>
     </message>
 </context>
 </TS>
