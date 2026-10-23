@@ -207,7 +207,7 @@ WindowsRouteMonitor::NextHop WindowsRouteMonitor::resolveExclusionHop(
     }
 
     // If we got here, then this is the longest prefix match so far.
-    memcpy(&best.address, &row->NextHop, sizeof(SOCKADDR_INET));
+    best.address = row->NextHop;
     bestMatch = row->DestinationPrefix.PrefixLength;
     bestMetric = routeMetric;
     if (bestMatch == data->DestinationPrefix.PrefixLength) {
@@ -238,7 +238,7 @@ void WindowsRouteMonitor::applyExclusionHop(MIB_IPFORWARD_ROW2* data,
 
   // Update the routing table entry.
   data->InterfaceLuid.Value = hop.luid;
-  memcpy(&data->NextHop, &hop.address, sizeof(SOCKADDR_INET));
+  data->NextHop = hop.address;
   if (data->InterfaceLuid.Value != 0) {
     DWORD result = CreateIpForwardEntry2(data);
     if (result != NO_ERROR) {
