@@ -635,27 +635,6 @@ bool SubscriptionUiController::importTrialFromGateway(const QString &email)
     return true;
 }
 
-bool SubscriptionUiController::hasPurchasedKey()
-{
-    for (int i = 0; i < m_serversController->getServersCount(); ++i) {
-        const auto apiV2 = m_serversController->apiV2Config(m_serversController->getServerId(i));
-        if (apiV2.has_value() && (apiV2->apiConfig.isPremium() || apiV2->apiConfig.isExternalPremium())) {
-            return true;
-        }
-    }
-
-#if defined(Q_OS_ANDROID)
-    if (!AndroidController::instance()->isPlay()) {
-        return false;
-    }
-    return !m_storePurchaseController->resolveActiveStoreProductIds().isEmpty();
-#elif defined(Q_OS_IOS) || defined(MACOS_NE)
-    return !m_storePurchaseController->resolveActiveStoreProductIds().isEmpty();
-#else
-    return false;
-#endif
-}
-
 bool SubscriptionUiController::startFreeAccountLogin()
 {
     m_freeAccount = FreeAccountState{};

@@ -163,12 +163,7 @@ void CoreSignalHandlers::initImportControllerHandler()
         emit m_coreController->m_pageController->goToPageViewConfig();
     });
     connect(m_coreController->m_importController, &ImportUiController::freeKeyImported, this, [this](const QJsonObject &config) {
-        auto subscriptionUiController = m_coreController->m_subscriptionUiController;
-        if (subscriptionUiController->hasPurchasedKey()) {
-            emit m_coreController->m_pageController->goToPageViewConfig();
-            return;
-        }
-        if (subscriptionUiController->startFreeAccountLoginForKey(config)) {
+        if (m_coreController->m_subscriptionUiController->startFreeAccountLoginForKey(config)) {
             emit m_coreController->m_pageController->goToPage(PageLoader::PageEnum::PageSetupWizardApiFreeEmail);
         }
     });

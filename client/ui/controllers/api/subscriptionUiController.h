@@ -56,7 +56,6 @@ public slots:
     bool importFreeFromGateway();
     bool restoreServiceFromStore();
     bool importTrialFromGateway(const QString &email);
-    bool hasPurchasedKey();
     bool startFreeAccountLogin();
     bool startFreeAccountLoginForKey(const QJsonObject &keyConfig);
     void refreshFreeAccountCaptcha();

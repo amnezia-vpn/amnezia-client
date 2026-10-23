@@ -117,29 +117,8 @@ PageType {
             text: qsTr("Continue")
 
             onClicked: {
-                PageController.showBusyIndicator(true)
-                var hasPurchasedKey = SubscriptionUiController.hasPurchasedKey()
-                PageController.showBusyIndicator(false)
-
-                if (!hasPurchasedKey) {
-                    if (SubscriptionUiController.startFreeAccountLogin()) {
-                        PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
-                    }
-                    return
-                }
-
-                PageController.showBusyIndicator(true)
-                var result = SubscriptionUiController.importFreeFromGateway()
-                PageController.showBusyIndicator(false)
-
-                if (!result) {
-                    if (SubscriptionUiController.isCaptchaAwaitingUser()) {
-                        return
-                    }
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    Qt.openUrlExternally(endpoint)
-                    PageController.closePage()
-                    PageController.closePage()
+                if (SubscriptionUiController.startFreeAccountLogin()) {
+                    PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
                 }
             }
         }
