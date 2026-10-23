@@ -208,8 +208,6 @@ ADB_BIN=$(which adb)
 
 run_test() {
   local target="$1"
-  local apk_dir="$BUILD_DIR/client/tests/android-build"
-  local apk="$apk_dir/${target}.apk"
   local pkg_name="org.qtproject.example.${target}"
   local activity="${pkg_name}/org.qtproject.qt.android.bindings.QtActivity"
 
@@ -217,7 +215,27 @@ run_test() {
   echo ">>> Building $target APK..."
   cmake --build "$BUILD_DIR" --target "${target}_make_apk"
 
-  echo ">>> Installing $target APK on device..."
+  local apk=""
+  local candidates=(
+    "$BUILD_DIR/client/tests/android-build/${target}.apk"
+    "$BUILD_DIR/client/tests/api/android-build/build/outputs/apk/debug/android-build-debug.apk"
+  )
+
+  for candidate in "${candidates[@]}"; do
+    if [[ -f "$candidate" ]]; then
+      apk="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$apk" ]]; then
+    echo "ERROR: APK not found for $target."
+    echo "APK files found in build directory:"
+    find "$BUILD_DIR/client/tests" -type f -name '*.apk' -print
+    return 1
+  fi
+
+  echo ">>> Installing $target APK on device: $apk"
   "$ADB_BIN" install -r "$apk"
 
   # Pre-create files/stdout.txt before launching so the test process finds it
