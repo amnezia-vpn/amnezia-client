@@ -1,0 +1,26 @@
+sources:
+  "1.27.1":
+    Macos:
+      x86_64:
+        url: "https://go.dev/dl/go1.27.1.darwin-amd64.tar.gz"
+        sha256: "8f8f52c6649542cf027bbc9b9c68d1ec042f9f34808a40413f0b8b3f66f3caa4"
+      armv8:
+        url: "https://go.dev/dl/go1.27.1.darwin-arm64.tar.gz"
+        sha256: "ee215d57e0ec269c60cc9ceca68e6bda321ba9ee5afe24f4b0988703c2d87d12"
+    Linux:
+      x86:
+        url: "https://go.dev/dl/go1.27.1.linux-386.tar.gz"
+        sha256: "3b72028095439d2bc0ce84e271cc70328a878d879020c5721eaa46df5f72fbc0"
+      x86_64:
+        url: "https://go.dev/dl/go1.27.1.linux-amd64.tar.gz"
+        sha256: "63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445"
+      armv8:
+        url: "https://go.dev/dl/go1.27.1.linux-arm64.tar.gz"
+        sha256: "3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec"
+    Windows:
+      x86:
+        url: "https://go.dev/dl/go1.27.1.windows-386.zip"
+        sha256: "1670510496778ee976de09c91b7960f76cb7dbf90968cfea98bb51fa80c9de91"
+      x86_64:
+        url: "https://go.dev/dl/go1.27.1.windows-amd64.zip"
+        sha256: "a3911b5e0e1b1053f25ed0675f4c1c6aad1e2bfcf253df2b9be4caabd2edd95d"

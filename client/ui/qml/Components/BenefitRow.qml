@@ -1,64 +1,58 @@
 import QtQuick
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 import Style 1.0
 
+import "../Controls2"
 import "../Controls2/TextTypes"
 
 RowLayout {
     id: root
 
-    property string iconSource: ""
-    property string titleText: ""
-    property string bodyText: ""
-    property bool link: false
+    property string iconSource
+    property string title
+    property string subtitle
+    property bool isLink: false
 
-    readonly property string bodyLineText: root.link && root.bodyText.length > 0 ? "@" + root.bodyText : root.bodyText
+    spacing: 16
 
-    readonly property bool bodyClickable: root.link && root.bodyText.length > 0
-
-    spacing: 12
-
-    Image {
+    IconImage {
         Layout.alignment: Qt.AlignTop
-        Layout.preferredWidth: 22
-        Layout.preferredHeight: 22
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 24
+
         source: root.iconSource
-        fillMode: Image.PreserveAspectFit
+        sourceSize: Qt.size(24, 24)
+        color: AmneziaStyle.color.iconDefault
     }
 
     ColumnLayout {
         Layout.fillWidth: true
+
         spacing: 4
 
-        LabelTextType {
+        H3TextType {
             Layout.fillWidth: true
-            text: root.titleText
-            color: AmneziaStyle.color.paleGray
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-            wrapMode: Text.Wrap
+
+            text: root.title
         }
 
-        Item {
+        SmallTextType {
             Layout.fillWidth: true
-            implicitHeight: bodyLabel.implicitHeight
 
-            LabelTextType {
-                id: bodyLabel
-                width: parent.width
-                text: root.bodyLineText
-                color: root.link ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
-                font.pixelSize: 14
-                wrapMode: Text.Wrap
-            }
+            visible: !root.isLink && text !== ""
+            text: root.subtitle
+        }
 
-            MouseArea {
-                anchors.fill: bodyLabel
-                visible: root.bodyClickable
-                cursorShape: Qt.PointingHandCursor
-                onClicked: Qt.openUrlExternally("https://t.me/" + root.bodyText)
-            }
+        LinkButtonType {
+            Layout.alignment: Qt.AlignLeft
+            Layout.maximumWidth: parent.width
+
+            visible: root.isLink && root.subtitle !== ""
+            text: "@" + root.subtitle
+
+            onClicked: Qt.openUrlExternally("https://t.me/" + root.subtitle)
         }
     }
 }

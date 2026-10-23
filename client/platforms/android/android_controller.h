@@ -3,8 +3,9 @@
 
 #include <QJniObject>
 #include <QPixmap>
+#include <QStringList>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 using namespace amnezia;
 
@@ -33,6 +34,8 @@ public:
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
+    bool saveFile(const QString &fileName, const QByteArray &data, const QString &mime, bool *cancelled = nullptr);
+    void shareFile(const QString &path, const QString &mime);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
     void closeFd();
@@ -44,8 +47,6 @@ public:
     int getNavigationBarHeight();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
-    void exportLogsFile(const QString &fileName);
-    void clearLogs();
     void setScreenshotsEnabled(bool enabled);
     void setNavigationBarColor(unsigned int color);
     void minimizeApp();
@@ -55,9 +56,19 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+    bool isPlay();
+    QJsonObject getSubscriptionPlans();
+    QJsonObject purchaseSubscription(const QString &offerToken);
+    QJsonObject upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken);
+    QJsonObject acknowledgePurchase(const QString &purchaseToken);
+    QJsonObject queryPurchases();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+
+    static QStringList logFiles(int stream);
+    static QString deviceInfo();
+    static void clearLogStream(int stream);
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -69,6 +80,7 @@ signals:
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
+    void fileSaved(bool success, bool cancelled);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
@@ -88,6 +100,8 @@ private:
     static jmethodID logError;
     static jmethodID logFatal;
 
+    static jclass findLogClass();
+
     void qtAndroidControllerInitialized();
 
     static Vpn::ConnectionState convertState(ConnectionState state);
@@ -103,6 +117,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onFileSaved(JNIEnv *env, jobject thiz, jboolean success, jboolean cancelled);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);

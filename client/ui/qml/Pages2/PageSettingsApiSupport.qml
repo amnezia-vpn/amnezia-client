@@ -21,7 +21,7 @@ PageType {
 
         readonly property string title: qsTr("Telegram")
         readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
-        readonly property string link: "https://t.me/" + ApiAccountInfoModel.getTelegramBotLink()
+        readonly property string link: "https://telegram.me/" + ApiAccountInfoModel.getTelegramBotLink()
     }
 
     QtObject {
@@ -59,67 +59,69 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-        anchors.bottomMargin: 24
 
         model: supportModel
 
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {
-                id: backButton
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Support")
+                description: qsTr("Our technical support specialists are available to assist you at any time")
             }
 
-            BaseHeaderType {
-                id: header
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                headerText: qsTr("Support")
-                descriptionText: qsTr("Our technical support specialists are available to assist you at any time")
+            Item {
+                Layout.preferredHeight: 16
             }
         }
 
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 visible: link !== ""
                 text: title
-                descriptionText: description
-                rightImageSource: "qrc:/images/controls/external-link.svg"
-                clickedFunction: function() {
+                subtitle: description
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+                onClicked: {
                     Qt.openUrlExternally(link)
                 }
             }
-            DividerType {}
         }
-
 
         footer: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 id: supportUuid
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Support tag")
-                descriptionText: SettingsController.getInstallationUuid()
+                showSeparator: false
 
-                descriptionOnTop: true
+                overline: qsTr("Support tag")
+                text: SettingsController.getInstallationUuid()
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                     if (!GC.isMobile()) {
-                        this.rightButton.forceActiveFocus()
+                        supportUuid.forceActiveFocus(Qt.TabFocusReason)
                     }
                 }
             }

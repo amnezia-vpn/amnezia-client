@@ -47,13 +47,13 @@ Window  {
         interval: 150
         repeat: false
         onTriggered: {
-            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+            if (Qt.platform.os === "android" && PageController.isEdgeToEdgeEnabled()) {
                 console.log("QML: Application resumed with edge-to-edge")
             }
         }
     }
 
-    visible: true
+    visible: !GC.isDesktop()
     width: GC.screenWidth
     height: GC.screenHeight
     minimumWidth: GC.isDesktop() ? 360 : 0
@@ -61,11 +61,19 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
-    color: AmneziaStyle.color.midnightBlack
+    flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.ExpandedClientAreaHint) : Qt.Window
+
+    color: AmneziaStyle.color.bgBase
 
     onClosing: function(close) {
         close.accepted = false
         PageController.closeWindow()
+    }
+
+    onActiveFocusItemChanged: {
+        if (activeFocusItem === contentItem) {
+            pageStart.forceActiveFocus()
+        }
     }
 
     onSceneGraphError: function(error, message) {
@@ -74,31 +82,6 @@ Window  {
     }
 
     title: "AmneziaVPN"
-
-    Item { // This item is needed for focus handling
-        id: defaultFocusItem
-        objectName: "defaultFocusItem"
-
-        focus: true
-
-        Keys.onPressed: function(event) {
-            switch (event.key) {
-            case Qt.Key_Tab:
-            case Qt.Key_Down:
-            case Qt.Key_Right:
-                FocusController.nextKeyTabItem()
-                break
-            case Qt.Key_Backtab:
-            case Qt.Key_Up:
-            case Qt.Key_Left:
-                FocusController.previousKeyTabItem()
-                break
-            default:
-                PageController.keyPressEvent(event.key)
-                event.accepted = true
-            }
-        }
-    }
 
     Loader {
         active: Qt.platform.os === "android"
@@ -121,19 +104,15 @@ Window  {
         }
 
         function onShowErrorMessage(errorMessage) {
-            popupErrorMessage.text = errorMessage
-            popupErrorMessage.open()
+            popupErrorMessage.show(errorMessage)
         }
 
         function onShowNotificationMessage(message) {
-            popupNotificationMessage.text = message
-            popupNotificationMessage.closeButtonVisible = false
-            popupNotificationMessage.open()
-            popupNotificationTimer.start()
+            popupNotificationMessage.show(message)
         }
 
         function onShowPassphraseRequestDrawer() {
-            privateKeyPassphraseDrawer.openTriggered()
+            privateKeyPassphraseDrawer.open()
         }
 
         function onGoToPageSettingsBackup() {
@@ -144,6 +123,7 @@ Window  {
             busyIndicator.visible = visible
             PageController.disableControls(visible)
         }
+
     }
 
     Connections {
@@ -157,159 +137,162 @@ Window  {
     }
 
     PageStart {
+        id: pageStart
         objectName: "pageStart"
         width: root.width
         height: root.height
+
+        focus: true
+    }
+
+    SnackbarType {
+        id: popupNotificationMessage
+        objectName: "popupNotificationMessage"
+
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
+
+        duration: 3000
+    }
+
+    SnackbarType {
+        id: popupErrorMessage
+        objectName: "popupErrorMessage"
+
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
+
+        variant: SnackbarType.Destructive
+        closable: true
+        duration: 0
     }
 
     Item {
-        objectName: "popupNotificationItem"
+        objectName: "captchaDialogItem"
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.fill: parent
 
-        implicitHeight: popupNotificationMessage.height
+        CaptchaDialogType {
+            id: captchaDialog
 
-        PopupType {
-            id: popupNotificationMessage
-        }
+            onCaptchaSolved: function(captchaId, solution) {
+                PageController.showBusyIndicator(true)
+                Qt.callLater(function() {
+                    SubscriptionUiController.onCaptchaSolved(captchaId, solution)
+                })
+            }
 
-        Timer {
-            id: popupNotificationTimer
-
-            interval: 3000
-            repeat: false
-            running: false
-            onTriggered: {
-                popupNotificationMessage.close()
+            onRefreshCaptchaRequested: function() {
+                SubscriptionUiController.onRefreshCaptchaRequested()
             }
         }
     }
 
-    Item {
-        objectName: "popupErrorMessageItem"
+    SheetType {
+        id: privateKeyPassphraseDrawer
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        property bool isCloseByUser: false
 
-        implicitHeight: popupErrorMessage.height
+        expandedHeight: windowHeight * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
-        PopupType {
-            id: popupErrorMessage
+        onAboutToShow: {
+            PageController.showBusyIndicator(false)
         }
-    }
 
-    Item {
-        objectName: "privateKeyPassphraseDrawerItem"
+        onOpened: {
+            passphrase.textField.text = ""
+            passphrase.textField.forceActiveFocus()
+        }
 
-        anchors.fill: parent
+        onAboutToHide: {
+            if (privateKeyPassphraseDrawer.isCloseByUser === false) {
+                privateKeyPassphraseDrawer.isCloseByUser = true
+                PageController.passphraseRequestDrawerClosed("")
+            }
 
-        DrawerType2 {
-            id: privateKeyPassphraseDrawer
+            if (passphrase.textField.text !== "") {
+                PageController.showBusyIndicator(true)
+            }
+        }
 
-            anchors.fill: parent
-            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
+        ColumnLayout {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 16
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
-            expandedStateContent: ColumnLayout {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+            TextFieldType {
+                id: passphrase
 
-                Connections {
-                    target: privateKeyPassphraseDrawer
-                    function onOpened() {
-                        passphrase.textField.text = ""
-                        passphrase.textField.forceActiveFocus()
-                    }
+                Layout.fillWidth: true
+                headerText: qsTr("Private key passphrase")
+                passwordToggle: true
+            }
 
-                    function onAboutToHide() {
-                        if (passphrase.textField.text !== "") {
-                            PageController.showBusyIndicator(true)
-                        }
-                    }
+            ButtonType {
+                id: saveButton
+                variant: ButtonType.Secondary
 
-                    function onAboutToShow() {
-                        PageController.showBusyIndicator(false)
-                    }
-                }
+                Layout.fillWidth: true
 
-                TextFieldWithHeaderType {
-                    id: passphrase
+                text: qsTr("Save")
 
-                    property bool hidePassword: true
-
-                    Layout.fillWidth: true
-                    headerText: qsTr("Private key passphrase")
-                    textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                    buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                    clickedFunc: function() {
-                        hidePassword = !hidePassword
-                    }
-                }
-
-                BasicButtonType {
-                    id: saveButton
-
-                    Layout.fillWidth: true
-
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.translucentWhite
-                    pressedColor: AmneziaStyle.color.sheerWhite
-                    disabledColor: AmneziaStyle.color.mutedGray
-                    textColor: AmneziaStyle.color.paleGray
-                    borderWidth: 1
-
-                    text: qsTr("Save")
-
-                    clickedFunc: function() {
-                        privateKeyPassphraseDrawer.closeTriggered()
-                        PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
-                    }
+                onClicked: {
+                    privateKeyPassphraseDrawer.isCloseByUser = true
+                    privateKeyPassphraseDrawer.close()
+                    PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
                 }
             }
         }
     }
 
-    Item {
-        objectName: "questionDrawerItem"
-
-        anchors.fill: parent
-
-        QuestionDrawer {
-            id: questionDrawer
-
-            anchors.fill: parent
-        }
+    QuestionDrawer {
+        id: questionDrawer
     }
 
-    Item {
-        objectName: "subscriptionExpiredDrawerItem"
+    SubscriptionExpiredDrawer {
+        id: subscriptionExpiredDrawer
+    }
 
-        anchors.fill: parent
+    Connections {
+        target: PageController
 
-        SubscriptionExpiredDrawer {
-            id: subscriptionExpiredDrawer
-
-            anchors.fill: parent
+        function onUnsupportedConnectDrawerRequested() {
+            root.showUnsupportedConnectDrawer()
         }
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
         function onSubscriptionExpiredOnServer() {
-            subscriptionExpiredDrawer.openTriggered()
+            subscriptionExpiredDrawer.open()
+        }
+
+        function onCaptchaRequired(captchaId, captchaImageBase64, hint) {
+            if (captchaDialog.opened) {
+                PageController.showBusyIndicator(false)
+            }
+            captchaDialog.captchaId = captchaId
+            captchaDialog.captchaImageBase64 = captchaImageBase64
+            captchaDialog.hint = hint
+            captchaDialog.open()
+        }
+
+        function onCaptchaFlowDismissRequested() {
+            PageController.showBusyIndicator(false)
+            captchaDialog.close()
+        }
+
+        function onErrorOccurred(error) {
+            if (captchaDialog.opened) {
+                PageController.showBusyIndicator(false)
+            }
         }
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onRenewalLinkReceived(url) {
             Qt.openUrlExternally(url)
@@ -321,11 +304,35 @@ Window  {
 
         anchors.fill: parent
 
-        BusyIndicatorType {
+        LoadingOverlayType {
             id: busyIndicator
             anchors.centerIn: parent
             z: 1
+
+            blurSource: pageStart
         }
+    }
+
+    function showUnsupportedConnectDrawer() {
+        let headerText = qsTr("This subscription format is no longer supported")
+        let descriptionText = qsTr("This legacy Amnezia subscription type can no longer be used to connect in this application version.\nRemove the server from the app to continue.")
+        let yesButtonText = qsTr("Continue")
+        let noButtonText = qsTr("Cancel")
+
+        let yesButtonFunction = function() {
+            if (ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                return
+            }
+
+            PageController.showBusyIndicator(true)
+            InstallController.removeServer(ServersUiController.defaultServerId)
+            PageController.showBusyIndicator(false)
+        }
+        let noButtonFunction = function() {
+        }
+
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
     function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
@@ -335,18 +342,18 @@ Window  {
         questionDrawer.noButtonText = noButtonText
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.closeTriggered()
+            questionDrawer.close()
             if (yesButtonFunction && typeof yesButtonFunction === "function") {
                 yesButtonFunction()
             }
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.closeTriggered()
+            questionDrawer.close()
             if (noButtonFunction && typeof noButtonFunction === "function") {
                 noButtonFunction()
             }
         }
-        questionDrawer.openTriggered()
+        questionDrawer.open()
     }
 
     FileDialog {
@@ -360,4 +367,5 @@ Window  {
         onAccepted: SystemController.fileDialogClosed(true)
         onRejected: SystemController.fileDialogClosed(false)
     }
+
 }

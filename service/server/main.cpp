@@ -4,7 +4,7 @@
 #include "localserver.h"
 #include "logger.h"
 #include "systemservice.h"
-#include "utilities.h"
+#include "core/utils/utilities.h"
 
 #ifdef Q_OS_WIN
 #include "platforms/windows/daemon/windowsdaemontunnel.h"

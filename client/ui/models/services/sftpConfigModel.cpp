@@ -1,6 +1,11 @@
 #include "sftpConfigModel.h"
 
-#include "protocols/protocols_defs.h"
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
+
+using namespace amnezia;
 
 SftpConfigModel::SftpConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -12,44 +17,61 @@ int SftpConfigModel::rowCount(const QModelIndex &parent) const
     return 1;
 }
 
-QVariant SftpConfigModel::data(const QModelIndex &index, int role) const
+bool SftpConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return false;
     }
 
+    QString strValue = value.toString();
+
     switch (role) {
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString();
+    case Roles::PortRole: m_protocolConfig.port = strValue; break;
+    case Roles::UserNameRole: m_protocolConfig.userName = strValue; break;
+    case Roles::PasswordRole: m_protocolConfig.password = strValue; break;
+    default:
+        return false;
+    }
+
+    emit dataChanged(index, index, QList { role });
+    return true;
+}
+
+QVariant SftpConfigModel::data(const QModelIndex &index, int role) const
+{
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
+        return QVariant();
+    }
+
+    switch (role) {
+    case Roles::PortRole: return m_protocolConfig.port;
     case Roles::UserNameRole:
-        return m_protocolConfig.value(config_key::userName).toString(protocols::sftp::defaultUserName);
-    case Roles::PasswordRole: return m_protocolConfig.value(config_key::password).toString();
+        return m_protocolConfig.userName.isEmpty() ? QString(protocols::sftp::defaultUserName) : m_protocolConfig.userName;
+    case Roles::PasswordRole: return m_protocolConfig.password;
     }
 
     return QVariant();
 }
 
-void SftpConfigModel::updateModel(const QJsonObject &config)
+void SftpConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::SftpProtocolConfig &protocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::sftp).toObject();
-
-    m_protocolConfig.insert(config_key::userName,
-                            protocolConfig.value(config_key::userName).toString(protocols::sftp::defaultUserName));
-
-    m_protocolConfig.insert(config_key::password, protocolConfig.value(config_key::password).toString());
-
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString());
-
+    m_container = container;
+    m_protocolConfig = protocolConfig;
+    applyDefaults(m_protocolConfig);
     endResetModel();
 }
 
-QJsonObject SftpConfigModel::getConfig()
+amnezia::SftpProtocolConfig SftpConfigModel::getProtocolConfig()
 {
-    m_fullConfig.insert(config_key::sftp, m_protocolConfig);
-    return m_fullConfig;
+    return m_protocolConfig;
+}
+
+void SftpConfigModel::applyDefaults(amnezia::SftpProtocolConfig& config)
+{
+    if (config.userName.isEmpty()) {
+        config.userName = protocols::sftp::defaultUserName;
+    }
 }
 
 QHash<int, QByteArray> SftpConfigModel::roleNames() const
@@ -62,3 +84,4 @@ QHash<int, QByteArray> SftpConfigModel::roleNames() const
 
     return roles;
 }
+

@@ -8,266 +8,292 @@ import Style 1.0
 import "./"
 import "../Controls2"
 import "../Config"
-import "../Controls2/TextTypes"
 import "../Components"
 
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
+
+                title: qsTr("Application")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                headerText: qsTr("Application")
-            }
-        }
+                spacing: 0
 
-        model: 1 // fake model to force the ListView to be created without a model
+                ListItemType {
+                    id: switcherAllowScreenshotsRow
 
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
+                    Layout.fillWidth: true
 
-            width: listView.width
+                    visible: GC.isMobile()
 
-            SwitcherType {
-                id: switcherAllowScreenshots
+                    text: qsTr("Allow application screenshots")
 
-                visible: GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Allow application screenshots")
-
-                checked: SettingsController.isScreenshotsEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isScreenshotsEnabled()) {
-                        SettingsController.toggleScreenshotsEnabled(checked)
+                    onClicked: {
+                        switcherAllowScreenshots.toggle()
+                        switcherAllowScreenshots.toggled()
                     }
-                }
-            }
 
-            DividerType {
-                visible: GC.isMobile()
-            }
+                    SwitchType {
+                        id: switcherAllowScreenshots
 
-            LabelWithButtonType {
-                id: labelWithButtonNotification
+                        focusPolicy: Qt.NoFocus
 
-                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
-
-                Layout.fillWidth: true
-
-                text: qsTr("Enable notifications")
-                descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    SettingsController.requestNotificationPermission()
-                }
-            }
-
-            DividerType {
-                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
-            }
-
-            SwitcherType {
-                id: switcherAutoStart
-
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Auto start")
-                descriptionText: qsTr("Launch the application every time the device is starts")
-
-                checked: SettingsController.isAutoStartEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isAutoStartEnabled()) {
-                        SettingsController.toggleAutoStart(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-
-            SwitcherType {
-                id: switcherAutoConnect
-
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Auto connect")
-                descriptionText: qsTr("Connect to VPN on app start")
-
-                checked: SettingsController.isAutoConnectEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isAutoConnectEnabled()) {
-                        SettingsController.toggleAutoConnect(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile() && !IsMacOsNeBuild
-            }
-
-            SwitcherType {
-                id: switcherStartMinimized
-
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Start minimized")
-                descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
-
-                enabled: switcherAutoStart.checked
-                opacity: enabled ? 1.0 : 0.5
-
-                checked: SettingsController.startMinimized
-                onToggled: function() {
-                    if (checked !== SettingsController.startMinimized) {
-                        SettingsController.toggleStartMinimized(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-
-            SwitcherType {
-                id: switcherNewsNotificationEnabled
-
-                visible: ServersModel.hasServersFromGatewayApi
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("News Notification")
-                descriptionText: qsTr("Show a notification icon for unread news")
-
-                checked: SettingsController.isNewsNotificationsEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isNewsNotificationsEnabled()) {
-                        SettingsController.toggleNewsNotificationsEnabled(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-        }
-
-        footer: ColumnLayout {
-
-            width: listView.width
-
-            LabelWithButtonType {
-                id: labelWithButtonLanguage
-
-                Layout.fillWidth: true
-
-                text: qsTr("Language")
-                descriptionText: LanguageModel.currentLanguageName
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    selectLanguageDrawer.openTriggered()
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: labelWithButtonLogging
-
-                Layout.fillWidth: true
-
-                text: qsTr("Logging")
-                descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsLogging)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: labelWithButtonReset
-                
-                Layout.fillWidth: true
-
-                text: qsTr("Reset settings and remove all data from the application")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: AmneziaStyle.color.vibrantRed
-
-                clickedFunction: function() {
-                    var headerText = qsTr("Reset settings and remove all data from the application?")
-                    var descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
-                        } else
-                        {
-                            SettingsController.clearSettings()
-                            PageController.goToPageHome()
+                        checked: SettingsController.isScreenshotsEnabled()
+                        onToggled: function() {
+                            if (checked !== SettingsController.isScreenshotsEnabled()) {
+                                SettingsController.toggleScreenshotsEnabled(checked)
+                            }
                         }
                     }
-                    var noButtonFunction = function() {
+                }
+
+                ListItemType {
+                    id: labelWithButtonNotification
+
+                    Layout.fillWidth: true
+
+                    visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+
+                    text: qsTr("Enable notifications")
+                    subtitle: qsTr("Enable notifications to show the VPN state in the status bar")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        SettingsController.requestNotificationPermission()
+                    }
+                }
+
+                ListItemType {
+                    id: switcherAutoStartRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile()
+
+                    text: qsTr("Auto start")
+                    subtitle: qsTr("Launch the application every time the device is starts")
+
+                    onClicked: {
+                        switcherAutoStart.toggle()
+                        switcherAutoStart.toggled()
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    SwitchType {
+                        id: switcherAutoStart
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.autoStartEnabled
+                        onToggled: function() {
+                            if (checked !== SettingsController.autoStartEnabled) {
+                                SettingsController.toggleAutoStart(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: switcherAutoConnectRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile()
+
+                    text: qsTr("Auto connect")
+                    subtitle: qsTr("Connect to VPN on app start")
+
+                    onClicked: {
+                        switcherAutoConnect.toggle()
+                        switcherAutoConnect.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherAutoConnect
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.isAutoConnectEnabled()
+                        onToggled: function() {
+                            if (checked !== SettingsController.isAutoConnectEnabled()) {
+                                SettingsController.toggleAutoConnect(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: switcherStartMinimizedRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile()
+                    enabled: SettingsController.autoStartEnabled
+
+                    text: qsTr("Start minimized")
+                    subtitle: qsTr("Launch application minimized (works with autostart option turned on)")
+
+                    onClicked: {
+                        switcherStartMinimized.toggle()
+                        switcherStartMinimized.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherStartMinimized
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.autoStartEnabled && SettingsController.startMinimized
+                        onToggled: function() {
+                            if (checked !== SettingsController.startMinimized) {
+                                SettingsController.toggleStartMinimized(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: switcherNewsNotificationEnabledRow
+
+                    Layout.fillWidth: true
+
+                    visible: ServersUiController.hasServersFromGatewayApi
+
+                    text: qsTr("News Notification")
+                    subtitle: qsTr("Show a notification icon for unread news")
+
+                    onClicked: {
+                        switcherNewsNotificationEnabled.toggle()
+                        switcherNewsNotificationEnabled.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherNewsNotificationEnabled
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.isNewsNotificationsEnabled()
+                        onToggled: function() {
+                            if (checked !== SettingsController.isNewsNotificationsEnabled()) {
+                                SettingsController.toggleNewsNotificationsEnabled(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: switcherAutoUpdateCheckRow
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Check for updates automatically")
+                    subtitle: qsTr("Check for a new app version at startup")
+
+                    onClicked: {
+                        switcherAutoUpdateCheck.toggle()
+                        switcherAutoUpdateCheck.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherAutoUpdateCheck
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.isAutoUpdateCheckEnabled()
+                        onToggled: function() {
+                            if (checked !== SettingsController.isAutoUpdateCheckEnabled()) {
+                                SettingsController.toggleAutoUpdateCheckEnabled(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: labelWithButtonLanguage
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Language")
+                    subtitle: LanguageUiController.currentLanguageName
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        selectLanguageDrawer.open()
+                    }
+                }
+
+                ListItemType {
+                    id: labelWithButtonLogging
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Logging")
+                    subtitle: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsLogging)
+                    }
+                }
+
+                ListItemType {
+                    id: labelWithButtonReset
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Reset settings and remove all data from the application")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+                    destructive: true
+
+                    onClicked: {
+                        var headerText = qsTr("Reset settings and remove all data from the application?")
+                        var descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                                PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
+                            } else {
+                                SettingsController.clearSettings()
+                                PageController.goToPageHome()
+                            }
+                        }
+                        var noButtonFunction = function() {
+                        }
+
+                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    }
                 }
             }
-
-            DividerType {}
         }
     }
 
     SelectLanguageDrawer {
         id: selectLanguageDrawer
-
-        width: root.width
-        height: root.height
     }
 }

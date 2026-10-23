@@ -16,7 +16,7 @@ PageType {
     property string trialEmailErrorMessage: ""
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
         function onTrialEmailError(message) {
             root.trialEmailErrorMessage = message
@@ -24,114 +24,98 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (activeFocus) {
-                flick.contentY = 0
-            }
-        }
-    }
-
     FlickableType {
         id: flick
 
-        anchors.top: backButton.bottom
-        anchors.bottom: continueButton.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: bottomBar.top
 
-        contentHeight: scrollColumn.implicitHeight + 24
+        contentHeight: scrollColumn.implicitHeight + 16
 
         ColumnLayout {
             id: scrollColumn
 
-            width: flick.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
 
-                headerText: qsTr("Create an account")
-                descriptionText: qsTr("To manage your subscription")
+                title: qsTr("Create an account")
+                description: qsTr("To manage your subscription")
             }
 
-            TextFieldWithHeaderType {
-                id: emailField
-
+            ColumnLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 24
 
-                headerText: qsTr("Email")
-                textField.placeholderText: qsTr("Email")
-                textField.inputMethodHints: Qt.ImhEmailCharactersOnly
+                spacing: 24
 
-                Connections {
-                    target: emailField.textField
+                TextFieldType {
+                    id: emailField
 
-                    function onTextChanged() {
-                        if (root.trialEmailErrorMessage !== "") {
-                            root.trialEmailErrorMessage = ""
-                            emailField.errorText = ""
+                    Layout.fillWidth: true
+
+                    headerText: qsTr("Email")
+                    textField.placeholderText: qsTr("Email")
+                    textField.inputMethodHints: Qt.ImhEmailCharactersOnly
+
+                    Connections {
+                        target: emailField.textField
+
+                        function onTextChanged() {
+                            if (root.trialEmailErrorMessage !== "") {
+                                root.trialEmailErrorMessage = ""
+                                emailField.errorText = ""
+                            }
                         }
                     }
                 }
-            }
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
+                CaptionTextType {
+                    Layout.fillWidth: true
 
-                wrapMode: Text.WordWrap
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 12
-                text: qsTr("We will create an account for your trial subscription and send important subscription updates to this email address")
+                    text: qsTr("We will create an account for your trial subscription and send important subscription updates to this email address")
+                }
             }
         }
     }
 
-    BasicButtonType {
-        id: continueButton
+    BottomBarType {
+        id: bottomBar
 
-        z: 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
 
-        text: qsTr("Continue")
+        ButtonType {
+            id: continueButton
 
-        clickedFunc: function() {
-            root.trialEmailErrorMessage = ""
-            emailField.errorText = ""
+            Layout.fillWidth: true
 
-            var raw = emailField.textField.text.trim()
-            if (raw.length === 0 || raw.indexOf("@") < 0) {
-                PageController.showNotificationMessage(qsTr("Enter a valid email address"))
-                return
-            }
-            PageController.showBusyIndicator(true)
-            var ok = ApiConfigsController.importTrialFromGateway(raw)
-            PageController.showBusyIndicator(false)
-            if (ok) {
-                PageController.closePage()
-                PageController.closePage()
+            text: qsTr("Continue")
+
+            onClicked: {
+                root.trialEmailErrorMessage = ""
+                emailField.errorText = ""
+
+                var raw = emailField.textField.text.trim()
+                if (raw.length === 0 || raw.indexOf("@") < 0) {
+                    PageController.showNotificationMessage(qsTr("Enter a valid email address"))
+                    return
+                }
+                PageController.showBusyIndicator(true)
+                var ok = SubscriptionUiController.importTrialFromGateway(raw)
+                PageController.showBusyIndicator(false)
+                if (ok) {
+                    PageController.closePage()
+                    PageController.closePage()
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 #ifndef IOS_CONTROLLER_H
 #define IOS_CONTROLLER_H
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 #include <functional>
 #include <QVariant>
 #include <QVariantMap>
@@ -59,18 +59,39 @@ public:
     void getBackendLogs(std::function<void(const QString &)> &&callback);
     void checkStatus();
 
-    bool shareText(const QStringList &filesToSend);
+    bool shareText(const QStringList &filesToSend, bool *cancelled = nullptr);
     QString openFile();
+
+    // Store-specific purchase failure reasons; values match StoreKit2Helper error codes
+    enum class StorePurchaseFailure {
+        Other,
+        Cancelled,
+        Pending
+    };
 
     void purchaseProduct(const QString &productId,
                          std::function<void(bool success,
                                             const QString &transactionId,
                                             const QString &purchasedProductId,
                                             const QString &originalTransactionId,
-                                            const QString &errorString)> &&callback);
+                                            const QString &storeEnvironment,
+                                            const QString &errorString,
+                                            StorePurchaseFailure failureReason)> &&callback);
+
+    // Finish a StoreKit transaction after the gateway has validated the purchase
+    void finishStoreTransaction(const QString &transactionId);
+
+    // Start listening to StoreKit transaction updates; each verified transaction is
+    // reported once per session via the storeTransactionUpdated signal
+    void startStoreTransactionObserver();
+
     void restorePurchases(std::function<void(bool success,
                                              const QList<QVariantMap> &transactions,
                                              const QString &errorString)> &&callback);
+
+    void fetchLocalEntitlements(std::function<void(bool success,
+                                                    const QList<QVariantMap> &transactions,
+                                                    const QString &errorString)> &&callback);
 
     // Fetch product info for given product identifiers and return basic fields for logging
     void fetchProducts(const QStringList &productIds,
@@ -80,11 +101,13 @@ public:
 
     void requestInetAccess();
     bool isTestFlight();
+
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void importConfigFromOutside(const QString);
     void importBackupFromOutside(const QString);
+    void storeTransactionUpdated(const QVariantMap &transaction);
 
     void finished();
 
@@ -94,7 +117,6 @@ private:
     explicit IosController();
 
     bool setupOpenVPN();
-    bool setupCloak();
     bool setupWireGuard();
     bool setupAwg();
     bool setupXray();

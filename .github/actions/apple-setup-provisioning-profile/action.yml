@@ -1,0 +1,31 @@
+# .github/actions/apple-setup-provisioning-profile/action.yml
+
+name: Setup provisioning profiles
+description: Decodes and installs provisioning profiles
+
+inputs:
+  provisioning_profile_base64:
+    description: Base64-encoded provisioning profile
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup provisioning profile
+      shell: bash
+      run: |
+        PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+        TEMP_FILE=$(mktemp)
+
+        echo "${{ inputs.provisioning_profile_base64 }}" | base64 --decode > "$TEMP_FILE"
+
+        PROFILE_UUID=$(grep UUID -A1 -a "$TEMP_FILE" | grep -io "[-A-F0-9]\{36\}")
+        if [[ -z "$PROFILE_UUID" ]]; then
+          echo "Failed to extract UUID from provisioning profile"
+          rm -f "$TEMP_FILE"
+          exit 1
+        fi
+
+        mkdir -p "$PROFILES_DIR"
+        mv "$TEMP_FILE" "$PROFILES_DIR/$PROFILE_UUID.mobileprovision"
+        echo "Installed profile: $PROFILE_UUID"

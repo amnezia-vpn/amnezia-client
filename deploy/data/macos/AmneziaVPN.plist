@@ -12,17 +12,7 @@
     <true/>
     <key>RunAtLoad</key>
     <true/>
-    <key>Sockets</key>
-	<dict>
-	    <key>Listeners</key>
-	    <dict>
-	        <key>SockServiceName</key>
-                <string>5959</string>
-	        <key>SockType</key>
-	        <string>stream</string>
-	        <key>SockFamily</key>
-	        <string>IPv4</string>
-	    </dict>
-	</dict>
+    <key>GroupName</key>
+    <string>amnvpn</string>
 </dict>
 </plist>

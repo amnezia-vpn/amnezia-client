@@ -9,7 +9,7 @@
 #include <QCoreApplication>
 
 //#include "commandlineparser.h"
-#include "constants.h"
+#include "core/utils/constants.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "platforms/windows/daemon/wireguardutilswindows.h"

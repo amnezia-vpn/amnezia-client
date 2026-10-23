@@ -38,9 +38,9 @@
 	</dict>
 
 	<key>com.wireguard.ios.app_group_id</key>
-	<string>group.${BUILD_IOS_APP_IDENTIFIER}</string>
+	<string>${BUILD_IOS_GROUP_IDENTIFIER}</string>
 
 	<key>com.wireguard.macos.app_group_id</key>
-	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.group.${BUILD_OSX_APP_IDENTIFIER}</string>
+	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.${BUILD_IOS_GROUP_IDENTIFIER}</string>
 </dict>
 </plist>

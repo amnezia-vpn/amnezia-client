@@ -17,6 +17,7 @@ jobs:
       QIF_VERSION: 4.5
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}

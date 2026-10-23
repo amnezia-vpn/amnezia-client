@@ -13,7 +13,6 @@ Item {
 
         onButtonStartChanged: {
             if (buttonStart) {
-                ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
                 ConnectionController.connectButtonClicked()
             }
         }

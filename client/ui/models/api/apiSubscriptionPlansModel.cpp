@@ -11,12 +11,14 @@ namespace configKey
 {
     constexpr char billingPeriod[] = "billing_period";
     constexpr char priceLabel[] = "price_label";
+    constexpr char priceAmount[] = "price_amount";
     constexpr char subtitle[] = "subtitle";
     constexpr char recommended[] = "recommended";
     constexpr char checkoutUrl[] = "checkout_url";
     constexpr char isTrial[] = "is_trial";
-    constexpr char serviceProtocol[] = "service_protocol";
     constexpr char storeProductId[] = "store_product_id";
+    constexpr char hasFreeTrial[] = "has_free_trial";
+    constexpr char trialDays[] = "trial_days";
 }
 }
 
@@ -44,6 +46,8 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.billingPeriod;
     case PriceLabelRole:
         return plan.priceLabel;
+    case PriceAmountRole:
+        return plan.priceAmount;
     case SubtitleRole:
         return plan.subtitle;
     case RecommendedRole:
@@ -52,10 +56,12 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.checkoutUrl;
     case IsTrialRole:
         return plan.isTrial;
-    case ServiceProtocolRole:
-        return plan.serviceProtocol;
     case StoreProductIdRole:
         return plan.storeProductId;
+    case HasFreeTrialRole:
+        return plan.hasFreeTrial;
+    case TrialDaysRole:
+        return plan.trialDays;
     default:
         return {};
     }
@@ -66,12 +72,14 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
     return {
         { BillingPeriodRole, "billingPeriod" },
         { PriceLabelRole, "priceLabel" },
+        { PriceAmountRole, "priceAmount" },
         { SubtitleRole, "subtitle" },
         { RecommendedRole, "recommended" },
         { CheckoutUrlRole, "checkoutUrl" },
         { IsTrialRole, "isTrial" },
-        { ServiceProtocolRole, "serviceProtocol" },
         { StoreProductIdRole, "storeProductId" },
+        { HasFreeTrialRole, "hasFreeTrial" },
+        { TrialDaysRole, "trialDays" },
     };
 }
 
@@ -88,12 +96,14 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         SubscriptionPlanItem subscriptionPlan;
         subscriptionPlan.billingPeriod = planObject.value(configKey::billingPeriod).toString();
         subscriptionPlan.priceLabel = planObject.value(configKey::priceLabel).toString();
+        subscriptionPlan.priceAmount = planObject.value(configKey::priceAmount).toDouble();
         subscriptionPlan.subtitle = planObject.value(configKey::subtitle).toString();
         subscriptionPlan.recommended = planObject.value(configKey::recommended).toBool();
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
         subscriptionPlan.isTrial = planObject.value(configKey::isTrial).toBool();
-        subscriptionPlan.serviceProtocol = planObject.value(configKey::serviceProtocol).toString();
         subscriptionPlan.storeProductId = planObject.value(configKey::storeProductId).toString();
+        subscriptionPlan.hasFreeTrial = planObject.value(configKey::hasFreeTrial).toBool();
+        subscriptionPlan.trialDays = planObject.value(configKey::trialDays).toInt();
         m_subscriptionPlans.append(std::move(subscriptionPlan));
     }
     endResetModel();
@@ -128,4 +138,24 @@ int ApiSubscriptionPlansModel::recommendedRowIndex() const
         }
     }
     return 0;
+}
+
+bool ApiSubscriptionPlansModel::hasAnyFreeTrial() const
+{
+    for (const SubscriptionPlanItem &plan : m_subscriptionPlans) {
+        if (plan.hasFreeTrial) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int ApiSubscriptionPlansModel::rowForStoreProductId(const QString &storeProductId) const
+{
+    for (int planIndex = 0; planIndex < m_subscriptionPlans.size(); ++planIndex) {
+        if (m_subscriptionPlans.at(planIndex).storeProductId == storeProductId) {
+            return planIndex;
+        }
+    }
+    return -1;
 }

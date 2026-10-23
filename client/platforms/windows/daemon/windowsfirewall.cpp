@@ -36,6 +36,8 @@
 // ID for the Firewall Sublayer
 DEFINE_GUID(ST_FW_WINFW_BASELINE_SUBLAYER_KEY, 0xc78056ff, 0x2bc1, 0x4211, 0xaa,
             0xdd, 0x7f, 0x35, 0x8d, 0xef, 0x20, 0x2d);
+DEFINE_GUID(ST_FW_WINFW_DNS_SUBLAYER_KEY, 0x60090787, 0xcca1, 0x4937, 0xaa,
+            0xce, 0x51, 0x25, 0x6e, 0xf4, 0x81, 0xf3);
 // ID for the Mullvad Split-Tunnel Sublayer Provider
 DEFINE_GUID(ST_FW_PROVIDER_KEY, 0xe2c114ee, 0xf32a, 0x4264, 0xa6, 0xcb, 0x3f,
             0xa7, 0x99, 0x63, 0x56, 0xd9);
@@ -49,6 +51,53 @@ constexpr uint8_t LOW_WEIGHT = 0;
 constexpr uint8_t MED_WEIGHT = 7;
 constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
+
+bool ensureSublayer(HANDLE wfp, const GUID& key, const wchar_t* name,
+                    const wchar_t* description) {
+  FWPM_SUBLAYER0* maybeLayer = nullptr;
+  DWORD result = FwpmSubLayerGetByKey0(wfp, &key, &maybeLayer);
+  if (result == ERROR_SUCCESS) {
+    logger.debug() << "The Sublayer Already Exists:"
+                   << QString::fromWCharArray(name);
+    FwpmFreeMemory0(reinterpret_cast<void**>(&maybeLayer));
+    return true;
+  }
+  if (result != FWP_E_SUBLAYER_NOT_FOUND) {
+    logger.error() << "FwpmSubLayerGetByKey0 failed. Return value:.\n"
+                   << result;
+    return false;
+  }
+
+  result = FwpmTransactionBegin(wfp, NULL);
+  if (result != ERROR_SUCCESS) {
+    logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
+                   << result;
+    return false;
+  }
+
+  FWPM_SUBLAYER0 subLayer;
+  memset(&subLayer, 0, sizeof(subLayer));
+  subLayer.subLayerKey = key;
+  subLayer.displayData.name = const_cast<PWSTR>(name);
+  subLayer.displayData.description = const_cast<PWSTR>(description);
+  subLayer.weight = 0xFFFF;
+
+  result = FwpmSubLayerAdd0(wfp, &subLayer, NULL);
+  if (result != ERROR_SUCCESS) {
+    FwpmTransactionAbort0(wfp);
+    logger.error() << "FwpmSubLayerAdd0 failed. Return value:.\n" << result;
+    return false;
+  }
+
+  result = FwpmTransactionCommit0(wfp);
+  if (result != ERROR_SUCCESS) {
+    logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
+                   << result;
+    return false;
+  }
+  logger.debug() << "Initialised Sublayer:" << QString::fromWCharArray(name);
+  return true;
+}
 }  // namespace
 
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
@@ -116,47 +165,12 @@ bool WindowsFirewall::initSublayer() {
   }
   auto cleanup = qScopeGuard([&] { FwpmEngineClose0(wfp); });
 
-  // Check if the Layer Already Exists
-  FWPM_SUBLAYER0* maybeLayer;
-  result = FwpmSubLayerGetByKey0(wfp, &ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
-                                 &maybeLayer);
-  if (result == ERROR_SUCCESS) {
-    logger.debug() << "The Sublayer Already Exists!";
-    FwpmFreeMemory0((void**)&maybeLayer);
-    return true;
-  }
-
-  // Step 1: Start Transaction
-  result = FwpmTransactionBegin(wfp, NULL);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-
-  // Step 3: Add Sublayer
-  FWPM_SUBLAYER0 subLayer;
-  memset(&subLayer, 0, sizeof(subLayer));
-  subLayer.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
-  subLayer.displayData.name = (PWSTR)L"Amnezia-SplitTunnel-Sublayer";
-  subLayer.displayData.description =
-      (PWSTR)L"Filters that enforce a good baseline";
-  subLayer.weight = 0xFFFF;
-
-  result = FwpmSubLayerAdd0(wfp, &subLayer, NULL);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmSubLayerAdd0 failed. Return value:.\n" << result;
-    return false;
-  }
-  // Step 4: Commit!
-  result = FwpmTransactionCommit0(wfp);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-  logger.debug() << "Initialised Sublayer";
-  return true;
+  return ensureSublayer(wfp, ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
+                        L"Amnezia-SplitTunnel-Sublayer",
+                        L"Filters that enforce a good baseline") &&
+         ensureSublayer(wfp, ST_FW_WINFW_DNS_SUBLAYER_KEY,
+                        L"Amnezia-SplitTunnel-DNS-Sublayer",
+                        L"DNS filters for split tunneling");
 }
 
 bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {

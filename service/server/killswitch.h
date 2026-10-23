@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QSharedPointer>
 
-#include "secure_qsettings.h"
+#include "secureQSettings.h"
 
 class KillSwitch : public QObject
 {

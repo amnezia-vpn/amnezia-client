@@ -1,0 +1,50 @@
+From 9a42a0350abaa1a329ad56e40b1900ef78183323 Mon Sep 17 00:00:00 2001
+From: Yaroslav Gurov <ygurov@proton.me>
+Date: Mon, 18 May 2026 18:05:09 +0200
+Subject: [PATCH] explicitly pass unicode everywhere
+
+---
+ src/openvpnmsica/CMakeLists.txt | 1 +
+ src/openvpnserv/CMakeLists.txt  | 1 +
+ src/tapctl/CMakeLists.txt       | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/openvpnmsica/CMakeLists.txt b/src/openvpnmsica/CMakeLists.txt
+index 9126b80f..23f979d6 100644
+--- a/src/openvpnmsica/CMakeLists.txt
++++ b/src/openvpnmsica/CMakeLists.txt
+@@ -22,6 +22,7 @@ target_sources(openvpnmsica PRIVATE
+     openvpnmsica_resources.rc
+     )
+ target_compile_options(openvpnmsica PRIVATE
++    -DUNICODE
+     -D_UNICODE
+     -UNTDDI_VERSION
+     -D_WIN32_WINNT=_WIN32_WINNT_VISTA
+diff --git a/src/openvpnserv/CMakeLists.txt b/src/openvpnserv/CMakeLists.txt
+index fc153822..b3a0cff1 100644
+--- a/src/openvpnserv/CMakeLists.txt
++++ b/src/openvpnserv/CMakeLists.txt
+@@ -19,6 +19,7 @@ function(add_common_options target)
+         ${MC_GEN_DIR}
+     )
+     target_compile_options(${target} PRIVATE
++        -DUNICODE
+         -D_UNICODE
+         -UNTDDI_VERSION
+         -D_WIN32_WINNT=_WIN32_WINNT_VISTA
+diff --git a/src/tapctl/CMakeLists.txt b/src/tapctl/CMakeLists.txt
+index 97702c01..81da46b8 100644
+--- a/src/tapctl/CMakeLists.txt
++++ b/src/tapctl/CMakeLists.txt
+@@ -19,6 +19,7 @@ target_sources(tapctl PRIVATE
+     tapctl_resources.rc
+     )
+ target_compile_options(tapctl PRIVATE
++    -DUNICODE
+     -D_UNICODE
+     -UNTDDI_VERSION
+     -D_WIN32_WINNT=_WIN32_WINNT_VISTA
+-- 
+2.46.0.windows.1
+

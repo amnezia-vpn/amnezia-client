@@ -5,7 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/constants/apiKeys.h"
 #include "logger.h"
 
 namespace

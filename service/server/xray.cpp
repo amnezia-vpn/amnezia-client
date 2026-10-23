@@ -1,5 +1,8 @@
 #include "xray.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
+#ifdef Q_OS_MAC
+#include "router_mac.h"
+#endif
 
 #include <QDebug>
 #include <QNetworkInterface>
@@ -25,17 +28,80 @@
 #endif
 #ifdef Q_OS_LINUX
     #include <sys/socket.h>
+    #include "xray_defs.h"
 #endif
+
+qint64 Xray::start(const QString &cfg)
+{
+    if (m_currentToken != 0) {
+        qDebug() << "Xray::start() engine is busy (token" << m_currentToken << "), stopping it for the new owner";
+        stopXray();
+        m_currentToken = 0;
+    }
+
+    if (!startXray(cfg)) {
+        return 0;
+    }
+
+    m_currentToken = ++m_lastToken;
+    qDebug() << "Xray::start() engine started, owner token" << m_currentToken;
+    return m_currentToken;
+}
+
+bool Xray::stop(qint64 token)
+{
+    if (m_currentToken == 0) {
+        return true;
+    }
+
+    if (token == 0 || token != m_currentToken) {
+        qDebug() << "Xray::stop() stale owner token" << token << "(current" << m_currentToken << "), ignoring";
+        return true;
+    }
+
+    m_currentToken = 0;
+    return stopXray();
+}
+
+bool Xray::stopAny()
+{
+    if (m_currentToken == 0) {
+        return true;
+    }
+
+    m_currentToken = 0;
+    return stopXray();
+}
+
+qint64 Xray::currentToken() const
+{
+    return m_currentToken;
+}
 
 bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
-
-    auto defaultIface = NetworkUtilities::getGatewayAndIface().second;
+    const auto gatewayAndIface = NetworkUtilities::getGatewayAndIface();
+    const QString defaultGateway = gatewayAndIface.first;
+    const QNetworkInterface defaultIface = gatewayAndIface.second;
 #ifdef Q_OS_LINUX
     m_defaultIfaceName = defaultIface.name().toUtf8();
 #else
     m_defaultIfaceIdx = defaultIface.index();
+#endif
+    if (defaultIface.index() > 0) {
+        qDebug() << "[xray] using uplink interface:" << defaultIface.name() << "(" << defaultIface.index() << ")";
+    }
+
+#ifdef Q_OS_MAC
+    m_uplinkIfaceName = defaultIface.name();
+    m_uplinkGateway = defaultGateway;
+    if (!m_uplinkIfaceName.isEmpty()) {
+        const bool installed = RouterMac::Instance().routeAddXray(m_uplinkIfaceName, m_uplinkGateway);
+        if (!installed) {
+            qWarning() << "[xray] failed to install xray routes on" << m_uplinkIfaceName;
+        }
+    }
 #endif
 
     if (auto err = amnezia_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
@@ -65,13 +131,22 @@ bool Xray::startXray(const QString &cfg)
 bool Xray::stopXray()
 {
     qDebug() << "Xray::stopXray()";
+    bool success = true;
     if (auto err = amnezia_xray_stop(); err != nullptr) {
         qDebug() << "[xray] failed to stop: " << err;
         amnezia_xray_free(err);
-        return false;
+        success = false;
     }
 
-    return true;
+#ifdef Q_OS_MAC
+    if (!m_uplinkIfaceName.isEmpty()) {
+        RouterMac::Instance().routeDeleteXray(m_uplinkIfaceName, m_uplinkGateway);
+    }
+    m_uplinkIfaceName.clear();
+    m_uplinkGateway.clear();
+#endif
+
+    return success;
 }
 
 void Xray::logHandler(char* str)
@@ -99,6 +174,7 @@ void Xray::sockCallback(uintptr_t fd)
 #ifdef Q_OS_LINUX
     if (!m_defaultIfaceName.isEmpty()) {
         setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, m_defaultIfaceName.data(), m_defaultIfaceName.size());
+        setsockopt(fd, SOL_SOCKET, SO_MARK, &amnezia::xray::xrayTrafficMark, sizeof(amnezia::xray::xrayTrafficMark));
     }
 #endif
 }

@@ -23,56 +23,61 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-        anchors.bottomMargin: 24
 
         model: ApiDevicesModel
 
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {
-                id: backButton
-            }
+            spacing: 0
 
-            BaseHeaderType {
-                id: header
-
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
 
-                headerText: qsTr("Active Devices")
-                descriptionText: qsTr("Manage currently connected devices")
+                title: qsTr("Active Devices")
+                description: qsTr("Manage currently connected devices")
             }
 
-            WarningType {
+            NotificationType {
+                Layout.fillWidth: true
                 Layout.topMargin: 16
+                Layout.bottomMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                Layout.fillWidth: true
 
-                textString: qsTr("You can find the identifier on the Support tab or, for older versions of the app, "
+                text: qsTr("You can find the identifier on the Support tab or, for older versions of the app, "
                                  + "by tapping '+' and then the three dots at the top of the page.")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
+        }
+
+        footer: Item {
+            width: listView.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: osVersion + (isCurrentDevice ? qsTr(" (current device)") : "")
-                descriptionText: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
-                rightImageSource: "qrc:/images/controls/trash.svg"
+                subtitle: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
+                trailingIconSource: "qrc:/images/controls/trash.svg"
 
-                clickedFunction: function() {
-                    if (isCurrentDevice && ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                onClicked: {
+                    if (isCurrentDevice && ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        return
+                    }
+
+                    if (isCurrentDevice && LocalProxyController.isEnabled
+                            && LocalProxyController.ownerId === ServersUiController.processedServerId) {
+                        PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         return
                     }
 
@@ -82,7 +87,8 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        Qt.callLater(deactivateExternalDevice, supportTag, countryCode)
+                        var serverId = ServersUiController.processedServerId
+                        Qt.callLater(deactivateExternalDevice, serverId, supportTag, countryCode)
                     }
                     var noButtonFunction = function() {
                     }
@@ -90,15 +96,13 @@ PageType {
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 
-    function deactivateExternalDevice(supportTag, countryCode) {
+    function deactivateExternalDevice(serverId, supportTag, countryCode) {
         PageController.showBusyIndicator(true)
-        if (ApiConfigsController.deactivateExternalDevice(supportTag, countryCode)) {
-            ApiSettingsController.getAccountInfo(true)
+        if (SubscriptionUiController.deactivateExternalDevice(serverId, supportTag, countryCode)) {
+            SubscriptionUiController.getAccountInfo(serverId, true)
         }
         PageController.showBusyIndicator(false)
     }

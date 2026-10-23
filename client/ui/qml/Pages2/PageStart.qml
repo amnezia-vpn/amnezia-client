@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Shapes
 
 import PageEnum 1.0
 import Style 1.0
@@ -17,6 +16,15 @@ PageType {
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
+    property bool isTabBarShown: true
+    readonly property real tabBarHeight: tabBar.visible ? tabBar.height : 0
+
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+            PageController.keyPressEvent(event.key)
+            event.accepted = true
+        }
+    }
 
     Connections {
         objectName: "pageControllerConnection"
@@ -25,10 +33,10 @@ PageType {
 
         function onGoToPageHome() {
             if (PageController.isStartPageVisible()) {
-                tabBar.visible = false
+                root.isTabBarShown = false
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardStart)
             } else {
-                tabBar.visible = true
+                root.isTabBarShown = true
                 tabBar.setCurrentIndex(0)
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             }
@@ -106,6 +114,19 @@ PageType {
     }
 
     Connections {
+        objectName: "connectionControllerConnections"
+
+        target: ConnectionController
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
+
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
         objectName: "installControllerConnections"
 
         target: InstallController
@@ -132,21 +153,19 @@ PageType {
             onInstallationErrorOccurred(message)
         }
 
-        function onUpdateContainerFinished(message) {
+        function onUpdateContainerFinished(message, closePage) {
             PageController.showNotificationMessage(message)
-            PageController.closePage()
+            if (closePage) {
+                PageController.closePage()
+            }
         }
 
         function onCachedProfileCleared(message) {
             PageController.showNotificationMessage(message)
         }
 
-        function onApiConfigRemoved(message) {
-            PageController.showNotificationMessage(message)
-        }
-
-        function onRemoveProcessedServerFinished(finishedMessage) {
-            if (!ServersModel.getServersCount()) {
+        function onRemoveServerFinished(finishedMessage) {
+            if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
@@ -155,23 +174,19 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        function onRemoveAllContainersFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
+            PageController.showNotificationMessage(finishedMessage)
         }
-    }
 
-    Connections {
-        objectName: "connectionControllerConnections"
-
-        target: ConnectionController
-
-        function onReconnectWithUpdatedContainer(message) {
-            PageController.showNotificationMessage(message)
+        function onRemoveContainerFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
             PageController.closePage()
+            PageController.showNotificationMessage(finishedMessage)
         }
     }
 
@@ -215,7 +230,7 @@ PageType {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onErrorOccurred(error) {
             PageController.showErrorMessage(error)
@@ -223,19 +238,28 @@ PageType {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
+
+        function onApiConfigRemoved(message) {
+            PageController.showNotificationMessage(message)
+        }
+
+        function onApiServerRemoved(message) {
+            if (!ServersUiController.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
+            }
+            PageController.showNotificationMessage(message)
+        }
 
         function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
-            if (!ConnectionController.isConnected) {
-                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
-                    ServersModel.setDefaultServerIndex(preferredDefaultIndex)
-                } else {
-                    ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1)
-                }
-                ServersModel.processedIndex = ServersModel.defaultIndex
-            }
-
             PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
+
+        function onBackgroundPurchaseCompleted(message) {
             PageController.showNotificationMessage(message)
         }
 
@@ -270,37 +294,19 @@ PageType {
         Component.onCompleted: {
             var pagePath
             if (PageController.isStartPageVisible()) {
-                tabBar.visible = false
+                root.isTabBarShown = false
                 pagePath = PageController.getPagePath(PageEnum.PageSetupWizardStart)
             } else {
-                tabBar.visible = true
+                root.isTabBarShown = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
-
-        Keys.onPressed: function(event) {
-            switch (event.key) {
-            case Qt.Key_Tab:
-            case Qt.Key_Down:
-            case Qt.Key_Right:
-                FocusController.nextKeyTabItem()
-                break
-            case Qt.Key_Backtab:
-            case Qt.Key_Up:
-            case Qt.Key_Left:
-                FocusController.previousKeyTabItem()
-                break
-            default:
-                PageController.keyPressEvent(event.key)
-                event.accepted = true
-            }
-        }
     }
 
-    TabBar {
+    TabBarType {
         id: tabBar
         objectName: "tabBar"
 
@@ -308,53 +314,32 @@ PageType {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
+        visible: root.isTabBarShown
+                 && tabBarStackView.depth <= 1
+                 && !(tabBarStackView.currentItem && tabBarStackView.currentItem.isTabBarHidden === true)
+
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
-        anchors.bottomMargin: SettingsController.imeHeight
+        anchors.bottomMargin: PageController.imeHeight
 
-        topPadding: 8
-        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
-        leftPadding: 96
-        rightPadding: 96
-
-        height: visible ? homeTabButton.implicitHeight + tabBar.topPadding + tabBar.bottomPadding : 0
+        height: visible ? implicitHeight : 0
 
         enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
-        background: Shape {
-            objectName: "backgroundShape"
-
-            width: parent.width
-            height: parent.height
-
-            ShapePath {
-                startX: 0
-                startY: 0
-
-                PathLine { x: width; y: 0 }
-                PathLine { x: width; y: tabBar.height - 1 }
-                PathLine { x: 0; y: tabBar.height - 1 }
-                PathLine { x: 0; y: 0 }
-
-                strokeWidth: 1
-                strokeColor: AmneziaStyle.color.slateGray
-                fillColor: AmneziaStyle.color.onyxBlack
-            }
-        }
-
-        TabImageButtonType {
+        TabBarButtonType {
             id: homeTabButton
             objectName: "homeTabButton"
 
-            isSelected: tabBar.currentIndex === 0
-            image: "qrc:/images/controls/home.svg"
-            clickedFunc: function () {
+            text: qsTr("Home")
+            icon.source: "qrc:/images/controls/home.svg"
+
+            onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 tabBar.currentIndex = 0
             }
         }
 
-        TabImageButtonType {
+        TabBarButtonType {
             id: shareTabButton
             objectName: "shareTabButton"
 
@@ -363,49 +348,47 @@ PageType {
 
                 function onModelReset() {
                     if (!SettingsController.isOnTv()) {
-                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                        var hasServerWithWriteAccess = ServersUiController.hasServerWithWriteAccess()
                         shareTabButton.visible = hasServerWithWriteAccess
                         shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                     }
                 }
             }
 
-            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
+            visible: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess()
+            width: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess() ? undefined : 0
 
-            isSelected: tabBar.currentIndex === 1
-            image: "qrc:/images/controls/share-2.svg"
-            clickedFunc: function () {
+            text: qsTr("Share")
+            icon.source: "qrc:/images/controls/share-2.svg"
+
+            onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
                 tabBar.currentIndex = 1
             }
         }
 
-        TabImageButtonType {
+        TabBarButtonType {
             id: settingsTabButton
             objectName: "settingsTabButton"
 
-            isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
-            Binding {
-                target: settingsTabButton
-                property: "defaultColor"
-                value: "transparent"
-                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
-            }
-            clickedFunc: function () {
+            text: qsTr("Settings")
+            icon.source: "qrc:/images/controls/settings.svg"
+            showBadge: ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
+
+            onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2
             }
         }
 
-        TabImageButtonType {
+        TabBarButtonType {
             id: plusTabButton
             objectName: "plusTabButton"
 
-            isSelected: tabBar.currentIndex === 3
-            image: "qrc:/images/controls/plus.svg"
-            clickedFunc: function () {
+            text: qsTr("Add")
+            icon.source: "qrc:/images/controls/plus.svg"
+
+            onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
                 tabBar.currentIndex = 3
             }

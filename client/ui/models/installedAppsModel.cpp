@@ -1,6 +1,7 @@
 #include "installedAppsModel.h"
 
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QtConcurrent>
 
 #ifdef Q_OS_ANDROID
@@ -73,21 +74,21 @@ QVector<QPair<QString, QString>> InstalledAppsModel::getSelectedAppsInfo()
 
 void InstalledAppsModel::updateModel()
 {
-    QFuture<void> future = QtConcurrent::run([this]() {
-        beginResetModel();
 #ifdef Q_OS_ANDROID
-        m_installedApps = AndroidController::instance()->getAppList();
-#endif
-        endResetModel();
+    QFuture<QJsonArray> future = QtConcurrent::run([]() {
+        return AndroidController::instance()->getAppList();
     });
 
-    QFutureWatcher<void> watcher;
+    QFutureWatcher<QJsonArray> watcher;
     QEventLoop wait;
-    connect(&watcher, &QFutureWatcher<void>::finished, &wait, &QEventLoop::quit);
+    connect(&watcher, &QFutureWatcher<QJsonArray>::finished, &wait, &QEventLoop::quit);
     watcher.setFuture(future);
     wait.exec();
 
-    return;
+    beginResetModel();
+    m_installedApps = future.result();
+    endResetModel();
+#endif
 }
 
 QHash<int, QByteArray> InstalledAppsModel::roleNames() const

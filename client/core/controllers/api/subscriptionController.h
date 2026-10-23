@@ -1,0 +1,123 @@
+#ifndef SUBSCRIPTIONCONTROLLER_H
+#define SUBSCRIPTIONCONTROLLER_H
+
+#include <QJsonObject>
+#include <QByteArray>
+#include <QFuture>
+
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/repositories/secureAppSettingsRepository.h"
+
+class ServersController;
+
+class SubscriptionController
+{
+public:
+    struct ProtocolData
+    {
+        QString certRequest;
+        QString certPrivKey;
+        QString wireGuardClientPrivKey;
+        QString wireGuardClientPubKey;
+        QString xrayUuid;
+    };
+
+    struct CaptchaInfo {
+        QString captchaId;
+        QString captchaImageBase64;
+        QString hint;
+        bool isRequired = false;
+    };
+
+    explicit SubscriptionController(SecureServersRepository* serversRepository,
+                                     SecureAppSettingsRepository* appSettingsRepository);
+
+    static ProtocolData generateProtocolData(const QString &protocol);
+
+    static QString publicKeyForProtocol(const QString &protocol, const ProtocolData &protocolData);
+
+    ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                      const QString &serviceProtocol, const ProtocolData &protocolData,
+                                      CaptchaInfo &captchaInfo);
+    ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                     const QString &serviceProtocol, const QString &email);
+
+    ErrorCode fetchServiceConfig(const QString &serverId, const QString &serviceProtocol, QJsonObject &serverConfigJson);
+
+    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+                                       CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
+
+    ErrorCode resolveUpdateServiceCaptcha(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+                                          const ProtocolData &protocolData, const QString &captchaId,
+                                          const QString &captchaSolution, CaptchaInfo *retryCaptchaOut = nullptr);
+
+    ErrorCode deactivateDevice(const QString &serverId);
+
+    ErrorCode deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);
+
+    ErrorCode exportNativeConfig(const QString &serverId, const QString &serverCountryCode, QString &nativeConfig);
+
+    ErrorCode revokeNativeConfig(const QString &serverId, const QString &serverCountryCode);
+
+    ErrorCode prepareVpnKeyExport(const QString &serverId, QString &vpnKey);
+
+    ErrorCode validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers,
+                                      CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
+
+    void removeApiConfig(const QString &serverId);
+
+    bool removeServer(const QString &serverId);
+
+    void setCurrentProtocol(const QString &serverId, const QString &protocolName);
+    bool isVlessProtocol(const QString &serverId) const;
+    QString currentProtocol(const QString &serverId) const;
+    QStringList availableProtocols(const QString &serverId) const;
+
+    ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
+    QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
+
+    ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
+                                          const QString &serviceProtocol, const ProtocolData &protocolData,
+                                          const QString &captchaId, const QString &captchaSolution,
+                                          CaptchaInfo *retryCaptchaOut = nullptr);
+
+#ifdef AMNEZIA_BUILD_TESTS
+    // Exposes the gateway response parsing path without performing a network request.
+    ErrorCode applyImportedServiceConfigForTest(const QString &userCountryCode, const QString &serviceType,
+                                                const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                const QByteArray &responseBody)
+    {
+        return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+    }
+    ErrorCode applyUpdatedServiceConfigForTest(const QString &serverId, const QString &serviceProtocol,
+                                               const ProtocolData &protocolData, const QByteArray &responseBody)
+    {
+        return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
+    }
+#endif
+
+private:
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
+    bool isApiKeyExpired(const QString &serverId) const;
+    
+    ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol,
+                                                   const ProtocolData &protocolData, QJsonObject &serverConfigJson);
+    ErrorCode applyUpdatedServiceConfig(const QString &serverId, const QString &serviceProtocol,
+                                        const ProtocolData &protocolData, const QByteArray &responseBody);
+    ErrorCode applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
+                                         const QString &serviceProtocol, const ProtocolData &protocolData,
+                                         const QByteArray &responseBody);
+    void markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2);
+    void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType,
+                                const QString &serviceProtocol, const QString &userCountryCode,
+                                const QByteArray &apiResponseBody);
+
+    SecureServersRepository* m_serversRepository;
+    SecureAppSettingsRepository* m_appSettingsRepository;
+};
+
+#endif // SUBSCRIPTIONCONTROLLER_H
+

@@ -7,99 +7,104 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
-import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
-    }
 
-    ListViewType {
-        id: listView
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        contentHeight: content.implicitHeight
 
-        header: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            BaseHeaderType {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
 
-                headerText: "Dev menu"
+                title: "Dev menu"
             }
-        }
-        
-        model: 1 // fake model to force the ListView to be created without a model
 
-        spacing: 16
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            TextFieldWithHeaderType {
-                id: gatewayEndpointField
-
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                headerText: qsTr("Gateway endpoint")
-                textField.text: SettingsController.gatewayEndpoint
+                spacing: 24
 
-                buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                clickedFunc: function() {
-                    SettingsController.resetGatewayEndpoint()
-                    gatewayEndpointField.textField.text = SettingsController.gatewayEndpoint
-                }
-            }
+                    spacing: 12
 
-            BasicButtonType {
-                id: saveButton
+                    TextFieldType {
+                        id: gatewayEndpointField
 
-                Layout.fillWidth: true
-                Layout.margins: 16
+                        Layout.fillWidth: true
 
-                text: qsTr("Save")
+                        headerText: qsTr("Gateway endpoint")
+                        textField.text: SettingsController.gatewayEndpoint
 
-                clickedFunc: function() {
-                    var trimmed = gatewayEndpointField.textField.text.replace(/^\s+|\s+$/g, '')
-                    gatewayEndpointField.textField.text = trimmed
-                    if (trimmed !== SettingsController.gatewayEndpoint) {
-                        SettingsController.gatewayEndpoint = trimmed
+                        buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+
+                        clickedFunc: function() {
+                            SettingsController.resetGatewayEndpoint()
+                            gatewayEndpointField.textField.text = SettingsController.gatewayEndpoint
+                        }
                     }
-                    PageController.showNotificationMessage(qsTr("Settings saved"))
+
+                    ButtonType {
+                        id: saveButton
+
+                        Layout.fillWidth: true
+
+                        text: qsTr("Save")
+
+                        onClicked: {
+                            var trimmed = gatewayEndpointField.textField.text.replace(/^\s+|\s+$/g, '')
+                            gatewayEndpointField.textField.text = trimmed
+                            if (trimmed !== SettingsController.gatewayEndpoint) {
+                                SettingsController.gatewayEndpoint = trimmed
+                            }
+                            PageController.showNotificationMessage(qsTr("Settings saved"))
+                        }
+                    }
                 }
-            }
-        }
 
-        footer: ColumnLayout {
-            width: listView.width
+                ListItemType {
+                    id: devGatewayRow
 
-            SwitcherType {
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                    Layout.fillWidth: true
 
-                text: qsTr("Dev gateway environment")
-                checked: SettingsController.isDevGatewayEnv
-                onToggled: function() {
-                    SettingsController.isDevGatewayEnv = checked
+                    text: qsTr("Dev gateway environment")
+
+                    onClicked: {
+                        devGatewaySwitch.toggle()
+                        devGatewaySwitch.toggled()
+                    }
+
+                    SwitchType {
+                        id: devGatewaySwitch
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.isDevGatewayEnv
+                        onToggled: function() {
+                            SettingsController.isDevGatewayEnv = checked
+                        }
+                    }
                 }
             }
         }

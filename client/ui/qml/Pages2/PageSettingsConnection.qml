@@ -14,142 +14,123 @@ PageType {
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
+            spacing: 0
 
-            width: listView.width
-
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
+
+                title: qsTr("Connection")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                headerText: qsTr("Connection")
-            }
-        }
+                spacing: 0
 
-        model: 1 // fake model to force the ListView to be created without a model
+                ListItemType {
+                    id: amneziaDnsRow
 
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
+                    Layout.fillWidth: true
 
-            width: listView.width
+                    text: qsTr("Use AmneziaDNS")
+                    subtitle: qsTr("If AmneziaDNS is installed on the server")
 
-            SwitcherType {
-                id: amneziaDnsSwitch
+                    onClicked: {
+                        amneziaDnsSwitch.toggle()
+                        amneziaDnsSwitch.toggled()
+                    }
 
-                Layout.fillWidth: true
-                Layout.margins: 16
+                    SwitchType {
+                        id: amneziaDnsSwitch
 
-                text: qsTr("Use AmneziaDNS")
-                descriptionText: qsTr("If AmneziaDNS is installed on the server")
+                        focusPolicy: Qt.NoFocus
 
-                checked: SettingsController.isAmneziaDnsEnabled()
-                onToggled: function() {
-                    if (checked !== SettingsController.isAmneziaDnsEnabled()) {
-                        SettingsController.toggleAmneziaDns(checked)
+                        checked: SettingsController.isAmneziaDnsEnabled()
+                        onToggled: function() {
+                            if (checked !== SettingsController.isAmneziaDnsEnabled()) {
+                                SettingsController.toggleAmneziaDns(checked)
+                            }
+                        }
                     }
                 }
-            }
 
-            DividerType {}
+                ListItemType {
+                    id: dnsServersButton
 
-            LabelWithButtonType {
-                id: dnsServersButton
+                    Layout.fillWidth: true
 
-                Layout.fillWidth: true
+                    text: qsTr("DNS servers")
+                    subtitle: qsTr("When AmneziaDNS is not used or installed")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                text: qsTr("DNS servers")
-                descriptionText: qsTr("When AmneziaDNS is not used or installed")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsDns)
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsDns)
+                    }
                 }
-            }
 
-            DividerType {}
+                ListItemType {
+                    id: splitTunnelingButton
 
-            LabelWithButtonType {
-                id: splitTunnelingButton
+                    Layout.fillWidth: true
 
-                Layout.fillWidth: true
+                    text: qsTr("Site-based split tunneling")
+                    subtitle: qsTr("Allows you to select which sites you want to access through the VPN")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                text: qsTr("Site-based split tunneling")
-                descriptionText: qsTr("Allows you to select which sites you want to access through the VPN")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                    }
                 }
-            }
 
-            DividerType {}
+                ListItemType {
+                    id: splitTunnelingButton2
 
-        }
+                    Layout.fillWidth: true
 
-        footer: ColumnLayout { // TODO(CyAn84): move to delegate,add DelegateChooser when have migrated to 6.9
+                    visible: root.isAppSplitTinnelingEnabled
 
-            width: listView.width
+                    text: qsTr("App-based split tunneling")
+                    subtitle: qsTr("Allows you to use the VPN only for certain Apps")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            LabelWithButtonType {
-                id: splitTunnelingButton2
-
-                visible: root.isAppSplitTinnelingEnabled
-
-                Layout.fillWidth: true
-
-                text: qsTr("App-based split tunneling")
-                descriptionText: qsTr("Allows you to use the VPN only for certain Apps")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
+                    }
                 }
-            }
 
-            DividerType {
-                visible: root.isAppSplitTinnelingEnabled
-            }
+                ListItemType {
+                    id: killSwitchButton
 
-            LabelWithButtonType {
-                id: killSwitchButton
-                visible: !GC.isMobile()
+                    Layout.fillWidth: true
 
-                Layout.fillWidth: true
+                    visible: !GC.isMobile()
 
-                text: qsTr("KillSwitch")
-                descriptionText: qsTr("Blocks network connections without VPN")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                    text: qsTr("KillSwitch")
+                    subtitle: qsTr("Blocks network connections without VPN")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsKillSwitch)
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsKillSwitch)
+                    }
                 }
-            }
-
-            DividerType {
-                visible: GC.isDesktop()
             }
         }
     }

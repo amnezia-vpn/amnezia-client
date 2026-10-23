@@ -1,0 +1,2 @@
+# Allow traffic by configured identity (set by CMake)
+pass out proto { tcp, udp } @AMN_PF_RULE_IDENTITY@ flags any no state

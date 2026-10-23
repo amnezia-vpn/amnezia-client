@@ -1,123 +1,142 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 import Style 1.0
+
+import "TextTypes"
 
 Rectangle {
     id: root
 
-    property string placeholderText
-    property string text
     property alias textArea: textArea
     property alias textAreaText: textArea.text
+    property alias placeholderText: textArea.placeholderText
 
-    property string borderHoveredColor: AmneziaStyle.color.charcoalGray
-    property string borderNormalColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property int maximumLength: 0
+    property bool clearable: true
 
-    height: 148
-    color: AmneziaStyle.color.onyxBlack
-    border.width: 1
-    border.color: getBorderColor(borderNormalColor)
-    radius: 16
+    readonly property bool atLimit: root.maximumLength > 0 && textArea.length >= root.maximumLength
 
-    MouseArea {
-        id: parentMouse
-        anchors.fill: parent
-        cursorShape: Qt.IBeamCursor
-        onClicked: textArea.forceActiveFocus()
-        hoverEnabled: true
+    implicitWidth: 358
+    implicitHeight: 180
 
-        FlickableType {
-            id: fl
-            interactive: false
+    radius: 14
+    color: AmneziaStyle.color.bgSurfaceAlt
+    border.width: textArea.activeFocus || root.atLimit || textArea.length === 0 ? 1 : 0
+    border.color: {
+        if (root.atLimit) {
+            return AmneziaStyle.color.statusDestructive
+        }
+        return textArea.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderSoft
+    }
 
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            contentHeight: textArea.implicitHeight
-            TextArea {
-                id: textArea
+    opacity: root.enabled ? 1 : 0.4
 
-                width: parent.width
+    Flickable {
+        id: flickable
 
-                topPadding: 16
-                leftPadding: 16
-                anchors.topMargin: 16
-                anchors.bottomMargin: 16
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: footer.top
+        anchors.topMargin: 1
+        anchors.leftMargin: 1
+        anchors.rightMargin: 1
 
-                property bool isFocusable: true
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
 
-                Keys.onTabPressed: {
-                    FocusController.nextKeyTabItem()
-                }
+        TextArea.flickable: TextArea {
+            id: textArea
 
-                Keys.onBacktabPressed: {
-                    FocusController.previousKeyTabItem()
-                }
+            leftPadding: 11
+            rightPadding: 11
+            topPadding: 15
+            bottomPadding: 8
 
-                Keys.onUpPressed: {
-                    FocusController.nextKeyUpItem()
-                }
-                
-                Keys.onDownPressed: {
-                    FocusController.nextKeyDownItem()
-                }
-                
-                Keys.onLeftPressed: {
-                    FocusController.nextKeyLeftItem()
-                }
+            color: AmneziaStyle.color.textPrimary
+            placeholderTextColor: AmneziaStyle.color.textTertiary
+            selectionColor: AmneziaStyle.color.accentDeep
+            selectedTextColor: AmneziaStyle.color.textPrimary
 
-                Keys.onRightPressed: {
-                    FocusController.nextKeyRightItem()
-                }
+            font.pixelSize: 16
+            font.weight: 400
+            font.family: "PT Root UI VF"
+            font.letterSpacing: -0.4
+            font.features: { "ss08": 1, "ss09": 1, "lnum": 1, "tnum": 1 }
 
-                color: AmneziaStyle.color.paleGray
-                selectionColor:  AmneziaStyle.color.richBrown
-                selectedTextColor: AmneziaStyle.color.paleGray
-                placeholderTextColor: AmneziaStyle.color.mutedGray
+            wrapMode: Text.Wrap
+            background: null
 
-                font.pixelSize: 16
-                font.weight: Font.Medium
-                font.family: "PT Root UI VF"
-
-                placeholderText: root.placeholderText
-                text: root.text
-
-                onCursorVisibleChanged:  {
-                    if (textArea.cursorVisible) {
-                        fl.interactive = true
-                    } else {
-                        fl.interactive = false
-                    }
-                }
-
-                wrapMode: Text.Wrap
-
-                ContextMenu.menu: ContextMenuType {
-                    textObj: textArea
-                }
-
-                onFocusChanged: {
-                    root.border.color = getBorderColor(borderNormalColor)
+            onTextChanged: {
+                if (root.maximumLength > 0 && length > root.maximumLength) {
+                    const position = Math.min(cursorPosition, root.maximumLength)
+                    text = text.substring(0, root.maximumLength)
+                    cursorPosition = position
                 }
             }
-        }
 
-        onPressed: {
-            root.border.color = getBorderColor(borderFocusedColor)
-        }
+            ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+            ContextMenu.onRequested: function(position) {
+                contextMenu.requestNative(position)
+            }
 
-        onExited: {
-            root.border.color = getBorderColor(borderNormalColor)
-        }
+            TapHandler {
+                enabled: contextMenu.useNativeEditMenu
+                acceptedDevices: PointerDevice.TouchScreen
+                onDoubleTapped: function(eventPoint) {
+                    textArea.forceActiveFocus()
+                    textArea.cursorPosition = textArea.positionAt(eventPoint.position.x, eventPoint.position.y)
+                    textArea.selectWord()
+                    contextMenu.requestNative(eventPoint.position)
+                }
+            }
 
-        onEntered: {
-            root.border.color = getBorderColor(borderHoveredColor)
+            ContextMenuType {
+                id: contextMenu
+                textObj: textArea
+            }
         }
     }
 
+    RowLayout {
+        id: footer
 
-    function getBorderColor(noneFocusedColor) {
-        return textArea.focus ? root.borderFocusedColor : noneFocusedColor
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
+        anchors.bottomMargin: 16
+
+        height: 40
+        spacing: 12
+
+        SmallTextType {
+            Layout.fillWidth: true
+
+            visible: root.maximumLength > 0
+            text: textArea.length + "/" + root.maximumLength
+            color: root.atLimit ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textQuaternary
+        }
+
+        Item {
+            Layout.fillWidth: true
+            visible: root.maximumLength <= 0
+        }
+
+        IconButtonType {
+            implicitWidth: 40
+            implicitHeight: 40
+
+            visible: root.clearable && textArea.length > 0 && !textArea.readOnly
+            icon.source: "qrc:/images/controls/trash.svg"
+
+            onClicked: {
+                textArea.clear()
+                textArea.forceActiveFocus()
+            }
+        }
     }
 }

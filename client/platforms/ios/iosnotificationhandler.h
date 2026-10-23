@@ -5,7 +5,7 @@
 #ifndef IOSNOTIFICATIONHANDLER_H
 #define IOSNOTIFICATIONHANDLER_H
 
-#include "ui/notificationhandler.h"
+#include "ui/utils/notificationHandler.h"
 
 #include <QObject>
 

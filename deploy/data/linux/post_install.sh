@@ -36,9 +36,8 @@ sudo cp $APP_PATH/$APP_NAME.service /etc/systemd/system/ >> $LOG_FILE
 
 sudo systemctl start $APP_NAME >> $LOG_FILE
 sudo systemctl enable $APP_NAME >> $LOG_FILE
-sudo chmod 555 $APP_PATH/client/$APP_NAME.sh >> $LOG_FILE
-sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/sbin/$APP_NAME >> $LOG_FILE
-sudo ln -s $APP_PATH/client/$APP_NAME.sh /usr/local/bin/$APP_NAME >> $LOG_FILE
+sudo ln -sf $APP_PATH/bin/$APP_NAME /usr/local/sbin/$APP_NAME >> $LOG_FILE
+sudo ln -sf $APP_PATH/bin/$APP_NAME /usr/local/bin/$APP_NAME >> $LOG_FILE
 
 echo "user desktop creation loop started" >> $LOG_FILE
 sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE

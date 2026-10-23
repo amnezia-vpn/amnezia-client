@@ -10,6 +10,8 @@ iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -p icmp -j ACCEPT
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport $XRAY_SERVER_PORT -j ACCEPT
+iptables -A INPUT -p udp --dport $XRAY_SERVER_PORT -j ACCEPT
 iptables -P INPUT DROP
 
 ip6tables -A INPUT -i lo -j ACCEPT

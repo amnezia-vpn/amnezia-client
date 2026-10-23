@@ -1,0 +1,109 @@
+#ifndef PAGECONTROLLER_H
+#define PAGECONTROLLER_H
+
+#include <QMargins>
+#include <QObject>
+#include <QQmlEngine>
+
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
+#include "core/controllers/settingsController.h"
+#include "core/controllers/serversController.h"
+#include "ui/utils/pageEnum.h"
+
+class PageController : public QObject
+{
+    Q_OBJECT
+public:
+    explicit PageController(ServersController* serversController, SettingsController* settingsController,
+                            QObject *parent = nullptr);
+
+    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
+    Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
+    Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
+
+public slots:
+    bool isStartPageVisible();
+    QString getPagePath(PageLoader::PageEnum page);
+
+    void closeWindow();
+    void hideWindow();
+    void keyPressEvent(Qt::Key key);
+
+    unsigned int getInitialPageNavigationBarColor();
+    void updateNavigationBarColor(const int color);
+
+    void showOnStartup();
+    bool shouldStartMinimized() const;
+
+    bool isTriggeredByConnectButton();
+    void setTriggeredByConnectButton(bool trigger);
+
+    void closeApplication();
+
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
+    int getSafeAreaTopMargin();
+    int getSafeAreaBottomMargin();
+    int getImeHeight();
+
+    void setSafeAreaMargins(const QMargins &margins);
+
+private slots:
+    void onShowErrorMessage(amnezia::ErrorCode errorCode);
+
+signals:
+    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToStartPage();
+    void goToPageHome();
+    void goToPageSettings();
+    void goToPageViewConfig();
+    void goToPageSettingsServerServices();
+    void goToPageSettingsBackup();
+    void goToShareConnectionPage(QString headerText, QString configContentHeaderText, QString configCaption, QString configExtension,
+                                 QString configFileName);
+
+    void closePage();
+
+    void restorePageHomeState(bool isContainerInstalled = false);
+
+    void showErrorMessage(amnezia::ErrorCode);
+    void showErrorMessage(const QString &errorMessage);
+    void showNotificationMessage(const QString &message);
+
+    void showBusyIndicator(bool visible);
+    void disableControls(bool disabled);
+    void disableTabBar(bool disabled);
+
+    void hideMainWindow();
+    void raiseMainWindow();
+
+    void showPassphraseRequestDrawer();
+    void passphraseRequestDrawerClosed(QString passphrase);
+
+    void unsupportedConnectDrawerRequested();
+
+    void escapePressed();
+
+    void imeHeightChanged(int height);
+    void safeAreaTopMarginChanged();
+    void safeAreaBottomMarginChanged();
+
+private:
+    ServersController* m_serversController;
+    SettingsController* m_settingsController;
+
+    bool m_isTriggeredByConnectButton;
+
+    mutable int m_cachedStatusBarHeight = -1;
+    mutable int m_cachedNavigationBarHeight = -1;
+    mutable bool m_cachedEdgeToEdgeEnabled = false;
+    mutable bool m_edgeToEdgeCached = false;
+
+    QMargins m_safeAreaMargins;
+    int m_imeHeight = 0;
+};
+
+#endif

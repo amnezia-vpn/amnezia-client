@@ -1,8 +1,8 @@
-if which apt-get > /dev/null 2>&1; then pm=$(which apt-get); opt="--version";\
-elif which dnf > /dev/null 2>&1; then pm=$(which dnf); opt="--version";\
-elif which yum > /dev/null 2>&1; then pm=$(which yum); opt="--version";\
-elif which zypper > /dev/null 2>&1; then pm=$(which zypper); opt="--version";\
-elif which pacman > /dev/null 2>&1; then pm=$(which pacman); opt="--version";\
+if pm=$(which apt-get 2>/dev/null || command -v apt-get 2>/dev/null); then opt="--version";\
+elif pm=$(which dnf 2>/dev/null || command -v dnf 2>/dev/null); then opt="--version";\
+elif pm=$(which yum 2>/dev/null || command -v yum 2>/dev/null); then opt="--version";\
+elif pm=$(which zypper 2>/dev/null || command -v zypper 2>/dev/null); then opt="--version";\
+elif pm=$(which pacman 2>/dev/null || command -v pacman 2>/dev/null); then opt="--version";\
 else pm="uname"; opt="-a";\
 fi;\
 CUR_USER=$(whoami 2>/dev/null || echo $HOME | sed 's/.*\///');\

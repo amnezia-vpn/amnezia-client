@@ -1,5 +1,6 @@
 package org.amnezia.vpn
 
+import android.system.Os
 import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraXConfig
@@ -12,6 +13,9 @@ private const val TAG = "AmneziaApplication"
 class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
 
     override fun onCreate() {
+        if (BuildConfig.DEBUG) {
+            Os.setenv("QT_ANDROID_DEBUGGER_MAIN_THREAD_SLEEP_MS", "0", true)
+        }
         super.onCreate()
         Prefs.init(this)
         Log.init(this)

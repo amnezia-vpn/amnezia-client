@@ -5,9 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
-import ProtocolProps 1.0
 import Style 1.0
 
 import "./"
@@ -34,9 +32,17 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -48,8 +54,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -62,39 +68,37 @@ PageType {
         objectName: "mainLayout"
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
-        spacing: 4
+        spacing: 0
 
-        BackButtonType {
-            id: backButton
-            objectName: "backButton"
-        }
-
-        HeaderTypeWithButton {
+        NavigationBarType {
             id: headerContent
             objectName: "headerContent"
 
             Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 10
 
-            actionButtonImage: "qrc:/images/controls/edit-3.svg"
-
-            headerText: root.processedServer.name
-            descriptionText: {
-                if (root.processedServer.isServerFromTelegramApi) {
+            title: root.processedServer != null ? root.processedServer.name : ""
+            description: {
+                if (root.processedServer == null) {
+                    return ""
+                }
+                if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
                     return root.processedServer.serverDescription
-                } else if (root.processedServer.hasWriteAccess) {
+                } else if (ServersUiController.isProcessedServerHasWriteAccess()) {
                     return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
                 } else {
                     return root.processedServer.hostName
                 }
             }
 
-            actionButtonFunction: function() {
-                serverNameEditDrawer.openTriggered()
+            IconButtonType {
+                id: editButton
+                objectName: "editButton"
+
+                size: IconButtonType.Small
+                icon.source: "qrc:/images/controls/edit-3.svg"
+
+                onClicked: serverNameEditDrawer.open()
             }
         }
 
@@ -103,55 +107,38 @@ PageType {
 
             parent: root
 
-            anchors.fill: parent
-            expandedHeight: root.height * 0.35
-
-            serverNameText: root.processedServer.name
+            serverNameText: root.processedServer != null ? root.processedServer.name : ""
         }
 
-        TabBar {
+        TabsType {
             id: tabBar
 
             Layout.fillWidth: true
+            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
-            currentIndex: (ServersModel.getProcessedServerData("isServerFromTelegramApi")
-                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ?
+            currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+                           && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
                               root.pageSettingsServerData : root.pageSettingsServerProtocols
-
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-            }
-
 
             TabButtonType {
                 id: protocolsTab
                 visible: protocolsPage.installedProtocolsCount
                 width: protocolsPage.installedProtocolsCount ? undefined : 0
-                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerProtocols
                 text: qsTr("Protocols")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
             }
 
             TabButtonType {
                 id: servicesTab
                 visible: servicesPage.installedServicesCount
                 width: servicesPage.installedServicesCount ? undefined : 0
-                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerServices
                 text: qsTr("Services")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
             }
 
             TabButtonType {
                 id: dataTab
-                isSelected: tabBar.currentIndex === root.pageSettingsServerData
                 text: qsTr("Management")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
             }
         }
 
@@ -159,6 +146,8 @@ PageType {
             id: nestedStackView
 
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.topMargin: 24
 
             currentIndex: tabBar.currentIndex
 

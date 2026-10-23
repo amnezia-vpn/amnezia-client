@@ -24,6 +24,17 @@ set(IOS_TARGET_COMPILED_TYPES
     EXECUTABLE
 )
 
+## Simulator architecture: honor CMAKE_OSX_ARCHITECTURES when set, otherwise
+## match the host — arm64 Macs run arm64 simulators (Xcode 26 has no Rosetta
+## simulator destinations), Intel Macs need x86_64.
+if(CMAKE_OSX_ARCHITECTURES)
+    string(REPLACE ";" " " IOS_SIMULATOR_ARCHS "${CMAKE_OSX_ARCHITECTURES}")
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(IOS_SIMULATOR_ARCHS "arm64")
+else()
+    set(IOS_SIMULATOR_ARCHS "x86_64")
+endif()
+
 ## Inspect all the targets, and add extra properties if necessary.
 while(IOS_TARGETS)
     list(POP_FRONT IOS_TARGETS TARGET_NAME)
@@ -38,6 +49,6 @@ while(IOS_TARGETS)
     message("Patching architectures for ${TARGET_NAME}")
     set_target_properties(${TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] "arm64"
-        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "x86_64"
+        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "${IOS_SIMULATOR_ARCHS}"
     )
 endwhile()

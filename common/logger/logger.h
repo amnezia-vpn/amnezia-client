@@ -21,8 +21,6 @@ public:
 
     static bool setServiceLogsEnabled(bool enabled);
 
-    static bool openLogsFolder(bool isServiceLogger);
-
     static void clearLogs(bool isServiceLogger);
     static void clearServiceLogs();
     static void cleanUp();
@@ -30,9 +28,6 @@ public:
     static QString userLogsFilePath();
     static QString serviceLogsFilePath();
     static QString systemLogDir();
-
-    static QString getLogFile();
-    static QString getServiceLogFile();
 
     // compat with Mozilla logger
     Logger(const QString &className)

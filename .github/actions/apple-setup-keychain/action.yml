@@ -1,0 +1,57 @@
+# .github/actions/apple-setup-keychain/action.yml
+
+name: Setup apple keychain
+description: Creates and configures a temporary build keychain
+
+inputs:
+  keychain-name:
+    description: Name of the keychain
+    required: false
+    default: "ci-amnezia"
+  keychain-password:
+    description: The keychain password
+    required: true
+  lock-timeout:
+    description: A timeout after exceeding which the keychain would be locked
+    required: false
+    default: "0"
+
+outputs:
+  keychain-path:
+    description: "Full path to the keychain created"
+    value: ${{ steps.setup.outputs.keychain-path }}
+  keychain-name:
+    description: "Actual name of the keychain created"
+    value: ${{ steps.setup.outputs.keychain-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup keychain
+      id: setup
+      shell: bash
+      env:
+        KEYCHAIN_NAME: ${{ inputs.keychain-name }}
+        KEYCHAIN_PASSWORD: ${{ inputs.keychain-password }}
+        LOCK_TIMEOUT: ${{ inputs.lock-timeout }}
+      run: |
+        KEYCHAIN_PATH="$HOME/Library/Keychains/$KEYCHAIN_NAME.keychain-db"
+
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+        if [[ "$LOCK_TIMEOUT" == "0" ]]; then
+          security set-keychain-settings "$KEYCHAIN_PATH"
+        else
+          security set-keychain-settings -u -t "$LOCK_TIMEOUT" "$KEYCHAIN_PATH"
+        fi
+
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+        security import "${{ github.action_path }}/DeveloperIDG2CA.cer" -k "$KEYCHAIN_PATH" -A
+        security import "${{ github.action_path }}/AppleWWDRCAG3.cer" -k "$KEYCHAIN_PATH" -A
+
+        security list-keychains -d user -s "$KEYCHAIN_PATH"
+        security default-keychain -s "$KEYCHAIN_PATH"
+
+        echo "keychain-name=$KEYCHAIN_NAME" >> $GITHUB_OUTPUT
+        echo "keychain-path=$KEYCHAIN_PATH" >> $GITHUB_OUTPUT
