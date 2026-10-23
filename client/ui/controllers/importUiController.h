@@ -27,6 +27,7 @@ public slots:
     QString getConfigFileName();
     QString getMaliciousWarningText();
     bool isNativeWireGuardConfig();
+    void openImportedConfig();
     void processNativeWireGuardConfig();
     QString readTextFile(const QString &fileName);
 
@@ -44,6 +45,8 @@ public slots:
 
 signals:
     void importFinished();
+    void freeKeyImported(const QJsonObject &config);
+    void configPreviewRequested();
     void importErrorOccurred(ErrorCode errorCode, bool goToPageHome);
     void qrDecodingFinished();
     void restoreAppConfig(const QByteArray &data);

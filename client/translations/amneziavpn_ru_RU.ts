@@ -5361,6 +5361,132 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
+    <name>PageSetupWizardApiFreeCode</name>
+    <message>
+        <source>Enter the code from the email</source>
+        <translation>Введите код из письма</translation>
+    </message>
+    <message>
+        <source>The code has expired. Request a new one</source>
+        <translation>Код устарел. Запросите новый</translation>
+    </message>
+    <message>
+        <source>Too many attempts. Try again later</source>
+        <translation>Слишком много попыток. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>Incorrect code. Check it and try again</source>
+        <translation>Код не подходит. Проверьте и введите заново</translation>
+    </message>
+    <message>
+        <source>Check your email</source>
+        <translation>Проверьте почту</translation>
+    </message>
+    <message>
+        <source>We sent a code to %1</source>
+        <translation>Мы отправили код на %1</translation>
+    </message>
+    <message>
+        <source>Code</source>
+        <translation>Код</translation>
+    </message>
+    <message>
+        <source>Code from the email</source>
+        <translation>Код из письма</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Resend code in %1</source>
+        <translation>Отправить код повторно через %1</translation>
+    </message>
+    <message>
+        <source>Resend code</source>
+        <translation>Отправить код повторно</translation>
+    </message>
+    <message>
+        <source>CAPTCHA was incorrect. Please try again</source>
+        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
+    </message>
+    <message>
+        <source>Please solve the new CAPTCHA to continue</source>
+        <translation>Решите новую капчу, чтобы продолжить</translation>
+    </message>
+    <message>
+        <source>No connection. Check your internet and try again</source>
+        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again in %1 s</source>
+        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again later</source>
+        <translation>Слишком много запросов. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>Something went wrong. Try again later</source>
+        <translation>Что-то пошло не так. Попробуйте позже</translation>
+    </message>
+</context>
+<context>
+    <name>PageSetupWizardApiFreeEmail</name>
+    <message>
+        <source>Invalid email address. Check it and try again</source>
+        <translation>Неверный email</translation>
+    </message>
+    <message>
+        <source>Sign in or sign up</source>
+        <translation>Вход или регистрация</translation>
+    </message>
+    <message>
+        <source>Enter your email to sign in or create an account</source>
+        <translation>Введите почту, чтобы войти или создать аккаунт</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>Почта</translation>
+    </message>
+    <message>
+        <source>Enter your email</source>
+        <translation>Введите Email</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Can't sign in?</source>
+        <translation>Не удается войти?</translation>
+    </message>
+    <message>
+        <source>No connection. Check your internet and try again</source>
+        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again in %1 s</source>
+        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again later</source>
+        <translation>Слишком много запросов. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>Something went wrong. Try again later</source>
+        <translation>Что-то пошло не так. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>CAPTCHA was incorrect. Please try again</source>
+        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
+    </message>
+    <message>
+        <source>Please solve the new CAPTCHA to continue</source>
+        <translation>Решите новую капчу, чтобы продолжить</translation>
+    </message>
+</context>
+<context>
     <name>PageSetupWizardApiFreeInfo</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml" line="68"/>
@@ -6640,6 +6766,18 @@ Create one from the current settings.</source>
         <location filename="../core/utils/errorStrings.cpp" line="140"/>
         <source>Too many requests. Please try again later</source>
         <translation>Слишком много запросов. Пожалуйста, попробуйте еще раз позже</translation>
+    </message>
+    <message>
+        <source>Unable to send the sign-in code. Please try again in a minute</source>
+        <translation>Не удалось отправить код для входа. Попробуйте через минуту</translation>
+    </message>
+    <message>
+        <source>The code is invalid or has expired. Request a new one</source>
+        <translation>Код неверный или истёк. Запросите новый</translation>
+    </message>
+    <message>
+        <source>Unable to sign in to the account. Please try again</source>
+        <translation>Не удалось войти в учётную запись. Попробуйте ещё раз</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="182"/>

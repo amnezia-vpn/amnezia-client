@@ -48,6 +48,7 @@ namespace apiDefs
         constexpr QLatin1String captchaImage("captcha_image");
         constexpr QLatin1String httpStatus("http_status");
         constexpr QLatin1String captchaSolution("captcha_solution");
+        constexpr QLatin1String refreshCaptcha("refresh_captcha");
 
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
@@ -99,6 +100,18 @@ namespace apiDefs
         constexpr QLatin1String expiresAt("expires_at");
         constexpr QLatin1String isConnectEvent("is_connect_event");
         constexpr QLatin1String certificate("certificate");
+
+        constexpr QLatin1String code("code");
+        constexpr QLatin1String idempotencyKey("idempotency_key");
+        constexpr QLatin1String retryAfter("retry_after");
+        constexpr QLatin1String requestId("request_id");
+        constexpr QLatin1String message("message");
+        constexpr QLatin1String status("status");
+        constexpr QLatin1String userId("user_id");
+        constexpr QLatin1String accessToken("access_token");
+        constexpr QLatin1String refreshToken("refresh_token");
+        constexpr QLatin1String expiresIn("expires_in");
+        constexpr QLatin1String passwordMustChange("password_must_change");
     } // namespace key
 } // namespace apiDefs
 

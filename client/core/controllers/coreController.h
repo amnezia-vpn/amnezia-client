@@ -42,6 +42,7 @@
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/controllers/api/accountController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/settingsController.h"
@@ -201,6 +202,7 @@ private:
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
     StorePurchaseController* m_storePurchaseController;
+    AccountController* m_accountController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
     InstallController* m_installController;

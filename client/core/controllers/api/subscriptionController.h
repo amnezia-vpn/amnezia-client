@@ -44,6 +44,9 @@ public:
                                       CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
+    ErrorCode importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                           const QString &accessToken, const QString &captchaId,
+                                           const QString &captchaSolution, CaptchaInfo &captchaInfo);
 
     ErrorCode fetchServiceConfig(const QString &serverId, const QString &serviceProtocol, QJsonObject &serverConfigJson);
 
@@ -110,6 +113,7 @@ private:
     ErrorCode applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
                                          const QString &serviceProtocol, const ProtocolData &protocolData,
                                          const QByteArray &responseBody);
+    ErrorCode applyFreeAccountConfig(const QByteArray &responseBody);
     void markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2);
     void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType,
                                 const QString &serviceProtocol, const QString &userCountryCode,

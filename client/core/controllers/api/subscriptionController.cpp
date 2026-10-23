@@ -35,6 +35,7 @@ using namespace amnezia;
 
 namespace
 {
+
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
     if (apiConfig.subscriptionExpiredByServer) {
@@ -225,6 +226,88 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     }
 
     return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+}
+
+ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                                               const QString &accessToken, const QString &captchaId,
+                                                               const QString &captchaSolution, CaptchaInfo &captchaInfo)
+{
+    if (accessToken.isEmpty()) {
+        return ErrorCode::ApiAccountSessionError;
+    }
+
+    const QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                           .addField(apiDefs::key::accessToken, accessToken)
+                                           .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                           .addField(apiDefs::key::serviceType, serviceType)
+                                           .addField(apiDefs::key::captchaId, captchaId)
+                                           .addField(apiDefs::key::captchaSolution, normalizeCaptchaSolution(captchaSolution))
+                                           .build();
+
+    QByteArray responseBody;
+    const ErrorCode errorCode = executeRequest(QString("%1v1/free_account"), apiPayload, responseBody);
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError || errorCode == ErrorCode::ApiCaptchaInvalidError
+        || errorCode == ErrorCode::ApiCaptchaRefreshError) {
+        fillCaptchaInfoFromResponse(responseBody, captchaInfo);
+        qInfo().noquote() << "[FreeAccount] Captcha required for account request, errorCode =" << static_cast<int>(errorCode);
+        return errorCode;
+    }
+    if (errorCode != ErrorCode::NoError) {
+        const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+        qWarning().noquote() << "[FreeAccount] Account request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "http status =" << response.value(apiDefs::key::httpStatus).toInt()
+                             << "message:" << response.value(apiDefs::key::message).toString();
+        return errorCode;
+    }
+
+    return applyFreeAccountConfig(responseBody);
+}
+
+ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &responseBody)
+{
+    const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+
+    QString vpnKey;
+    QJsonObject configObject;
+    const QJsonValue keyValue = response.value(QStringLiteral("key")).isString() ? response.value(QStringLiteral("key"))
+                                                                                  : response.value(configKey::config);
+    if (keyValue.isString()) {
+        vpnKey = keyValue.toString();
+        vpnKey.replace(QStringLiteral("vpn://"), QString());
+        QByteArray configString = QByteArray::fromBase64(vpnKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        const QByteArray configUncompressed = qUncompress(configString);
+        if (!configUncompressed.isEmpty()) {
+            configString = configUncompressed;
+        }
+        configObject = QJsonDocument::fromJson(configString).object();
+        if (configObject.isEmpty()) {
+            configObject = QJsonDocument::fromJson(keyValue.toString().toUtf8()).object();
+            vpnKey.clear();
+        }
+    } else if (response.contains(configKey::configVersion)) {
+        configObject = response;
+    } else if (keyValue.isObject()) {
+        configObject = keyValue.toObject();
+    }
+
+    if (configObject.isEmpty()) {
+        qWarning().noquote() << "[FreeAccount] Account response has no config, keys =" << response.keys()
+                             << "config =" << (keyValue.isString() ? keyValue.toString().left(40) : QString());
+        return ErrorCode::ApiConfigDownloadError;
+    }
+    if (!serverConfigUtils::isConfigFormatVersionSupported(configObject)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
+    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
+        return ErrorCode::InternalError;
+    }
+
+    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
+    apiV2ServerConfig.apiConfig.vpnKey = vpnKey;
+    apiV2ServerConfig.crc = qChecksum(QJsonDocument(configObject).toJson());
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
+    return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import PageEnum 1.0
 import Style 1.0
 
 import "./"
@@ -22,6 +23,8 @@ PageType {
     }
 
     Component.onCompleted: syncFromModel()
+
+    Component.onDestruction: SubscriptionUiController.cancelFreeAccountLogin()
 
     FlickableType {
         id: flick
@@ -114,18 +117,8 @@ PageType {
             text: qsTr("Continue")
 
             onClicked: {
-                PageController.showBusyIndicator(true)
-                var result = SubscriptionUiController.importFreeFromGateway()
-                PageController.showBusyIndicator(false)
-
-                if (!result) {
-                    if (SubscriptionUiController.isCaptchaAwaitingUser()) {
-                        return
-                    }
-                    var endpoint = ApiServicesModel.getStoreEndpoint()
-                    Qt.openUrlExternally(endpoint)
-                    PageController.closePage()
-                    PageController.closePage()
+                if (SubscriptionUiController.startFreeAccountLogin()) {
+                    PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
                 }
             }
         }
