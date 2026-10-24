@@ -12,6 +12,7 @@ QtObject {
         readonly property color textQuaternary: '#86868F'
         readonly property color textInverted: '#09090B'
         readonly property color textAccent: '#FDBA74'
+        readonly property color textInfoInverse: '#0369A1'
         readonly property color textStaticWhite: '#FFFFFF'
 
         readonly property color bgBase: '#101012'

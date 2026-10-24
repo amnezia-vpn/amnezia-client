@@ -175,9 +175,9 @@ Popup {
             SmallTextType {
                 Layout.fillWidth: true
 
-                text: root.text
+                text: root.text.replace(/\n/g, "<br>").replace(/<a /g, "<a style=\"color: " + AmneziaStyle.color.textInfoInverse + "; text-decoration: none\" ")
+                textFormat: Text.RichText
                 color: AmneziaStyle.color.textInverted
-                linkColor: AmneziaStyle.color.textAccent
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
@@ -192,6 +192,7 @@ Popup {
                 id: actionButton
 
                 Layout.alignment: Qt.AlignVCenter
+                Layout.maximumWidth: content.width / 2
 
                 visible: root.actionText !== "" || root.closable
 
@@ -230,6 +231,7 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     wrapMode: Text.NoWrap
+                    elide: Text.ElideRight
                 }
 
                 HoverHandler {

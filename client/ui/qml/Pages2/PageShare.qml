@@ -204,8 +204,8 @@ PageType {
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
-                    PageController.goToPage(PageEnum.PageShareFullAccess)
                     shareFullAccessDrawer.close()
+                    PageController.goToPage(PageEnum.PageShareFullAccess)
                 }
             }
         }

@@ -196,7 +196,8 @@ PageType {
 
         CaptionTextType {
             Layout.fillWidth: true
-            Layout.topMargin: 4
+            Layout.topMargin: 16
+            Layout.bottomMargin: 12
 
             horizontalAlignment: Text.AlignHCenter
 

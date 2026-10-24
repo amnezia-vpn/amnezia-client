@@ -125,7 +125,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 8
 
                 visible: root.showSubscriptionNote
 
@@ -137,7 +136,7 @@ PageType {
 
             ButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: root.showSubscriptionNote ? 24 : 0
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -152,7 +151,7 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: root.showSubscriptionNote || root.showRenewButton ? 24 : 0
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -167,7 +166,6 @@ PageType {
 
                     interactive: false
                     showSeparator: false
-                    leadingSlotWidth: 24
 
                     text: qsTr("Subscription Status")
                     icon.source: "qrc:/images/controls/info.svg"
@@ -192,7 +190,6 @@ PageType {
 
                     interactive: false
                     showSeparator: false
-                    leadingSlotWidth: 24
 
                     text: qsTr("Valid Until")
                     icon.source: "qrc:/images/controls/history.svg"
@@ -217,7 +214,6 @@ PageType {
 
                     interactive: false
                     showSeparator: false
-                    leadingSlotWidth: 24
 
                     text: qsTr("Active Connections")
                     icon.source: "qrc:/images/controls/monitor.svg"
@@ -454,7 +450,7 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 12
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
                 size: ButtonType.Medium
                 variant: ButtonType.Text

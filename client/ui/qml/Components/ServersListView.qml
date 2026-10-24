@@ -22,6 +22,7 @@ ListViewType {
 
         if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
             if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
+                root.serverSettingsOpened()
                 PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
             } else {
                 PageController.showBusyIndicator(true)
@@ -31,13 +32,13 @@ ListViewType {
                     return
                 }
 
+                root.serverSettingsOpened()
                 PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
             }
         } else {
+            root.serverSettingsOpened()
             PageController.goToPage(PageEnum.PageSettingsServerInfo)
         }
-
-        root.serverSettingsOpened()
     }
 
     delegate: ServerListItem {

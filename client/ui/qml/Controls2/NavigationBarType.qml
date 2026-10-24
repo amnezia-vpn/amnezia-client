@@ -21,7 +21,7 @@ Item {
 
     implicitHeight: column.implicitHeight
 
-    z: 1
+    z: 2
 
     onBackClicked: PageController.closePage()
 
@@ -134,9 +134,9 @@ Item {
         }
 
         H3TextType {
-            x: 4 + d.sideWidth
+            x: 4 + d.sideWidth + 8
             y: d.toolbarTop + (56 - height) / 2
-            width: root.width - 8 - 2 * d.sideWidth
+            width: root.width - 2 * (4 + d.sideWidth + 8)
 
             font.weight: 600
             font.letterSpacing: 0

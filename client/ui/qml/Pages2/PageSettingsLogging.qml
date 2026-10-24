@@ -112,7 +112,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
                 spacing: 24
 
@@ -153,10 +153,11 @@ PageType {
 
                     spacing: 12
 
-                    SmallTextType {
+                    BodyTextType {
                         Layout.fillWidth: true
 
                         text: qsTr("Logs")
+                        color: AmneziaStyle.color.textTertiary
                     }
 
                     ListGroupType {
@@ -202,6 +203,7 @@ PageType {
 
                         Layout.fillWidth: true
 
+                        enabled: LogsController.hasLogs
                         text: qsTr("Save all logs")
                         subtitle: qsTr(".zip archive with both logs")
                         icon.source: "qrc:/images/controls/save.svg"
@@ -216,6 +218,7 @@ PageType {
 
                         Layout.fillWidth: true
 
+                        enabled: LogsController.hasLogs
                         text: qsTr("Clear all logs")
                         destructive: true
                         icon.source: "qrc:/images/controls/trash-2.svg"

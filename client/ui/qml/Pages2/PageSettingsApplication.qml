@@ -39,7 +39,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
                 spacing: 0
 
@@ -267,6 +267,7 @@ PageType {
                     text: qsTr("Reset settings and remove all data from the application")
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                     destructive: true
+                    showSeparator: false
 
                     onClicked: {
                         var headerText = qsTr("Reset settings and remove all data from the application?")

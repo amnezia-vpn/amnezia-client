@@ -60,19 +60,18 @@ PageType {
                 checkEmptyText: true
             }
 
-            BodyTextType {
+            H2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("Server settings")
-                color: AmneziaStyle.color.textTertiary
             }
 
             TextFieldType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

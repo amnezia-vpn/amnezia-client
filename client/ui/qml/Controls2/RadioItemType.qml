@@ -27,7 +27,7 @@ RadioDelegate {
 
     padding: 12
     verticalPadding: 4
-    leftPadding: 12 + 48 + spacing
+    leftPadding: 16 + 24 + spacing
     spacing: 12
 
     checkable: false
@@ -54,7 +54,7 @@ RadioDelegate {
     indicator: Item {
         x: root.leftPadding - width - root.spacing
         y: (root.height - height) / 2
-        width: 48
+        width: 24
         height: 48
 
         ListItemStateLayerType {
@@ -87,7 +87,6 @@ RadioDelegate {
 
         ListItemLabelType {
             Layout.fillWidth: true
-            Layout.leftMargin: 4
             Layout.topMargin: 10
             Layout.bottomMargin: 10
 

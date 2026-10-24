@@ -18,7 +18,7 @@ import "../Components"
 PageType {
     id: root
 
-    property var installedProtocolsCount
+    readonly property int installedProtocolsCount: proxyContainersModel.count
 
     SettingsContainersListView {
         id: settingsContainersListView
@@ -39,7 +39,6 @@ PageType {
             } else {
                 proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
             }
-            root.installedProtocolsCount = proxyContainersModel.count
         }
 
         model: SortFilterProxyModel {

@@ -62,6 +62,8 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             onHeightChanged: {
@@ -194,7 +196,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        implicitHeight: searchField.implicitHeight + 24 + PageController.safeAreaBottomMargin
+        implicitHeight: searchField.implicitHeight + 32 + PageController.safeAreaBottomMargin
 
         color: AmneziaStyle.color.bgBase
 
@@ -204,7 +206,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
+            anchors.topMargin: 24
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 

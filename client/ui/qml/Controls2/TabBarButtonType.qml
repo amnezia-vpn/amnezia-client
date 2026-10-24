@@ -46,11 +46,13 @@ TabButton {
             color: root.icon.color
 
             DotBadgeType {
-                anchors.horizontalCenter: parent.right
+                anchors.horizontalCenter: parent.left
+                anchors.horizontalCenterOffset: 20.5
                 anchors.verticalCenter: parent.top
+                anchors.verticalCenterOffset: 3.5
 
                 visible: root.showBadge
-                color: AmneziaStyle.color.accentDefault
+                color: AmneziaStyle.color.accentLight
             }
         }
     }

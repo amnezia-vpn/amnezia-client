@@ -24,7 +24,6 @@ PageType {
 
         header: NavigationBarType {
             width: listView.width
-            height: implicitHeight + 16
 
             title: ContainersModel.getProcessedContainerName() + qsTr(" settings")
         }
@@ -65,10 +64,8 @@ PageType {
 
                         anchors.top: parent.top
                         anchors.left: parent.left
-                        anchors.topMargin: 8
-                        anchors.leftMargin: 16
-
-                        size: IconButtonType.Small
+                        anchors.topMargin: 0
+                        anchors.leftMargin: 4
                         icon.source: "qrc:/images/controls/arrow-left.svg"
 
                         onClicked: configContentDrawer.close()

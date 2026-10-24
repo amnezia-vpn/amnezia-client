@@ -60,7 +60,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.maximumWidth: implicitWidth
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: 6
+        Layout.topMargin: root.expanded ? 8 : 6
         Layout.leftMargin: 16
         Layout.rightMargin: 16
         Layout.bottomMargin: (root.outdatedWarningVisible || root.protocolSelectionVisible) ? 8 : 16

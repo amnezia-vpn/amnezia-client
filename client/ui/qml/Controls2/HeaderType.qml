@@ -39,7 +39,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        spacing: 8
+        spacing: 0
 
         RowLayout {
             Layout.fillWidth: true

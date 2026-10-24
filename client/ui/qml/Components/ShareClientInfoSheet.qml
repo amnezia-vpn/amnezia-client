@@ -36,7 +36,7 @@ SheetType {
 
         H2TextType {
             Layout.fillWidth: true
-            Layout.bottomMargin: 12
+            Layout.bottomMargin: 8
 
             text: root.clientName
             maximumLineCount: 2

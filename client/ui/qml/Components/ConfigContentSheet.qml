@@ -23,10 +23,8 @@ SheetType {
         IconButtonType {
             id: backButton
 
-            x: 16
-            y: 8
-
-            size: IconButtonType.Small
+            x: 4
+            y: 0
             icon.source: "qrc:/images/controls/arrow-left.svg"
 
             onClicked: root.close()

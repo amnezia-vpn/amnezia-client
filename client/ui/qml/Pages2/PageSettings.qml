@@ -56,7 +56,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("Servers")
                 icon.source: "qrc:/images/controls/server.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -69,7 +68,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("Connection")
                 icon.source: "qrc:/images/controls/radio.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -82,7 +80,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("Application")
                 icon.source: "qrc:/images/controls/app.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -97,7 +94,6 @@ PageType {
 
                 visible: ServersUiController.hasServersFromGatewayApi
 
-                leadingSlotWidth: 24
                 text: qsTr("News & Notifications")
                 icon.source: "qrc:/images/controls/news.svg"
                 showIconBadge: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
@@ -115,7 +111,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("Backup")
                 icon.source: "qrc:/images/controls/save.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -128,7 +123,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("About AmneziaVPN")
                 icon.source: "qrc:/images/controls/amnezia.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -143,7 +137,6 @@ PageType {
 
                 visible: SettingsController.isDevModeEnabled
 
-                leadingSlotWidth: 24
                 text: qsTr("Dev console")
                 icon.source: "qrc:/images/controls/bug.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -155,16 +148,18 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
                 visible: GC.isDesktop()
 
-                leadingSlotWidth: 24
                 text: qsTr("Close application")
                 icon.source: "qrc:/images/controls/x-circle.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: PageController.closeApplication()
+            }
+
+            Item {
+                Layout.preferredHeight: 24
             }
         }
     }

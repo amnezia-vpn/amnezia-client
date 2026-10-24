@@ -19,6 +19,7 @@ Popup {
     property color defaultColor: AmneziaStyle.color.bgSurfaceAlt
     property color borderColor: AmneziaStyle.color.borderFaint
     property bool showGrabber: true
+    property real grabberTopMargin: 8
     readonly property real contentTopOffset: showGrabber ? grabber.anchors.topMargin + grabber.height : 0
     readonly property real navigationBarColor: 0xFF000000
                                                + Math.round(defaultColor.r * 255) * 0x10000
@@ -116,7 +117,7 @@ Popup {
         target: root.parent
 
         function onVisibleChanged() {
-            if (!root.parent.visible && root.visible) {
+            if (!root.parent.visible && root.opened) {
                 root.reopenWithParent = true
                 root.close()
             } else if (root.parent.visible && root.reopenWithParent) {
@@ -189,20 +190,35 @@ Popup {
                     id: grabber
 
                     anchors.top: parent.top
-                    anchors.topMargin: 16
+                    anchors.topMargin: root.grabberTopMargin
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     visible: root.showGrabber
                 }
 
-                Item {
-                    id: sheetContent
+                Flickable {
+                    id: sheetFlickable
 
                     anchors.top: parent.top
                     anchors.topMargin: root.contentTopOffset
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: root.bottomY - root.openedY - root.contentTopOffset
+
+                    contentWidth: width
+                    contentHeight: Math.max(height, root.expandedHeight)
+                    interactive: contentHeight > height + 1
+                    boundsBehavior: Flickable.StopAtBounds
+                    clip: interactive
+
+                    ScrollBar.vertical: ScrollBarType {}
+
+                    Item {
+                        id: sheetContent
+
+                        width: sheetFlickable.width
+                        height: sheetFlickable.contentHeight
+                    }
                 }
             }
         }

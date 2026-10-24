@@ -29,6 +29,8 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
@@ -66,6 +68,7 @@ PageType {
 
                 text: osVersion + (isCurrentDevice ? qsTr(" (current device)") : "")
                 subtitle: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
+                maximumLineCount: 3
                 trailingIconSource: "qrc:/images/controls/trash.svg"
 
                 onClicked: {

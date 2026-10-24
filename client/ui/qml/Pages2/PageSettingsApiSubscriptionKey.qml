@@ -76,7 +76,7 @@ PageType {
             NavigationBarType {
                 Layout.fillWidth: true
 
-                title: root.processedServer ? qsTr(root.processedServer.name + "\nsubscription key") : ""
+                title: root.processedServer ? qsTr("%1 connection key").arg(root.processedServer.name) : ""
             }
 
             ButtonType {

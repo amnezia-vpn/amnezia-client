@@ -214,7 +214,7 @@ PageType {
             }
 
             Item {
-                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
+                Layout.preferredHeight: 24 + PageController.safeAreaBottomMargin
             }
         }
     }

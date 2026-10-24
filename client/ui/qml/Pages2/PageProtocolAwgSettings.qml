@@ -105,6 +105,7 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
+                Layout.bottomMargin: -content.spacing
 
                 title: qsTr("AmneziaWG settings")
             }

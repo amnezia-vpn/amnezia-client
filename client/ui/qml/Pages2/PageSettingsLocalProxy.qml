@@ -225,7 +225,7 @@ PageType {
             }
 
             ButtonType {
-                Layout.topMargin: 16
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -248,7 +248,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 24
 
                 headerText: qsTr("Address and port")
                 placeholderText: LocalProxyController.port.toString()

@@ -12,7 +12,6 @@ Flickable {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.rightMargin: 1
 
     ScrollBar.vertical: ScrollBarType {}
 }

@@ -104,7 +104,7 @@ PageType {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.topMargin: 12 + PageController.safeAreaTopMargin
+            anchors.topMargin: PageController.safeAreaTopMargin
             anchors.bottomMargin: 12
 
             spacing: 0
@@ -142,8 +142,11 @@ PageType {
             }
 
             Item {
+                id: connectButtonArea
+
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 140
                 Layout.topMargin: 16
                 Layout.bottomMargin: 28
 
@@ -290,6 +293,7 @@ PageType {
         bottomY: root.height
         closedY: root.height - collapsedBar.height
         borderColor: AmneziaStyle.color.borderSoft
+        grabberTopMargin: 16
         expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
         Item {
@@ -374,10 +378,8 @@ PageType {
                 Layout.preferredHeight: 48
 
                 IconButtonType {
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
+                    x: 4
+                    y: 0
                     icon.source: "qrc:/images/controls/arrow-left.svg"
                     Accessible.name: qsTr("Back")
 
@@ -385,12 +387,12 @@ PageType {
                 }
             }
 
-            HeaderType {
+            SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN protocol")
                 descriptionText: qsTr("Select an installed protocol or add a new one")
@@ -439,7 +441,9 @@ PageType {
     SheetType {
         id: protocolSelectionDrawer
 
-        expandedHeight: windowHeight * 0.5
+        expandedHeight: Math.min(windowHeight * 0.9,
+                                 48 + 16 + protocolDrawerHeader.implicitHeight + 32
+                                 + protocolDrawerListView.contentHeight + protocolDrawerListView.bottomMargin)
 
         ColumnLayout {
             id: protocolDrawerContainer
@@ -455,10 +459,8 @@ PageType {
                 IconButtonType {
                     id: protocolDrawerBackButton
 
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
+                    x: 4
+                    y: 0
                     icon.source: "qrc:/images/controls/arrow-left.svg"
                     Accessible.name: qsTr("Back")
 
@@ -466,12 +468,14 @@ PageType {
                 }
             }
 
-            HeaderType {
+            SectionHeaderType {
+                id: protocolDrawerHeader
+
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN protocol")
             }

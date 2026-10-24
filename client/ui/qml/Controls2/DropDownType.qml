@@ -40,8 +40,8 @@ AbstractButton {
 
     leftPadding: 16
     rightPadding: root.isPrimary ? 4 : 16
-    topPadding: root.isPrimary ? 0 : 12
-    bottomPadding: root.isPrimary ? 0 : 12
+    topPadding: root.isPrimary ? 0 : 4
+    bottomPadding: root.isPrimary ? 0 : 4
 
     hoverEnabled: true
 

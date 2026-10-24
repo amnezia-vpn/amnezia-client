@@ -24,7 +24,6 @@ PageType {
 
         header: NavigationBarType {
             width: servers.width
-            height: implicitHeight + 16
 
             title: qsTr("Servers")
         }

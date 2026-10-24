@@ -198,7 +198,7 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : countryItem.implicitHeight
             height: implicitHeight
 
             CountrySectionHeader {
@@ -213,6 +213,8 @@ PageType {
             }
 
             CountryListItem {
+                id: countryItem
+
                 x: 16
                 width: rowItem.width - 32
                 height: rowItem.height
@@ -258,7 +260,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
+                Layout.topMargin: 24
 
                 text: qsTr("Renew subscription")
 

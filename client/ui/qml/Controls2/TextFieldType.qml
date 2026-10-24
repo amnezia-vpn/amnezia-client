@@ -84,7 +84,7 @@ Item {
                     topRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
                     bottomRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
 
-                    color: AmneziaStyle.color.bgSurfaceAlt
+                    color: root.headerText !== "" ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgSurface
                     border.width: textField.activeFocus ? 2 : 1
                     border.color: {
                         if (root.hasError) {
@@ -145,7 +145,7 @@ Item {
                     id: actions
 
                     anchors.right: parent.right
-                    anchors.rightMargin: 12
+                    anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
 
                     active: root.clearable || root.passwordToggle || root.trailingIconSource !== ""
@@ -198,6 +198,7 @@ Item {
                 id: attachedButton
 
                 Layout.preferredHeight: textField.height
+                Layout.maximumWidth: Math.max(83, root.width * 0.4)
 
                 active: root.buttonText !== "" || root.buttonImageSource !== ""
                 visible: active

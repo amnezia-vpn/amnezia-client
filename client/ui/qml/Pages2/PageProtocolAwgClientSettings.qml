@@ -47,6 +47,7 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
+                Layout.bottomMargin: -content.spacing
 
                 title: qsTr("AmneziaWG settings")
             }
@@ -272,7 +273,7 @@ PageType {
 
             H2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 28
                 Layout.bottomMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16

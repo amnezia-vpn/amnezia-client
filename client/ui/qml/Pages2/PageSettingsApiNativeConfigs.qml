@@ -109,7 +109,7 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : countryItem.implicitHeight
             height: implicitHeight
 
             CountrySectionHeader {
@@ -124,6 +124,8 @@ PageType {
             }
 
             CountryListItem {
+                id: countryItem
+
                 x: 16
                 width: rowItem.width - 32
                 height: rowItem.height

@@ -51,8 +51,6 @@ Button {
                 }
                 return root.hovered ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
             }
-            border.width: !root.filled && root.down ? 1 : 0
-            border.color: AmneziaStyle.color.borderMedium
 
             Behavior on color {
                 ColorAnimation { duration: 150 }

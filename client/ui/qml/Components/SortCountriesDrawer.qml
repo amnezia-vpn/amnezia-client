@@ -37,7 +37,6 @@ SheetType {
             Layout.rightMargin: 16
             Layout.preferredHeight: 80
 
-            leftPadding: 16 + 48 + spacing
             text: qsTr("By region")
 
             checked: root.listModel !== null && root.listModel.sortMode === 0
@@ -54,7 +53,6 @@ SheetType {
             Layout.rightMargin: 16
             Layout.preferredHeight: 80
 
-            leftPadding: 16 + 48 + spacing
             text: qsTr("Alphabetically")
 
             checked: root.listModel !== null && root.listModel.sortMode === 1

@@ -28,7 +28,7 @@ Rectangle {
         if (root.atLimit) {
             return AmneziaStyle.color.statusDestructive
         }
-        return textArea.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderSoft
+        return textArea.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderField
     }
 
     opacity: root.enabled ? 1 : 0.4

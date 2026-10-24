@@ -21,7 +21,7 @@ RadioButton {
     checkable: false
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : (root.checked ? 0.4 : 0.65)
+    opacity: root.enabled ? 1 : 0.4
 
     indicator: null
 
@@ -29,8 +29,8 @@ RadioButton {
         radius: 16
 
         color: root.checked ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.transparent
-        border.width: root.checked || (root.enabled && root.down) ? 1 : 0
-        border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderMedium
+        border.width: root.checked ? 1 : 0
+        border.color: AmneziaStyle.color.accentLight
 
         Rectangle {
             anchors.fill: parent
@@ -53,7 +53,6 @@ RadioButton {
     contentItem: BodyTextType {
         text: root.text
         color: AmneziaStyle.color.textPrimary
-        opacity: !root.enabled && !root.checked ? 0.4 : 1
 
         lineHeight: (root.size === SegmentType.Small ? 18 : 24) + LanguageUiController.getLineHeightAppend()
         font.pixelSize: root.size === SegmentType.Small ? 14 : 16

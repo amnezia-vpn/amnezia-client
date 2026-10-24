@@ -34,7 +34,7 @@ PageType {
 
         anchors.top: parent.top
 
-        contentHeight: content.implicitHeight
+        contentHeight: Math.max(content.implicitHeight, flickable.height)
 
         ColumnLayout {
             id: content
@@ -42,6 +42,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            height: flickable.contentHeight
 
             spacing: 0
 
@@ -50,6 +51,7 @@ PageType {
 
                 title: qsTr("Connection")
                 description: qsTr("Insert the key, add a configuration file or scan the QR-code")
+                backButtonVisible: !PageController.isStartPageVisible() && root.stackView !== null && root.stackView.depth > 1
 
                 IconButtonType {
                     id: moreButton
@@ -270,11 +272,15 @@ PageType {
                 onClicked: Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
             }
 
+            Item {
+                Layout.fillHeight: true
+            }
+
             LinkButtonType {
                 id: siteLink2
 
                 Layout.topMargin: 24
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
                 Layout.alignment: Qt.AlignHCenter
 
                 size: LinkButtonType.Medium
@@ -295,7 +301,9 @@ PageType {
     SheetType {
         id: moreActionsDrawer
 
-        expandedHeight: moreSheetContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
+        readonly property bool loggingRowsVisible: PageController.isStartPageVisible()
+
+        expandedHeight: moreSheetContent.implicitHeight + 24 + 8 + PageController.safeAreaBottomMargin
 
         ColumnLayout {
             id: moreSheetContent
@@ -305,31 +313,40 @@ PageType {
             anchors.right: parent.right
             spacing: 0
 
-            SectionHeaderType {
+            H2TextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                headerText: qsTr("Settings")
-                descriptionText: supportUuidRow.visible ? qsTr("Support tag") : ""
+                text: qsTr("Settings")
             }
 
-            SwitchType {
-                id: switcher
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
+                visible: moreActionsDrawer.loggingRowsVisible
 
                 text: qsTr("Enable logs")
 
-                visible: PageController.isStartPageVisible()
-                checked: SettingsController.isLoggingEnabled
-                onToggled: function() {
-                    if (checked !== SettingsController.isLoggingEnabled) {
-                        SettingsController.isLoggingEnabled = checked
+                onClicked: {
+                    loggingSwitch.toggle()
+                    loggingSwitch.toggled()
+                }
+
+                SwitchType {
+                    id: loggingSwitch
+
+                    focusPolicy: Qt.NoFocus
+
+                    checked: SettingsController.isLoggingEnabled
+                    onToggled: {
+                        if (checked !== SettingsController.isLoggingEnabled) {
+                            SettingsController.isLoggingEnabled = checked
+                        }
                     }
                 }
             }
@@ -339,10 +356,11 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                visible: moreActionsDrawer.loggingRowsVisible
+                showSeparator: false
+
                 text: qsTr("Export client logs")
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-
-                visible: PageController.isStartPageVisible()
 
                 onClicked: {
                     var fileName = ""
@@ -368,7 +386,7 @@ PageType {
                 id: supportUuidRow
 
                 Layout.fillWidth: true
-                Layout.topMargin: 28
+                Layout.topMargin: moreActionsDrawer.loggingRowsVisible ? 24 : 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -376,14 +394,32 @@ PageType {
 
                 visible: SettingsController.getInstallationUuid() !== ""
 
-                BodyTextType {
-                    id: supportUuidText
-
+                ColumnLayout {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
+                    Layout.bottomMargin: 12
 
-                    text: SettingsController.getInstallationUuid()
-                    elide: Text.ElideRight
-                    wrapMode: Text.NoWrap
+                    spacing: 8
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+
+                        text: qsTr("Support tag")
+                        color: AmneziaStyle.color.textTertiary
+                        elide: Text.ElideRight
+                        wrapMode: Text.NoWrap
+                    }
+
+                    BodyTextType {
+                        id: supportUuidText
+
+                        Layout.fillWidth: true
+
+                        text: SettingsController.getInstallationUuid()
+                        color: AmneziaStyle.color.textSecondary
+                        elide: Text.ElideRight
+                        wrapMode: Text.NoWrap
+                    }
                 }
 
                 IconButtonType {

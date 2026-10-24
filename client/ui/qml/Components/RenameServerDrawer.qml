@@ -26,7 +26,7 @@ SheetType {
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        spacing: 26
+        spacing: 24
 
         TextFieldType {
             id: serverName

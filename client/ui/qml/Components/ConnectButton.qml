@@ -144,6 +144,7 @@ Button {
         color: root.connected && !root.inProgress ? AmneziaStyle.color.textAccent : AmneziaStyle.color.textPrimary
         lineHeight: 30 + LanguageUiController.getLineHeightAppend()
         font.pixelSize: 20
+        font.weight: 700
 
         leftPadding: 16
         rightPadding: 16

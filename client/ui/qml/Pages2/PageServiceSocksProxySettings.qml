@@ -141,7 +141,7 @@ PageType {
 
                 parent: root
 
-                expandedHeight: drawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
+                expandedHeight: drawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
                 ColumnLayout {
                     id: drawerContent

@@ -9,9 +9,9 @@ Rectangle {
     property alias source: image.source
 
     implicitWidth: 358
-    implicitHeight: root.width
+    implicitHeight: root.width - 10
 
-    Layout.preferredHeight: root.width
+    Layout.preferredHeight: root.width - 10
 
     color: AmneziaStyle.color.bgStaticWhite
     radius: 16
@@ -20,7 +20,7 @@ Rectangle {
         id: image
 
         anchors.fill: parent
-        anchors.margins: 12
+        anchors.margins: 10
 
         smooth: false
         fillMode: Image.PreserveAspectFit

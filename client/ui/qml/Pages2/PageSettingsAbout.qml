@@ -85,7 +85,7 @@ PageType {
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
                 spacing: 24
 
@@ -191,10 +191,10 @@ PageType {
                         id: checkUpdatesButton
 
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: Math.max(220, implicitWidth)
                         Layout.maximumWidth: content.width - 32
 
-                        variant: ButtonType.Secondary
+                        variant: ButtonType.Text
+                        size: ButtonType.Medium
                         loading: UpdateController.isCheckRunning
                         enabled: !UpdateController.isCheckRunning
 
@@ -211,6 +211,7 @@ PageType {
                         Layout.alignment: Qt.AlignHCenter
 
                         variant: ButtonType.Text
+                        size: ButtonType.Medium
                         text: qsTr("Privacy Policy")
 
                         onClicked: {

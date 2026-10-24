@@ -19,6 +19,7 @@ ListViewType {
 
         text: name
         subtitle: description
+        maximumLineCount: 6
         showSeparator: index < root.count - 1
 
         icon.source: isInstalled ? "" : "qrc:/images/controls/download.svg"
@@ -36,8 +37,8 @@ ListViewType {
             if (!isInstalled) {
                 ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 ServersUiController.processedContainerIndex = containerIndex
-                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 root.activated()
+                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 return
             }
 

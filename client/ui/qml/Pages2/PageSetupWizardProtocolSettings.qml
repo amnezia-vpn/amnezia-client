@@ -251,10 +251,8 @@ PageType {
                                     height: 48
 
                                     IconButtonType {
-                                        x: 16
-                                        y: 4
-
-                                        size: IconButtonType.Small
+                                        x: 4
+                                        y: 0
                                         icon.source: "qrc:/images/controls/arrow-left.svg"
                                         Accessible.name: qsTr("Back")
 

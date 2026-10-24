@@ -85,7 +85,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
@@ -123,7 +123,7 @@ PageType {
             LinkButtonType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
+                Layout.topMargin: flickable.enabled ? 0 : 16
 
                 size: LinkButtonType.Medium
                 horizontalPadding: 14
@@ -261,8 +261,8 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: flickable.enabled && XrayConfigModel.hasUnsavedChanges
-        enabled: visible && root.portText !== ""
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges && root.portText !== ""
         text: qsTr("Save")
 
         onClicked: root.save()
