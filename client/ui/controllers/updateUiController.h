@@ -42,6 +42,7 @@ public slots:
 
 signals:
     void updateFound();
+    void installerVerificationFailed(const QString &message);
     void updateNotFound();
     void updateCheckFailed();
     void updateStateChanged();
