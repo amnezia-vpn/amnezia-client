@@ -140,7 +140,9 @@ class Libagw(ConanFile):
                     self._go_build(os.path.join(build_dir, self._shared_lib), "c-shared", goarch, cflags, ldflags,
                                    goldflags=f"-extldflags=-Wl,-soname,{self._shared_lib}")
                 else:
-                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags)
+                    goldflags = "-X=runtime.godebugDefault=asyncpreemptoff=1" if is_apple_os(self) else ""
+                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags,
+                                   goldflags=goldflags)
 
             if is_apple_os(self) and self._is_multiarch:
                 lipo = XCRun(self).find("lipo")
