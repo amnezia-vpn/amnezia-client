@@ -23,10 +23,8 @@ SheetType {
         IconButtonType {
             id: backButton
 
-            x: 16
-            y: 8
-
-            size: IconButtonType.Small
+            x: 4
+            y: 0
             icon.source: "qrc:/images/controls/arrow-left.svg"
 
             onClicked: root.close()
@@ -61,7 +59,7 @@ SheetType {
                     id: contentArea
 
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
+                    Layout.topMargin: 32
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin

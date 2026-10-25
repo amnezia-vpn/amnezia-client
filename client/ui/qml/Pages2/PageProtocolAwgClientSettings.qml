@@ -14,42 +14,43 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-
 PageType {
     id: root
 
+    readonly property bool isSaveButtonEnabled: mtuTextField.errorText === "" &&
+                                                junkPacketMaxSizeTextField.errorText === "" &&
+                                                junkPacketMinSizeTextField.errorText === "" &&
+                                                junkPacketCountTextField.errorText === ""
+
     SmartScroll {
         id: smartScroll
-        listView: listView
+        flickable: flickable
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.bottomMargin: 24
 
-        header: NavigationBarType {
-            width: listView.width
-            height: implicitHeight + 16
+        contentHeight: content.implicitHeight
 
-            title: qsTr("AmneziaWG settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: AwgConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            property bool isSaveButtonEnabled: mtuTextField.errorText === "" &&
-                                               junkPacketMaxSizeTextField.errorText === "" &&
-                                               junkPacketMinSizeTextField.errorText === "" &&
-                                               junkPacketCountTextField.errorText === ""
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 12
+
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: -content.spacing
+
+                title: qsTr("AmneziaWG settings")
+            }
 
             TextFieldType {
                 id: mtuTextField
@@ -59,14 +60,10 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("MTU")
-                textField.text: clientMtu
+                textField.text: AwgConfigModel.clientMtu
                 textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== clientMtu) {
-                        clientMtu = textField.text
-                    }
-                }
+                textField.onTextEdited: AwgConfigModel.clientMtu = textField.text
 
                 textField.onActiveFocusChanged: {
                     if (textField.activeFocus) {
@@ -81,80 +78,80 @@ PageType {
                 id: junkPacketCountTextField
 
                 headerText: "Jc - Junk packet count"
-                textField.text: clientJunkPacketCount
+                textField.text: AwgConfigModel.clientJunkPacketCount
 
                 scroller: smartScroll
-                onEdited: (text) => { clientJunkPacketCount = text }
+                onEdited: (text) => { AwgConfigModel.clientJunkPacketCount = text }
             }
 
             AwgTextField {
                 id: junkPacketMinSizeTextField
 
                 headerText: "Jmin - Junk packet minimum size"
-                textField.text: clientJunkPacketMinSize
+                textField.text: AwgConfigModel.clientJunkPacketMinSize
 
                 scroller: smartScroll
-                onEdited: (text) => { clientJunkPacketMinSize = text }
+                onEdited: (text) => { AwgConfigModel.clientJunkPacketMinSize = text }
             }
 
             AwgTextField {
                 id: junkPacketMaxSizeTextField
 
                 headerText: "Jmax - Junk packet maximum size"
-                textField.text: clientJunkPacketMaxSize
+                textField.text: AwgConfigModel.clientJunkPacketMaxSize
 
                 scroller: smartScroll
-                onEdited: (text) => { clientJunkPacketMaxSize = text }
+                onEdited: (text) => { AwgConfigModel.clientJunkPacketMaxSize = text }
             }
 
             AwgTextField {
                 id: specialJunk1TextField
 
                 headerText: qsTr("I1 - First special junk packet")
-                textField.text: clientSpecialJunk1
+                textField.text: AwgConfigModel.clientSpecialJunk1
 
                 scroller: smartScroll
-                onEdited: (text) => { clientSpecialJunk1 = text }
+                onEdited: (text) => { AwgConfigModel.clientSpecialJunk1 = text }
             }
 
             AwgTextField {
                 id: specialJunk2TextField
 
                 headerText: qsTr("I2 - Second special junk packet")
-                textField.text: clientSpecialJunk2
+                textField.text: AwgConfigModel.clientSpecialJunk2
 
                 scroller: smartScroll
-                onEdited: (text) => { clientSpecialJunk2 = text }
+                onEdited: (text) => { AwgConfigModel.clientSpecialJunk2 = text }
             }
 
             AwgTextField {
                 id: specialJunk3TextField
 
                 headerText: qsTr("I3 - Third special junk packet")
-                textField.text: clientSpecialJunk3
+                textField.text: AwgConfigModel.clientSpecialJunk3
 
                 scroller: smartScroll
-                onEdited: (text) => { clientSpecialJunk3 = text }
+                onEdited: (text) => { AwgConfigModel.clientSpecialJunk3 = text }
             }
 
             AwgTextField {
                 id: specialJunk4TextField
 
                 headerText: qsTr("I4 - Fourth special junk packet")
-                textField.text: clientSpecialJunk4
+                textField.text: AwgConfigModel.clientSpecialJunk4
 
                 scroller: smartScroll
-                onEdited: (text) => { clientSpecialJunk4 = text }
+                onEdited: (text) => { AwgConfigModel.clientSpecialJunk4 = text }
             }
 
             AwgTextField {
                 id: specialJunk5TextField
 
                 headerText: qsTr("I5 - Fifth special junk packet")
-                textField.text: clientSpecialJunk5
+                textField.text: AwgConfigModel.clientSpecialJunk5
 
                 scroller: smartScroll
-                onEdited: (text) => { clientSpecialJunk5 = text }
+                onEdited: (text) => { AwgConfigModel.clientSpecialJunk5 = text }
             }
 
             CheckBoxType {
@@ -168,7 +165,7 @@ PageType {
 
                 text: qsTr("HeaderProtectionKey")
 
-                checked: clientHeaderProtectionEnabled
+                checked: AwgConfigModel.clientHeaderProtectionEnabled
             }
 
             AwgTextField {
@@ -177,10 +174,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("ContentPaddingAddition - Content padding addition")
-                textField.text: clientContentPaddingAddition
+                textField.text: AwgConfigModel.clientContentPaddingAddition
 
                 scroller: smartScroll
-                onEdited: (text) => { clientContentPaddingAddition = text }
+                onEdited: (text) => { AwgConfigModel.clientContentPaddingAddition = text }
             }
 
             AwgTextField {
@@ -189,10 +186,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("RekeyAfterTime - Rekey after time")
-                textField.text: clientRekeyAfterTime
+                textField.text: AwgConfigModel.clientRekeyAfterTime
 
                 scroller: smartScroll
-                onEdited: (text) => { clientRekeyAfterTime = text }
+                onEdited: (text) => { AwgConfigModel.clientRekeyAfterTime = text }
             }
 
             AwgTextField {
@@ -201,10 +198,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("RekeyTimeout - Rekey timeout")
-                textField.text: clientRekeyTimeout
+                textField.text: AwgConfigModel.clientRekeyTimeout
 
                 scroller: smartScroll
-                onEdited: (text) => { clientRekeyTimeout = text }
+                onEdited: (text) => { AwgConfigModel.clientRekeyTimeout = text }
             }
 
             AwgTextField {
@@ -213,10 +210,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("RejectAfterTime - Reject after time")
-                textField.text: clientRejectAfterTime
+                textField.text: AwgConfigModel.clientRejectAfterTime
 
                 scroller: smartScroll
-                onEdited: (text) => { clientRejectAfterTime = text }
+                onEdited: (text) => { AwgConfigModel.clientRejectAfterTime = text }
             }
 
             AwgTextField {
@@ -225,10 +222,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("KeepaliveTimeout - Keepalive timeout")
-                textField.text: clientKeepaliveTimeout
+                textField.text: AwgConfigModel.clientKeepaliveTimeout
 
                 scroller: smartScroll
-                onEdited: (text) => { clientKeepaliveTimeout = text }
+                onEdited: (text) => { AwgConfigModel.clientKeepaliveTimeout = text }
             }
 
             AwgTextField {
@@ -237,10 +234,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("MaxHandshakeAttempts - Max handshake attempts")
-                textField.text: clientMaxHandshakeAttempts
+                textField.text: AwgConfigModel.clientMaxHandshakeAttempts
 
                 scroller: smartScroll
-                onEdited: (text) => { clientMaxHandshakeAttempts = text }
+                onEdited: (text) => { AwgConfigModel.clientMaxHandshakeAttempts = text }
             }
 
             CheckBoxType {
@@ -254,7 +251,7 @@ PageType {
 
                 text: qsTr("RandomTrailers")
 
-                checked: clientRandomTrailers
+                checked: AwgConfigModel.clientRandomTrailers
             }
 
             CheckBoxType {
@@ -266,17 +263,17 @@ PageType {
 
                 text: qsTr("DisableCookies")
 
-                checked: clientDisableCookies
+                checked: AwgConfigModel.clientDisableCookies
                 onCheckedChanged: {
-                    if (checked !== clientDisableCookies) {
-                        clientDisableCookies = checked
+                    if (checked !== AwgConfigModel.clientDisableCookies) {
+                        AwgConfigModel.clientDisableCookies = checked
                     }
                 }
             }
 
             H2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20
+                Layout.topMargin: 28
                 Layout.bottomMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -290,7 +287,7 @@ PageType {
                 enabled: false
 
                 headerText: qsTr("Port")
-                textField.text: port
+                textField.text: AwgConfigModel.port
             }
 
             AwgTextField {
@@ -299,7 +296,7 @@ PageType {
                 enabled: false
 
                 headerText: "S1 - Init packet junk size"
-                textField.text: serverInitPacketJunkSize
+                textField.text: AwgConfigModel.serverInitPacketJunkSize
             }
 
             AwgTextField {
@@ -308,27 +305,27 @@ PageType {
                 enabled: false
 
                 headerText: "S2 - Response packet junk size"
-                textField.text: serverResponsePacketJunkSize
+                textField.text: AwgConfigModel.serverResponsePacketJunkSize
             }
 
             AwgTextField {
                 id: cookieReplyPacketJunkSizeTextField
 
-                visible: isAwg2
+                visible: AwgConfigModel.isAwg2
                 enabled: false
 
                 headerText: "S3 - Cookie Reply packet junk size"
-                textField.text: serverCookieReplyPacketJunkSize
+                textField.text: AwgConfigModel.serverCookieReplyPacketJunkSize
             }
 
             AwgTextField {
                 id: transportPacketJunkSizeTextField
 
-                visible: isAwg2
+                visible: AwgConfigModel.isAwg2
                 enabled: false
 
                 headerText: "S4 - Transport packet junk size"
-                textField.text: serverTransportPacketJunkSize
+                textField.text: AwgConfigModel.serverTransportPacketJunkSize
             }
 
             AwgTextField {
@@ -337,7 +334,7 @@ PageType {
                 enabled: false
 
                 headerText: "H1 - Init packet magic header"
-                textField.text: serverInitPacketMagicHeader
+                textField.text: AwgConfigModel.serverInitPacketMagicHeader
             }
 
             AwgTextField {
@@ -346,7 +343,7 @@ PageType {
                 enabled: false
 
                 headerText: "H2 - Response packet magic header"
-                textField.text: serverResponsePacketMagicHeader
+                textField.text: AwgConfigModel.serverResponsePacketMagicHeader
             }
 
             AwgTextField {
@@ -355,7 +352,7 @@ PageType {
                 enabled: false
 
                 headerText: "H3 - Underload packet magic header"
-                textField.text: serverUnderloadPacketMagicHeader
+                textField.text: AwgConfigModel.serverUnderloadPacketMagicHeader
             }
 
             AwgTextField {
@@ -364,7 +361,7 @@ PageType {
                 enabled: false
 
                 headerText: "H4 - Transport packet magic header"
-                textField.text: serverTransportPacketMagicHeader
+                textField.text: AwgConfigModel.serverTransportPacketMagicHeader
             }
         }
     }
@@ -379,15 +376,9 @@ PageType {
         anchors.leftMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
+        enabled: root.isSaveButtonEnabled
 
         text: qsTr("Save")
-
-        onActiveFocusChanged: {
-            if(activeFocus) {
-                listView.positionViewAtEnd()
-            }
-        }
 
         onClicked: {
             var headerText = qsTr("Save settings?")
@@ -406,7 +397,7 @@ PageType {
 
             var noButtonFunction = function() {}
 
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

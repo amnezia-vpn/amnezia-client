@@ -12,6 +12,7 @@
 #include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
+#include "ui/controllers/qml/focusController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"
@@ -83,6 +84,7 @@ void CoreSignalHandlers::initAllHandlers()
     initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
     initUnsupportedConnectDrawerHandler();
+    initBackNavigationHandler();
     initStrictKillSwitchHandler();
     initAndroidSettingsHandler();
     initAndroidConnectionHandler();
@@ -410,6 +412,16 @@ void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
 
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::unsupportedConnectDrawerRequested,
             m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
+}
+
+void CoreSignalHandlers::initBackNavigationHandler()
+{
+    if (!m_coreController->m_focusController) {
+        return;
+    }
+
+    connect(m_coreController->m_focusController, &FocusController::backRequested,
+            m_coreController->m_pageController, &PageController::escapePressed);
 }
 
 void CoreSignalHandlers::initStrictKillSwitchHandler()

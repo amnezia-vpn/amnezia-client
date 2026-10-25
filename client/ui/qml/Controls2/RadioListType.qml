@@ -5,7 +5,7 @@ ListViewType {
     id: root
 
     property int selectedIndex: 0
-    property string selectedText
+    readonly property string selectedText: root.textAt(root.selectedIndex)
     property string currentValue: ""
 
     signal activated(int index)
@@ -15,15 +15,17 @@ ListViewType {
     leftMargin: 16
     rightMargin: 16
 
-    function triggerCurrentItem() {
-        const item = root.itemAtIndex(root.selectedIndex)
-        if (item) {
-            item.click()
+    function textAt(index) {
+        if (!root.model || !root.model.get || index < 0 || index >= root.count) {
+            return ""
         }
+        const item = root.model.get(index)
+        return item ? item.name : ""
     }
 
-    ButtonGroup {
-        id: buttonGroup
+    function select(index) {
+        root.selectedIndex = index
+        root.activated(index)
     }
 
     delegate: RadioItemType {
@@ -35,19 +37,8 @@ ListViewType {
         text: name
         showSeparator: index < root.count - 1
 
-        ButtonGroup.group: buttonGroup
         checked: root.currentValue !== "" ? name === root.currentValue : root.selectedIndex === index
 
-        onClicked: {
-            root.selectedIndex = index
-            root.selectedText = name
-            root.activated(index)
-        }
-
-        Component.onCompleted: {
-            if (root.selectedIndex === index) {
-                root.selectedText = name
-            }
-        }
+        onClicked: root.select(index)
     }
 }

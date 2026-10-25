@@ -6,12 +6,19 @@ Text {
     id: root
 
     readonly property real halfLeading: Math.max(0, (root.lineHeight - fontMetrics.height) / 2)
+    readonly property real alignmentShift: {
+        const extra = Math.ceil(fontMetrics.height) - root.lineHeight
+        if (root.verticalAlignment === Text.AlignVCenter) {
+            return extra / 2
+        }
+        return root.verticalAlignment === Text.AlignBottom ? extra : 0
+    }
 
     lineHeight: 24 + LanguageUiController.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
-    topPadding: root.halfLeading
-    bottomPadding: -root.halfLeading
+    topPadding: root.halfLeading + root.alignmentShift
+    bottomPadding: -root.halfLeading - root.alignmentShift
 
     color: AmneziaStyle.color.textSecondary
     font.pixelSize: 16

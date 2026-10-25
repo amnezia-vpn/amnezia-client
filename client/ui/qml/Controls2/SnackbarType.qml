@@ -10,10 +10,7 @@ import "TextTypes"
 Popup {
     id: root
 
-    enum Variant { Default, Destructive }
-
     property string text
-    property int variant: SnackbarType.Default
     property string actionText
     property bool closable: false
     property int duration: 4000
@@ -178,9 +175,9 @@ Popup {
             SmallTextType {
                 Layout.fillWidth: true
 
-                text: root.text
-                color: root.variant === SnackbarType.Destructive ? AmneziaStyle.color.statusDestructive
-                                                                  : AmneziaStyle.color.textInverted
+                text: root.text.replace(/\n/g, "<br>").replace(/<a /g, "<a style=\"color: " + AmneziaStyle.color.textInfoInverse + "; text-decoration: none\" ")
+                textFormat: Text.RichText
+                color: AmneziaStyle.color.textInverted
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
@@ -195,6 +192,7 @@ Popup {
                 id: actionButton
 
                 Layout.alignment: Qt.AlignVCenter
+                Layout.maximumWidth: content.width / 2
 
                 visible: root.actionText !== "" || root.closable
 
@@ -233,6 +231,7 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     wrapMode: Text.NoWrap
+                    elide: Text.ElideRight
                 }
 
                 HoverHandler {

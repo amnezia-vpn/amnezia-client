@@ -86,9 +86,8 @@ TextField {
         root.clear()
     }
 
-    ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
     ContextMenu.onRequested: function(position) {
-        contextMenu.requestNative(position)
+        contextMenu.request(position)
     }
 
     TapHandler {

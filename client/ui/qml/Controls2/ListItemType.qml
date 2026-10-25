@@ -21,7 +21,7 @@ ItemDelegate {
     property bool dense: false
     property bool trailingContentVisible: trailingSlot.children.length > 0
     property color separatorColor: AmneziaStyle.color.borderSoft
-    property int leadingSlotWidth: 48
+    property int leadingSlotWidth: 24
     property bool showIconBadge: false
 
     readonly property bool rowHovered: root.interactive && root.enabled && root.hovered && !trailingHover.hovered
@@ -34,6 +34,7 @@ ItemDelegate {
     implicitHeight: Math.max(root.dense ? 72 : 56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
+    leftPadding: 16
     verticalPadding: 4
     spacing: 12
 
@@ -76,18 +77,19 @@ ItemDelegate {
                 color: root.icon.color
 
                 DotBadgeType {
-                    anchors.horizontalCenter: parent.right
+                    anchors.horizontalCenter: parent.left
+                    anchors.horizontalCenterOffset: 20.5
                     anchors.verticalCenter: parent.top
+                    anchors.verticalCenterOffset: 3.5
 
                     visible: root.showIconBadge
-                    color: AmneziaStyle.color.accentDefault
+                    color: AmneziaStyle.color.accentLight
                 }
             }
         }
 
         ListItemLabelType {
             Layout.fillWidth: true
-            Layout.leftMargin: 4
             Layout.topMargin: 10
             Layout.bottomMargin: 10
 

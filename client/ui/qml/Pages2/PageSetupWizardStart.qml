@@ -13,7 +13,8 @@ import "../Components"
 
 PageType {
     id: root
-    enableTimer: (SettingsController.isOnTv()) ? false : true
+
+    initialFocusItem: SettingsController.isOnTv() ? startButton : root
 
     Item {
         id: logoArea
@@ -51,24 +52,6 @@ PageType {
 
         onClicked: {
             PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-        }
-    }
-
-    Timer {
-        interval: 250
-        running: SettingsController.isOnTv()
-        repeat: true
-        onTriggered: {
-            startButton.forceActiveFocus()
-            if (startButton.activeFocus) {
-                running = false
-            }
-        }
-    }
-
-    onVisibleChanged: {
-        if (visible && SettingsController.isOnTv()) {
-            startButton.forceActiveFocus()
         }
     }
 }

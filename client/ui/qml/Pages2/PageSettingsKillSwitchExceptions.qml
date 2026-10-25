@@ -48,11 +48,12 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("DNS Exceptions")
                 description: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")
@@ -82,17 +83,10 @@ PageType {
 
                     var yesButtonFunction = function() {
                         AllowedDnsController.removeDns(dnsFilterModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
         }

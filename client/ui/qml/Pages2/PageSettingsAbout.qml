@@ -85,7 +85,7 @@ PageType {
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
                 spacing: 24
 
@@ -106,18 +106,44 @@ PageType {
 
                         spacing: 0
 
-                        Repeater {
-                            model: contacts
+                        ListItemType {
+                            Layout.fillWidth: true
 
-                            delegate: ListItemType {
-                                Layout.fillWidth: true
+                            text: qsTr("Telegram group")
+                            subtitle: qsTr("To discuss features")
+                            icon.source: "qrc:/images/controls/telegram.svg"
 
-                                text: title
-                                subtitle: description
-                                icon.source: imageSource
+                            onClicked: Qt.openUrlExternally(qsTr("https://telegram.me/amnezia_vpn_en"))
+                        }
 
-                                onClicked: handler()
-                            }
+                        ListItemType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("support@amnezia.org")
+                            subtitle: qsTr("For reviews and bug reports")
+                            icon.source: "qrc:/images/controls/mail.svg"
+
+                            onClicked: Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
+                        }
+
+                        ListItemType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("GitHub")
+                            subtitle: qsTr("Discover the source code")
+                            icon.source: "qrc:/images/controls/github.svg"
+
+                            onClicked: Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
+                        }
+
+                        ListItemType {
+                            Layout.fillWidth: true
+
+                            text: qsTr("Website")
+                            subtitle: qsTr("Visit official website")
+                            icon.source: "qrc:/images/controls/amnezia.svg"
+
+                            onClicked: Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
                         }
                     }
                 }
@@ -165,10 +191,10 @@ PageType {
                         id: checkUpdatesButton
 
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: Math.max(220, implicitWidth)
                         Layout.maximumWidth: content.width - 32
 
-                        variant: ButtonType.Secondary
+                        variant: ButtonType.Text
+                        size: ButtonType.Medium
                         loading: UpdateController.isCheckRunning
                         enabled: !UpdateController.isCheckRunning
 
@@ -185,6 +211,7 @@ PageType {
                         Layout.alignment: Qt.AlignHCenter
 
                         variant: ButtonType.Text
+                        size: ButtonType.Medium
                         text: qsTr("Privacy Policy")
 
                         onClicked: {
@@ -193,57 +220,6 @@ PageType {
                     }
                 }
             }
-        }
-    }
-
-    property list<QtObject> contacts: [
-        telegramGroup,
-        mail,
-        github,
-        website
-    ]
-
-    QtObject {
-        id: telegramGroup
-
-        readonly property string title: qsTr("Telegram group")
-        readonly property string description: qsTr("To discuss features")
-        readonly property string imageSource: "qrc:/images/controls/telegram.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://telegram.me/amnezia_vpn_en"))
-        }
-    }
-
-    QtObject {
-        id: mail
-
-        readonly property string title: qsTr("support@amnezia.org")
-        readonly property string description: qsTr("For reviews and bug reports")
-        readonly property string imageSource: "qrc:/images/controls/mail.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
-        }
-    }
-
-    QtObject {
-        id: github
-
-        readonly property string title: qsTr("GitHub")
-        readonly property string description: qsTr("Discover the source code")
-        readonly property string imageSource: "qrc:/images/controls/github.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
-        }
-    }
-
-    QtObject {
-        id: website
-
-        readonly property string title: qsTr("Website")
-        readonly property string description: qsTr("Visit official website")
-        readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }

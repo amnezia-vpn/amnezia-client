@@ -53,7 +53,6 @@ PageType {
 
             BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
