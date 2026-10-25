@@ -844,6 +844,7 @@ void SubscriptionUiController::updateApiCountryModel(const QString &serverId)
     const QString currentCountryCode = apiV2.has_value() ? apiV2->apiConfig.serverCountryCode : QString();
     const QString userCountryCode = apiV2.has_value() ? apiV2->apiConfig.userCountryCode : QString();
 
+    m_apiCountryModel->setServerId(serverId);
     m_apiCountryModel->updateModel(m_apiAccountInfoModel->getAvailableCountries(), currentCountryCode,
                                    userCountryCode);
     m_apiCountryModel->updateIssuedConfigsInfo(m_apiAccountInfoModel->getIssuedConfigsInfo());

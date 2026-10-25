@@ -40,6 +40,9 @@ public:
         , m_servicesCatalogUiController(servicesCatalogUiControllerProtected())
         , m_apiNewsUiController(apiNewsUiControllerProtected())
         , m_subscriptionController(subscriptionControllerProtected())
+        , m_apiCountryModel(apiCountryModelProtected())
+        , m_apiCountryListModel(apiCountryListModelProtected())
+        , m_apiConfigsCountryListModel(apiConfigsCountryListModelProtected())
     {
     }
 
@@ -73,6 +76,9 @@ public:
     ServicesCatalogUiController *m_servicesCatalogUiController;
     ApiNewsUiController *m_apiNewsUiController;
     SubscriptionController *m_subscriptionController;
+    ApiCountryModel *m_apiCountryModel;
+    ApiCountryListModel *m_apiCountryListModel;
+    ApiCountryListModel *m_apiConfigsCountryListModel;
 };
 
 #endif // TESTCORECONTROLLER_H
