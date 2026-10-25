@@ -7,6 +7,7 @@ from conan.tools.apple import XCRun, is_apple_os
 from conan.tools.apple.apple import _to_apple_arch
 from conan.tools.env import Environment
 
+import io
 import os
 import shlex
 
@@ -117,8 +118,15 @@ class Libagw(ConanFile):
             self.run(f'go build -buildmode={buildmode} -ldflags="{go_ldflags}" '
                      f'-o {shlex.quote(output)} ./archive')
 
+    def _godebug_ldflag(self):
+        output = io.StringIO()
+        self.run("go list -f '{{.DefaultGODEBUG}}' ./archive", stdout=output)
+        godebug = ",".join(filter(None, [output.getvalue().strip(), "asyncpreemptoff=1"]))
+        return f"-X=runtime.godebugDefault={godebug}"
+
     def build(self):
         with chdir(self, self.source_folder):
+            godebug_ldflag = self._godebug_ldflag() if is_apple_os(self) else ""
             for arch in self._archs:
                 build_dir = os.path.join(self.build_folder, self._slices_dir, arch) if self._is_multiarch else self.build_folder
                 if self._is_windows:
@@ -140,7 +148,8 @@ class Libagw(ConanFile):
                     self._go_build(os.path.join(build_dir, self._shared_lib), "c-shared", goarch, cflags, ldflags,
                                    goldflags=f"-extldflags=-Wl,-soname,{self._shared_lib}")
                 else:
-                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags)
+                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags,
+                                   goldflags=godebug_ldflag)
 
             if is_apple_os(self) and self._is_multiarch:
                 lipo = XCRun(self).find("lipo")
