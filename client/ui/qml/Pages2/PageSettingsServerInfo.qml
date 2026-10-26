@@ -117,15 +117,13 @@ PageType {
 
             TabButtonType {
                 id: protocolsTab
-                visible: protocolsPage.installedProtocolsCount
-                width: protocolsPage.installedProtocolsCount ? undefined : 0
+                visible: protocolsPage.installedProtocolsCount > 0
                 text: qsTr("Protocols")
             }
 
             TabButtonType {
                 id: servicesTab
-                visible: servicesPage.installedServicesCount
-                width: servicesPage.installedServicesCount ? undefined : 0
+                visible: servicesPage.installedServicesCount > 0
                 text: qsTr("Services")
             }
 
