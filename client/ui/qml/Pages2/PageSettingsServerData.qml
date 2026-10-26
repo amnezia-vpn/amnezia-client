@@ -28,7 +28,7 @@ PageType {
                 message = qsTr("No new installed containers found")
             }
 
-            PageController.showErrorMessage(message)
+            PageController.showNotificationMessage(message)
         }
 
         function onRebootServerFinished(finishedMessage) {
