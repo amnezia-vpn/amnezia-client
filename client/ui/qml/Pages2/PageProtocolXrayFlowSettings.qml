@@ -15,7 +15,8 @@ import "../Components"
 PageType {
     id: root
 
-    readonly property bool visionAllowed: XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw"
+    readonly property bool visionAllowed: (XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw")
+                                          && (XrayConfigModel.security === "tls" || XrayConfigModel.security === "reality")
 
     FlickableType {
         id: flickable
@@ -80,7 +81,7 @@ PageType {
                 Layout.topMargin: 12
                 visible: !root.visionAllowed
                 color: AmneziaStyle.color.textAccent
-                text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport.")
+                text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport and TLS or Reality security.")
             }
 
             Item {
@@ -103,6 +104,12 @@ PageType {
         enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -112,8 +119,10 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
             var noButtonFunction = function () {}
             Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

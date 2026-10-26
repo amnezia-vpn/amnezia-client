@@ -267,7 +267,6 @@ public:
 
     Q_INVOKABLE static bool isValidHost(const QString &host);
     Q_INVOKABLE static bool isValidSni(const QString &sni);
-    Q_INVOKABLE static bool isValidPath(const QString &path);
     Q_INVOKABLE QStringList validationErrors() const;
 
     Q_INVOKABLE bool pendingChangeTouchesServer(const QString &pendingPort) const;

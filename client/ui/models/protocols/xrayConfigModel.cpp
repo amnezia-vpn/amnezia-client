@@ -13,6 +13,28 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
+namespace
+{
+    QJsonObject comparableJson(amnezia::XrayServerConfig config)
+    {
+        if (config.transport != QLatin1String(protocols::xray::transportXhttp)) {
+            config.xhttp = {};
+        }
+        if (config.transport != QLatin1String(protocols::xray::transportMkcp)) {
+            config.mkcp = {};
+        }
+        auto &x = config.xhttp.xmux;
+        for (QString *limit : { &x.maxConcurrencyMin, &x.maxConcurrencyMax, &x.maxConnectionsMin, &x.maxConnectionsMax,
+                                &x.cMaxReuseTimesMin, &x.cMaxReuseTimesMax, &x.hMaxRequestTimesMin, &x.hMaxRequestTimesMax,
+                                &x.hMaxReusableSecsMin, &x.hMaxReusableSecsMax }) {
+            if (limit->isEmpty()) {
+                *limit = QStringLiteral("0");
+            }
+        }
+        return config.toJson();
+    }
+}
+
 XrayConfigModel::XrayConfigModel(QObject* parent) : QObject(parent)
 {
 }
@@ -623,7 +645,7 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
         return m_protocolConfig;
     }
 
-    if (m_protocolConfig.serverConfig.toJson() == m_originalProtocolConfig.serverConfig.toJson()) {
+    if (comparableJson(m_protocolConfig.serverConfig) == comparableJson(m_originalProtocolConfig.serverConfig)) {
         return m_protocolConfig;
     }
 
@@ -677,7 +699,7 @@ QString XrayConfigModel::saveDescription(const QString &pendingPort) const
         if (breaksIssued) {
             return tr("The server configuration will be updated. All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
         } else {
-            return tr("The server configuration will be updated. The container will not be recreated.");
+            return tr("The server configuration will be updated. If XRay on the server is outdated, the container will be recreated with the current version; connections that were already shared keep working.");
         }
     } else {
         return tr("The server will not be changed now. The new settings apply the next time you connect.");
@@ -691,7 +713,7 @@ bool XrayConfigModel::isServerSettingsEqual() const
 
 bool XrayConfigModel::hasUnsavedChanges() const
 {
-    return m_protocolConfig.serverConfig.toJson() != m_originalProtocolConfig.serverConfig.toJson();
+    return comparableJson(m_protocolConfig.serverConfig) != comparableJson(m_originalProtocolConfig.serverConfig);
 }
 
 void XrayConfigModel::resetToDefaults()
@@ -747,7 +769,7 @@ QStringList XrayConfigModel::alpnOptions()
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
-    return { "Stream-up", "Stream-one" };
+    return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -767,7 +789,7 @@ QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
-    return { "Body", "Auto" };
+    return { "Body", "Auto", "Header", "Cookie" };
 }
 
 QStringList XrayConfigModel::xPaddingPlacementOptions()
@@ -914,19 +936,10 @@ bool XrayConfigModel::isValidSni(const QString &sni)
     if (t.isEmpty()) {
         return true;
     }
-    if (t.startsWith(QLatin1String("*."))) {
-        return isValidSingleHost(t.mid(2));
+    if (t.contains(QLatin1Char('*'))) {
+        return false;
     }
     return isValidSingleHost(t);
-}
-
-bool XrayConfigModel::isValidPath(const QString &path)
-{
-    const QString t = path.trimmed();
-    if (t.isEmpty()) {
-        return true;
-    }
-    return t.startsWith(QLatin1Char('/'));
 }
 
 QStringList XrayConfigModel::validationErrors() const
@@ -934,7 +947,7 @@ QStringList XrayConfigModel::validationErrors() const
     QStringList errs;
     const auto &srv = m_protocolConfig.serverConfig;
 
-    if (!srv.port.isEmpty()) {
+    if (!srv.port.isEmpty() || !srv.isThirdPartyConfig) {
         bool ok = false;
         const int p = srv.port.toInt(&ok);
         if (!ok || p < 1 || p > 65535) {
@@ -942,7 +955,8 @@ QStringList XrayConfigModel::validationErrors() const
         }
     }
 
-    if (srv.security == QLatin1String("tls") || srv.security == QLatin1String("reality")) {
+    const QString security = xrayEffective::security(srv);
+    if (security == QLatin1String("tls") || security == QLatin1String("reality")) {
         if (!isValidSni(srv.sni)) {
             errs << tr("SNI: enter a valid IP address or domain name");
         }
@@ -952,8 +966,11 @@ QStringList XrayConfigModel::validationErrors() const
         if (!isValidHost(srv.xhttp.host)) {
             errs << tr("Host: enter a valid IP address or domain name");
         }
-        if (!isValidPath(srv.xhttp.path)) {
-            errs << tr("Path must start with \"/\"");
+        const auto &xmux = srv.xhttp.xmux;
+        auto isSet = [](const QString &v) { return !v.isEmpty() && v != QLatin1String("0"); };
+        if (xmux.enabled && (isSet(xmux.maxConcurrencyMin) || isSet(xmux.maxConcurrencyMax))
+            && (isSet(xmux.maxConnectionsMin) || isSet(xmux.maxConnectionsMax))) {
+            errs << tr("XMux: set either maxConcurrency or maxConnections, not both");
         }
     }
 
