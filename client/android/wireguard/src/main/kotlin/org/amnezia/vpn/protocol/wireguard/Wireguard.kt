@@ -1,6 +1,9 @@
 package org.amnezia.vpn.protocol.wireguard
 
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.VpnService.Builder
+import java.net.InetAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,11 +22,17 @@ import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.asSequence
 import org.amnezia.vpn.util.net.InetEndpoint
 import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.ip
+import org.amnezia.vpn.util.net.isNumericAddress
 import org.amnezia.vpn.util.net.parseInetAddress
 import org.amnezia.vpn.util.optStringOrNull
 import org.json.JSONObject
 
 private const val TAG = "Wireguard"
+
+private const val ENDPOINT_POLL_MS = 20_000L
+// DNS is asked again at most this often while the tunnel stays stale
+private const val ENDPOINT_RECHECK_MS = 60_000L
 
 open class Wireguard : Protocol() {
 
@@ -32,6 +41,11 @@ open class Wireguard : Protocol() {
     protected open val ifName: String = "amn0"
     private lateinit var scope: CoroutineScope
     private var statusJob: Job? = null
+
+    // Host name of the server as configured, null if the endpoint is an IP literal
+    private var endpointHost: String? = null
+    private var endpointJob: Job? = null
+    private val endpointWatchdog = EndpointWatchdog(ENDPOINT_RECHECK_MS, ENDPOINT_RECHECK_MS)
 
     override val statistics: Statistics
         get() {
@@ -102,7 +116,9 @@ open class Wireguard : Protocol() {
 
         configData.optStringOrNull("mtu")?.let { setMtu(it.toInt()) }
 
-        val host = configData.getString("hostName").let { parseInetAddress(it.trim()) }
+        val hostName = configData.getString("hostName").trim()
+        val host = parseInetAddress(hostName)
+        endpointHost = hostName.takeUnless { isNumericAddress(it) }
         val port = configData.getInt("port")
         setEndpoint(InetEndpoint(host, port))
 
@@ -189,6 +205,7 @@ open class Wireguard : Protocol() {
             throw VpnStartException("Protect VPN interface: permission not granted or revoked")
         }
         launchStatusJob()
+        launchEndpointJob()
     }
 
     private fun launchStatusJob() {
@@ -207,6 +224,80 @@ open class Wireguard : Protocol() {
                 break
             }
         }
+    }
+
+    /**
+     * Watches the peer while the tunnel is up. When the server stops answering,
+     * resolves its host name again outside the tunnel and, if the address
+     * changed, reconnects to the new one: the app resolves the name only once
+     * per connection, so without this a server that moved to another IP is
+     * reachable again only after a manual reconnect.
+     */
+    private fun launchEndpointJob() {
+        val host = endpointHost ?: return
+        endpointJob?.cancel()
+        endpointWatchdog.tunnelStarted(System.currentTimeMillis())
+        endpointJob = scope.launch {
+            while (true) {
+                delay(ENDPOINT_POLL_MS)
+                val status = getPeerStatus() ?: continue
+                val now = System.currentTimeMillis()
+                if (!endpointWatchdog.observe(now, status.lastHandshakeMs, status.txBytes)) continue
+                endpointWatchdog.refreshAttempted(now)
+
+                val config = this@Wireguard.config ?: continue
+                val current = config.endpoint
+                val addresses = resolveOutsideTunnel(host)
+                if (addresses.isEmpty() || current.address in addresses) {
+                    Log.i(TAG, "No handshake with $host, its address is unchanged")
+                    continue
+                }
+                val address = addresses.firstOrNull { it.javaClass == current.address.javaClass } ?: addresses.first()
+                Log.i(TAG, "No handshake with $host, it moved to ${address.ip}: reconnecting")
+                config.endpoint = InetEndpoint(address, current.port)
+                requestReconnect()
+                break
+            }
+        }
+    }
+
+    private class PeerStatus(val lastHandshakeMs: Long, val txBytes: Long)
+
+    private fun getPeerStatus(): PeerStatus? {
+        if (tunnelHandle == -1) return null
+        val config = GoBackend.awgGetConfig(tunnelHandle) ?: return null
+        var sec = 0L
+        var nsec = 0L
+        var tx = 0L
+        config.lineSequence().forEach { line ->
+            when {
+                line.startsWith("last_handshake_time_sec=") -> sec = line.substring(24).toLongOrNull() ?: 0
+                line.startsWith("last_handshake_time_nsec=") -> nsec = line.substring(25).toLongOrNull() ?: 0
+                line.startsWith("tx_bytes=") -> tx = line.substring(9).toLongOrNull() ?: 0
+            }
+        }
+        return PeerStatus(sec * 1000 + nsec / 1_000_000, tx)
+    }
+
+    /**
+     * Resolves [host] on an underlying (non-VPN) network: while the tunnel is
+     * stale, DNS through it does not work.
+     */
+    @Suppress("DEPRECATION") // allNetworks: the underlying networks are needed, not the default (VPN) one
+    private fun resolveOutsideTunnel(host: String): List<InetAddress> {
+        val connectivityManager = context.getSystemService(ConnectivityManager::class.java) ?: return emptyList()
+        for (network in connectivityManager.allNetworks) {
+            val caps = connectivityManager.getNetworkCapabilities(network) ?: continue
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) ||
+                !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            ) continue
+            try {
+                return network.getAllByName(host).toList()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to resolve $host on $network: $e")
+            }
+        }
+        return emptyList()
     }
 
     private fun getLastHandshake(): Long {
@@ -230,6 +321,8 @@ open class Wireguard : Protocol() {
     private fun turnOffVpn() {
         statusJob?.cancel()
         statusJob = null
+        endpointJob?.cancel()
+        endpointJob = null
         val handleToClose = tunnelHandle
         tunnelHandle = -1
         GoBackend.awgTurnOff(handleToClose)
