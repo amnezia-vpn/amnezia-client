@@ -139,7 +139,7 @@ PageType {
 
                     spacing: 12
 
-                    visible: benefitsPanel.visible
+                    visible: benefitsPanel.benefitsCount > 0
 
                     BodyTextType {
                         Layout.fillWidth: true
