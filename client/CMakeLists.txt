@@ -104,6 +104,7 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ko_KR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fr_FR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_th_TH.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_id_ID.ts
     )
 endif()
 
@@ -224,6 +225,10 @@ endif()
 
 if(ANDROID)
     include(cmake/android.cmake)
+endif()
+
+if(APPLE)
+    include(cmake/appleAppIcon.cmake)
 endif()
 
 if(IOS)

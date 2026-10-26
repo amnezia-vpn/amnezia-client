@@ -43,20 +43,17 @@ PageType {
 
             spacing: 0
 
-            HeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12 + PageController.safeAreaTopMargin
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                headerText: qsTr("Removing services from %1").arg(name)
+                backButtonVisible: false
+                title: qsTr("Removing services from %1").arg(name)
             }
 
             ProgressBarType {
                 id: progressBar
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

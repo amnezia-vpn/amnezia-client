@@ -75,7 +75,6 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -249,7 +248,7 @@ PageType {
                                     .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                         }
 
-                        showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
+                        Dialogs.askQuestion(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
                             function() { root.proceedWithPurchase(plan) },
                             function() {})
                         return

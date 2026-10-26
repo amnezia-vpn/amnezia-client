@@ -15,50 +15,43 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
-
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("xPadding")
-        }
+        ColumnLayout {
+            id: content
 
-        footer: Item {
-            width: listView.width
-            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
-        }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        delegate: Item {
-            width: listView.width
-            implicitHeight: content.implicitHeight
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("xPadding")
+            }
 
             ColumnLayout {
-                id: content
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 spacing: 12
 
                 ListItemType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
                     text: qsTr("xPaddingBytes")
-                    subtitle: (xPaddingBytesMin !== "" ? xPaddingBytesMin : "0") + "—" + (xPaddingBytesMax !== "" ? xPaddingBytesMax : "0")
+                    subtitle: (XrayConfigModel.xPaddingBytesMin !== "" ? XrayConfigModel.xPaddingBytesMin : "0") + "—" + (XrayConfigModel.xPaddingBytesMax !== "" ? XrayConfigModel.xPaddingBytesMax : "0")
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                     onClicked: {
                         PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
@@ -69,8 +62,8 @@ PageType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
                     text: qsTr("xPaddingObfsMode")
-                    checked: xPaddingObfsMode
-                    onToggled: xPaddingObfsMode = checked
+                    checked: XrayConfigModel.xPaddingObfsMode
+                    onToggled: XrayConfigModel.xPaddingObfsMode = checked
                 }
 
                 TextFieldType {
@@ -78,14 +71,12 @@ PageType {
                     Layout.topMargin: 12
                     headerText: qsTr("xPaddingKey")
                     placeholderText: XrayConfigModel.xPaddingKeyDefault()
-                    textField.text: xPaddingKey
+                    textField.text: XrayConfigModel.xPaddingKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xPaddingKey)
+                    textField.onTextEdited: XrayConfigModel.xPaddingKey = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xPaddingKey) xPaddingKey = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xPaddingKey) XrayConfigModel.xPaddingKey = v
                     }
                 }
 
@@ -93,14 +84,12 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("xPaddingHeader")
                     placeholderText: XrayConfigModel.xPaddingHeaderDefault()
-                    textField.text: xPaddingHeader
+                    textField.text: XrayConfigModel.xPaddingHeader
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xPaddingHeader)
+                    textField.onTextEdited: XrayConfigModel.xPaddingHeader = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xPaddingHeader) xPaddingHeader = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xPaddingHeader) XrayConfigModel.xPaddingHeader = v
                     }
                 }
 
@@ -108,11 +97,11 @@ PageType {
                     id: placementDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xPaddingPlacement
+                    text: XrayConfigModel.xPaddingPlacement
                     descriptionText: qsTr("xPaddingPlacement")
                     headerText: qsTr("xPaddingPlacement")
                     listView: RadioListType {
-                        currentValue: xPaddingPlacement
+                        currentValue: XrayConfigModel.xPaddingPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xPaddingPlacementOptions()
@@ -122,24 +111,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xPaddingPlacement = selectedText
-                            placementDropDown.text = selectedText
+                            XrayConfigModel.xPaddingPlacement = selectedText
                             placementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xPaddingPlacement) {
+                                if (model.get(i).name === XrayConfigModel.xPaddingPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            placementDropDown.text = xPaddingPlacement
                         }
                     }
                 }
@@ -148,11 +129,11 @@ PageType {
                     id: methodDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xPaddingMethod
+                    text: XrayConfigModel.xPaddingMethod
                     descriptionText: qsTr("xPaddingMethod")
                     headerText: qsTr("xPaddingMethod")
                     listView: RadioListType {
-                        currentValue: xPaddingMethod
+                        currentValue: XrayConfigModel.xPaddingMethod
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xPaddingMethodOptions()
@@ -162,27 +143,24 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xPaddingMethod = selectedText
-                            methodDropDown.text = selectedText
+                            XrayConfigModel.xPaddingMethod = selectedText
                             methodDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xPaddingMethod) {
+                                if (model.get(i).name === XrayConfigModel.xPaddingMethod) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            methodDropDown.text = xPaddingMethod
-                        }
-                    }
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
@@ -197,11 +175,10 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
-            saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -214,12 +191,8 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

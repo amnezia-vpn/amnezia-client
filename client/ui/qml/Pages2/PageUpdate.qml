@@ -48,7 +48,6 @@ PageType {
         IconButtonType {
             id: supportButton
 
-            size: IconButtonType.Small
             icon.source: "qrc:/images/controls/headphones.svg"
 
             onClicked: supportDrawer.open()
@@ -60,7 +59,7 @@ PageType {
 
         anchors.top: navigationBar.bottom
         anchors.bottom: bottomBar.top
-        contentHeight: content.implicitHeight + 16 + 32
+        contentHeight: content.implicitHeight + 24
 
         ColumnLayout {
             id: content
@@ -68,7 +67,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 24

@@ -1,46 +1,78 @@
 #ifndef TELEMTCONFIGMODEL_H
 #define TELEMTCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 #include <QJsonObject>
 #include <QRandomGenerator>
 
 #include "core/models/protocols/telemtProtocolConfig.h"
 #include "core/utils/containerEnum.h"
 
-class TelemtConfigModel : public QAbstractListModel {
+class TelemtConfigModel : public QObject {
 Q_OBJECT
 
-public:
-    enum Roles {
-        PortRole = Qt::UserRole + 1,
-        SecretRole,
-        TagRole,
-        TgLinkRole,
-        TmeLinkRole,
-        IsEnabledRole,
-        PublicHostRole,
-        TransportModeRole,
-        TlsDomainRole,
-        AdditionalSecretsRole,
-        WorkersModeRole,
-        WorkersRole,
-        NatEnabledRole,
-        NatInternalIpRole,
-        NatExternalIpRole,
-        MaskEnabledRole,
-        UseMiddleProxyRole,
-        TlsEmulationRole,
-        UserNameRole
-    };
+    Q_PROPERTY(QString port READ port WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString secret READ secret WRITE setSecret NOTIFY changed)
+    Q_PROPERTY(QString tag READ tag WRITE setTag NOTIFY changed)
+    Q_PROPERTY(QString tgLink READ tgLink NOTIFY changed)
+    Q_PROPERTY(QString tmeLink READ tmeLink NOTIFY changed)
+    Q_PROPERTY(bool isEnabled READ isEnabled WRITE setEnabled NOTIFY changed)
+    Q_PROPERTY(QString publicHost READ publicHost WRITE setPublicHost NOTIFY changed)
+    Q_PROPERTY(QString transportMode READ transportMode WRITE setTransportMode NOTIFY changed)
+    Q_PROPERTY(QString tlsDomain READ tlsDomain WRITE setTlsDomain NOTIFY changed)
+    Q_PROPERTY(QStringList additionalSecrets READ additionalSecrets WRITE setAdditionalSecrets NOTIFY changed)
+    Q_PROPERTY(QString workersMode READ workersMode WRITE setWorkersMode NOTIFY changed)
+    Q_PROPERTY(QString workers READ workers WRITE setWorkers NOTIFY changed)
+    Q_PROPERTY(bool natEnabled READ natEnabled WRITE setNatEnabled NOTIFY changed)
+    Q_PROPERTY(QString natInternalIp READ natInternalIp WRITE setNatInternalIp NOTIFY changed)
+    Q_PROPERTY(QString natExternalIp READ natExternalIp WRITE setNatExternalIp NOTIFY changed)
+    Q_PROPERTY(bool maskEnabled READ maskEnabled WRITE setMaskEnabled NOTIFY changed)
+    Q_PROPERTY(bool useMiddleProxy READ useMiddleProxy WRITE setUseMiddleProxy NOTIFY changed)
+    Q_PROPERTY(bool tlsEmulation READ tlsEmulation WRITE setTlsEmulation NOTIFY changed)
+    Q_PROPERTY(QString userName READ userName WRITE setUserName NOTIFY changed)
 
+public:
     explicit TelemtConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QString port() const;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    QString secret() const;
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString tag() const;
+
+    QString tgLink() const;
+
+    QString tmeLink() const;
+
+    bool isEnabled() const;
+
+    QString publicHost() const;
+
+    QString transportMode() const;
+
+    QString tlsDomain() const;
+
+    QStringList additionalSecrets() const;
+
+    void setAdditionalSecrets(const QStringList &secrets);
+
+    QString workersMode() const;
+
+    QString workers() const;
+
+    bool natEnabled() const;
+
+    QString natInternalIp() const;
+
+    QString natExternalIp() const;
+
+    bool maskEnabled() const;
+
+    bool useMiddleProxy() const;
+
+    bool tlsEmulation() const;
+
+    QString userName() const;
 
 public slots:
 
@@ -148,8 +180,8 @@ public slots:
 
     Q_INVOKABLE bool isValidOptionalIpv4(const QString &ip) const;
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     static void applyDefaults(amnezia::TelemtProtocolConfig &c);

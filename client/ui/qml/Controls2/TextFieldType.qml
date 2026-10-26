@@ -84,7 +84,7 @@ Item {
                     topRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
                     bottomRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
 
-                    color: AmneziaStyle.color.bgSurfaceAlt
+                    color: root.headerText !== "" ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgSurface
                     border.width: textField.activeFocus ? 2 : 1
                     border.color: {
                         if (root.hasError) {
@@ -121,9 +121,8 @@ Item {
                     }
                 }
 
-                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
                 ContextMenu.onRequested: function(position) {
-                    contextMenu.requestNative(position)
+                    contextMenu.request(position)
                 }
 
                 TapHandler {
@@ -142,68 +141,76 @@ Item {
                     textObj: textField
                 }
 
-                Row {
+                Loader {
                     id: actions
 
                     anchors.right: parent.right
-                    anchors.rightMargin: 12
+                    anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
 
-                    visible: root.clearable || root.passwordToggle || root.trailingIconSource !== ""
+                    active: root.clearable || root.passwordToggle || root.trailingIconSource !== ""
+                    visible: active
 
-                    IconButtonType {
-                        id: clearButton
+                    sourceComponent: Row {
+                        IconButtonType {
+                            id: clearButton
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                            implicitWidth: 40
+                            implicitHeight: 40
 
-                        visible: root.clearable && textField.text !== "" && !textField.readOnly
-                        icon.source: "qrc:/images/controls/x-circle.svg"
+                            visible: root.clearable && textField.text !== "" && !textField.readOnly
+                            icon.source: "qrc:/images/controls/x-circle.svg"
 
-                        onClicked: {
-                            textField.clear()
-                            textField.forceActiveFocus()
+                            onClicked: {
+                                textField.clear()
+                                textField.forceActiveFocus()
+                            }
                         }
-                    }
 
-                    IconButtonType {
-                        id: eyeButton
+                        IconButtonType {
+                            id: eyeButton
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                            implicitWidth: 40
+                            implicitHeight: 40
 
-                        visible: root.passwordToggle
-                        icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
+                            visible: root.passwordToggle
+                            icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
 
-                        onClicked: root.passwordRevealed = !root.passwordRevealed
-                    }
+                            onClicked: root.passwordRevealed = !root.passwordRevealed
+                        }
 
-                    IconButtonType {
-                        id: trailingButton
+                        IconButtonType {
+                            id: trailingButton
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                            implicitWidth: 40
+                            implicitHeight: 40
 
-                        visible: root.trailingIconSource !== ""
-                        icon.source: root.trailingIconSource
+                            visible: root.trailingIconSource !== ""
+                            icon.source: root.trailingIconSource
 
-                        onClicked: root.trailingClicked()
+                            onClicked: root.trailingClicked()
+                        }
                     }
                 }
             }
 
-            InputButtonType {
+            Loader {
                 id: attachedButton
 
                 Layout.preferredHeight: textField.height
+                Layout.maximumWidth: Math.max(83, root.width * 0.4)
 
-                visible: root.buttonText !== "" || root.buttonImageSource !== ""
-                joined: root.buttonJoined
+                active: root.buttonText !== "" || root.buttonImageSource !== ""
+                visible: active
 
-                text: root.buttonText
-                imageSource: root.buttonImageSource
+                sourceComponent: InputButtonType {
+                    joined: root.buttonJoined
 
-                onClicked: root.runClickedFunc()
+                    text: root.buttonText
+                    imageSource: root.buttonImageSource
+
+                    onClicked: root.runClickedFunc()
+                }
             }
         }
 

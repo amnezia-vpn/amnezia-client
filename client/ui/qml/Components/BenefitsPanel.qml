@@ -9,7 +9,7 @@ Pane {
 
     property var benefitsModel: null
 
-    visible: root.benefitsModel && root.benefitsModel.rowCount() > 0
+    visible: benefitsRepeater.count > 0
 
     padding: 16
 
@@ -22,6 +22,8 @@ Pane {
         spacing: 16
 
         Repeater {
+            id: benefitsRepeater
+
             model: root.benefitsModel
 
             delegate: BenefitRow {

@@ -10,7 +10,8 @@ Item {
     id: root
 
     property StackView stackView: StackView.view
-    property bool enableTimer: true
+    property bool focusOnActivation: true
+    property Item initialFocusItem: root
     property bool isTabBarHidden: false
 
     Rectangle {
@@ -20,25 +21,15 @@ Item {
         color: AmneziaStyle.color.bgBase
     }
 
-    onVisibleChanged: {
-        if (visible && enableTimer) {
-            timer.start()
+    StackView.onActivated: {
+        if (!root.focusOnActivation) {
+            return
         }
-    }
-
-    // Set a timer to set focus after a short delay
-    Timer {
-        id: timer
-        interval: 200 // Milliseconds
-        onTriggered: {
-            for (let item = root.Window.activeFocusItem; item; item = item.parent) {
-                if (item === root.Overlay.overlay) {
-                    return
-                }
+        for (let item = root.Window.activeFocusItem; item; item = item.parent) {
+            if (item === root.Overlay.overlay) {
+                return
             }
-            root.forceActiveFocus()
         }
-        repeat: false // Stop the timer after one trigger
-        running: enableTimer // Start the timer
+        root.initialFocusItem.forceActiveFocus()
     }
 }

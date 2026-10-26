@@ -54,8 +54,6 @@ ColumnLayout {
         text: root.title
         color: root.titleColor
         opacity: root.textOpacity
-        maximumLineCount: root.maximumLineCount
-        elide: Text.ElideRight
 
         Behavior on color {
             ColorAnimation { duration: 150 }

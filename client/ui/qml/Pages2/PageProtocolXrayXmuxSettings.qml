@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
-
     function clampSigned(text) {
         if (text === "" || text === "-")
             return ""
@@ -30,56 +28,51 @@ PageType {
         return String(n)
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("xmux")
-        }
+        ColumnLayout {
+            id: content
 
-        footer: Item {
-            width: listView.width
-            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
-        }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        delegate: Item {
-            width: listView.width
-            implicitHeight: content.implicitHeight
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("xmux")
+            }
 
             ColumnLayout {
-                id: content
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 spacing: 12
 
                 SwitchRowType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
                     text: qsTr("xmux")
-                    checked: xmuxEnabled
-                    onToggled: xmuxEnabled = checked
+                    checked: XrayConfigModel.xmuxEnabled
+                    onToggled: XrayConfigModel.xmuxEnabled = checked
                 }
 
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
 
-                    enabled: xmuxEnabled
+                    enabled: XrayConfigModel.xmuxEnabled
                     spacing: 12
 
                     SmallTextType {
@@ -88,13 +81,12 @@ PageType {
                     }
                     MinMaxRowType {
                         Layout.fillWidth: true
-                        minValue: xmuxMaxConcurrencyMin
-                        maxValue: xmuxMaxConcurrencyMax
+                        minValue: XrayConfigModel.xmuxMaxConcurrencyMin
+                        maxValue: XrayConfigModel.xmuxMaxConcurrencyMax
                         minPlaceholder: "0"
                         maxPlaceholder: "0"
-                        onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
-                        onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
-                        onEdited: root.editDirty = true
+                        onMinChanged: function(val) { XrayConfigModel.xmuxMaxConcurrencyMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxMaxConcurrencyMax = val }
                     }
 
                     SmallTextType {
@@ -104,13 +96,12 @@ PageType {
                     }
                     MinMaxRowType {
                         Layout.fillWidth: true
-                        minValue: xmuxMaxConnectionsMin
-                        maxValue: xmuxMaxConnectionsMax
+                        minValue: XrayConfigModel.xmuxMaxConnectionsMin
+                        maxValue: XrayConfigModel.xmuxMaxConnectionsMax
                         minPlaceholder: "0"
                         maxPlaceholder: "0"
-                        onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
-                        onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
-                        onEdited: root.editDirty = true
+                        onMinChanged: function(val) { XrayConfigModel.xmuxMaxConnectionsMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxMaxConnectionsMax = val }
                     }
 
                     SmallTextType {
@@ -120,13 +111,12 @@ PageType {
                     }
                     MinMaxRowType {
                         Layout.fillWidth: true
-                        minValue: xmuxCMaxReuseTimesMin
-                        maxValue: xmuxCMaxReuseTimesMax
+                        minValue: XrayConfigModel.xmuxCMaxReuseTimesMin
+                        maxValue: XrayConfigModel.xmuxCMaxReuseTimesMax
                         minPlaceholder: "0"
                         maxPlaceholder: "0"
-                        onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
-                        onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
-                        onEdited: root.editDirty = true
+                        onMinChanged: function(val) { XrayConfigModel.xmuxCMaxReuseTimesMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxCMaxReuseTimesMax = val }
                     }
 
                     SmallTextType {
@@ -136,13 +126,12 @@ PageType {
                     }
                     MinMaxRowType {
                         Layout.fillWidth: true
-                        minValue: xmuxHMaxRequestTimesMin
-                        maxValue: xmuxHMaxRequestTimesMax
+                        minValue: XrayConfigModel.xmuxHMaxRequestTimesMin
+                        maxValue: XrayConfigModel.xmuxHMaxRequestTimesMax
                         minPlaceholder: "0"
                         maxPlaceholder: "0"
-                        onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
-                        onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
-                        onEdited: root.editDirty = true
+                        onMinChanged: function(val) { XrayConfigModel.xmuxHMaxRequestTimesMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxHMaxRequestTimesMax = val }
                     }
 
                     SmallTextType {
@@ -152,13 +141,12 @@ PageType {
                     }
                     MinMaxRowType {
                         Layout.fillWidth: true
-                        minValue: xmuxHMaxReusableSecsMin
-                        maxValue: xmuxHMaxReusableSecsMax
+                        minValue: XrayConfigModel.xmuxHMaxReusableSecsMin
+                        maxValue: XrayConfigModel.xmuxHMaxReusableSecsMax
                         minPlaceholder: "0"
                         maxPlaceholder: "0"
-                        onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
-                        onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
-                        onEdited: root.editDirty = true
+                        onMinChanged: function(val) { XrayConfigModel.xmuxHMaxReusableSecsMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxHMaxReusableSecsMax = val }
                     }
 
                     TextFieldType {
@@ -166,18 +154,21 @@ PageType {
                         Layout.topMargin: 12
                         headerText: qsTr("hKeepAlivePeriod")
                         helperText: qsTr("HTTP keep-alive period. Integer, may be negative.")
-                        textField.text: xmuxHKeepAlivePeriod
+                        textField.text: XrayConfigModel.xmuxHKeepAlivePeriod
                         textField.maximumLength: 11
                         textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
-                        textField.onTextEdited: root.editDirty = (textField.text !== xmuxHKeepAlivePeriod)
+                        textField.onTextEdited: XrayConfigModel.xmuxHKeepAlivePeriod = textField.text
                         textField.onEditingFinished: {
                             var v = root.clampSigned(textField.text)
-                            if (v !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = v
-                            else if (textField.text !== v) textField.text = v
-                            root.editDirty = false
+                            if (v !== XrayConfigModel.xmuxHKeepAlivePeriod) XrayConfigModel.xmuxHKeepAlivePeriod = v
                         }
                     }
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
@@ -192,11 +183,10 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
-            saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -209,12 +199,8 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

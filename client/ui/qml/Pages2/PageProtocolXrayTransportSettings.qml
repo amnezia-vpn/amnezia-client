@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
-
     function clampInt(text, lo, hi) {
         if (text === "")
             return ""
@@ -30,36 +28,39 @@ PageType {
         return String(n)
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("Transport")
-        }
+        ColumnLayout {
+            id: content
 
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Transport")
+            }
 
             RadioItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("RAW (TCP)")
-                checked: transport === "raw"
-                onToggled: if (checked && transport !== "raw") transport = "raw"
+                checked: XrayConfigModel.transport === "raw"
+                onToggled: if (checked && XrayConfigModel.transport !== "raw") XrayConfigModel.transport = "raw"
             }
 
             RadioItemType {
@@ -68,8 +69,8 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("XHTTP")
                 subtitle: qsTr("Advanced users")
-                checked: transport === "xhttp"
-                onToggled: if (checked && transport !== "xhttp") transport = "xhttp"
+                checked: XrayConfigModel.transport === "xhttp"
+                onToggled: if (checked && XrayConfigModel.transport !== "xhttp") XrayConfigModel.transport = "xhttp"
             }
 
             RadioItemType {
@@ -77,8 +78,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("mKCP")
-                checked: transport === "mkcp"
-                onToggled: if (checked && transport !== "mkcp") transport = "mkcp"
+                checked: XrayConfigModel.transport === "mkcp"
+                onToggled: if (checked && XrayConfigModel.transport !== "mkcp") XrayConfigModel.transport = "mkcp"
             }
 
             ColumnLayout {
@@ -87,7 +88,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: transport === "mkcp"
+                visible: XrayConfigModel.transport === "mkcp"
                 spacing: 12
 
                 SmallTextType {
@@ -100,15 +101,13 @@ PageType {
                     headerText: qsTr("TTI")
                     helperText: qsTr("Transmission time interval (ms). Valid range: 10–100.")
                     placeholderText: XrayConfigModel.mkcpDefaultTti()
-                    textField.text: mkcpTti
+                    textField.text: XrayConfigModel.mkcpTti
                     textField.maximumLength: 3
                     textField.validator: RegularExpressionValidator { regularExpression: /^(|\d{1,2}|100)$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpTti)
+                    textField.onTextEdited: XrayConfigModel.mkcpTti = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 10, 100)
-                        if (v !== mkcpTti) mkcpTti = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.mkcpTti) XrayConfigModel.mkcpTti = v
                     }
                 }
 
@@ -117,15 +116,13 @@ PageType {
                     headerText: qsTr("uplinkCapacity")
                     helperText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647.")
                     placeholderText: XrayConfigModel.mkcpDefaultUplinkCapacity()
-                    textField.text: mkcpUplinkCapacity
+                    textField.text: XrayConfigModel.mkcpUplinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpUplinkCapacity)
+                    textField.onTextEdited: XrayConfigModel.mkcpUplinkCapacity = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 0, 2147483647)
-                        if (v !== mkcpUplinkCapacity) mkcpUplinkCapacity = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.mkcpUplinkCapacity) XrayConfigModel.mkcpUplinkCapacity = v
                     }
                 }
 
@@ -134,15 +131,13 @@ PageType {
                     headerText: qsTr("downlinkCapacity")
                     helperText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647.")
                     placeholderText: XrayConfigModel.mkcpDefaultDownlinkCapacity()
-                    textField.text: mkcpDownlinkCapacity
+                    textField.text: XrayConfigModel.mkcpDownlinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpDownlinkCapacity)
+                    textField.onTextEdited: XrayConfigModel.mkcpDownlinkCapacity = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 0, 2147483647)
-                        if (v !== mkcpDownlinkCapacity) mkcpDownlinkCapacity = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.mkcpDownlinkCapacity) XrayConfigModel.mkcpDownlinkCapacity = v
                     }
                 }
 
@@ -151,21 +146,19 @@ PageType {
                     headerText: qsTr("mtu")
                     helperText: qsTr("Maximum packet size in bytes. Range: 576–1460.")
                     placeholderText: XrayConfigModel.mkcpDefaultMtu()
-                    textField.text: mkcpMtu
+                    textField.text: XrayConfigModel.mkcpMtu
                     textField.maximumLength: 4
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpMtu)
+                    textField.onTextEdited: XrayConfigModel.mkcpMtu = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 576, 1460)
-                        if (v !== mkcpMtu) mkcpMtu = v
-                        else if (textField.text !== v) textField.text = v
-                        if (mkcpMaxSendingWindow !== "") {
+                        if (v !== XrayConfigModel.mkcpMtu) XrayConfigModel.mkcpMtu = v
+                        if (XrayConfigModel.mkcpMaxSendingWindow !== "") {
                             var floorNow = parseInt(v !== "" ? v : XrayConfigModel.mkcpDefaultMtu(), 10)
-                            if (parseInt(mkcpMaxSendingWindow, 10) < floorNow) {
-                                mkcpMaxSendingWindow = String(floorNow)
+                            if (parseInt(XrayConfigModel.mkcpMaxSendingWindow, 10) < floorNow) {
+                                XrayConfigModel.mkcpMaxSendingWindow = String(floorNow)
                             }
                         }
-                        root.editDirty = false
                     }
                 }
 
@@ -174,15 +167,13 @@ PageType {
                     headerText: qsTr("cwndMultiplier")
                     helperText: qsTr("Congestion window multiplier. Minimum: 1.")
                     placeholderText: XrayConfigModel.mkcpDefaultCwndMultiplier()
-                    textField.text: mkcpCwndMultiplier
+                    textField.text: XrayConfigModel.mkcpCwndMultiplier
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpCwndMultiplier)
+                    textField.onTextEdited: XrayConfigModel.mkcpCwndMultiplier = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 1, 2147483647)
-                        if (v !== mkcpCwndMultiplier) mkcpCwndMultiplier = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.mkcpCwndMultiplier) XrayConfigModel.mkcpCwndMultiplier = v
                     }
                 }
 
@@ -190,16 +181,14 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("maxSendingWindow")
                     helperText: qsTr("Send window in bytes. Must not be smaller than mtu. Leave empty to let Xray decide.")
-                    textField.text: mkcpMaxSendingWindow
+                    textField.text: XrayConfigModel.mkcpMaxSendingWindow
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpMaxSendingWindow)
+                    textField.onTextEdited: XrayConfigModel.mkcpMaxSendingWindow = textField.text
                     textField.onEditingFinished: {
-                        var mtuFloor = parseInt(mkcpMtu !== "" ? mkcpMtu : XrayConfigModel.mkcpDefaultMtu(), 10)
+                        var mtuFloor = parseInt(XrayConfigModel.mkcpMtu !== "" ? XrayConfigModel.mkcpMtu : XrayConfigModel.mkcpDefaultMtu(), 10)
                         var v = root.clampInt(textField.text, mtuFloor, 2147483647)
-                        if (v !== mkcpMaxSendingWindow) mkcpMaxSendingWindow = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.mkcpMaxSendingWindow) XrayConfigModel.mkcpMaxSendingWindow = v
                     }
                 }
             }
@@ -210,18 +199,18 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: transport === "xhttp"
+                visible: XrayConfigModel.transport === "xhttp"
                 spacing: 12
 
                 DropDownType {
                     id: modeDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xhttpMode
+                    text: XrayConfigModel.xhttpMode
                     descriptionText: qsTr("Mode")
                     headerText: qsTr("Mode")
                     listView: RadioListType {
-                        currentValue: xhttpMode
+                        currentValue: XrayConfigModel.xhttpMode
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpModeOptions()
@@ -231,24 +220,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xhttpMode = selectedText
-                            modeDropDown.text = selectedText
+                            XrayConfigModel.xhttpMode = selectedText
                             modeDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpMode) {
+                                if (model.get(i).name === XrayConfigModel.xhttpMode) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            modeDropDown.text = xhttpMode
                         }
                     }
                 }
@@ -264,15 +245,13 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("Host")
                     placeholderText: XrayConfigModel.xhttpHostDefault()
-                    textField.text: xhttpHost
+                    textField.text: XrayConfigModel.xhttpHost
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._:,-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpHost)
+                    textField.onTextEdited: XrayConfigModel.xhttpHost = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xhttpHost) xhttpHost = v
-                        else if (textField.text !== v) textField.text = v
+                        if (v !== XrayConfigModel.xhttpHost) XrayConfigModel.xhttpHost = v
                         hostField.errorText = XrayConfigModel.isValidHost(v) ? "" : qsTr("Enter a valid IP address or domain name")
-                        root.editDirty = false
                     }
                 }
 
@@ -280,15 +259,13 @@ PageType {
                     id: pathField
                     Layout.fillWidth: true
                     headerText: qsTr("Path")
-                    textField.text: xhttpPath
+                    textField.text: XrayConfigModel.xhttpPath
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9\-._~:\/?#\[\]@!$&'()*+,;=%]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpPath)
+                    textField.onTextEdited: XrayConfigModel.xhttpPath = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xhttpPath) xhttpPath = v
-                        else if (textField.text !== v) textField.text = v
+                        if (v !== XrayConfigModel.xhttpPath) XrayConfigModel.xhttpPath = v
                         pathField.errorText = XrayConfigModel.isValidPath(v) ? "" : qsTr("Path must start with \"/\"")
-                        root.editDirty = false
                     }
                 }
 
@@ -296,11 +273,11 @@ PageType {
                     id: uplinkMethodDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xhttpUplinkMethod
+                    text: XrayConfigModel.xhttpUplinkMethod
                     descriptionText: qsTr("UplinkHTTPMethod")
                     headerText: qsTr("UplinkHTTPMethod")
                     listView: RadioListType {
-                        currentValue: xhttpUplinkMethod
+                        currentValue: XrayConfigModel.xhttpUplinkMethod
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkMethodOptions()
@@ -310,24 +287,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xhttpUplinkMethod = selectedText
-                            uplinkMethodDropDown.text = selectedText
+                            XrayConfigModel.xhttpUplinkMethod = selectedText
                             uplinkMethodDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpUplinkMethod) {
+                                if (model.get(i).name === XrayConfigModel.xhttpUplinkMethod) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            uplinkMethodDropDown.text = xhttpUplinkMethod
                         }
                     }
                 }
@@ -337,8 +306,8 @@ PageType {
                     Layout.topMargin: 12
                     text: qsTr("Disable gRPC Header")
                     descriptionText: qsTr("noGRPCHeader")
-                    checked: xhttpDisableGrpc
-                    onToggled: xhttpDisableGrpc = checked
+                    checked: XrayConfigModel.xhttpDisableGrpc
+                    onToggled: XrayConfigModel.xhttpDisableGrpc = checked
                 }
 
                 SwitchRowType {
@@ -346,8 +315,8 @@ PageType {
                     Layout.topMargin: 12
                     text: qsTr("Disable SSE Header")
                     descriptionText: qsTr("noSSEHeader")
-                    checked: xhttpDisableSse
-                    onToggled: xhttpDisableSse = checked
+                    checked: XrayConfigModel.xhttpDisableSse
+                    onToggled: XrayConfigModel.xhttpDisableSse = checked
                 }
 
                 SmallTextType {
@@ -360,11 +329,11 @@ PageType {
                     id: sessionPlacementDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xhttpSessionPlacement
+                    text: XrayConfigModel.xhttpSessionPlacement
                     descriptionText: qsTr("SessionPlacement")
                     headerText: qsTr("SessionPlacement")
                     listView: RadioListType {
-                        currentValue: xhttpSessionPlacement
+                        currentValue: XrayConfigModel.xhttpSessionPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSessionPlacementOptions()
@@ -374,24 +343,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xhttpSessionPlacement = selectedText
-                            sessionPlacementDropDown.text = selectedText
+                            XrayConfigModel.xhttpSessionPlacement = selectedText
                             sessionPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSessionPlacement) {
+                                if (model.get(i).name === XrayConfigModel.xhttpSessionPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            sessionPlacementDropDown.text = xhttpSessionPlacement
                         }
                     }
                 }
@@ -399,14 +360,12 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("SessionKey")
-                    textField.text: xhttpSessionKey
+                    textField.text: XrayConfigModel.xhttpSessionKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpSessionKey)
+                    textField.onTextEdited: XrayConfigModel.xhttpSessionKey = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xhttpSessionKey) xhttpSessionKey = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xhttpSessionKey) XrayConfigModel.xhttpSessionKey = v
                     }
                 }
 
@@ -414,11 +373,11 @@ PageType {
                     id: seqPlacementDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xhttpSeqPlacement
+                    text: XrayConfigModel.xhttpSeqPlacement
                     descriptionText: qsTr("SeqPlacement")
                     headerText: qsTr("SeqPlacement")
                     listView: RadioListType {
-                        currentValue: xhttpSeqPlacement
+                        currentValue: XrayConfigModel.xhttpSeqPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSeqPlacementOptions()
@@ -428,24 +387,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xhttpSeqPlacement = selectedText
-                            seqPlacementDropDown.text = selectedText
+                            XrayConfigModel.xhttpSeqPlacement = selectedText
                             seqPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSeqPlacement) {
+                                if (model.get(i).name === XrayConfigModel.xhttpSeqPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            seqPlacementDropDown.text = xhttpSeqPlacement
                         }
                     }
                 }
@@ -453,14 +404,12 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("SeqKey")
-                    textField.text: xhttpSeqKey
+                    textField.text: XrayConfigModel.xhttpSeqKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpSeqKey)
+                    textField.onTextEdited: XrayConfigModel.xhttpSeqKey = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xhttpSeqKey) xhttpSeqKey = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xhttpSeqKey) XrayConfigModel.xhttpSeqKey = v
                     }
                 }
 
@@ -468,11 +417,11 @@ PageType {
                     id: uplinkDataPlacementDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: xhttpUplinkDataPlacement
+                    text: XrayConfigModel.xhttpUplinkDataPlacement
                     descriptionText: qsTr("Where the uploaded data is carried in the request")
                     headerText: qsTr("UplinkDataPlacement")
                     listView: RadioListType {
-                        currentValue: xhttpUplinkDataPlacement
+                        currentValue: XrayConfigModel.xhttpUplinkDataPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkDataPlacementOptions()
@@ -482,24 +431,16 @@ PageType {
                             }
                         }
                         onActivated: {
-                            xhttpUplinkDataPlacement = selectedText
-                            uplinkDataPlacementDropDown.text = selectedText
+                            XrayConfigModel.xhttpUplinkDataPlacement = selectedText
                             uplinkDataPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpUplinkDataPlacement) {
+                                if (model.get(i).name === XrayConfigModel.xhttpUplinkDataPlacement) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            uplinkDataPlacementDropDown.text = xhttpUplinkDataPlacement
                         }
                     }
                 }
@@ -507,14 +448,12 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("UplinkDataKey")
-                    textField.text: xhttpUplinkDataKey
+                    textField.text: XrayConfigModel.xhttpUplinkDataKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpUplinkDataKey)
+                    textField.onTextEdited: XrayConfigModel.xhttpUplinkDataKey = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== xhttpUplinkDataKey) xhttpUplinkDataKey = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xhttpUplinkDataKey) XrayConfigModel.xhttpUplinkDataKey = v
                     }
                 }
 
@@ -529,15 +468,13 @@ PageType {
                     headerText: qsTr("UplinkChunkSize")
                     helperText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.")
                     placeholderText: XrayConfigModel.xhttpUplinkChunkSizeDefault()
-                    textField.text: xhttpUplinkChunkSize
+                    textField.text: XrayConfigModel.xhttpUplinkChunkSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpUplinkChunkSize)
+                    textField.onTextEdited: XrayConfigModel.xhttpUplinkChunkSize = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 0, 2147483647)
-                        if (v !== xhttpUplinkChunkSize) xhttpUplinkChunkSize = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xhttpUplinkChunkSize) XrayConfigModel.xhttpUplinkChunkSize = v
                     }
                 }
 
@@ -545,15 +482,13 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("scMaxBufferedPosts")
                     helperText: qsTr("Max buffered POSTs. Range: 0–2147483647.")
-                    textField.text: xhttpScMaxBufferedPosts
+                    textField.text: XrayConfigModel.xhttpScMaxBufferedPosts
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpScMaxBufferedPosts)
+                    textField.onTextEdited: XrayConfigModel.xhttpScMaxBufferedPosts = textField.text
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 0, 2147483647)
-                        if (v !== xhttpScMaxBufferedPosts) xhttpScMaxBufferedPosts = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                        if (v !== XrayConfigModel.xhttpScMaxBufferedPosts) XrayConfigModel.xhttpScMaxBufferedPosts = v
                     }
                 }
 
@@ -564,13 +499,12 @@ PageType {
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
-                    minValue: xhttpScMaxEachPostBytesMin
-                    maxValue: xhttpScMaxEachPostBytesMax
+                    minValue: XrayConfigModel.xhttpScMaxEachPostBytesMin
+                    maxValue: XrayConfigModel.xhttpScMaxEachPostBytesMax
                     minPlaceholder: XrayConfigModel.scMaxEachPostBytesMinDefault()
                     maxPlaceholder: XrayConfigModel.scMaxEachPostBytesMaxDefault()
-                    onMinChanged: function(val) { xhttpScMaxEachPostBytesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xhttpScMaxEachPostBytesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    onMinChanged: function(val) { XrayConfigModel.xhttpScMaxEachPostBytesMin = val }
+                    onMaxChanged: function(val) { XrayConfigModel.xhttpScMaxEachPostBytesMax = val }
                 }
 
                 SmallTextType {
@@ -580,13 +514,12 @@ PageType {
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
-                    minValue: xhttpScStreamUpServerSecsMin
-                    maxValue: xhttpScStreamUpServerSecsMax
+                    minValue: XrayConfigModel.xhttpScStreamUpServerSecsMin
+                    maxValue: XrayConfigModel.xhttpScStreamUpServerSecsMax
                     minPlaceholder: XrayConfigModel.scStreamUpServerSecsMinDefault()
                     maxPlaceholder: XrayConfigModel.scStreamUpServerSecsMaxDefault()
-                    onMinChanged: function(val) { xhttpScStreamUpServerSecsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xhttpScStreamUpServerSecsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    onMinChanged: function(val) { XrayConfigModel.xhttpScStreamUpServerSecsMin = val }
+                    onMaxChanged: function(val) { XrayConfigModel.xhttpScStreamUpServerSecsMax = val }
                 }
 
                 SmallTextType {
@@ -596,13 +529,12 @@ PageType {
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
-                    minValue: xhttpScMinPostsIntervalMsMin
-                    maxValue: xhttpScMinPostsIntervalMsMax
+                    minValue: XrayConfigModel.xhttpScMinPostsIntervalMsMin
+                    maxValue: XrayConfigModel.xhttpScMinPostsIntervalMsMax
                     minPlaceholder: XrayConfigModel.scMinPostsIntervalMsMinDefault()
                     maxPlaceholder: XrayConfigModel.scMinPostsIntervalMsMaxDefault()
-                    onMinChanged: function(val) { xhttpScMinPostsIntervalMsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xhttpScMinPostsIntervalMsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    onMinChanged: function(val) { XrayConfigModel.xhttpScMinPostsIntervalMsMin = val }
+                    onMaxChanged: function(val) { XrayConfigModel.xhttpScMinPostsIntervalMsMax = val }
                 }
 
                 SmallTextType {
@@ -628,7 +560,7 @@ PageType {
                     ListItemType {
                         Layout.fillWidth: true
                         text: qsTr("XMux")
-                        subtitle: xmuxEnabled ? qsTr("On") : qsTr("Off")
+                        subtitle: XrayConfigModel.xmuxEnabled ? qsTr("On") : qsTr("Off")
                         trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                         onClicked: {
                             PageController.goToPage(PageEnum.PageProtocolXrayXmuxSettings)
@@ -653,11 +585,10 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
-            saveButton.forceActiveFocus()
             var errs = XrayConfigModel.validationErrors()
             if (errs.length > 0) {
                 PageController.showErrorMessage(errs.join("\n"))
@@ -675,12 +606,8 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

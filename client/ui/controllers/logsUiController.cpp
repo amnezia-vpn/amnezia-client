@@ -78,6 +78,11 @@ QString LogsUiController::tunnelLogSize() const
     return formatSize(LogsController::size(LogsController::Stream::Tunnel));
 }
 
+bool LogsUiController::hasLogs() const
+{
+    return LogsController::size(LogsController::Stream::App) > 0 || LogsController::size(LogsController::Stream::Tunnel) > 0;
+}
+
 QString LogsUiController::viewerStream() const
 {
     return m_viewerStream;

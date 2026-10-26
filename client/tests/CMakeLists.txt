@@ -38,6 +38,7 @@ set(CMAKE_AUTOUIC ON)
 
 qt6_add_resources(TEST_QRC
     ../server_scripts/serverScripts.qrc
+    ../resources/countries.qrc
 )
 
 set(_main_cpp "${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp")
@@ -92,6 +93,15 @@ if(NOT ANDROID)
     add_new_test(test_connection                          testConnection.cpp)
     add_new_test(test_logs_controller                     testLogsController.cpp)
     add_new_test(test_openssl_library                     testOpenSSLLibrary.cpp)
+
+    add_executable(test_favorite_locations_restore
+        testFavoriteLocationsRestore.cpp
+    )
+
+    target_link_libraries(test_favorite_locations_restore PRIVATE
+        Qt6::Test
+        test_common
+    )
 
     # Tests run from a bare artifact directory on CI, so the OpenSSL runtime we
     # compiled against must sit next to the binary (PATH / LD_LIBRARY_PATH /
@@ -286,8 +296,10 @@ enable_testing()
 if(NOT ANDROID)
     add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
     add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
+    add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)
+    add_test(NAME FavoriteLocationsRestoreTest     COMMAND test_favorite_locations_restore)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
     add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)

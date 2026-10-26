@@ -29,7 +29,6 @@ public slots:
 
     void closeWindow();
     void hideWindow();
-    void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);

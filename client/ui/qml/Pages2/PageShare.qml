@@ -99,35 +99,13 @@ PageType {
     property bool isSearchBarVisible: false
     property bool showContent: false
     property bool shareButtonEnabled: true
-    property list<QtObject> connectionTypesModel: [
-        amneziaConnectionFormat
-    ]
+    readonly property var amneziaConnectionFormat: ({ name: qsTr("For the AmneziaVPN app"), type: PageShare.ConfigType.AmneziaConnection })
+    readonly property var openVpnConnectionFormat: ({ name: qsTr("OpenVPN native format"), type: PageShare.ConfigType.OpenVpn })
+    readonly property var wireGuardConnectionFormat: ({ name: qsTr("WireGuard native format"), type: PageShare.ConfigType.WireGuard })
+    readonly property var awgConnectionFormat: ({ name: qsTr("AmneziaWG native format"), type: PageShare.ConfigType.Awg })
+    readonly property var xrayConnectionFormat: ({ name: qsTr("XRay native format"), type: PageShare.ConfigType.Xray })
 
-    QtObject {
-        id: amneziaConnectionFormat
-        readonly property string name: qsTr("For the AmneziaVPN app")
-        readonly property int type: PageShare.ConfigType.AmneziaConnection
-    }
-    QtObject {
-        id: openVpnConnectionFormat
-        readonly property string name: qsTr("OpenVPN native format")
-        readonly property int type: PageShare.ConfigType.OpenVpn
-    }
-    QtObject {
-        id: wireGuardConnectionFormat
-        readonly property string name: qsTr("WireGuard native format")
-        readonly property int type: PageShare.ConfigType.WireGuard
-    }
-    QtObject {
-        id: awgConnectionFormat
-        readonly property string name: qsTr("AmneziaWG native format")
-        readonly property int type: PageShare.ConfigType.Awg
-    }
-    QtObject {
-        id: xrayConnectionFormat
-        readonly property string name: qsTr("XRay native format")
-        readonly property int type: PageShare.ConfigType.Xray
-    }
+    property var connectionTypesModel: [root.amneziaConnectionFormat]
 
     ShareClientInfoSheet {
         id: clientInfoDrawer
@@ -183,7 +161,7 @@ PageType {
                     clientInfoDrawer.clientId)) {
                 PageController.showNotificationMessage("Unable to revoke current config during active connection")
             } else {
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
             }
         }
     }
@@ -207,7 +185,7 @@ PageType {
 
             SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 24
+                Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -226,8 +204,8 @@ PageType {
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
-                    PageController.goToPage(PageEnum.PageShareFullAccess)
                     shareFullAccessDrawer.close()
+                    PageController.goToPage(PageEnum.PageShareFullAccess)
                 }
             }
         }
@@ -255,11 +233,9 @@ PageType {
 
                 Layout.fillWidth: true
 
-                backButtonVisible: false
                 title: qsTr("Share VPN Access")
 
                 IconButtonType {
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/more-vertical.svg"
 
                     onClicked: shareFullAccessDrawer.open()
@@ -270,7 +246,6 @@ PageType {
                 id: accessTypeSelector
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -370,7 +345,7 @@ PageType {
                         }
 
                         serverSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
-                        serverSelectorListView.triggerCurrentItem()
+                        serverSelectorListView.select(serverSelectorListView.selectedIndex)
                     }
 
                     function handler() {
@@ -382,8 +357,6 @@ PageType {
 
             DropDownType {
                 id: containerSelector
-
-                signal containerSelectorTextChanged
 
                 Layout.fillWidth: true
                 Layout.topMargin: 12
@@ -440,7 +413,7 @@ PageType {
 
                             containerSelectorListView.selectedIndex = defaultContainer
                             containerSelectorListView.positionViewAtIndex(defaultContainer, ListView.Beginning)
-                            containerSelectorListView.triggerCurrentItem()
+                            containerSelectorListView.select(defaultContainer)
                         }
                     }
 
@@ -465,25 +438,28 @@ PageType {
                             PageController.showBusyIndicator(false)
                         }
 
-                        containerSelector.containerSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
-                        root.connectionTypesModel = [amneziaConnectionFormat]
+                        const formats = [root.amneziaConnectionFormat]
 
                         var index = proxyContainersModel.mapToSource(selectedIndex)
 
                         if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
-                            root.connectionTypesModel.push(openVpnConnectionFormat)
+                            formats.push(root.openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
-                            root.connectionTypesModel.push(wireGuardConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
-                            root.connectionTypesModel.push(awgConnectionFormat)
-                        } else if (index === ContainerProps.containerFromString("amnezia-awg2")) {
-                            root.connectionTypesModel.push(awgConnectionFormat)
+                            formats.push(root.wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg")
+                                   || index === ContainerProps.containerFromString("amnezia-awg2")) {
+                            formats.push(root.awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
-                            root.connectionTypesModel.push(xrayConnectionFormat)
+                            formats.push(root.xrayConnectionFormat)
                         }
+
+                        if (exportTypeSelector.currentIndex >= formats.length) {
+                            exportTypeSelector.currentIndex = 0
+                        }
+                        root.connectionTypesModel = formats
                     }
                 }
             }
@@ -500,6 +476,8 @@ PageType {
 
                 drawerHeight: 0.4375
 
+                text: root.connectionTypesModel[currentIndex] ? root.connectionTypesModel[currentIndex].name : ""
+
                 visible: accessTypeSelector.currentIndex === 0
                 enabled: root.connectionTypesModel.length > 1
 
@@ -509,43 +487,11 @@ PageType {
                 listView: RadioListType {
                     id: exportTypeSelectorListView
 
-                    onCurrentIndexChanged: {
-                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
-                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
-                    }
-
-                    onModelChanged: {
-                        if (exportTypeSelector.currentIndex >= model.length || exportTypeSelector.currentIndex < 0) {
-                            exportTypeSelector.currentIndex = 0
-                        }
-                        selectedIndex = exportTypeSelector.currentIndex
-                        if (model.length > 0 && model[selectedIndex] && model[selectedIndex].name !== undefined) {
-                            exportTypeSelectorListView.selectedText = model[selectedIndex].name
-                            exportTypeSelector.text = model[selectedIndex].name
-                        } else {
-                            exportTypeSelectorListView.selectedText = ""
-                            exportTypeSelector.text = ""
-                        }
-                    }
-
                     model: root.connectionTypesModel
-                    currentIndex: 0
+                    currentValue: exportTypeSelector.text
 
-                    Connections {
-                        target: containerSelector
-
-                        function onContainerSelectorTextChanged() {
-                            if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
-                                exportTypeSelectorListView.selectedIndex = 0
-                                exportTypeSelector.currentIndex = 0
-                                exportTypeSelector.text = root.connectionTypesModel[0].name
-                            }
-                        }
-                    }
-
-                    onActivated: {
-                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
-                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
+                    onActivated: function(index) {
+                        exportTypeSelector.currentIndex = index
                         exportTypeSelector.close()
                     }
                 }
@@ -625,8 +571,7 @@ PageType {
                         }
                     }
 
-                    Keys.onEnterPressed: { navigateTo() }
-                    Keys.onReturnPressed: { navigateTo() }
+                    onAccepted: navigateTo()
                 }
 
                 IconButtonType {

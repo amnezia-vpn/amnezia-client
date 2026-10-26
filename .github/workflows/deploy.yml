@@ -324,7 +324,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-iOS
     if: ${{ always() }}
@@ -472,7 +472,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-15
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -1054,6 +1054,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1247,6 +1248,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1357,6 +1359,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest

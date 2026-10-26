@@ -14,17 +14,6 @@ Control {
 
     signal activated(int index)
 
-    function syncChecked() {
-        for (let i = 0; i < repeater.count; ++i) {
-            const item = repeater.itemAt(i)
-            if (item) {
-                item.checked = i === root.currentIndex
-            }
-        }
-    }
-
-    onCurrentIndexChanged: root.syncChecked()
-
     padding: 0
 
     background: Rectangle {
@@ -40,8 +29,6 @@ Control {
 
             model: root.model
 
-            onItemAdded: root.syncChecked()
-
             SegmentType {
                 required property int index
                 required property var modelData
@@ -51,7 +38,7 @@ Control {
 
                 size: root.size
                 text: modelData
-                ButtonGroup.group: group
+                checked: index === root.currentIndex
 
                 onClicked: {
                     root.currentIndex = index
@@ -59,9 +46,5 @@ Control {
                 }
             }
         }
-    }
-
-    ButtonGroup {
-        id: group
     }
 }

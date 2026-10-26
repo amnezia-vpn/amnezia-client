@@ -23,7 +23,6 @@ Item {
 
     signal minChanged(string val)
     signal maxChanged(string val)
-    signal edited()
 
     implicitHeight: col.implicitHeight
     implicitWidth: col.implicitWidth
@@ -81,7 +80,7 @@ Item {
                     if (minField.textField.activeFocus)
                         minField.lastValid = minField.textField.text
                 }
-                textField.onTextEdited: { root.capEdit(minField.textField, minField); root.edited() }
+                textField.onTextEdited: { root.capEdit(minField.textField, minField); root.minChanged(minField.textField.text) }
                 textField.onEditingFinished: {
                     var v = root.clampValue(minField.textField.text)
                     if (v !== "") {
@@ -116,7 +115,7 @@ Item {
                     if (maxField.textField.activeFocus)
                         maxField.lastValid = maxField.textField.text
                 }
-                textField.onTextEdited: { root.capEdit(maxField.textField, maxField); root.edited() }
+                textField.onTextEdited: { root.capEdit(maxField.textField, maxField); root.maxChanged(maxField.textField.text) }
                 textField.onEditingFinished: {
                     var v = root.clampValue(maxField.textField.text)
                     if (v !== "") {
