@@ -29,11 +29,12 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: ContainersModel.getProcessedContainerName() + qsTr(" settings")
                 description: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""
@@ -140,7 +141,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -176,7 +177,7 @@ PageType {
 
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 

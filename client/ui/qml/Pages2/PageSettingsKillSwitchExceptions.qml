@@ -48,11 +48,12 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("DNS Exceptions")
                 description: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")
@@ -82,17 +83,10 @@ PageType {
 
                     var yesButtonFunction = function() {
                         AllowedDnsController.removeDns(dnsFilterModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
         }
@@ -108,6 +102,7 @@ PageType {
 
         enabled: root.pageEnabled
         placeholderText: qsTr("IPv4 address")
+        moreButtonAccessibleName: qsTr("Import / Export addresses")
 
         onAddClicked: function(text) {
             PageController.showBusyIndicator(true)
@@ -116,164 +111,68 @@ PageType {
         }
 
         onMoreClicked: {
-            moreActionsDrawer.open()
+            moreActionsMenu.openAbove(addSitePanel.moreButton)
         }
     }
 
-    SheetType {
-        id: moreActionsDrawer
+    PopupMenuType {
+        id: moreActionsMenu
 
-        expandedHeight: moreActionsDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
+        PopupMenuItemType {
+            id: importSitesButton3
 
-        ColumnLayout {
-            id: moreActionsDrawerContent
+            text: qsTr("Add imported addresses to existing ones")
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
-
-            SectionHeaderType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 32
-
-                headerText: qsTr("Import / Export addresses")
+            onClicked: {
+                moreActionsMenu.close()
+                root.selectImportFile(false)
             }
+        }
 
-            ListItemType {
-                id: importSitesButton
+        PopupMenuItemType {
+            id: importSitesButton2
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            text: qsTr("Replace address list")
 
-                text: qsTr("Import")
-                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+            onClicked: {
+                moreActionsMenu.close()
+                root.selectImportFile(true)
+            }
+        }
 
-                onClicked: {
-                    importSitesDrawer.open()
+        PopupMenuItemType {
+            id: exportSitesButton
+
+            text: qsTr("Save address list")
+
+            onClicked: {
+                moreActionsMenu.close()
+                var fileName = ""
+                if (GC.isMobile()) {
+                    fileName = "amnezia_killswitch_exceptions.json"
+                } else {
+                    fileName = SystemController.getFileName(qsTr("Save addresses"),
+                                                            qsTr("Address files (*.json)"),
+                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_killswitch_exceptions",
+                                                            true,
+                                                            ".json")
                 }
-            }
-
-            ListItemType {
-                id: exportSitesButton
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Save address list")
-
-                onClicked: {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "amnezia_killswitch_exceptions.json"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save addresses"),
-                                                                qsTr("Address files (*.json)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_killswitch_exceptions",
-                                                                true,
-                                                                ".json")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        AllowedDnsController.exportDns(fileName)
-                        moreActionsDrawer.close()
-                        PageController.showBusyIndicator(false)
-                    }
+                if (fileName !== "") {
+                    PageController.showBusyIndicator(true)
+                    AllowedDnsController.exportDns(fileName)
+                    PageController.showBusyIndicator(false)
                 }
             }
         }
     }
 
-    SheetType {
-        id: importSitesDrawer
-
-        expandedHeight: importSitesDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
-
-        ColumnLayout {
-            id: importSitesDrawerContent
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
-
-            function importSites(fileName, replaceExistingSites) {
-                PageController.showBusyIndicator(true)
-                AllowedDnsController.importDns(fileName, replaceExistingSites)
-                PageController.showBusyIndicator(false)
-                importSitesDrawer.close()
-                moreActionsDrawer.close()
-            }
-
-            Item {
-                Layout.fillWidth: true
-                Layout.topMargin: 2
-                Layout.preferredHeight: 48
-
-                IconButtonType {
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
-                    icon.source: "qrc:/images/controls/arrow-left.svg"
-                    Accessible.name: qsTr("Back")
-
-                    onClicked: importSitesDrawer.close()
-                }
-            }
-
-            SectionHeaderType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 32
-
-                headerText: qsTr("Import address list")
-            }
-
-            ListItemType {
-                id: importSitesButton2
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Replace address list")
-
-                onClicked: {
-                    var fileName = SystemController.getFileName(qsTr("Open address file"),
-                                                                qsTr("Address files (*.json)"))
-                    if (fileName !== "") {
-                        importSitesDrawerContent.importSites(fileName, true)
-                    }
-                }
-            }
-
-            ListItemType {
-                id: importSitesButton3
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Add imported addresses to existing ones")
-
-                onClicked: {
-                    var fileName = SystemController.getFileName(qsTr("Open address file"),
-                                                                qsTr("Address files (*.json)"))
-                    if (fileName !== "") {
-                        importSitesDrawerContent.importSites(fileName, false)
-                    }
-                }
-            }
+    function selectImportFile(replaceExistingSites) {
+        var fileName = SystemController.getFileName(qsTr("Open address file"),
+                                                    qsTr("Address files (*.json)"))
+        if (fileName !== "") {
+            PageController.showBusyIndicator(true)
+            AllowedDnsController.importDns(fileName, replaceExistingSites)
+            PageController.showBusyIndicator(false)
         }
     }
 }

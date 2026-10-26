@@ -38,8 +38,24 @@ Item {
         return root.listModel.sectionKeyAtRow(root.row - 1).split("/").length < root.sectionKey.split("/").length
     }
 
-    readonly property int contentTopMargin: root.isDirectlyUnderParent ? 0 : 24
-    readonly property int contentBottomMargin: root.collapsed ? 0 : (root.level === 1 ? 4 : 8)
+    readonly property bool isDirectlyAboveChild: {
+        if (!root.isRealSection || root.row < 0) {
+            return false
+        }
+        root.listModel.layoutRevision
+        if (!root.listModel.isSectionHeaderRow(root.row + 1)) {
+            return false
+        }
+        return root.listModel.sectionKeyAtRow(root.row + 1).split("/").length > root.sectionKey.split("/").length
+    }
+
+    readonly property int contentTopMargin: root.isDirectlyUnderParent ? 0 : (root.level === 1 ? 24 : 32)
+    readonly property int contentBottomMargin: {
+        if (root.collapsed || root.isDirectlyAboveChild) {
+            return 0
+        }
+        return root.level === 1 ? 4 : 12
+    }
 
     implicitHeight: root.isRealSection ? root.contentTopMargin + 32 + root.contentBottomMargin : 0
 

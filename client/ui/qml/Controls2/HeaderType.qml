@@ -13,8 +13,6 @@ Item {
     property string headerText
     property int headerTextFormat: Text.AutoText
     property int headerHorizontalAlignment: Text.AlignLeft
-    property int headerTextMaximumLineCount: 2
-    property int headerTextElide: Qt.ElideRight
 
     property string descriptionText
 
@@ -26,6 +24,7 @@ Item {
 
     readonly property alias actionButton: actionButton
     readonly property alias switcher: switcher
+    readonly property alias titleItem: titleText
 
     signal actionClicked()
     signal switcherToggled(bool checked)
@@ -40,7 +39,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        spacing: 8
+        spacing: 0
 
         RowLayout {
             Layout.fillWidth: true
@@ -48,14 +47,14 @@ Item {
             spacing: 8
 
             H1TextType {
+                id: titleText
+
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
 
                 text: root.headerText
                 textFormat: root.headerTextFormat
                 horizontalAlignment: root.headerHorizontalAlignment
-                maximumLineCount: root.headerTextMaximumLineCount
-                elide: root.headerTextElide
             }
 
             IconButtonType {

@@ -17,8 +17,13 @@ Control {
 
     property string text
     property int textFormat: Text.PlainText
-    property string iconSource: root.variant === NotificationType.Info ? "qrc:/images/controls/info.svg"
-                                                                        : "qrc:/images/controls/alert-circle.svg"
+    property string iconSource: {
+        switch (root.variant) {
+        case NotificationType.Warning: return "qrc:/images/controls/alert-triangle.svg"
+        case NotificationType.Error: return "qrc:/images/controls/alert-circle.svg"
+        default: return "qrc:/images/controls/info.svg"
+        }
+    }
 
     padding: root.compact ? 12 : 16
 
@@ -42,7 +47,7 @@ Control {
             sourceSize: Qt.size(size, size)
             color: {
                 switch (root.variant) {
-                case NotificationType.Warning: return AmneziaStyle.color.accentLight
+                case NotificationType.Warning: return AmneziaStyle.color.statusWarning
                 case NotificationType.Error: return AmneziaStyle.color.statusDestructive
                 default: return AmneziaStyle.color.iconDefault
                 }

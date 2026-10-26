@@ -36,6 +36,7 @@ private:
     void initAppSplitTunnelingModelUpdateHandler();
     void initPrepareConfigHandler();
     void initUnsupportedConnectDrawerHandler();
+    void initBackNavigationHandler();
     void initStrictKillSwitchHandler();
     void initAndroidSettingsHandler();
     void initAndroidConnectionHandler();
@@ -43,6 +44,7 @@ private:
     void initIosSettingsHandler();
     void initNotificationHandler();
     void initUpdateFoundHandler();
+    void initLocalProxyHandler();
 
     CoreController* m_coreController;
 };

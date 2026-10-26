@@ -22,11 +22,12 @@ PageType {
         header: ColumnLayout {
             width: newsList.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("News & Notifications")
             }
@@ -43,7 +44,6 @@ PageType {
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
 
-                leadingSlotWidth: 24
                 icon.source: read ? "" : "qrc:/images/controls/unread-dot.svg"
                 icon.width: 8
                 icon.height: 8

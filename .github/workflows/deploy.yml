@@ -88,7 +88,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'linux_gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -209,7 +209,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2022_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -324,7 +324,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-iOS
     if: ${{ always() }}
@@ -472,7 +472,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-15
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -528,7 +528,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -671,7 +671,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
@@ -1054,8 +1054,10 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: ubuntu-22.04
 
@@ -1104,7 +1106,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1132,6 +1134,8 @@ jobs:
             -exec chmod +x {} \;
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: bash
         run: |
           QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
@@ -1139,7 +1143,7 @@ jobs:
           export LD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${LD_LIBRARY_PATH:-}"
           export QT_QPA_PLATFORM=offscreen
 
-          ctest --test-dir deploy/build/client/tests --output-on-failure -VV -R "^${{ matrix.filter }}$"
+          ctest --test-dir deploy/build/client/tests --output-on-failure -VV --timeout 600 -R "^${{ matrix.filter }}$"
 
 # ------------------------------------------------------
 
@@ -1178,7 +1182,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1241,8 +1245,10 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: windows-latest
 
@@ -1299,7 +1305,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2022_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 
@@ -1309,6 +1315,8 @@ jobs:
           arch: x64
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: cmd
         run: |
           rem Without an attached console (GitHub runner), QTest sends its output to
@@ -1318,7 +1326,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir deploy\build\client\tests -C Release -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy\build\client\tests -C Release -R "${{ matrix.filter }}" --output-on-failure -VV --timeout 600
 
 # ------------------------------------------------------
 
@@ -1345,8 +1353,10 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: macos-15
 
@@ -1406,7 +1416,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 
@@ -1418,13 +1428,15 @@ jobs:
             -exec chmod +x {} \;
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: bash
         run: |
           QT_ROOT="$RUNNER_TEMP/Qt/$QT_VERSION/macos"
 
           export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${DYLD_LIBRARY_PATH:-}"
 
-          ctest --test-dir deploy/build/client/tests -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy/build/client/tests -R "${{ matrix.filter }}" --output-on-failure -VV --timeout 600
 
 # ------------------------------------------------------
 

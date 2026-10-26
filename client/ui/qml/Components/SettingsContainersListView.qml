@@ -30,6 +30,7 @@ ListViewType {
 
             text: name
             subtitle: description
+            maximumLineCount: 4
             trailingIconSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
             trailingContentVisible: delegateRoot.isOutdatedAwgContainer
 

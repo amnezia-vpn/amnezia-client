@@ -86,8 +86,8 @@ PageType {
                 const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
                 if (current >= 0) {
                     menuContent.positionViewAtIndex(current, ListView.Center)
-                    menuContent.contentY = collapsingHeader.clampContentY(menuContent.contentY
-                                                                          - collapsingHeader.pinnedHeight / 2)
+                    menuContent.contentY = pageHeader.clampContentY(menuContent.contentY
+                                                                          - pageHeader.pinnedHeight / 2)
                 }
             })
         }
@@ -145,7 +145,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -163,8 +162,10 @@ PageType {
     ListViewType {
         id: menuContent
 
+        reuseItems: true
+
         anchors.top: parent.top
-        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.topMargin: pageHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -172,11 +173,10 @@ PageType {
 
         model: ApiCountryListModel
 
-        interactive: menuContent.contentHeight > menuContent.height
 
-        ScrollBar.vertical: collapsingHeader.scrollBar
+        ScrollBar.vertical: pageHeader.scrollBar
 
-        header: collapsingHeader.listHeader
+        header: pageHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -198,7 +198,7 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : countryItem.implicitHeight
             height: implicitHeight
 
             CountrySectionHeader {
@@ -213,6 +213,8 @@ PageType {
             }
 
             CountryListItem {
+                id: countryItem
+
                 x: 16
                 width: rowItem.width - 32
                 height: rowItem.height
@@ -230,13 +232,12 @@ PageType {
         }
     }
 
-    CollapsingHeaderType {
-        id: collapsingHeader
+    ListPageHeaderType {
+        id: pageHeader
 
         anchors.fill: parent
 
         listView: menuContent
-        title: qsTr("Amnezia Premium")
 
         collapsibleContent: ColumnLayout {
             spacing: 0
@@ -247,7 +248,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 12
+                Layout.topMargin: 16
 
                 text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
                 color: root.subscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
@@ -259,7 +260,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 28
+                Layout.topMargin: 24
 
                 text: qsTr("Renew subscription")
 
@@ -267,25 +268,12 @@ PageType {
                     SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
-
-            BodyTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: root.showSubscriptionNote ? 12 : 8
-                Layout.bottomMargin: 16
-
-                text: qsTr("Locations")
-                color: AmneziaStyle.color.textSecondary
-            }
         }
 
         navigationButtons: [
             IconButtonType {
                 id: settingsButton
-                objectName: "settingsButton"
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/settings.svg"
 
                 onClicked: root.openServerInfo()
@@ -327,20 +315,20 @@ PageType {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 24
             }
         ]
 
         CountryListStickyHeader {
             listModel: ApiCountryListModel
             listView: menuContent
-            header: collapsingHeader
+            header: pageHeader
             revision: root.stickyRevision
         }
 
         CountriesEmptyState {
             anchors.top: parent.top
-            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.topMargin: pageHeader.pinnedBottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom

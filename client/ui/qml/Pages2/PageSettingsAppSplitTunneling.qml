@@ -31,40 +31,12 @@ PageType {
         }
     }
 
-    QtObject {
-        id: routeMode
-        property int allApps: 0
-        property int onlyForwardApps: 1
-        property int allExceptApps: 2
-    }
-
-    property list<QtObject> routeModesModel: [
-        onlyForwardApps,
-        allExceptApps
+    readonly property var routeModes: [
+        { type: 1, segmentName: qsTr("Via VPN"), name: qsTr("Only the apps from the list should have access via VPN") },
+        { type: 2, segmentName: qsTr("Directly"), name: qsTr("Apps from the list should not have access via VPN") }
     ]
 
-    QtObject {
-        id: onlyForwardApps
-
-        readonly property string name: qsTr("Only the apps from the list should have access via VPN")
-        readonly property int type: routeMode.onlyForwardApps
-    }
-
-    QtObject {
-        id: allExceptApps
-        
-        readonly property string name: qsTr("Apps from the list should not have access via VPN")
-        readonly property int type: routeMode.allExceptApps
-    }
-
-    function getRouteModesModelIndex() {
-        var currentRouteMode = AppSplitTunnelingController.routeMode
-        if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
-            return 0
-        } else if (routeMode.allExceptApps === currentRouteMode) {
-            return 1
-        }
-    }
+    readonly property int routeModeIndex: AppSplitTunnelingController.routeMode === 2 ? 1 : 0
 
     ListViewType {
         id: listView
@@ -90,7 +62,15 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
+
+            onHeightChanged: {
+                if (!listView.moving) {
+                    Qt.callLater(listView.positionViewAtBeginning)
+                }
+            }
 
             NavigationBarType {
                 id: navigationBar
@@ -98,65 +78,71 @@ PageType {
                 Layout.fillWidth: true
 
                 title: qsTr("App split tunneling")
+            }
 
-                header.showSwitcher: true
-                header.switcher.checked: AppSplitTunnelingController.isSplitTunnelingEnabled
-                header.switcher.enabled: root.pageEnabled
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: GC.isDesktop()
+                enabled: root.pageEnabled
+
+                text: qsTr("App split tunneling")
+
+                onClicked: {
+                    splitTunnelingSwitch.toggle()
+                    splitTunnelingSwitch.toggled()
+                }
+
+                SwitchType {
+                    id: splitTunnelingSwitch
+
+                    focusPolicy: Qt.NoFocus
+
+                    checked: AppSplitTunnelingController.isSplitTunnelingEnabled
+
+                    onToggled: AppSplitTunnelingController.toggleSplitTunneling(checked)
+                }
+            }
+
+            SegmentedControlType {
+                id: modeSelector
+
+                Layout.fillWidth: true
+                Layout.topMargin: GC.isDesktop() ? 24 : 0
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: (Qt.platform.os === "android") && root.pageEnabled
+
+                model: root.routeModes.map(function(mode) { return mode.segmentName })
+                currentIndex: root.routeModeIndex
+
+                onActivated: function(index) {
+                    if (AppSplitTunnelingController.routeMode !== root.routeModes[index].type) {
+                        AppSplitTunnelingController.routeMode = root.routeModes[index].type
+                    }
+                }
 
                 Connections {
-                    target: navigationBar.header
+                    target: AppSplitTunnelingController
 
-                    function onSwitcherToggled(checked) {
-                        AppSplitTunnelingController.toggleSplitTunneling(checked)
-                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
+                    function onRouteModeChanged() {
+                        modeSelector.currentIndex = root.routeModeIndex
                     }
                 }
             }
 
-            DropDownType {
-                id: selector
-
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                drawerHeight: 0.4375
-
-                headerText: qsTr("Mode")
-
-                enabled: (Qt.platform.os === "android") && root.pageEnabled
-
-                listView: RadioListType {
-
-                    model: root.routeModesModel
-
-                    selectedIndex: getRouteModesModelIndex()
-
-                    onActivated: {
-                        selector.text = selectedText
-                        selector.close()
-                        if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                            AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
-                        }
-                    }
-
-                    Component.onCompleted: {
-                        if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
-                            selector.text = selectedText
-                        } else {
-                            selector.text = root.routeModesModel[0].name
-                        }
-                    }
-
-                    Connections {
-                        target: AppSplitTunnelingController
-                        function onRouteModeChanged() {
-                            selectedIndex = getRouteModesModelIndex()
-                        }
-                    }
-                }
+                text: root.routeModes[modeSelector.currentIndex].name
+                color: AmneziaStyle.color.textSecondary
             }
 
             NotificationType {
@@ -196,7 +182,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
         }
@@ -220,7 +206,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
+            anchors.topMargin: 24
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 

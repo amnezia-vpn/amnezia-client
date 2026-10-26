@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import PageEnum 1.0
 import UpdateState 1.0
@@ -15,6 +15,11 @@ import "../Components"
 
 PageType {
     id: root
+
+    readonly property bool hasChangelog: UpdateController.description !== ""
+                                         || UpdateController.newFeatures.length > 0
+                                         || UpdateController.improvements.length > 0
+                                         || UpdateController.bugFixes.length > 0
 
     Connections {
         target: UpdateController
@@ -43,7 +48,6 @@ PageType {
         IconButtonType {
             id: supportButton
 
-            size: IconButtonType.Small
             icon.source: "qrc:/images/controls/headphones.svg"
 
             onClicked: supportDrawer.open()
@@ -54,8 +58,8 @@ PageType {
         id: fl
 
         anchors.top: navigationBar.bottom
-        anchors.bottom: stickyBar.top
-        contentHeight: content.height + 32
+        anchors.bottom: bottomBar.top
+        contentHeight: content.implicitHeight + 24
 
         ColumnLayout {
             id: content
@@ -63,7 +67,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 12
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 24
@@ -81,11 +84,13 @@ PageType {
                     Layout.preferredHeight: 98
 
                     layer.enabled: true
-                    layer.effect: OpacityMask {
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
                         maskSource: imageBlockMask
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
                     }
 
-                    // Image placement replicates the crop from the design mockup
                     Image {
                         id: heroImage
 
@@ -104,11 +109,12 @@ PageType {
                         anchors.fill: parent
                         radius: 16
                         visible: false
+                        layer.enabled: true
                     }
 
                     BackdropBlurType {
                         anchors.centerIn: parent
-                        width: versionText.implicitWidth + 40
+                        width: versionText.implicitWidth + 26
                         height: 55
 
                         sourceItem: heroImage
@@ -138,7 +144,7 @@ PageType {
                     }
 
                     SmallTextType {
-                        height: 22
+                        height: UpdateController.tags.length > 0 ? 22 : implicitHeight
 
                         verticalAlignment: Text.AlignVCenter
 
@@ -166,7 +172,7 @@ PageType {
 
                     color: AmneziaStyle.color.textTertiary
 
-                    text: UpdateController.description
+                    text: root.hasChangelog ? UpdateController.description : qsTr("No release notes yet")
                 }
 
                 ChangelogSectionType {
@@ -196,30 +202,25 @@ PageType {
         }
     }
 
-    Rectangle {
-        id: stickyBar
+    BottomBarType {
+        id: bottomBar
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: updateButton.height + 32 + PageController.safeAreaBottomMargin
 
-        color: AmneziaStyle.color.bgBase
+        filled: true
 
         ButtonType {
             id: updateButton
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 16
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            Layout.fillWidth: true
 
+            loading: !UpdateController.isStoreUpdate && UpdateController.updateState === UpdateState.Downloading
             enabled: UpdateController.updateState !== UpdateState.Downloading
 
             leftImageSource: !UpdateController.isStoreUpdate && UpdateController.updateState === UpdateState.ReadyToInstall
-                             ? "qrc:/images/controls/download.svg" : ""
+                             ? "qrc:/images/update/arrow-down-circle.svg" : ""
 
             text: {
                 if (UpdateController.isStoreUpdate) {

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import SortFilterProxyModel 0.2
 
@@ -18,8 +17,6 @@ import "../Components"
 
 PageType {
     id: root
-
-    property var containersDropDownRef: null
 
     property var apiAvailableProtocols: []
     property string apiCurrentProtocol: ""
@@ -91,27 +88,21 @@ PageType {
     }
 
     Connections {
-        objectName: "pageControllerConnections"
-
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
             drawer.open()
-            if (isContainerInstalled && root.containersDropDownRef) {
-                root.containersDropDownRef.open()
+            if (isContainerInstalled) {
+                containersSheet.open()
             }
         }
     }
 
     Item {
-        objectName: "homeColumnItem"
-
         anchors.fill: parent
         anchors.bottomMargin: collapsedBar.height
 
         ColumnLayout {
-            objectName: "homeColumnLayout"
-
             anchors.fill: parent
             anchors.topMargin: PageController.safeAreaTopMargin
             anchors.bottomMargin: 12
@@ -120,7 +111,6 @@ PageType {
 
             HomeInfoButton {
                 id: loggingButton
-                objectName: "loggingButton"
 
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
@@ -137,7 +127,6 @@ PageType {
 
             HomeInfoButton {
                 id: devGatewayButton
-                objectName: "devGatewayButton"
 
                 property bool isDevGatewayEnabled: SettingsController.isDevGatewayEnv
 
@@ -153,14 +142,16 @@ PageType {
             }
 
             Item {
+                id: connectButtonArea
+
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 140
                 Layout.topMargin: 16
                 Layout.bottomMargin: 28
 
                 ConnectButton {
                     id: connectButton
-                    objectName: "connectButton"
 
                     anchors.centerIn: parent
                     width: Math.min(implicitWidth, parent.width, parent.height)
@@ -170,7 +161,6 @@ PageType {
 
             HomeInfoButton {
                 id: splitTunnelingButton
-                objectName: "splitTunnelingButton"
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.maximumWidth: parent.width - 32
@@ -189,7 +179,6 @@ PageType {
 
                 HomeSplitTunnelingDrawer {
                     id: homeSplitTunnelingDrawer
-                    objectName: "homeSplitTunnelingDrawer"
 
                     parent: root
                 }
@@ -214,7 +203,6 @@ PageType {
 
     Item {
         id: collapsedBar
-        objectName: "collapsedBar"
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -301,16 +289,14 @@ PageType {
 
     SheetType {
         id: drawer
-        objectName: "drawerProtocol"
 
         bottomY: root.height
         closedY: root.height - collapsedBar.height
         borderColor: AmneziaStyle.color.borderSoft
+        grabberTopMargin: 16
         expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
         Item {
-            objectName: "ProtocolDrawerCollapsedContent"
-
             anchors.fill: parent
 
             HomeServerSummary {
@@ -330,7 +316,6 @@ PageType {
 
             ColumnLayout {
                 id: serversMenuHeader
-                objectName: "serversMenuHeader"
 
                 anchors.top: expandedSummary.bottom
                 anchors.right: parent.right
@@ -340,7 +325,6 @@ PageType {
 
                 ButtonType {
                     id: containersDropDown
-                    objectName: "containersDropDown"
 
                     Layout.alignment: Qt.AlignHCenter
                     Layout.maximumWidth: parent.width - 32
@@ -367,7 +351,6 @@ PageType {
 
             ServersListView {
                 id: serversMenuContent
-                objectName: "serversMenuContent"
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
@@ -382,11 +365,8 @@ PageType {
 
     SheetType {
         id: containersSheet
-        objectName: "containersSheet"
 
         expandedHeight: windowHeight * 0.9
-
-        Component.onCompleted: root.containersDropDownRef = containersSheet
 
         ColumnLayout {
             anchors.fill: parent
@@ -398,10 +378,8 @@ PageType {
                 Layout.preferredHeight: 48
 
                 IconButtonType {
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
+                    x: 4
+                    y: 0
                     icon.source: "qrc:/images/controls/arrow-left.svg"
                     Accessible.name: qsTr("Back")
 
@@ -409,12 +387,12 @@ PageType {
                 }
             }
 
-            HeaderType {
+            SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN protocol")
                 descriptionText: qsTr("Select an installed protocol or add a new one")
@@ -422,7 +400,6 @@ PageType {
 
             HomeContainersListView {
                 id: containersListView
-                objectName: "containersListView"
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -432,8 +409,6 @@ PageType {
                 onActivated: containersSheet.close()
 
                 Connections {
-                    objectName: "rowLayoutConnections"
-
                     target: ServersUiController
 
                     function onDefaultServerIdChanged() {
@@ -465,9 +440,10 @@ PageType {
 
     SheetType {
         id: protocolSelectionDrawer
-        objectName: "protocolSelectionDrawer"
 
-        expandedHeight: windowHeight * 0.5
+        expandedHeight: Math.min(windowHeight * 0.9,
+                                 48 + 16 + protocolDrawerHeader.implicitHeight + 32
+                                 + protocolDrawerListView.contentHeight + protocolDrawerListView.bottomMargin)
 
         ColumnLayout {
             id: protocolDrawerContainer
@@ -483,10 +459,8 @@ PageType {
                 IconButtonType {
                     id: protocolDrawerBackButton
 
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
+                    x: 4
+                    y: 0
                     icon.source: "qrc:/images/controls/arrow-left.svg"
                     Accessible.name: qsTr("Back")
 
@@ -494,12 +468,14 @@ PageType {
                 }
             }
 
-            HeaderType {
+            SectionHeaderType {
+                id: protocolDrawerHeader
+
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN protocol")
             }
@@ -516,10 +492,6 @@ PageType {
 
                 model: root.apiAvailableProtocols
 
-                ButtonGroup {
-                    id: protocolDrawerButtonGroup
-                }
-
                 delegate: RadioItemType {
                     id: protocolDrawerRadioButton
 
@@ -529,9 +501,6 @@ PageType {
 
                     text: root.protocolDisplayName(modelData)
 
-                    ButtonGroup.group: protocolDrawerButtonGroup
-
-                    checkable: !ConnectionController.isConnected
                     checked: modelData === root.apiCurrentProtocol
 
                     onClicked: {

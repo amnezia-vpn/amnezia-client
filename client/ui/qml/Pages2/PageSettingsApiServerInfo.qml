@@ -17,39 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    property list<QtObject> labelsModel: [
-        statusObject,
-        endDateObject,
-        deviceCountObject
-    ]
-
-    QtObject {
-        id: statusObject
-
-        readonly property string title: qsTr("Subscription Status")
-        readonly property string contentKey: "subscriptionStatus"
-        readonly property string objectImageSource: "qrc:/images/controls/info.svg"
-        readonly property bool isRichText: true
-    }
-
-    QtObject {
-        id: endDateObject
-
-        readonly property string title: qsTr("Valid Until")
-        readonly property string contentKey: "endDate"
-        readonly property string objectImageSource: "qrc:/images/controls/history.svg"
-        readonly property bool isRichText: false
-    }
-
-    QtObject {
-        id: deviceCountObject
-
-        readonly property string title: qsTr("Active Connections")
-        readonly property string contentKey: "connectedDevices"
-        readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
-        readonly property bool isRichText: false
-    }
-
     property var processedServer
 
     property bool isSubscriptionExpired: false
@@ -58,6 +25,9 @@ PageType {
     property bool isInAppPurchase: false
     property bool isVisibleForAmneziaFree: false
     property string serviceDescription: ""
+    property string subscriptionStatusValue: ""
+    property string endDateValue: ""
+    property string connectedDevicesValue: ""
 
     readonly property bool showSubscriptionNote: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
     readonly property bool showRenewButton: root.showSubscriptionNote
@@ -72,6 +42,9 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
         root.isVisibleForAmneziaFree = ApiAccountInfoModel.data("isComponentVisible")
         root.serviceDescription = ApiAccountInfoModel.data("serviceDescription") || ""
+        root.subscriptionStatusValue = ApiAccountInfoModel.data("subscriptionStatus") || ""
+        root.endDateValue = ApiAccountInfoModel.data("endDate") || ""
+        root.connectedDevicesValue = ApiAccountInfoModel.data("connectedDevices") || ""
     }
 
     Component.onCompleted: {
@@ -104,7 +77,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -136,7 +108,6 @@ PageType {
 
             NavigationBarType {
                 id: headerContent
-                objectName: "headerContent"
 
                 Layout.fillWidth: true
 
@@ -144,7 +115,6 @@ PageType {
                 description: root.serviceDescription
 
                 IconButtonType {
-                    size: IconButtonType.Small
                     icon.source: "qrc:/images/controls/edit-3.svg"
 
                     onClicked: serverNameEditDrawer.open()
@@ -155,7 +125,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 8
 
                 visible: root.showSubscriptionNote
 
@@ -167,7 +136,7 @@ PageType {
 
             ButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: root.showSubscriptionNote ? 24 : 0
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -182,51 +151,81 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: root.showSubscriptionNote || root.showRenewButton ? 24 : 0
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 spacing: 0
 
-                Repeater {
-                    model: root.labelsModel
+                ListItemType {
+                    id: subscriptionStatusRow
 
-                    delegate: ListItemType {
-                        id: infoRow
+                    Layout.fillWidth: true
 
-                        required property var modelData
+                    visible: root.subscriptionStatusValue !== ""
 
-                        property string value: ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
+                    interactive: false
+                    showSeparator: false
 
-                        Layout.fillWidth: true
+                    text: qsTr("Subscription Status")
+                    icon.source: "qrc:/images/controls/info.svg"
 
-                        visible: infoRow.value !== ""
+                    SmallTextType {
+                        Layout.maximumWidth: subscriptionStatusRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
 
-                        focusPolicy: Qt.NoFocus
-                        hoverEnabled: false
-                        showSeparator: false
-                        leadingSlotWidth: 24
+                        text: root.subscriptionStatusValue
+                        textFormat: Text.RichText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
 
-                        text: infoRow.modelData.title
-                        icon.source: infoRow.modelData.objectImageSource
+                ListItemType {
+                    id: endDateRow
 
-                        Connections {
-                            target: ApiAccountInfoModel
+                    Layout.fillWidth: true
 
-                            function onModelReset() {
-                                infoRow.value = ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
-                            }
-                        }
+                    visible: root.endDateValue !== ""
 
-                        SmallTextType {
-                            Layout.maximumWidth: infoRow.availableWidth * 0.5
-                            Layout.rightMargin: 4
+                    interactive: false
+                    showSeparator: false
 
-                            text: infoRow.value
-                            textFormat: infoRow.modelData.isRichText ? Text.RichText : Text.PlainText
-                            color: AmneziaStyle.color.textSecondary
-                            horizontalAlignment: Text.AlignRight
-                        }
+                    text: qsTr("Valid Until")
+                    icon.source: "qrc:/images/controls/history.svg"
+
+                    SmallTextType {
+                        Layout.maximumWidth: endDateRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
+
+                        text: root.endDateValue
+                        textFormat: Text.PlainText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+
+                ListItemType {
+                    id: connectedDevicesRow
+
+                    Layout.fillWidth: true
+
+                    visible: root.connectedDevicesValue !== ""
+
+                    interactive: false
+                    showSeparator: false
+
+                    text: qsTr("Active Connections")
+                    icon.source: "qrc:/images/controls/monitor.svg"
+
+                    SmallTextType {
+                        Layout.maximumWidth: connectedDevicesRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
+
+                        text: root.connectedDevicesValue
+                        textFormat: Text.PlainText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
                     }
                 }
             }
@@ -237,6 +236,7 @@ PageType {
 
                 visible: root.showRenewLink
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 leftImageSource: "qrc:/images/controls/refresh-cw.svg"
                 text: qsTr("Renew subscription")
@@ -267,6 +267,30 @@ PageType {
                 Layout.rightMargin: 16
 
                 spacing: 0
+
+                ListItemType {
+                    id: localProxyItem
+
+                    Layout.fillWidth: true
+
+                    visible: LocalProxyController.isSupported && ServersUiController.processedServerIsPremium
+
+                    text: qsTr("Local proxy")
+                    subtitle: {
+                        if (!LocalProxyController.isEnabled) {
+                            return qsTr("Off")
+                        }
+                        if (LocalProxyController.ownerId !== ServersUiController.processedServerId) {
+                            return qsTr("In use by another server")
+                        }
+                        return qsTr("Running: 127.0.0.1:%1").arg(LocalProxyController.activePort > 0 ? LocalProxyController.activePort : LocalProxyController.port)
+                    }
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsLocalProxy)
+                    }
+                }
 
                 ListItemType {
                     id: vpnKey
@@ -355,6 +379,7 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Reload API config")
@@ -376,7 +401,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -388,6 +413,7 @@ PageType {
 
                 visible: root.isVisibleForAmneziaFree
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Unlink this device")
@@ -401,6 +427,9 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        } else if (LocalProxyController.isEnabled
+                                   && LocalProxyController.ownerId === ServersUiController.processedServerId) {
+                            PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
                             if (SubscriptionUiController.deactivateDevice(ServersUiController.processedServerId)) {
@@ -412,7 +441,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -421,8 +450,9 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 12
-                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Remove from application")
@@ -435,6 +465,9 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else if (LocalProxyController.isEnabled
+                                   && LocalProxyController.ownerId === ServersUiController.processedServerId) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove server while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
                             SubscriptionUiController.removeServer(ServersUiController.processedServerId)
@@ -444,7 +477,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
         }

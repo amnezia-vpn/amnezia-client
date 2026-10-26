@@ -22,7 +22,7 @@ TabButton {
 
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     background: Item {
         Rectangle {

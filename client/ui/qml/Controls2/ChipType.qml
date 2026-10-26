@@ -8,8 +8,6 @@ import "TextTypes"
 Button {
     id: root
 
-    property bool applied: false
-
     implicitWidth: implicitContentWidth + leftPadding + rightPadding
     implicitHeight: 34
 
@@ -18,20 +16,20 @@ Button {
 
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     background: Rectangle {
         radius: 16
 
-        color: root.applied ? AmneziaStyle.color.accentLight : AmneziaStyle.color.bgSurfaceAlt
-        border.width: root.applied || root.checked || (root.hovered && !root.down) ? 1 : 0
-        border.color: root.applied || root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderBold
+        color: root.checked ? AmneziaStyle.color.bgSelected : AmneziaStyle.color.bgSurfaceAlt
+        border.width: root.checked || (root.hovered && !root.down) ? 1 : 0
+        border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderBold
 
         Rectangle {
             anchors.fill: parent
 
             radius: parent.radius
-            visible: root.down && !root.applied
+            visible: root.down
             color: AmneziaStyle.color.bgStateLayer
         }
 
@@ -43,14 +41,7 @@ Button {
 
     contentItem: SmallTextType {
         text: root.text
-        color: {
-            if (root.applied) {
-                return AmneziaStyle.color.textInverted
-            }
-            return root.checked ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textSecondary
-        }
-        font.weight: root.applied ? 600 : 400
-        font.letterSpacing: root.applied ? -0.4 : 0
+        color: root.checked ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textSecondary
 
         wrapMode: Text.NoWrap
         elide: Text.ElideRight

@@ -15,8 +15,6 @@ import "../Config"
 PageType {
     id: root
 
-    signal lastItemTabClickedSignal()
-
     property bool isServerWithWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
     Connections {
@@ -53,178 +51,172 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
+        anchors.top: parent.top
 
-        model: serverActions
+        contentHeight: content.implicitHeight
 
-        delegate: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
 
             ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: isVisible
+                visible: root.isServerWithWriteAccess
 
-                text: title
-                subtitle: description
-                destructive: isDestructive
+                text: qsTr("Check the server for previously installed Amnezia services")
+                subtitle: qsTr("Add them to the application if they were not displayed")
 
                 onClicked: {
-                    clickedHandler()
-                }
-            }
-        }
-
-        footer: Item {
-            width: listView.width
-            height: 16 + PageController.safeAreaBottomMargin
-        }
-    }
-
-    property list<QtObject> serverActions: [
-        check,
-        reboot,
-        remove,
-        clear,
-        reset,
-    ]
-
-    QtObject {
-        id: check
-
-        property bool isVisible: root.isServerWithWriteAccess
-        readonly property string title: qsTr("Check the server for previously installed Amnezia services")
-        readonly property string description: qsTr("Add them to the application if they were not displayed")
-        readonly property bool isDestructive: false
-        readonly property var clickedHandler: function() {
-            PageController.showBusyIndicator(true)
-            InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
-            PageController.showBusyIndicator(false)
-        }
-    }
-
-    QtObject {
-        id: reboot
-
-        property bool isVisible: root.isServerWithWriteAccess
-        readonly property string title: qsTr("Reboot server")
-        readonly property string description: ""
-        readonly property bool isDestructive: true
-        readonly property var clickedHandler: function() {
-            var headerText = qsTr("Do you want to reboot the server?")
-            var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = qsTr("Cancel")
-
-            var yesButtonFunction = function() {
-                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                    PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
-                } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.rebootServer(ServersUiController.processedServerId)
+                    InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
                 }
             }
-            var noButtonFunction = function() {
 
-            }
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-        }
-    }
+                visible: root.isServerWithWriteAccess
 
-    QtObject {
-        id: remove
+                text: qsTr("Reboot server")
+                destructive: true
 
-        property bool isVisible: true
-        readonly property string title: qsTr("Remove server from application")
-        readonly property string description: ""
-        readonly property bool isDestructive: true
-        readonly property var clickedHandler: function() {
-            var headerText = qsTr("Do you want to remove the server from application?")
-            var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = qsTr("Cancel")
+                onClicked: {
+                    var headerText = qsTr("Do you want to reboot the server?")
+                    var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-            var yesButtonFunction = function() {
-                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                    PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
-                } else {
-                    PageController.showBusyIndicator(true)
-                    InstallController.removeServer(ServersUiController.processedServerId)
-                    PageController.showBusyIndicator(false)
+                    var yesButtonFunction = function() {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.rebootServer(ServersUiController.processedServerId)
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
+
+                    }
+
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-            var noButtonFunction = function() {
 
-            }
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-        }
-    }
+                text: qsTr("Remove server from application")
+                destructive: true
 
-    QtObject {
-        id: clear
+                onClicked: {
+                    var headerText = qsTr("Do you want to remove the server from application?")
+                    var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-        property bool isVisible: root.isServerWithWriteAccess
-        readonly property string title: qsTr("Clear server from Amnezia software")
-        readonly property string description: ""
-        readonly property bool isDestructive: true
-        readonly property var clickedHandler: function() {
-            var headerText = qsTr("Do you want to clear server from Amnezia software?")
-            var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = qsTr("Cancel")
+                    var yesButtonFunction = function() {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeServer(ServersUiController.processedServerId)
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
 
-            var yesButtonFunction = function() {
-                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                    PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
-                } else {
-                    PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeAllContainers(ServersUiController.processedServerId)
+                    }
+
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-            var noButtonFunction = function() {
 
-            }
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-        }
-    }
+                visible: root.isServerWithWriteAccess
 
-    QtObject {
-        id: reset
+                text: qsTr("Clear server from Amnezia software")
+                destructive: true
 
-        property bool isVisible: ServersUiController.isServerFromApi(ServersUiController.processedServerId)
-        readonly property string title: qsTr("Reset API config")
-        readonly property string description: ""
-        readonly property bool isDestructive: true
-        readonly property var clickedHandler: function() {
-            var headerText = qsTr("Do you want to reset API config?")
-            var descriptionText = ""
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = qsTr("Cancel")
+                onClicked: {
+                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-            var yesButtonFunction = function() {
-                if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                    PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
-                } else {
-                    PageController.showBusyIndicator(true)
-                    SubscriptionUiController.removeApiConfig(ServersUiController.processedServerId)
-                    PageController.showBusyIndicator(false)
+                    var yesButtonFunction = function() {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                        } else {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeAllContainers(ServersUiController.processedServerId)
+                        }
+                    }
+                    var noButtonFunction = function() {
+
+                    }
+
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-            var noButtonFunction = function() {
 
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+
+                text: qsTr("Reset API config")
+                destructive: true
+
+                onClicked: {
+                    var headerText = qsTr("Do you want to reset API config?")
+                    var descriptionText = ""
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            SubscriptionUiController.removeApiConfig(ServersUiController.processedServerId)
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
+
+                    }
+
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
             }
 
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
+            }
         }
     }
-
 }

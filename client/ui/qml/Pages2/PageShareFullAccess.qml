@@ -26,7 +26,7 @@ PageType {
 
         anchors.top: parent.top
         anchors.bottom: shareButton.top
-        anchors.bottomMargin: 16
+        anchors.bottomMargin: 24
 
         contentHeight: content.implicitHeight
 
@@ -47,15 +47,12 @@ PageType {
 
             DropDownType {
                 id: serverSelector
-                objectName: "serverSelector"
 
-                signal severSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
                 Layout.bottomMargin: 16
 
                 drawerHeight: 0.4375
@@ -78,27 +75,25 @@ PageType {
                     }
 
                     onActivated: {
-                        handler()
-
-                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.severSelectorIndexChanged()
-                        }
-
-                        root.headerText = qsTr("Accessing ") + serverSelector.text
-                        root.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        applySelection()
                         serverSelector.close()
                     }
 
                     Component.onCompleted: {
-                        serverSelectorListView.currentIndex = ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId) ?
+                        selectedIndex = ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId) ?
                                     proxyServersModel.mapFromSource(ServersUiController.getServerIndexById(ServersUiController.defaultServerId)) : 0
-                        serverSelectorListView.triggerCurrentItem()
+                        applySelection()
                     }
 
-                    function handler() {
-                        serverSelector.text = selectedText
-                        ServersUiController.setProcessedServerId(ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex)))
+                    function applySelection() {
+                        const serverId = ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex))
+                        ServersUiController.setProcessedServerId(serverId)
+
+                        serverSelector.currentIndex = selectedIndex
+                        serverSelector.text = ServersUiController.serverName(serverId)
+
+                        root.headerText = qsTr("Accessing ") + serverSelector.text
+                        root.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                     }
                 }
             }
@@ -113,7 +108,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         text: qsTr("Share")
         leftImageSource: "qrc:/images/controls/share-2.svg"

@@ -17,33 +17,34 @@ import "../Components"
 PageType {
     id: root
 
-    ListViewType {
-        id: listView
+    readonly property bool isSaveButtonEnabled: portTextField.errorText === "" && vpnAddressSubnetTextField.errorText === ""
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.bottomMargin: 24
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
-        header: NavigationBarType {
-            width: listView.width
-            height: implicitHeight + 16
+        contentHeight: content.implicitHeight
 
-            title: qsTr("WG settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: WireGuardConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            property bool isSaveButtonEnabled: portTextField.errorText === "" &&
-                                               vpnAddressSubnetTextField.errorText === ""
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 12
+
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: -content.spacing
+
+                title: qsTr("WG settings")
+            }
 
             TextFieldType {
                 id: vpnAddressSubnetTextField
@@ -53,13 +54,9 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("VPN address subnet")
-                textField.text: subnetAddress
+                textField.text: WireGuardConfigModel.subnetAddress
 
-                textField.onEditingFinished: {
-                    if (textField.text !== subnetAddress) {
-                        subnetAddress = textField.text
-                    }
-                }
+                textField.onTextEdited: WireGuardConfigModel.subnetAddress = textField.text
 
                 checkEmptyText: true
             }
@@ -72,15 +69,11 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Port")
-                textField.text: port
+                textField.text: WireGuardConfigModel.port
                 textField.maximumLength: 5
                 textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== port) {
-                        port = textField.text
-                    }
-                }
+                textField.onTextEdited: WireGuardConfigModel.port = textField.text
 
                 checkEmptyText: true
             }
@@ -95,15 +88,13 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        enabled: listView.enabled && listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
+        enabled: flickable.enabled && root.isSaveButtonEnabled
 
         text: qsTr("Save")
 
         onClicked: function() {
-            forceActiveFocus()
-
             var headerText = qsTr("Save settings?")
             var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
             var yesButtonText = qsTr("Continue")
@@ -118,12 +109,8 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
             }
-            var noButtonFunction = function() {
-                if (!GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function() {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

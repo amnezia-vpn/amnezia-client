@@ -133,27 +133,9 @@
 <context>
     <name>ConnectButton</name>
     <message>
-        <location filename="../ui/qml/Components/ConnectButton.qml" line="29"/>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="28"/>
         <source>Unable to disconnect during configuration preparation</source>
         <translation>Configuration ပြင်ဆင်ခြင်းလုပ်ဆောင်နေချိန်အတွင်း ချိတ်ဆက်မှုဖြတ်တောက်၍မရပါ</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionTypeSelectionDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="31"/>
-        <source>Add new connection</source>
-        <translation>ချိတ်ဆက်မှုအသစ်ထည့်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="40"/>
-        <source>Configure your server</source>
-        <translation>သင်၏ဆာဗာကို စီစဉ်ချိန်ညှိမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="55"/>
-        <source>Open config file, key or QR code</source>
-        <translation>config ဖိုင်၊ key သို့မဟုတ် QR ကုဒ်ကို ဖွင့်မည်</translation>
     </message>
 </context>
 <context>
@@ -216,11 +198,297 @@
     </message>
 </context>
 <context>
+    <name>CountriesEmptyState</name>
+    <message>
+        <location filename="../ui/qml/Components/CountriesEmptyState.qml" line="19"/>
+        <source>Nothing found in &quot;%1&quot;</source>
+        <translation>&quot;%1&quot; တွင် ဘာမျှ မတွေ့ပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/CountriesEmptyState.qml" line="21"/>
+        <source>Nothing found. Check the spelling or change your query</source>
+        <translation>ဘာမျှ မတွေ့ပါ။ စာလုံးပေါင်းကို စစ်ဆေးပါ သို့မဟုတ် ရှာဖွေမှုကို ပြောင်းပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/CountriesEmptyState.qml" line="22"/>
+        <source>No locations available yet</source>
+        <translation>တည်နေရာများ မရှိသေးပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/CountriesEmptyState.qml" line="29"/>
+        <source>Show all</source>
+        <translation>အားလုံးပြမည်</translation>
+    </message>
+</context>
+<context>
+    <name>CountryRegionNames</name>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="7"/>
+        <source>Europe</source>
+        <translation>ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="8"/>
+        <source>Asia</source>
+        <translation>အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="9"/>
+        <source>Americas</source>
+        <translation>အမေရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="10"/>
+        <source>Africa</source>
+        <translation>အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="11"/>
+        <source>Oceania</source>
+        <translation>အိုရှန်းနီးယား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="12"/>
+        <source>Special</source>
+        <translation>အထူး</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="13"/>
+        <source>Other</source>
+        <translation>အခြား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="17"/>
+        <source>Northern Europe</source>
+        <translation>မြောက်ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="18"/>
+        <source>Western Europe</source>
+        <translation>အနောက်ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="19"/>
+        <source>Central &amp; Eastern Europe</source>
+        <translation>အလယ်ပိုင်းနှင့် အရှေ့ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="20"/>
+        <source>Southern Europe</source>
+        <translation>တောင်ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="22"/>
+        <source>Western Asia</source>
+        <translation>အနောက်အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="23"/>
+        <source>Central Asia</source>
+        <translation>အလယ်အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="24"/>
+        <source>Southern Asia</source>
+        <translation>တောင်အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="25"/>
+        <source>Eastern Asia</source>
+        <translation>အရှေ့အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="26"/>
+        <source>South-eastern Asia</source>
+        <translation>အရှေ့တောင်အာရှ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="28"/>
+        <source>Northern America</source>
+        <translation>မြောက်အမေရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="29"/>
+        <source>Central America</source>
+        <translation>အလယ်ပိုင်းအမေရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="30"/>
+        <source>Caribbean</source>
+        <translation>ကာရစ်ဘီယံ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="31"/>
+        <source>South America</source>
+        <translation>တောင်အမေရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="33"/>
+        <source>Northern Africa</source>
+        <translation>မြောက်အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="34"/>
+        <source>Western Africa</source>
+        <translation>အနောက်အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="35"/>
+        <source>Middle Africa</source>
+        <translation>အလယ်ပိုင်းအာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="36"/>
+        <source>Eastern Africa</source>
+        <translation>အရှေ့အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="37"/>
+        <source>Southern Africa</source>
+        <translation>တောင်ပိုင်းအာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="39"/>
+        <source>Australia and New Zealand</source>
+        <translation>ဩစတြေးလျနှင့် နယူးဇီလန်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="40"/>
+        <source>Melanesia</source>
+        <translation>မယ်လနီးရှား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="41"/>
+        <source>Micronesia</source>
+        <translation>မိုက်ခရိုနီးရှား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="42"/>
+        <source>Polynesia</source>
+        <translation>ပိုလီနီးရှား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="46"/>
+        <source>Nordic countries</source>
+        <translation>နော်ဒစ်နိုင်ငံများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="47"/>
+        <source>Baltic states</source>
+        <translation>ဘော်လ်တစ်နိုင်ငံများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="48"/>
+        <source>United Kingdom and Ireland</source>
+        <translation>ယူနိုက်တက်ကင်းဒမ်းနှင့် အိုင်ယာလန်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="49"/>
+        <source>Southwestern Europe</source>
+        <translation>အနောက်တောင်ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="50"/>
+        <source>Southeastern Europe</source>
+        <translation>အရှေ့တောင်ဥရောပ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="52"/>
+        <source>Caucasus and Turkey</source>
+        <translation>ကော့ကေးဆပ်နှင့် တူရကီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="53"/>
+        <source>Arabian Peninsula</source>
+        <translation>အာရေဗျကျွန်းဆွယ်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="54"/>
+        <source>Levant and Mesopotamia</source>
+        <translation>လီဗန့်နှင့် မက်ဆိုပိုတေးမီးယား</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="56"/>
+        <source>Greater Antilles</source>
+        <translation>အန်တီလီးစ်ကျွန်းစုကြီးများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="57"/>
+        <source>Lesser Antilles</source>
+        <translation>အန်တီလီးစ်ကျွန်းစုငယ်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="58"/>
+        <source>Bahamas and Southern Caribbean</source>
+        <translation>ဘဟားမားနှင့် တောင်ပိုင်းကာရစ်ဘီယံ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="60"/>
+        <source>Sahel</source>
+        <translation>ဆာဟဲလ်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="61"/>
+        <source>Gulf of Guinea</source>
+        <translation>ဂီနီပင်လယ်ကွေ့</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="62"/>
+        <source>Atlantic West Africa</source>
+        <translation>အတ္တလန္တိတ် အနောက်အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="63"/>
+        <source>East Africa (mainland)</source>
+        <translation>အရှေ့အာဖရိက (ကုန်းမြေ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="64"/>
+        <source>Southeast Africa</source>
+        <translation>အရှေ့တောင်အာဖရိက</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="65"/>
+        <source>Indian Ocean islands</source>
+        <translation>အိန္ဒိယသမုဒ္ဒရာ ကျွန်းများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="69"/>
+        <source>Favorites</source>
+        <translation>အကြိုက်ဆုံးများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="70"/>
+        <source>All</source>
+        <translation>အားလုံး</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="71"/>
+        <source>Allowlists</source>
+        <translation>ခွင့်ပြုစာရင်းများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="72"/>
+        <source>Created</source>
+        <translation>ဖန်တီးထားသည်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Config/CountryRegionNames.qml" line="87"/>
+        <source>For networks with allowlists</source>
+        <translation>ခွင့်ပြုစာရင်းသုံး ကွန်ရက်များအတွက်</translation>
+    </message>
+</context>
+<context>
     <name>CountrySearchRow</name>
     <message>
         <location filename="../ui/qml/Components/CountrySearchRow.qml" line="27"/>
         <source>Country or region</source>
         <translation>နိုင်ငံ သို့မဟုတ် ဒေသ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/CountrySearchRow.qml" line="50"/>
+        <source>Sort</source>
+        <translation>စီမည်</translation>
     </message>
 </context>
 <context>
@@ -239,7 +507,7 @@
 <context>
     <name>HomeContainersListView</name>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="37"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="30"/>
         <source>Unable change protocol while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ပရိုတိုကောကို ပြောင်းလဲ၍မရပါ။</translation>
     </message>
@@ -247,7 +515,7 @@
 <context>
     <name>HomeServerSummary</name>
     <message>
-        <location filename="../ui/qml/Components/HomeServerSummary.qml" line="101"/>
+        <location filename="../ui/qml/Components/HomeServerSummary.qml" line="91"/>
         <source>AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.</source>
         <translation>AmneziaWG 2.0 သည် ဟောင်းနေပြီး ပံ့ပိုးမထားတော့ပါ။ ဆက်လက်အသုံးပြုရန် AmneziaWG 3.1 ကွန်တိန်နာကို အသစ်ထည့်သွင်းရန် လိုအပ်ပါသည်။</translation>
     </message>
@@ -446,20 +714,57 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>ListItemType</name>
     <message>
-        <location filename="../ui/qml/Controls2/ListItemType.qml" line="43"/>
+        <location filename="../ui/qml/Controls2/ListItemType.qml" line="49"/>
         <source>Available in Premium</source>
         <translation>Premium တွင် ရရှိနိုင်သည်</translation>
     </message>
 </context>
 <context>
+    <name>LocalProxyController</name>
+    <message>
+        <location filename="../core/controllers/localProxyController.cpp" line="135"/>
+        <source>Local proxy failed to start. Check if the port is available</source>
+        <translation>စက်တွင်း ပရောက်စီ စတင်၍မရပါ။ Port ကို အသုံးပြုနိုင်ခြင်း ရှိမရှိ စစ်ဆေးပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/localProxyController.cpp" line="140"/>
+        <location filename="../core/controllers/localProxyController.cpp" line="157"/>
+        <source>Couldn’t start the proxy due to an internal error. Try restarting the app</source>
+        <translation>အတွင်းပိုင်း မှားယွင်းမှုကြောင့် ပရောက်စီကို စတင်၍မရပါ။ အက်ပ်ကို ပြန်လည်စတင်ကြည့်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/localProxyController.cpp" line="182"/>
+        <source>Local proxy stopped because VPN was turned on</source>
+        <translation>VPN ဖွင့်လိုက်သောကြောင့် စက်တွင်း ပရောက်စီ ရပ်တန့်သွားပါပြီ</translation>
+    </message>
+</context>
+<context>
+    <name>LogsUiController</name>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="113"/>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="116"/>
+        <source>%1 KB</source>
+        <translation>%1 KB</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="118"/>
+        <source>%1 MB</source>
+        <translation>%1 MB</translation>
+    </message>
+</context>
+<context>
     <name>MinMaxRowType</name>
     <message>
-        <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="76"/>
+        <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="75"/>
         <source>Min</source>
         <translation>အနည်းဆုံး</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="111"/>
+        <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="110"/>
         <source>Max</source>
         <translation>အမြင့်ဆုံး</translation>
     </message>
@@ -467,7 +772,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NavigationBarType</name>
     <message>
-        <location filename="../ui/qml/Controls2/NavigationBarType.qml" line="49"/>
+        <location filename="../ui/qml/Controls2/NavigationBarType.qml" line="124"/>
         <source>Back</source>
         <translation>နောက်သို့</translation>
     </message>
@@ -540,55 +845,55 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="121"/>
         <source>Logging enabled</source>
-        <translation>Logging ဖွင့်ထားပါသည်</translation>
+        <translation>မှတ်တမ်းတင်ခြင်း ဖွင့်ထားပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="137"/>
         <source>Dev gateway enabled</source>
         <translation>Dev gateway enabled</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="181"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="168"/>
         <source>Split tunneling enabled</source>
         <translation>split tunnelling ဖွင့်ထားပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="181"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="168"/>
         <source>Split tunneling disabled</source>
         <translation>split tunnelling ပိတ်ထားပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="420"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="396"/>
         <source>Select an installed protocol or add a new one</source>
         <translation>ထည့်သွင်းထားသော ပရိုတိုကောကို ရွေးပါ သို့မဟုတ် အသစ်ထည့်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="63"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="60"/>
         <source>Unable change protocol while trying to make an active connection</source>
         <translation>ချိတ်ဆက်မှု ပြုလုပ်နေစဉ် ပရိုတိုကောကို ပြောင်း၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="67"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="545"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="510"/>
         <source>Cannot change protocol during active connection</source>
         <translation>ချိတ်ဆက်မှု အသုံးပြုနေစဉ် ပရိုတိုကောကို ပြောင်း၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="406"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="491"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="382"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="463"/>
         <source>Back</source>
         <translation>နောက်သို့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="419"/>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="504"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="395"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="476"/>
         <source>VPN protocol</source>
         <translation>VPN ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="343"/>
         <source>Servers</source>
         <translation>ဆာဗာများ</translation>
     </message>
@@ -596,122 +901,122 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgClientSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="39"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="52"/>
         <source>AmneziaWG settings</source>
         <translation>AmneziaWG ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="62"/>
         <source>MTU</source>
         <translation>MTU</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="110"/>
         <source>I1 - First special junk packet</source>
         <translation>I1 - First special junk packet</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="120"/>
         <source>I2 - Second special junk packet</source>
         <translation>I2 - Second special junk packet</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="130"/>
         <source>I3 - Third special junk packet</source>
         <translation>I3 - Third special junk packet</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="140"/>
         <source>I4 - Fourth special junk packet</source>
         <translation>I4 - Fourth special junk packet</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="150"/>
         <source>I5 - Fifth special junk packet</source>
         <translation>I5 - Fifth special junk packet</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="166"/>
         <source>HeaderProtectionKey</source>
         <translation>HeaderProtectionKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="176"/>
         <source>ContentPaddingAddition - Content padding addition</source>
         <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="191"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="188"/>
         <source>RekeyAfterTime - Rekey after time</source>
         <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="200"/>
         <source>RekeyTimeout - Rekey timeout</source>
         <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="212"/>
         <source>RejectAfterTime - Reject after time</source>
         <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="224"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
         <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="239"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="236"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
         <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="252"/>
         <source>RandomTrailers</source>
         <translation>RandomTrailers</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="267"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="264"/>
         <source>DisableCookies</source>
         <translation>DisableCookies</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="284"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="281"/>
         <source>Server settings</source>
         <translation>ဆာဗာ ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="292"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="289"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="384"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="381"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="393"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="384"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="385"/>
         <source>Only the settings for this device will be changed</source>
         <translation>ဤစက်၏ ဆက်တင်များကိုသာ ပြောင်းလဲမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="395"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="386"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="387"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="400"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="391"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -719,182 +1024,182 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="110"/>
         <source>AmneziaWG settings</source>
         <translation>AmneziaWG ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="122"/>
         <source>VPN address subnet</source>
         <translation>VPN လိပ်စာ ကွန်ရက်ခွဲ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="145"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="164"/>
         <source>Jc - Junk packet count</source>
         <translation>Jc - Junk packet count</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="174"/>
         <source>Jmin - Junk packet minimum size</source>
         <translation>Jmin - Junk packet minimum size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="184"/>
         <source>Jmax - Junk packet maximum size</source>
         <translation>Jmax - Junk packet maximum size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="194"/>
         <source>S1 - Init packet junk size</source>
         <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S2 - Response packet junk size</source>
         <translation>S2 - Response packet junk size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="216"/>
         <source>S3 - Cookie reply packet junk size</source>
         <translation>S3 - Cookie reply packet junk size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S4 - Transport packet junk size</source>
         <translation>S4 - Transport packet junk size</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="250"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="240"/>
         <source>H1 - Init packet magic header</source>
         <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="262"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H2 - Response packet magic header</source>
         <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="274"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="264"/>
         <source>H3 - Underload packet magic header</source>
         <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="276"/>
         <source>H4 - Transport packet magic header</source>
         <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="296"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="286"/>
         <source>I1 - Special junk 1</source>
         <translation>I1 - Special junk 1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="296"/>
         <source>I2 - Special junk 2</source>
         <translation>I2 - Special junk 2</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="316"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>I3 - Special junk 3</source>
         <translation>I3 - Special junk 3</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="326"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="316"/>
         <source>I4 - Special junk 4</source>
         <translation>I4 - Special junk 4</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="336"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="326"/>
         <source>I5 - Special junk 5</source>
         <translation>I5 - Special junk 5</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="352"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="342"/>
         <source>HeaderProtectionKey</source>
         <translation>HeaderProtectionKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="368"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="358"/>
         <source>ContentPaddingAddition - Content padding addition</source>
         <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="381"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="371"/>
         <source>RekeyAfterTime - Rekey after time</source>
         <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
         <source>RekeyTimeout - Rekey timeout</source>
         <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="407"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="397"/>
         <source>RejectAfterTime - Reject after time</source>
         <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="420"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="410"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
         <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="433"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="423"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
         <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="449"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="439"/>
         <source>RandomTrailers</source>
         <translation>RandomTrailers</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="468"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="458"/>
         <source>DisableCookies</source>
         <translation>DisableCookies</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="492"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="482"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="50"/>
         <source>The values of the H1-H4 fields must be unique</source>
         <translation>H1-H4 အကွက်များ၏ တန်ဖိုးများသည် အခြားတန်ဖိုးများနှင့်မတူ တမူထူးခြားနေရပါမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="58"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation>S1 ကွက်လပ်၏ တန်ဖိုး + message initiation အရွယ်အစား (148) သည် S2 + message response အရွယ်အစား (92) + S3 + cookie reply အရွယ်အစား (64) + S4 + transport packet အရွယ်အစား (32) နှင့် တူညီခြင်း မရှိရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="63"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="64"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>သင်နှင့်အတူချိတ်ဆက်မှုတစ်ခုကို မျှဝေထားသည့် အသုံးပြုသူအားလုံး ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="65"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="66"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="70"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -902,149 +1207,149 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolOpenVpnSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="56"/>
         <source>OpenVPN Settings</source>
         <translation>OpenVPN ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="73"/>
         <source>VPN address subnet</source>
         <translation>VPN လိပ်စာ ကွန်ရက်ခွဲ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="81"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="91"/>
         <source>Network protocol</source>
         <translation>ကွန်ယက် ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="125"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="147"/>
         <source>Auto-negotiate encryption</source>
         <translation>အလိုအလျောက် ညှိနှိုင်း ကုဒ်ဝှက်ခြင်း</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="158"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="163"/>
         <source>Hash</source>
         <translation>Hash</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="169"/>
         <source>SHA512</source>
         <translation>SHA512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="170"/>
         <source>SHA384</source>
         <translation>SHA384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="171"/>
         <source>SHA256</source>
         <translation>SHA256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
         <source>SHA3-512</source>
         <translation>SHA3-512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
         <source>SHA3-384</source>
         <translation>SHA3-384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="174"/>
         <source>SHA3-256</source>
         <translation>SHA3-256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="175"/>
         <source>whirlpool</source>
         <translation>whirlpool</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="176"/>
         <source>BLAKE2b512</source>
         <translation>BLAKE2b512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="177"/>
         <source>BLAKE2s256</source>
         <translation>BLAKE2s256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="178"/>
         <source>SHA1</source>
         <translation>SHA1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="213"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="217"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="218"/>
         <source>Cipher</source>
         <translation>စာဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="220"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="224"/>
         <source>AES-256-GCM</source>
         <translation>AES-256-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="225"/>
         <source>AES-192-GCM</source>
         <translation>AES-192-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="226"/>
         <source>AES-128-GCM</source>
         <translation>AES-128-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="227"/>
         <source>AES-256-CBC</source>
         <translation>AES-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="228"/>
         <source>AES-192-CBC</source>
         <translation>AES-192-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="225"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="229"/>
         <source>AES-128-CBC</source>
         <translation>AES-128-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="230"/>
         <source>ChaCha20-Poly1305</source>
         <translation>ChaCha20-Poly1305</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="231"/>
         <source>ARIA-256-CBC</source>
         <translation>ARIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="232"/>
         <source>CAMELLIA-256-CBC</source>
         <translation>CAMELLIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="229"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="233"/>
         <source>none</source>
         <translation>none</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="293"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="297"/>
         <source>TLS auth</source>
         <translation>TLS auth</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="321"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="323"/>
         <source>Block DNS requests outside of VPN</source>
         <translation>VPN ပြင်ပရှိ DNS တောင်းဆိုမှုများကို ပိတ်ပင်မည်။</translation>
     </message>
@@ -1054,43 +1359,43 @@ Already installed containers were found on the server. All installed containers 
         <translation>ထပ်တိုး client ဖွဲ့စည်းမှုဆိုင်ရာ ညွှန်ကြားချက်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="364"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="397"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="395"/>
         <source>Commands:</source>
         <translation>အမိန့်ပေးခိုင်းစေချက်များ:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="380"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="377"/>
         <source>Additional server configuration commands</source>
         <translation>ထပ်တိုး ဆာဗာ ဖွဲ့စည်းမှုဆိုင်ရာ ညွှန်ကြားချက်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="421"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="416"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="419"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="420"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>သင့်တွင် သင့်ကိုမည်သည့် ချိတ်ဆက်ထားသော အသုံးပြုသူများသည် အကြောင်းအရာသို့ ဆက်သွယ်ရန် မရနိုင်ပါ။</translation>
+        <translation>သင် ချိတ်ဆက်မှုကို မျှဝေထားသော အသုံးပြုသူအားလုံး ၎င်းသို့ ချိတ်ဆက်နိုင်တော့မည် မဟုတ်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="428"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="421"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="422"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="433"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="426"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1141,52 +1446,52 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolWireGuardClientSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="34"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="45"/>
         <source>WG settings</source>
         <translation>WG ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="55"/>
         <source>MTU</source>
         <translation>MTU</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="70"/>
         <source>Server settings</source>
         <translation>ဆာဗာ ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="82"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="100"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="103"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="104"/>
         <source>Only the settings for this device will be changed</source>
         <translation>ဤစက်၏ ဆက်တင်များကိုသာ ပြောင်းလဲမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="105"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="106"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="110"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1194,47 +1499,47 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolWireGuardSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="46"/>
         <source>WG settings</source>
         <translation>WG ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="55"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="56"/>
         <source>VPN address subnet</source>
         <translation>VPN လိပ်စာ ကွန်ရက်ခွဲ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="71"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="95"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="98"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="99"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>သင်နှင့်အတူချိတ်ဆက်မှုတစ်ခုကို မျှဝေထားသည့် အသုံးပြုသူအားလုံး ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="100"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="101"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="105"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1242,42 +1547,47 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolXrayFlowSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="33"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="43"/>
         <source>Flow</source>
         <translation>Flow</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="51"/>
         <source>Empty</source>
         <translation>အလွတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="71"/>
+        <source>For apps that require QUIC. Browsers may stop loading.</source>
+        <translation>QUIC လိုအပ်သော အက်ပ်များအတွက်။ ဘရောက်ဇာများတွင် စာမျက်နှာများ ဖွင့်မရ ဖြစ်နိုင်သည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="84"/>
         <source>xtls-rprx-vision is available only with the RAW (TCP) transport.</source>
         <translation>xtls-rprx-vision သည် RAW (TCP) transport နှင့်သာ ရရှိနိုင်ပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="105"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="107"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="109"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="110"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="113"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1285,78 +1595,78 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolXraySecuritySettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="43"/>
         <source>Security</source>
         <translation>Security</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="51"/>
         <source>None</source>
         <translation>မရှိ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="60"/>
         <source>TLS</source>
         <translation>TLS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="69"/>
         <source>Reality</source>
         <translation>Reality</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="82"/>
         <source>REALITY is not supported with the mKCP transport. Use None or TLS.</source>
         <translation>REALITY ကို mKCP transport နှင့် ပံ့ပိုးမထားပါ။ None သို့မဟုတ် TLS ကို အသုံးပြုပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="97"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="100"/>
         <source>ALPN</source>
         <translation>ALPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="137"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="138"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="204"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="189"/>
         <source>Fingerprint</source>
         <translation>Fingerprint</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="175"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="218"/>
         <source>Server Name (SNI)</source>
         <translation>ဆာဗာအမည် (SNI)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="184"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="226"/>
         <source>Enter a valid IP address or domain name</source>
         <translation>တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="249"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="283"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="256"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="285"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="258"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="259"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="289"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="262"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1364,12 +1674,12 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolXraySettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="61"/>
         <source>Empty</source>
         <translation>အလွတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="122"/>
         <source>You have read-only access to this server. XRay settings cannot be edited.</source>
         <translation>ဤဆာဗာအတွက် သင့်ခွင့်ပြုချက်သည် ဖတ်ရုံသာဖြစ်ပါသည်။ XRay ဆက်တင်များကို ပြင်၍မရပါ။</translation>
     </message>
@@ -1379,80 +1689,85 @@ Already installed containers were found on the server. All installed containers 
         <translation>XRay VLESS ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="134"/>
         <source>More about settings</source>
         <translation>ဆက်တင်များအကြောင်း ပိုမိုဖတ်ရန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="148"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="209"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="195"/>
         <source>Transport</source>
         <translation>Transport</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="208"/>
         <source>Security</source>
         <translation>Security</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="221"/>
         <source>Flow</source>
         <translation>Flow</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="282"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="268"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="29"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="32"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="31"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="72"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="33"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="81"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="32"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="244"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="36"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="35"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="248"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="70"/>
+        <source>Recreate XRay with new keys?</source>
+        <translation>XRay ကို သော့အသစ်များဖြင့် ပြန်လည်ဖန်တီးမလား။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="234"/>
         <source>Reset settings</source>
         <translation>ဆက်တင်များ ပြန်လည်သတ်မှတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="254"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="240"/>
         <source>Settings were reset to defaults. Tap Save to apply them on the server.</source>
         <translation>ဆက်တင်များကို မူလတန်ဖိုးများသို့ ပြန်လည်သတ်မှတ်ပြီးပါပြီ။ ဆာဗာတွင် အသုံးပြုရန် သိမ်းဆည်းမည် ကို နှိပ်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="257"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="243"/>
         <source>Reset settings?</source>
         <translation>ဆက်တင်များ ပြန်လည်သတ်မှတ်မလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="257"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="243"/>
         <source>All XRay settings will be restored to defaults.</source>
         <translation>XRay ဆက်တင်အားလုံးကို မူလတန်ဖိုးများသို့ ပြန်လည်သတ်မှတ်ပါမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="244"/>
         <source>Reset</source>
         <translation>ပြန်လည်သတ်မှတ်</translation>
     </message>
@@ -1566,42 +1881,42 @@ Create one from the current settings.</source>
 <context>
     <name>PageProtocolXrayTransportSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="48"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="54"/>
         <source>Transport</source>
         <translation>Transport</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="62"/>
         <source>RAW (TCP)</source>
         <translation>RAW (TCP)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="71"/>
         <source>XHTTP</source>
         <translation>XHTTP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="72"/>
         <source>Advanced users</source>
         <translation>အတွေ့အကြုံရှိ အသုံးပြုသူများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="81"/>
         <source>mKCP</source>
         <translation>mKCP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="97"/>
         <source>mKCP Settings</source>
         <translation>mKCP ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="102"/>
         <source>TTI</source>
         <translation>TTI</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="103"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
         <translation>Transmission time interval (ms). Valid range: 10–100.</translation>
     </message>
@@ -1616,196 +1931,231 @@ Create one from the current settings.</source>
         <translation>Uplink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="132"/>
         <source>downlinkCapacity</source>
         <translation>downlinkCapacity</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="133"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
         <translation>Downlink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="221"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="147"/>
+        <source>mtu</source>
+        <translation>mtu</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="148"/>
+        <source>Maximum packet size in bytes. Range: 576–1460.</source>
+        <translation>ဘိုက်ဖြင့် အများဆုံး packet အရွယ်အစား။ အပိုင်းအခြား: 576–1460။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="168"/>
+        <source>cwndMultiplier</source>
+        <translation>cwndMultiplier</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="169"/>
+        <source>Congestion window multiplier. Minimum: 1.</source>
+        <translation>Congestion window မြှောက်ကိန်း။ အနည်းဆုံး: 1။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="183"/>
+        <source>maxSendingWindow</source>
+        <translation>maxSendingWindow</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="184"/>
+        <source>Send window in bytes. Must not be smaller than mtu. Leave empty to let Xray decide.</source>
+        <translation>ဘိုက်ဖြင့် ပေးပို့မှု window။ mtu ထက် မငယ်ရပါ။ Xray က ဆုံးဖြတ်စေရန် အလွတ်ထားပါ။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="212"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="259"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="241"/>
         <source>HTTP Profile</source>
         <translation>HTTP ပရိုဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="265"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="247"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="274"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="255"/>
         <source>Enter a valid IP address or domain name</source>
         <translation>တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="282"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="262"/>
         <source>Path</source>
         <translation>Path</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="290"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="269"/>
         <source>Path must start with &quot;/&quot;</source>
         <translation>လမ်းကြောင်းသည် &quot;/&quot; ဖြင့် စတင်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="300"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="301"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="278"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="279"/>
         <source>UplinkHTTPMethod</source>
         <translation>UplinkHTTPMethod</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="338"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="308"/>
         <source>Disable gRPC Header</source>
         <translation>gRPC Header ကို ပိတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="339"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="309"/>
         <source>noGRPCHeader</source>
         <translation>noGRPCHeader</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="347"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="317"/>
         <source>Disable SSE Header</source>
         <translation>SSE Header ကို ပိတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="348"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="318"/>
         <source>noSSEHeader</source>
         <translation>noSSEHeader</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="356"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="326"/>
         <source>Session &amp; Sequence</source>
         <translation>Session နှင့် Sequence</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="364"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="334"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="335"/>
         <source>SessionPlacement</source>
         <translation>SessionPlacement</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="401"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="363"/>
         <source>SessionKey</source>
         <translation>SessionKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="418"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="419"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="378"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="379"/>
         <source>SeqPlacement</source>
         <translation>SeqPlacement</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="455"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="407"/>
         <source>SeqKey</source>
         <translation>SeqKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="473"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="422"/>
+        <source>Where the uploaded data is carried in the request</source>
+        <translation>တောင်းဆိုမှုအတွင်း အပ်လုဒ်လုပ်သော ဒေတာကို သယ်ဆောင်သည့်နေရာ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="423"/>
         <source>UplinkDataPlacement</source>
         <translation>UplinkDataPlacement</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="509"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="451"/>
         <source>UplinkDataKey</source>
         <translation>UplinkDataKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="524"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="464"/>
         <source>Traffic Shaping</source>
         <translation>ဒေတာစီးဆင်းမှု ချိန်ညှိမှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="529"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="469"/>
         <source>UplinkChunkSize</source>
         <translation>UplinkChunkSize</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="530"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="470"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
         <translation>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="546"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="484"/>
         <source>scMaxBufferedPosts</source>
         <translation>scMaxBufferedPosts</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="547"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="485"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
         <translation>Max buffered POSTs. Range: 0–2147483647.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="563"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="499"/>
         <source>scMaxEachPostBytes</source>
         <translation>scMaxEachPostBytes</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="579"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="514"/>
         <source>scStreamUpServerSecs</source>
         <translation>scStreamUpServerSecs</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="595"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="529"/>
         <source>scMinPostsIntervalMs</source>
         <translation>scMinPostsIntervalMs</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="611"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="544"/>
         <source>Padding and multiplexing</source>
         <translation>Padding နှင့် multiplexing</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="621"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="554"/>
         <source>xPadding</source>
         <translation>xPadding</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="630"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="563"/>
         <source>XMux</source>
         <translation>XMux</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="631"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="564"/>
         <source>On</source>
         <translation>ဖွင့်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="631"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="564"/>
         <source>Off</source>
         <translation>ပိတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="658"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="591"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="666"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="598"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="668"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="600"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="669"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="601"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="672"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="604"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1813,37 +2163,37 @@ Create one from the current settings.</source>
 <context>
     <name>PageProtocolXrayXPaddingBytesSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="41"/>
         <source>xPaddingBytes</source>
         <translation>xPaddingBytes</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="54"/>
         <source>Range</source>
         <translation>အပိုင်းအခြား</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="87"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="92"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="89"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="91"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="92"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="95"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1851,64 +2201,64 @@ Create one from the current settings.</source>
 <context>
     <name>PageProtocolXrayXPaddingSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="41"/>
         <source>xPadding</source>
         <translation>xPadding</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="54"/>
         <source>xPaddingBytes</source>
         <translation>xPaddingBytes</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="71"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="65"/>
         <source>xPaddingObfsMode</source>
         <translation>xPaddingObfsMode</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="73"/>
         <source>xPaddingKey</source>
         <translation>xPaddingKey</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="86"/>
         <source>xPaddingHeader</source>
         <translation>xPaddingHeader</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="112"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="103"/>
         <source>xPaddingPlacement</source>
         <translation>xPaddingPlacement</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="152"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="135"/>
         <source>xPaddingMethod</source>
         <translation>xPaddingMethod</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="202"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="181"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="183"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="185"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="186"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="189"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1916,68 +2266,68 @@ Create one from the current settings.</source>
 <context>
     <name>PageProtocolXrayXmuxSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="48"/>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="67"/>
         <source>xmux</source>
         <translation>xmux</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="81"/>
         <source>maxConcurrency</source>
         <translation>maxConcurrency</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="96"/>
         <source>maxConnections</source>
         <translation>maxConnections</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="111"/>
         <source>cMaxReuseTimes</source>
         <translation>cMaxReuseTimes</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="126"/>
         <source>hMaxRequestTimes</source>
         <translation>hMaxRequestTimes</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="141"/>
         <source>hMaxReusableSecs</source>
         <translation>hMaxReusableSecs</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="156"/>
         <source>hKeepAlivePeriod</source>
         <translation>hKeepAlivePeriod</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="157"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
         <translation>HTTP keep-alive period. Integer, may be negative.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="197"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="189"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="191"/>
         <source>Save settings?</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="202"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="193"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="194"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="197"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -1985,517 +2335,518 @@ Create one from the current settings.</source>
 <context>
     <name>PageServiceDnsSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="26"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="37"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
         <translation>DNS ဝန်ဆောင်မှုကို သင့်ဆာဗာတွင် ထည့်သွင်းထားပြီးဖြစ်ပြီး ၎င်းကို VPN မှတစ်ဆင့်သာ အသုံးပြုနိုင်သည်.
 </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="27"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="38"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
         <translation>DNS လိပ်စာသည် သင့်ဆာဗာလိပ်စာနှင့် အတူတူပင်ဖြစ်ပါသည်။ ချိတ်ဆက်မှုတက်ဘ်အောက်ရှိ ဆက်တင်များတွင် DNS ကို ပြင်ဆင်ချိန်ညှိနိုင်ပါသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="49"/>
         <source>Remove </source>
         <translation>ဖယ်ရှားမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="54"/>
         <source>Remove %1 from server?</source>
         <translation>%1 ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="51"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="55"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="56"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="61"/>
         <source>Cannot remove AmneziaDNS from running server</source>
         <translation>AmneziaDNS ကို လည်ပတ်နေသည့်ဆာဗာမှ ဖယ်ရှား၍မရပါ</translation>
     </message>
 </context>
 <context>
-    <name>PageServiceMtProxySettings</name>
+    <name>PageServiceMtProtoSettingsBase</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="215"/>
-        <source>Checking...</source>
-        <translation>စစ်ဆေးနေသည်...</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="218"/>
-        <source>Updating</source>
-        <translation>အပ်ဒိတ်လုပ်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="222"/>
-        <source>Not deployed</source>
-        <translation>ထည့်သွင်းမထားပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="225"/>
-        <source>Running</source>
-        <translation>အလုပ်လုပ်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
-        <source>Stopped</source>
-        <translation>ရပ်တန့်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="231"/>
-        <source>Error</source>
-        <translation>မှားယွင်းမှု</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="234"/>
-        <source>Unknown</source>
-        <translation>အမည်မသိ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="349"/>
-        <source>MTProxy started</source>
-        <translation>MTProxy စတင်ပြီးပါပြီ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="349"/>
-        <source>MTProxy stopped</source>
-        <translation>MTProxy ရပ်တန့်ပြီးပါပြီ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="785"/>
-        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>ဆက်တင်များ ပိတ်ထားသည်: ချိတ်ဆက်မှုအချိန် ကုန်သွားပါသည် (မှားယွင်းမှုကုဒ် %1)။ ထပ်စမ်းရန် စာမျက်နှာကို ပြန်ဖွင့်ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="423"/>
-        <source>MTProxy settings</source>
-        <translation>MTProxy ဆက်တင်များ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="435"/>
-        <source>Read more about this settings</source>
-        <translation>ဤဆက်တင်များအကြောင်း ပိုမိုဖတ်ရန်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="447"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1636"/>
-        <source>No internet connection. Connect to the internet to change MTProxy settings.</source>
-        <translation>အင်တာနက် ချိတ်ဆက်မှု မရှိပါ။ MTProxy ဆက်တင်များ ပြောင်းရန် အင်တာနက်ကို ချိတ်ဆက်ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="461"/>
-        <source>Connection</source>
-        <translation>ချိတ်ဆက်မှု</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="464"/>
-        <source>Settings</source>
-        <translation>ဆက်တင်များ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="513"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="550"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
-        <source>Use Telegram connection link</source>
-        <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်ကို အသုံးပြုပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="540"/>
-        <source>Deploy MTProxy first</source>
-        <translation>MTProxy ကို ဦးစွာ ထည့်သွင်းပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="554"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="610"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="634"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="642"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="650"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="737"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1615"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="614"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="670"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="694"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="702"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="710"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1623"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="594"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="599"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="742"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="233"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="654"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="659"/>
         <source>Telegram connection link</source>
         <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="600"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="743"/>
-        <source>MTProxy connection link</source>
-        <translation>MTProxy ချိတ်ဆက်မှု လင့်ခ်</translation>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="287"/>
+        <source>Checking...</source>
+        <translation>စစ်ဆေးနေသည်...</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="622"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="290"/>
+        <source>Updating</source>
+        <translation>အပ်ဒိတ်လုပ်နေသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="294"/>
+        <source>Not deployed</source>
+        <translation>ထည့်သွင်းမထားပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="297"/>
+        <source>Running</source>
+        <translation>အလုပ်လုပ်နေသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="300"/>
+        <source>Stopped</source>
+        <translation>ရပ်တန့်နေသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="303"/>
+        <source>Error</source>
+        <translation>မှားယွင်းမှု</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="306"/>
+        <source>Unknown</source>
+        <translation>အမည်မသိ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="436"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="813"/>
+        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
+        <translation>ဆက်တင်များ ပိတ်ထားသည်: ချိတ်ဆက်မှုအချိန် ကုန်သွားပါသည် (မှားယွင်းမှုကုဒ် %1)။ ထပ်စမ်းရန် စာမျက်နှာကို ပြန်ဖွင့်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="509"/>
+        <source>Read more about this settings</source>
+        <translation>ဤဆက်တင်များအကြောင်း ပိုမိုဖတ်ရန်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="535"/>
+        <source>Connection</source>
+        <translation>ချိတ်ဆက်မှု</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="538"/>
+        <source>Settings</source>
+        <translation>ဆက်တင်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="573"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="610"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1251"/>
+        <source>Use Telegram connection link</source>
+        <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်ကို အသုံးပြုပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="682"/>
         <source>Or enter the proxy details manually.</source>
         <translation>သို့မဟုတ် ပရောက်စီ အချက်အလက်များကို ကိုယ်တိုင်ထည့်သွင်းပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="666"/>
-        <source>How to do it</source>
-        <translation>မည်သို့လုပ်ဆောင်ရမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="635"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="695"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="643"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="703"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="651"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="711"/>
         <source>Secret</source>
         <translation>Secret</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="682"/>
-        <source>Delete MTProxy</source>
-        <translation>MTProxy ကို ဖျက်မည်</translation>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="726"/>
+        <source>How to do it</source>
+        <translation>မည်သို့လုပ်ဆောင်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="685"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="745"/>
         <source>Remove %1 from server?</source>
         <translation>%1 ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="686"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="746"/>
         <source>The proxy will be stopped and all users will lose access.</source>
         <translation>ပရောက်စီကို ရပ်တန့်မည်ဖြစ်ပြီး အသုံးပြုသူအားလုံး ဝင်ရောက်ခွင့် ဆုံးရှုံးမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="687"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="747"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="688"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="822"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="748"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="850"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="756"/>
-        <source>Enable MTProxy</source>
-        <translation>MTProxy ကို ဖွင့်မည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="783"/>
-        <source>Enable MTProxy to edit settings</source>
-        <translation>ဆက်တင်များ ပြင်ရန် MTProxy ကို ဖွင့်ပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="786"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="814"/>
         <source>Cannot reach the server — settings are unavailable</source>
         <translation>ဆာဗာကို ဆက်သွယ်၍မရပါ — ဆက်တင်များ ရရှိနိုင်ခြင်း မရှိပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="797"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="825"/>
         <source>Base secret</source>
         <translation>Base secret</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="806"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="834"/>
         <source>Not generated</source>
         <translation>ဖန်တီးမထားပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="819"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="847"/>
         <source>Generate new secret?</source>
         <translation>Generate new secret?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="820"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="848"/>
         <source>All existing connection links will stop working. Users will need new links.</source>
         <translation>လက်ရှိ ချိတ်ဆက်မှု လင့်ခ်အားလုံး အလုပ်မလုပ်တော့ပါ။ အသုံးပြုသူများသည် လင့်ခ်အသစ်များ လိုအပ်ပါမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="821"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="849"/>
         <source>Generate</source>
         <translation>ဖန်တီးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="831"/>
-        <source>New secret saved. It will be applied when MTProxy is started.</source>
-        <translation>လှျို့ဝှက်ကုဒ်အသစ်ကို သိမ်းဆည်းပြီးပါပြီ။ MTProxy စတင်သောအခါ အသုံးပြုပါမည်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="849"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="877"/>
         <source>Public host / IP</source>
         <translation>အများပိုင် host / IP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="860"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="868"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1658"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="887"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="895"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1666"/>
         <source>Enter a valid IP address or domain name</source>
         <translation>တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="884"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="910"/>
         <source>Leave empty to use server IP automatically</source>
         <translation>ဆာဗာ IP ကို အလိုအလျောက် အသုံးပြုရန် အလွတ်ထားပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="893"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="919"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
         <translation>⚠ ဤအရာသည် ချိတ်ဆက်မှု လင့်ခ်များတွင် ဆာဗာ IP ကို အစားထိုးပါသည်။ ဤ host/ဒိုမိန်းသည် သင့်ဆာဗာကို ညွှန်းကြောင်း စစ်ဆေးပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="903"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="929"/>
         <source>Server port</source>
         <translation>ဆာဗာ port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="933"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="955"/>
         <source>FakeTLS may not work on ports other than 443</source>
         <translation>FakeTLS သည် port 443 မဟုတ်သော port များတွင် အလုပ်မလုပ်နိုင်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="941"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="963"/>
         <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
         <translation>ကြော်ငြာချန်နယ်ကို @MTProxyBot တွင် သတ်မှတ်ပါသည်။ ပရောက်စီ tag ကို ဤနေရာတွင် ကူးထည့်ပါ: hexadecimal အက္ခရာ 32 လုံး တိတိ (0-9, A-F)၊ bot စာတွင်ပါသည့်အတိုင်း — သို့မဟုတ် အလွတ်ထားပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="950"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="972"/>
         <source>Promoted channel tag (optional)</source>
         <translation>ကြော်ငြာချန်နယ် tag (မထည့်လည်းရ)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="951"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="973"/>
         <source>32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)</source>
         <translation>@MTProxyBot မှ hex အက္ခရာ 32 လုံး (ဥပမာ 3b7b2fa9…)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="972"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="993"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F).</source>
         <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="982"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1003"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
         <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)။ အသုံးမပြုပါက အလွတ်ထားပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1000"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1020"/>
         <source>Get a tag from</source>
         <translation>Tag ကို ဤမှ ရယူပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1022"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1023"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1042"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1043"/>
         <source>Transport mode</source>
         <translation>Transport စနစ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1024"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1031"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1044"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1051"/>
         <source>FakeTLS</source>
         <translation>FakeTLS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1024"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1031"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1044"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1051"/>
         <source>Standard MTProto</source>
         <translation>Standard MTProto</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1058"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1077"/>
         <source>FakeTLS domain</source>
         <translation>FakeTLS domain</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1073"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1080"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1673"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1088"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1095"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1681"/>
         <source>Enter a valid domain name</source>
         <translation>တိကျသော ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1100"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1114"/>
         <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
         <translation>ဒိုမိန်းကို FakeTLS client လှျို့ဝှက်ကုဒ်အတွင်း ကုဒ်ဖြင့်ထည့်သွင်းပါသည် (ee + base_secret + hex(domain))။ HTTPS / TLS 1.3 ကို ပံ့ပိုးရမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1104"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1118"/>
         <source>⚠ Changing the domain will invalidate all previously issued FakeTLS connection links.</source>
         <translation>⚠ ဒိုမိန်းကို ပြောင်းလျှင် ယခင်ထုတ်ပေးထားသော FakeTLS ချိတ်ဆက်မှု လင့်ခ်အားလုံး အသုံးမဝင်တော့ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1116"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1130"/>
         <source>Advanced</source>
         <translation>အထူးဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1135"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1149"/>
         <source>Additional secrets</source>
         <translation>Additional secrets</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1141"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1155"/>
         <source>Add extra secrets to allow gradual migration without disconnecting existing users.</source>
         <translation>လက်ရှိအသုံးပြုသူများကို အဆက်အသွယ်မဖြတ်ဘဲ တစ်ဆင့်ချင်း ပြောင်းရွှေ့နိုင်ရန် ထပ်ဆောင်း လှျို့ဝှက်ကုဒ်များ ထည့်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1320"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1334"/>
         <source>Add additional secret</source>
         <translation>Add additional secret</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1330"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1345"/>
         <source>Worker mode</source>
         <translation>Worker mode</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1339"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1354"/>
         <source>Auto</source>
         <translation>အလိုအလျောက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1339"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1354"/>
         <source>Manual</source>
         <translation>ကိုယ်တိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1353"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1367"/>
         <source>Workers are set to 0 automatically for FakeTLS mode.</source>
         <translation>FakeTLS စနစ်တွင် worker အရေအတွက်ကို အလိုအလျောက် 0 သတ်မှတ်ပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1362"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1376"/>
         <source>Workers count</source>
         <translation>Workers count</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1416"/>
-        <source>Server is behind NAT / Docker bridge</source>
-        <translation>Server is behind NAT / Docker bridge</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1417"/>
-        <source>Enable if your server is not directly accessible from the internet, e.g. Docker or private network</source>
-        <translation>သင့်ဆာဗာကို အင်တာနက်မှ တိုက်ရိုက် ဝင်ရောက်၍မရပါက ဖွင့်ပါ၊ ဥပမာ Docker သို့မဟုတ် သီးသန့်ကွန်ရက်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1433"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1445"/>
         <source>Internal IP</source>
         <translation>အတွင်းပိုင်း IP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1442"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1450"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1476"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1484"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1677"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1453"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1461"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1485"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1493"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1685"/>
         <source>Enter a valid IPv4 address</source>
         <translation>တိကျသော IPv4 လိပ်စာကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1467"/>
-        <source>External IP</source>
-        <translation>ပြင်ပ IP</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1510"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1518"/>
         <source>Diagnostics</source>
         <translation>ရောဂါရှာဖွေမှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1538"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1546"/>
         <source>Public port reachable</source>
         <translation>အများပိုင် port ကို ဝင်ရောက်နိုင်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1542"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1562"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1582"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1602"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1550"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1570"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1590"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1610"/>
         <source>—</source>
         <translation>—</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1542"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1562"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1550"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1570"/>
         <source>Yes</source>
         <translation>ဟုတ်ကဲ့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1542"/>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1562"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1550"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1570"/>
         <source>No</source>
         <translation>မဟုတ်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1558"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1566"/>
         <source>Telegram upstream reachable</source>
         <translation>Telegram upstream ကို ဝင်ရောက်နိုင်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1578"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1586"/>
         <source>Clients connected</source>
         <translation>ချိတ်ဆက်ထားသော client များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1598"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1606"/>
         <source>Last config refresh</source>
         <translation>စီစဉ်သတ်မှတ်မှု နောက်ဆုံးပြန်လည်ရယူချိန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1610"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1618"/>
         <source>Stats endpoint</source>
         <translation>Stats endpoint</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1621"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1629"/>
         <source>Refreshing…</source>
         <translation>ပြန်လည်ရယူနေသည်…</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1621"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1629"/>
         <source>Tap ↻ to refresh diagnostics</source>
         <translation>ရောဂါရှာဖွေမှုကို ပြန်လည်ရယူရန် ↻ ကို နှိပ်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1733"/>
-        <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>ဆက်တင်များကို ပြောင်းလျှင် ပရောက်စီ ချိတ်ဆက်မှု လင့်ခ် ပြောင်းလဲမည်။ လင့်ခ်အဟောင်း အလုပ်မလုပ်တော့ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1633"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1641"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1653"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1661"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1665"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1673"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F), or leave empty.</source>
         <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)၊ သို့မဟုတ် အလွတ်ထားပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1680"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1688"/>
         <source>NAT internal IP: enter a valid IPv4 address</source>
         <translation>NAT အတွင်းပိုင်း IP: တိကျသော IPv4 လိပ်စာကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1684"/>
+        <location filename="../ui/qml/Pages2/PageServiceMtProtoSettingsBase.qml" line="1744"/>
+        <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
+        <translation>ဆက်တင်များကို ပြောင်းလျှင် ပရောက်စီ ချိတ်ဆက်မှု လင့်ခ် ပြောင်းလဲမည်။ လင့်ခ်အဟောင်း အလုပ်မလုပ်တော့ပါ။</translation>
+    </message>
+</context>
+<context>
+    <name>PageServiceMtProxySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="14"/>
+        <source>MTProxy started</source>
+        <translation>MTProxy စတင်ပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="15"/>
+        <source>MTProxy stopped</source>
+        <translation>MTProxy ရပ်တန့်ပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="11"/>
+        <source>MTProxy settings</source>
+        <translation>MTProxy ဆက်တင်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="13"/>
+        <source>No internet connection. Connect to the internet to change MTProxy settings.</source>
+        <translation>အင်တာနက် ချိတ်ဆက်မှု မရှိပါ။ MTProxy ဆက်တင်များ ပြောင်းရန် အင်တာနက်ကို ချိတ်ဆက်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="16"/>
+        <source>Deploy MTProxy first</source>
+        <translation>MTProxy ကို ဦးစွာ ထည့်သွင်းပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="17"/>
+        <source>MTProxy connection link</source>
+        <translation>MTProxy ချိတ်ဆက်မှု လင့်ခ်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="18"/>
+        <source>Delete MTProxy</source>
+        <translation>MTProxy ကို ဖျက်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="19"/>
+        <source>Enable MTProxy</source>
+        <translation>MTProxy ကို ဖွင့်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="20"/>
+        <source>Enable MTProxy to edit settings</source>
+        <translation>ဆက်တင်များ ပြင်ရန် MTProxy ကို ဖွင့်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="21"/>
+        <source>New secret saved. It will be applied when MTProxy is started.</source>
+        <translation>လှျို့ဝှက်ကုဒ်အသစ်ကို သိမ်းဆည်းပြီးပါပြီ။ MTProxy စတင်သောအခါ အသုံးပြုပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="22"/>
+        <source>Server is behind NAT / Docker bridge</source>
+        <translation>Server is behind NAT / Docker bridge</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="23"/>
+        <source>Enable if your server is not directly accessible from the internet, e.g. Docker or private network</source>
+        <translation>သင့်ဆာဗာကို အင်တာနက်မှ တိုက်ရိုက် ဝင်ရောက်၍မရပါက ဖွင့်ပါ၊ ဥပမာ Docker သို့မဟုတ် သီးသန့်ကွန်ရက်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="24"/>
+        <source>External IP</source>
+        <translation>ပြင်ပ IP</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="25"/>
         <source>NAT external IP: enter a valid IPv4 address</source>
         <translation>NAT ပြင်ပ IP: တိကျသော IPv4 လိပ်စာကို ထည့်သွင်းပါ</translation>
     </message>
@@ -2508,72 +2859,72 @@ Create one from the current settings.</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="35"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="46"/>
         <source>SFTP settings</source>
         <translation>SFTP ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="58"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="62"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="82"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="102"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="129"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="78"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="98"/>
         <source>User name</source>
         <translation>အသုံးပြုသူနာမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="121"/>
         <source>Password</source>
         <translation>စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="134"/>
         <source>Show password</source>
         <translation>စကားဝှက်ကို ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="134"/>
         <source>Hide password</source>
         <translation>စကားဝှက်ကို ဖျောက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="151"/>
         <source>Mount folder on device</source>
         <translation>ဖိုင်တွဲကို စက်တွင် တပ်ဆင်မည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="177"/>
         <source>In order to mount remote SFTP folder as local drive, perform following steps: &lt;br&gt;</source>
         <translation>အဝေးမှ SFTP ဖိုင်တွဲကို စက်တွင်း drive အဖြစ် တပ်ဆင်ရန်အတွက် အောက်ပါအဆင့်များကို လုပ်ဆောင်ပါ: &lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="175"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="182"/>
         <source>&lt;br&gt;1. Install the latest version of </source>
         <translation>&lt;br&gt;၁။ နောက်ဆုံးထွက်ဗားရှင်းကို ထည့်သွင်းမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="176"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="180"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="183"/>
         <source>&lt;br&gt;2. Install the latest version of </source>
         <translation>&lt;br&gt;၂။ နောက်ဆုံးထွက်ဗားရှင်းကို ထည့်သွင်းမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="211"/>
         <source>Detailed instructions</source>
         <translation>အသေးစိတ်ညွှန်ကြားချက်များ</translation>
     </message>
@@ -2586,74 +2937,74 @@ Create one from the current settings.</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="39"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="186"/>
         <source>SOCKS5 settings</source>
         <translation>SOCKS5 ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="62"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="68"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="86"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="104"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="129"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="78"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="192"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="194"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="98"/>
         <source>User name</source>
         <translation>အသုံးပြုသူနာမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="119"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="230"/>
         <source>Password</source>
         <translation>စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="134"/>
         <source>Show password</source>
         <translation>စကားဝှက်ကို ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="134"/>
         <source>Hide password</source>
         <translation>စကားဝှက်ကို ဖျောက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="210"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="212"/>
         <source>Username</source>
         <translation>အသုံးပြုသူနာမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="248"/>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="250"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="292"/>
         <source>Change connection settings</source>
         <translation>ချက်ဆက်မှုဆက်တင်များကို ပြောင်းလဲမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="258"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="256"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="262"/>
         <source>Password cannot be empty</source>
         <translation>စကားဝှက် သည် ဗလာမဖြစ်ရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="259"/>
+        <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="265"/>
         <source>Username cannot be empty</source>
         <translation>အသုံးပြုသူနာမည် သည် ဗလာမဖြစ်ရပါ</translation>
     </message>
@@ -2661,202 +3012,202 @@ Create one from the current settings.</source>
 <context>
     <name>PageServiceTProxySettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="175"/>
         <source>TProxy started</source>
         <translation>TProxy စတင်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="175"/>
         <source>TProxy stopped</source>
         <translation>TProxy ရပ်တန့်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="166"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="577"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="597"/>
         <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
         <translation>ဆက်တင်များ ပိတ်ထားသည်: ချိတ်ဆက်မှုအချိန် ကုန်သွားပါသည် (မှားယွင်းမှုကုဒ် %1)။ ထပ်စမ်းရန် စာမျက်နှာကို ပြန်ဖွင့်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="257"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="281"/>
         <source>TProxy settings</source>
         <translation>TProxy ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="269"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="293"/>
         <source>Read more about Telegram WEB proxy</source>
         <translation>Telegram WEB ပရောက်စီအကြောင်း ပိုမိုဖတ်ရှုရန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="281"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="305"/>
         <source>No internet connection. Connect to the internet to change TProxy settings.</source>
         <translation>အင်တာနက် ချိတ်ဆက်မှု မရှိပါ။ TProxy ဆက်တင်များ ပြောင်းရန် အင်တာနက်ကို ချိတ်ဆက်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="296"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="320"/>
         <source>Connection</source>
         <translation>ချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="299"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="323"/>
         <source>Settings</source>
         <translation>ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="345"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="382"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="357"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="394"/>
         <source>Use Telegram WEB proxy link</source>
         <translation>Telegram WEB ပရောက်စီ လင့်ခ်ကို အသုံးပြုပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="372"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="384"/>
         <source>Set a hostname first</source>
         <translation>Hostname ကို ဦးစွာ သတ်မှတ်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="386"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="440"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="466"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="474"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="398"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="452"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="478"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="486"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="426"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="430"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="438"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="442"/>
         <source>Telegram connection link</source>
         <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="431"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="443"/>
         <source>TProxy WEB proxy link</source>
         <translation>TProxy WEB ပရောက်စီ လင့်ခ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="452"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="464"/>
         <source>Or enter the proxy details manually.</source>
         <translation>သို့မဟုတ် ပရောက်စီ အချက်အလက်များကို ကိုယ်တိုင်ထည့်သွင်းပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="490"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="502"/>
         <source>How to do it</source>
         <translation>မည်သို့လုပ်ဆောင်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="467"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="479"/>
         <source>Host</source>
         <translation>Host</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="475"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="487"/>
         <source>Secret</source>
         <translation>Secret</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="501"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="513"/>
         <source>Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.</source>
         <translation>WEB ကို ပံ့ပိုးသော Telegram client လိုအပ်ပါသည် (Desktop proof of concept)။ ပုံမှန် MTProxy လင့်ခ်များ အလုပ်မလုပ်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="515"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="527"/>
         <source>Delete TProxy</source>
         <translation>TProxy ကို ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="518"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="530"/>
         <source>Remove %1 from server?</source>
         <translation>%1 ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="525"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="537"/>
         <source>The proxy will be stopped and all users will lose access.</source>
         <translation>ပရောက်စီကို ရပ်တန့်မည်ဖြစ်ပြီး အသုံးပြုသူအားလုံး ဝင်ရောက်ခွင့် ဆုံးရှုံးမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="526"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="538"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="526"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="538"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="547"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="567"/>
         <source>Enable TProxy</source>
         <translation>TProxy ကို ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="575"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="595"/>
         <source>Enable TProxy to edit settings</source>
         <translation>ဆက်တင်များ ပြင်ရန် TProxy ကို ဖွင့်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="578"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="598"/>
         <source>Cannot reach the server — settings are unavailable</source>
         <translation>ဆာဗာကို ဆက်သွယ်၍မရပါ — ဆက်တင်များ ရရှိနိုင်ခြင်း မရှိပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="588"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="608"/>
         <source>Hostname</source>
         <translation>Hostname</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="589"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="609"/>
         <source>proxy.example.com</source>
         <translation>proxy.example.com</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="604"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="624"/>
         <source>Use lowercase letters, digits, dots and hyphens</source>
         <translation>စာလုံးအသေး၊ ဂဏန်း၊ အစက်နှင့် ဟိုက်ဖင်များကိုသာ အသုံးပြုပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="613"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="770"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="633"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="790"/>
         <source>Enter a lowercase DNS hostname (A record to this server)</source>
         <translation>စာလုံးအသေးဖြင့် DNS hostname ကို ထည့်သွင်းပါ (ဤဆာဗာသို့ A record)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="625"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="645"/>
         <source>Required. Point a DNS A record at this server. Do not put a CDN in front.</source>
         <translation>မဖြစ်မနေ လိုအပ်ပါသည်။ DNS A record ကို ဤဆာဗာသို့ ညွှန်းပါ။ ရှေ့တွင် CDN မထားပါနှင့်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="635"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="655"/>
         <source>ACME email</source>
         <translation>ACME အီးမေးလ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="636"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="656"/>
         <source>you@example.com</source>
         <translation>you@example.com</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="651"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="660"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="774"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="671"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="680"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="794"/>
         <source>Enter a valid email for the TLS certificate</source>
         <translation>TLS လက်မှတ်အတွက် တိကျသော အီးမေးလ်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="672"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="692"/>
         <source>Used by Caddy to issue a Let&apos;s Encrypt certificate.</source>
         <translation>Let&apos;s Encrypt လက်မှတ် ထုတ်ပေးရန် Caddy မှ အသုံးပြုပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="683"/>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="684"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="703"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="704"/>
         <source>Carrier mode</source>
         <translation>Carrier စနစ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="711"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="731"/>
         <source>MTProxy workers</source>
         <translation>MTProxy worker အရေအတွက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="752"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="772"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
@@ -2864,440 +3215,72 @@ Create one from the current settings.</source>
 <context>
     <name>PageServiceTelemtSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="215"/>
-        <source>Checking...</source>
-        <translation>စစ်ဆေးနေသည်...</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="218"/>
-        <source>Updating</source>
-        <translation>အပ်ဒိတ်လုပ်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="222"/>
-        <source>Not deployed</source>
-        <translation>ထည့်သွင်းမထားပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="225"/>
-        <source>Running</source>
-        <translation>အလုပ်လုပ်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="228"/>
-        <source>Stopped</source>
-        <translation>ရပ်တန့်နေသည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="231"/>
-        <source>Error</source>
-        <translation>မှားယွင်းမှု</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="234"/>
-        <source>Unknown</source>
-        <translation>အမည်မသိ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="349"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="15"/>
         <source>Telemt started</source>
         <translation>Telemt စတင်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="349"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="16"/>
         <source>Telemt stopped</source>
         <translation>Telemt ရပ်တန့်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="362"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="785"/>
-        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>ဆက်တင်များ ပိတ်ထားသည်: ချိတ်ဆက်မှုအချိန် ကုန်သွားပါသည် (မှားယွင်းမှုကုဒ် %1)။ ထပ်စမ်းရန် စာမျက်နှာကို ပြန်ဖွင့်ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="423"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="12"/>
         <source>Telemt settings</source>
         <translation>Telemt ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="435"/>
-        <source>Read more about this settings</source>
-        <translation>ဤဆက်တင်များအကြောင်း ပိုမိုဖတ်ရန်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="447"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1517"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="14"/>
         <source>No internet connection. Connect to the internet to change Telemt settings.</source>
         <translation>အင်တာနက် ချိတ်ဆက်မှု မရှိပါ။ Telemt ဆက်တင်များ ပြောင်းရန် အင်တာနက်ကို ချိတ်ဆက်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="461"/>
-        <source>Connection</source>
-        <translation>ချိတ်ဆက်မှု</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="464"/>
-        <source>Settings</source>
-        <translation>ဆက်တင်များ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="513"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="550"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
-        <source>Use Telegram connection link</source>
-        <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်ကို အသုံးပြုပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="540"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="17"/>
         <source>Deploy Telemt first</source>
         <translation>Telemt ကို ဦးစွာ ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="554"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="610"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="634"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="642"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="650"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="737"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1496"/>
-        <source>Copied</source>
-        <translation>ကူးယူပြီးပါပြီ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="594"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="599"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="742"/>
-        <source>Telegram connection link</source>
-        <translation>Telegram ချိတ်ဆက်မှု လင့်ခ်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="600"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="743"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="18"/>
         <source>Telemt connection link</source>
         <translation>Telemt ချိတ်ဆက်မှု လင့်ခ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="622"/>
-        <source>Or enter the proxy details manually.</source>
-        <translation>သို့မဟုတ် ပရောက်စီ အချက်အလက်များကို ကိုယ်တိုင်ထည့်သွင်းပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="666"/>
-        <source>How to do it</source>
-        <translation>မည်သို့လုပ်ဆောင်ရမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="635"/>
-        <source>Host</source>
-        <translation>Host</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="643"/>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="651"/>
-        <source>Secret</source>
-        <translation>Secret</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="682"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="19"/>
         <source>Delete Telemt</source>
         <translation>Telemt ကို ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="685"/>
-        <source>Remove %1 from server?</source>
-        <translation>%1 ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="686"/>
-        <source>The proxy will be stopped and all users will lose access.</source>
-        <translation>ပရောက်စီကို ရပ်တန့်မည်ဖြစ်ပြီး အသုံးပြုသူအားလုံး ဝင်ရောက်ခွင့် ဆုံးရှုံးမည်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="687"/>
-        <source>Continue</source>
-        <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="688"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="822"/>
-        <source>Cancel</source>
-        <translation>ပယ်ဖျက်မည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="756"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="20"/>
         <source>Enable Telemt</source>
         <translation>Telemt ကို ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="783"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="21"/>
         <source>Enable Telemt to edit settings</source>
         <translation>ဆက်တင်များ ပြင်ရန် Telemt ကို ဖွင့်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="786"/>
-        <source>Cannot reach the server — settings are unavailable</source>
-        <translation>ဆာဗာကို ဆက်သွယ်၍မရပါ — ဆက်တင်များ ရရှိနိုင်ခြင်း မရှိပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="797"/>
-        <source>Base secret</source>
-        <translation>Base secret</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="806"/>
-        <source>Not generated</source>
-        <translation>ဖန်တီးမထားပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="819"/>
-        <source>Generate new secret?</source>
-        <translation>Generate new secret?</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="820"/>
-        <source>All existing connection links will stop working. Users will need new links.</source>
-        <translation>လက်ရှိ ချိတ်ဆက်မှု လင့်ခ်အားလုံး အလုပ်မလုပ်တော့ပါ။ အသုံးပြုသူများသည် လင့်ခ်အသစ်များ လိုအပ်ပါမည်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="821"/>
-        <source>Generate</source>
-        <translation>ဖန်တီးမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="831"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="22"/>
         <source>New secret saved. It will be applied when Telemt is started.</source>
         <translation>လှျို့ဝှက်ကုဒ်အသစ်ကို သိမ်းဆည်းပြီးပါပြီ။ Telemt စတင်သောအခါ အသုံးပြုပါမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="849"/>
-        <source>Public host / IP</source>
-        <translation>အများပိုင် host / IP</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="860"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="868"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1538"/>
-        <source>Enter a valid IP address or domain name</source>
-        <translation>တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="884"/>
-        <source>Leave empty to use server IP automatically</source>
-        <translation>ဆာဗာ IP ကို အလိုအလျောက် အသုံးပြုရန် အလွတ်ထားပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="893"/>
-        <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ ဤအရာသည် ချိတ်ဆက်မှု လင့်ခ်များတွင် ဆာဗာ IP ကို အစားထိုးပါသည်။ ဤ host/ဒိုမိန်းသည် သင့်ဆာဗာကို ညွှန်းကြောင်း စစ်ဆေးပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="903"/>
-        <source>Server port</source>
-        <translation>ဆာဗာ port</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="933"/>
-        <source>FakeTLS may not work on ports other than 443</source>
-        <translation>FakeTLS သည် port 443 မဟုတ်သော port များတွင် အလုပ်မလုပ်နိုင်ပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="941"/>
-        <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
-        <translation>ကြော်ငြာချန်နယ်ကို @MTProxyBot တွင် သတ်မှတ်ပါသည်။ ပရောက်စီ tag ကို ဤနေရာတွင် ကူးထည့်ပါ: hexadecimal အက္ခရာ 32 လုံး တိတိ (0-9, A-F)၊ bot စာတွင်ပါသည့်အတိုင်း — သို့မဟုတ် အလွတ်ထားပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="950"/>
-        <source>Promoted channel tag (optional)</source>
-        <translation>ကြော်ငြာချန်နယ် tag (မထည့်လည်းရ)</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="951"/>
-        <source>32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)</source>
-        <translation>@MTProxyBot မှ hex အက္ခရာ 32 လုံး (ဥပမာ 3b7b2fa9…)</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="972"/>
-        <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F).</source>
-        <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="982"/>
-        <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
-        <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)။ အသုံးမပြုပါက အလွတ်ထားပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1000"/>
-        <source>Get a tag from</source>
-        <translation>Tag ကို ဤမှ ရယူပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1022"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1023"/>
-        <source>Transport mode</source>
-        <translation>Transport စနစ်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1024"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1031"/>
-        <source>FakeTLS</source>
-        <translation>FakeTLS</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1024"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1031"/>
-        <source>Standard MTProto</source>
-        <translation>Standard MTProto</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1058"/>
-        <source>FakeTLS domain</source>
-        <translation>FakeTLS domain</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1073"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1080"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1553"/>
-        <source>Enter a valid domain name</source>
-        <translation>တိကျသော ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1100"/>
-        <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
-        <translation>ဒိုမိန်းကို FakeTLS client လှျို့ဝှက်ကုဒ်အတွင်း ကုဒ်ဖြင့်ထည့်သွင်းပါသည် (ee + base_secret + hex(domain))။ HTTPS / TLS 1.3 ကို ပံ့ပိုးရမည်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1104"/>
-        <source>⚠ Changing the domain will invalidate all previously issued FakeTLS connection links.</source>
-        <translation>⚠ ဒိုမိန်းကို ပြောင်းလျှင် ယခင်ထုတ်ပေးထားသော FakeTLS ချိတ်ဆက်မှု လင့်ခ်အားလုံး အသုံးမဝင်တော့ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1116"/>
-        <source>Advanced</source>
-        <translation>အထူးဆက်တင်များ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1135"/>
-        <source>Additional secrets</source>
-        <translation>Additional secrets</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1141"/>
-        <source>Add extra secrets to allow gradual migration without disconnecting existing users.</source>
-        <translation>လက်ရှိအသုံးပြုသူများကို အဆက်အသွယ်မဖြတ်ဘဲ တစ်ဆင့်ချင်း ပြောင်းရွှေ့နိုင်ရန် ထပ်ဆောင်း လှျို့ဝှက်ကုဒ်များ ထည့်ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1320"/>
-        <source>Add additional secret</source>
-        <translation>Add additional secret</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1331"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="23"/>
         <source>Set public IP manually</source>
         <translation>အများပိုင် IP ကို ကိုယ်တိုင်သတ်မှတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1332"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="24"/>
         <source>By default the proxy auto-detects its public IP. Enable to override it manually, e.g. when the server is behind NAT / Docker bridge</source>
         <translation>ပုံမှန်အနေဖြင့် ပရောက်စီသည် မိမိ၏ အများပိုင် IP ကို အလိုအလျောက် ရှာဖွေသည်။ ကိုယ်တိုင်သတ်မှတ်ရန် ဖွင့်ပါ၊ ဥပမာ ဆာဗာသည် NAT / Docker bridge နောက်တွင် ရှိသောအခါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1348"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="25"/>
         <source>Public IP</source>
         <translation>အများပိုင် IP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1357"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1365"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1557"/>
-        <source>Enter a valid IPv4 address</source>
-        <translation>တိကျသော IPv4 လိပ်စာကို ထည့်သွင်းပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1391"/>
-        <source>Diagnostics</source>
-        <translation>ရောဂါရှာဖွေမှု</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1419"/>
-        <source>Public port reachable</source>
-        <translation>အများပိုင် port ကို ဝင်ရောက်နိုင်သည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1423"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1443"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1463"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1483"/>
-        <source>—</source>
-        <translation>—</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1423"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1443"/>
-        <source>Yes</source>
-        <translation>ဟုတ်ကဲ့</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1423"/>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1443"/>
-        <source>No</source>
-        <translation>မဟုတ်ပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1439"/>
-        <source>Telegram upstream reachable</source>
-        <translation>Telegram upstream ကို ဝင်ရောက်နိုင်သည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1459"/>
-        <source>Clients connected</source>
-        <translation>ချိတ်ဆက်ထားသော client များ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1479"/>
-        <source>Last config refresh</source>
-        <translation>စီစဉ်သတ်မှတ်မှု နောက်ဆုံးပြန်လည်ရယူချိန်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1491"/>
-        <source>Stats endpoint</source>
-        <translation>Stats endpoint</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1502"/>
-        <source>Refreshing…</source>
-        <translation>ပြန်လည်ရယူနေသည်…</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1502"/>
-        <source>Tap ↻ to refresh diagnostics</source>
-        <translation>ရောဂါရှာဖွေမှုကို ပြန်လည်ရယူရန် ↻ ကို နှိပ်ပါ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1601"/>
-        <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>ဆက်တင်များကို ပြောင်းလျှင် ပရောက်စီ ချိတ်ဆက်မှု လင့်ခ် ပြောင်းလဲမည်။ လင့်ခ်အဟောင်း အလုပ်မလုပ်တော့ပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1514"/>
-        <source>Save</source>
-        <translation>သိမ်းဆည်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1533"/>
-        <source>The port must be in the range of 1 to 65535</source>
-        <translation>Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1545"/>
-        <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F), or leave empty.</source>
-        <translation>ပရောက်စီ tag သည် hexadecimal အက္ခရာ 32 လုံး တိတိ ဖြစ်ရမည် (0-9, A-F)၊ သို့မဟုတ် အလွတ်ထားပါ။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1560"/>
+        <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="26"/>
         <source>Public IP: enter a valid IPv4 address</source>
         <translation>အများပိုင် IP: တိကျသော IPv4 လိပ်စာကို ထည့်သွင်းပါ</translation>
     </message>
@@ -3310,33 +3293,33 @@ Create one from the current settings.</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="34"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="45"/>
         <source>Tor website settings</source>
         <translation>Tor ဝဘ်ဆိုက်ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="50"/>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="83"/>
         <source>Website address</source>
         <translation>ဝဘ်ဆိုဒ်လိပ်စာ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="87"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="101"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
         <translation>ဤ URL ကိုဖွင့်ရန် &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; ကို အသုံးပြုပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="117"/>
         <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
         <translation>သင်၏ onion ဆိုက်ကို ဖန်တီးပြီးနောက်၊ Tor ကွန်ရက်က ၄င်းကိုအသုံးပြုနိုင်အောင်ပြုလုပ်‌ပေးရန် မိနစ်အနည်းငယ်အချိန်ယူသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
         <translation>WordPress ကို ချိန်ညှိသည့်အခါ ဤ onion လိပ်စာကို domain အဖြစ် သတ်မှတ်ပါ.</translation>
     </message>
@@ -3344,47 +3327,47 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="48"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="54"/>
         <source>Settings</source>
         <translation>ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="166"/>
         <source>Close application</source>
         <translation>အပလီကေးရှင်းကို ပိတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="63"/>
         <source>Servers</source>
         <translation>ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="76"/>
         <source>Connection</source>
         <translation>ချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="140"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="89"/>
         <source>Application</source>
         <translation>အပလီကေးရှင်း</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="104"/>
         <source>News &amp; Notifications</source>
         <translation>သတင်းနှင့် အကြောင်းကြားချက်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="122"/>
         <source>Backup</source>
         <translation>backup ယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="135"/>
         <source>About AmneziaVPN</source>
         <translation>AmneziaVPN အကြောင်း</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="150"/>
         <source>Dev console</source>
         <translation>ဒက်ဗယ်လော်ပါ console</translation>
     </message>
@@ -3392,107 +3375,107 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="22"/>
         <source>You have the latest version of AmneziaVPN</source>
         <translation>သင့်တွင် AmneziaVPN ၏ နောက်ဆုံးဗားရှင်း ရှိပြီးဖြစ်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="26"/>
         <source>Failed to check for updates</source>
         <translation>အပ်ဒိတ်များရှိမရှိ စစ်ဆေး၍ မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="69"/>
         <source>Support Amnezia</source>
         <translation>Amnezia ကိုကူညီပံ့ပိုးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="80"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
         <translation>Amnezia သည် အခမဲ့ open-source application တစ်ခုဖြစ်သည်။ သင်နှစ်သက်ပါက developer များကို ပံ့ပိုးနိုင်ပါသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="101"/>
         <source>Contacts</source>
         <translation>ဆက်သွယ်ရန်လိပ်စာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="181"/>
         <source>Copy version</source>
         <translation>ဗားရှင်းကို ကူးယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="185"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
         <source>Check for updates</source>
         <translation>အပ်ဒိတ်များရှိမရှိ စစ်ဆေးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
         <source>Checking...</source>
         <translation>စစ်ဆေးနေသည်...</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="183"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="214"/>
         <source>Privacy Policy</source>
         <translation>ကိုယ်ရေးအချက်အလက်မူဝါဒ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="112"/>
         <source>Telegram group</source>
         <translation>Telegram ဂရု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
         <source>To discuss features</source>
         <translation>feature များကိုဆွေးနွေးရန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="116"/>
         <source>https://telegram.me/amnezia_vpn_en</source>
         <translation>https://telegram.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="122"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="123"/>
         <source>For reviews and bug reports</source>
         <translation>သုံးသပ်ချက်များနှင့် ချွတ်ယွင်းချက်အစီရင်ခံစာများအတွက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="126"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="132"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="133"/>
         <source>Discover the source code</source>
         <translation>Source code ကို ကြည့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="136"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="142"/>
         <source>Website</source>
         <translation>ဝဘ်ဆိုက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="143"/>
         <source>Visit official website</source>
         <translation>တရားဝင် ဝဘ်ဆိုက်ကို ကြည့်မည်</translation>
     </message>
@@ -3500,22 +3483,27 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiAvailableCountries</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="115"/>
+        <source>You already have %1 locations in favorites. Remove one</source>
+        <translation>အကြိုက်ဆုံးများတွင် တည်နေရာ %1 ခု ရှိပြီးဖြစ်ပါသည်။ တစ်ခုကို ဖယ်ရှားပါ</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="117"/>
         <source>Show</source>
         <translation>ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="251"/>
         <source>Subscription expired</source>
         <translation>အသင်းဝင်မှု သက်တမ်းကုန်ဆုံး</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="251"/>
         <source>Subscription expiring soon</source>
         <translation>အသင်းဝင်မှု မကြာမီ သက်တမ်းကုန်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="264"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="263"/>
         <source>Renew subscription</source>
         <translation>အသင်းဝင်မှု သက်တမ်းတိုးမည်</translation>
     </message>
@@ -3568,22 +3556,27 @@ Create one from the current settings.</source>
         <translation>ချိတ်ဆက်မှု အသုံးပြုနေစဉ် စက်၏ချိတ်ဆက်မှုကို ဖြုတ်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
+        <source>Cannot unlink device while local proxy is running</source>
+        <translation>စက်တွင်း ပရောက်စီ လည်ပတ်နေစဉ် စက်၏ချိတ်ဆက်မှုကို ဖြုတ်၍မရပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="84"/>
         <source>Are you sure you want to unlink this device?</source>
         <translation>ဤစက်၏ ချိတ်ဆက်မှုကို ဖြုတ်လိုသည် အမှန်ပါသလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="85"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation>ဤလုပ်ဆောင်ချက်သည် စက်ကို သင့်အသင်းဝင်မှုမှ ချိတ်ဆက်မှုဖြုတ်ပါမည်။ စက်ပေါ်ရှိ အသင်းဝင်မှု ဆက်တင်များတွင် &apos;API စီစဉ်သတ်မှတ်မှုကို ပြန်လည်ဖွင့်မည်&apos; ကို နှိပ်ခြင်းဖြင့် အချိန်မရွေး ပြန်ချိတ်ဆက်နိုင်ပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="86"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="81"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="87"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
@@ -3591,82 +3584,82 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiInstructions</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="22"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="20"/>
         <source>Windows</source>
         <translation>Windows</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="23"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="20"/>
         <source>documentation/instructions/connect-amnezia-premium#windows</source>
         <translation>documentation/instructions/connect-amnezia-premium#windows</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="29"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="21"/>
         <source>macOS</source>
         <translation>macOS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="21"/>
         <source>documentation/instructions/connect-amnezia-premium#macos</source>
         <translation>documentation/instructions/connect-amnezia-premium#macos</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="36"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="22"/>
         <source>Android</source>
         <translation>Android</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="22"/>
         <source>documentation/instructions/connect-amnezia-premium#android</source>
         <translation>documentation/instructions/connect-amnezia-premium#android</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="43"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="23"/>
         <source>AndroidTV</source>
         <translation>AndroidTV</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="44"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="23"/>
         <source>documentation/instructions/android_tv_connect/</source>
         <translation>documentation/instructions/android_tv_connect/</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="24"/>
         <source>iOS</source>
         <translation>iOS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="51"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="24"/>
         <source>documentation/instructions/connect-amnezia-premium#ios</source>
         <translation>documentation/instructions/connect-amnezia-premium#ios</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="25"/>
         <source>Linux</source>
         <translation>Linux</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="25"/>
         <source>documentation/instructions/connect-amnezia-premium#linux</source>
         <translation>documentation/instructions/connect-amnezia-premium#linux</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="26"/>
         <source>Routers</source>
         <translation>ရောက်တာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="26"/>
         <source>documentation/instructions/connect-amnezia-premium#routers</source>
         <translation>documentation/instructions/connect-amnezia-premium#routers</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="48"/>
         <source>How to connect on another device</source>
         <translation>အခြားစက်တွင် မည်သို့ ချိတ်ဆက်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="49"/>
         <source>Setup guides on the Amnezia website</source>
         <translation>Amnezia ဝဘ်ဆိုက်တွင် တပ်ဆင်မှု လမ်းညွှန်များ</translation>
     </message>
@@ -3679,7 +3672,7 @@ Create one from the current settings.</source>
         <translation>AmneziaVPN config ကိုသိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="183"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="184"/>
         <source>For router setup or the AmneziaWG app</source>
         <translation>ရောက်တာ တပ်ဆင်မှု သို့မဟုတ် AmneziaWG အပလီကေးရှင်းအတွက်</translation>
     </message>
@@ -3689,62 +3682,92 @@ Create one from the current settings.</source>
         <translation>ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="295"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="53"/>
+        <source>You already have %1 locations in favorites. Remove one</source>
+        <translation>အကြိုက်ဆုံးများတွင် တည်နေရာ %1 ခု ရှိပြီးဖြစ်ပါသည်။ တစ်ခုကို ဖယ်ရှားပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="134"/>
+        <source>Update available</source>
+        <translation>အပ်ဒိတ် ရနိုင်ပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="150"/>
+        <source>Download configuration file</source>
+        <translation>စီစဉ်သတ်မှတ်မှုဖိုင်ကို ဒေါင်းလုဒ်လုပ်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="158"/>
+        <source>Configuration file options</source>
+        <translation>စီစဉ်သတ်မှတ်မှုဖိုင် ရွေးချယ်စရာများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="172"/>
+        <source>Configuration files</source>
+        <translation>စီစဉ်သတ်မှတ်မှု ဖိုင်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="216"/>
+        <source>New configurations are available for some locations. We recommend updating the files</source>
+        <translation>အချို့တည်နေရာများအတွက် စီစဉ်သတ်မှတ်မှုအသစ်များ ရနိုင်ပါသည်။ ဖိုင်များကို အပ်ဒိတ်လုပ်ရန် အကြံပြုပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="286"/>
         <source> configuration file</source>
         <translation> စီစဉ်သတ်မှတ်မှု ဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="303"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="294"/>
         <source>Generate a new configuration file</source>
         <translation>စီစဉ်သတ်မှတ်မှုဖိုင် အသစ် ဖန်တီးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="295"/>
         <source>The previously created one will stop working</source>
         <translation>ယခင်ဖန်တီးထားသည် အလုပ်မလုပ်တော့ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="316"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="307"/>
         <source>Revoke the current configuration file</source>
         <translation>လက်ရှိ စီစဉ်သတ်မှတ်မှုဖိုင်ကို ပြန်လည်ရုပ်သိမ်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="342"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="333"/>
         <source>Config file saved</source>
         <translation>စီစဉ်သတ်မှတ်မှုဖိုင်ကို သိမ်းဆည်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="356"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="347"/>
         <source>The config has been revoked</source>
         <translation>စီစဉ်သတ်မှတ်မှုကို ပြန်လည်ရုပ်သိမ်းလိုက်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="354"/>
         <source>Generate a new %1 configuration file?</source>
         <translation>%1 စီစဉ်သတ်မှတ်မှုဖိုင် အသစ် ဖန်တီးမလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="365"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="356"/>
         <source>Revoke the current %1 configuration file?</source>
         <translation>လက်ရှိ %1 စီစဉ်သတ်မှတ်မှုဖိုင်ကို ပြန်လည်ရုပ်သိမ်းမလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="368"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="359"/>
         <source>Your previous configuration file will no longer work, and it will not be possible to connect using it</source>
         <translation>သင့်ယခင် စီစဉ်သတ်မှတ်မှုဖိုင် အလုပ်မလုပ်တော့ဘဲ ၎င်းဖြင့် ချိတ်ဆက်၍ မရတော့ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="360"/>
         <source>Download</source>
         <translation>ဒေါင်းလုဒ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="360"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="370"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="361"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
@@ -3752,185 +3775,215 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="173"/>
         <source>Subscription Status</source>
         <translation>အသင်းဝင်မှု အခြေအနေ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="38"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="198"/>
         <source>Valid Until</source>
         <translation>သက်တမ်းကုန်ဆုံးရက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="223"/>
         <source>Active Connections</source>
         <translation>အသုံးပြုနေသော ချိတ်ဆက်မှုများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="133"/>
         <source>Subscription expired</source>
         <translation>အသင်းဝင်မှု သက်တမ်းကုန်ဆုံး</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="134"/>
         <source>Subscription expiring soon</source>
         <translation>အသင်းဝင်မှု မကြာမီ သက်တမ်းကုန်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="176"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="247"/>
         <source>Renew subscription</source>
         <translation>အသင်းဝင်မှု သက်တမ်းတိုးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="258"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="263"/>
         <source>Configurations have been updated for some countries. Download and install the updated configuration files</source>
         <translation>အချို့နိုင်ငံများအတွက် စီစဉ်သတ်မှတ်မှုများကို အပ်ဒိတ်လုပ်ထားပါသည်။ အပ်ဒိတ်လုပ်ထားသော စီစဉ်သတ်မှတ်မှုဖိုင်များကို ဒေါင်းလုဒ်ပြီး ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="278"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="283"/>
+        <source>Local proxy</source>
+        <translation>စက်တွင်း ပရောက်စီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="286"/>
+        <source>Off</source>
+        <translation>ပိတ်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="289"/>
+        <source>In use by another server</source>
+        <translation>အခြားဆာဗာက အသုံးပြုနေသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="291"/>
+        <source>Running: 127.0.0.1:%1</source>
+        <translation>လည်ပတ်နေသည်: 127.0.0.1:%1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="307"/>
         <source>Subscription Key</source>
         <translation>အသင်းဝင်မှု သော့</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="279"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="308"/>
         <source>For connecting on other devices</source>
         <translation>အခြားစက်ပစ္စည်းများတွင် ချိတ်ဆက်ရန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="326"/>
         <source>Configuration Files</source>
         <translation>စီစဉ်သတ်မှတ်မှု ဖိုင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="327"/>
         <source>Manage configuration files</source>
         <translation>စီစဉ်သတ်မှတ်မှု ဖိုင်များ စီမံမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="312"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="341"/>
         <source>Active Devices</source>
         <translation>အသုံးပြုနေသော စက်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="342"/>
         <source>Manage currently connected devices</source>
         <translation>လက်ရှိချိတ်ဆက်ထားသော စက်များကို စီမံမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="325"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="354"/>
         <source>Support</source>
         <translation>ကူညီရေး</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="338"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="367"/>
         <source>How to connect on another device</source>
         <translation>အခြားစက်တွင် မည်သို့ ချိတ်ဆက်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="360"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="390"/>
         <source>Reload API config</source>
         <translation>API config ကို ပြန်လည်စတင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="393"/>
         <source>Reload API config?</source>
         <translation>API config ကို ပြန်လည်စတင်မည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="364"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="398"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="432"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="429"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="467"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="365"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="399"/>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="433"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="395"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="430"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="468"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="369"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="399"/>
         <source>Cannot reload API config during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း API config ကို ပြန်လည်စတင်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="393"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="424"/>
         <source>Unlink this device</source>
         <translation>ဤစက်ကို ချိတ်ဆက်မှုဖြုတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="427"/>
         <source>Are you sure you want to unlink this device?</source>
         <translation>ဤစက်၏ ချိတ်ဆက်မှုကို ဖြုတ်လိုသည် အမှန်ပါသလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="397"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="428"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation>ဤလုပ်ဆောင်ချက်သည် စက်ကို သင့်အသင်းဝင်မှုမှ ချိတ်ဆက်မှုဖြုတ်ပါမည်။ စက်ပေါ်ရှိ အသင်းဝင်မှု ဆက်တင်များတွင် &apos;API စီစဉ်သတ်မှတ်မှုကို ပြန်လည်ဖွင့်မည်&apos; ကို နှိပ်ခြင်းဖြင့် အချိန်မရွေး ပြန်ချိတ်ဆက်နိုင်ပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="403"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="434"/>
         <source>Cannot unlink device during active connection</source>
         <translation>ချိတ်ဆက်မှု အသုံးပြုနေစဉ် စက်၏ချိတ်ဆက်မှုကို ဖြုတ်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="428"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="437"/>
+        <source>Cannot unlink device while local proxy is running</source>
+        <translation>စက်တွင်း ပရောက်စီ လည်ပတ်နေစဉ် စက်၏ချိတ်ဆက်မှုကို ဖြုတ်၍မရပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="463"/>
         <source>Remove from application</source>
         <translation>အပလီကေးရှင်းမှဖယ်ရှားမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="431"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="466"/>
         <source>Remove from application?</source>
         <translation>အပလီကေးရှင်းမှဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="437"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="472"/>
         <source>Cannot remove server during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း ဆာဗာကို ဖယ်ရှား၍မရပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="475"/>
+        <source>Cannot remove server while local proxy is running</source>
+        <translation>စက်တွင်း ပရောက်စီ လည်ပတ်နေစဉ် ဆာဗာကို ဖယ်ရှား၍မရပါ</translation>
     </message>
 </context>
 <context>
     <name>PageSettingsApiSubscriptionKey</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="88"/>
         <source>Copy key</source>
         <translation>သော့ကို ကူးယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="93"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="105"/>
         <source>Save key as a file</source>
         <translation>သော့ကို ဖိုင်အဖြစ် သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="112"/>
         <source>Save AmneziaVPN config</source>
         <translation>AmneziaVPN config ကိုသိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="113"/>
         <source>Config files (*.vpn)</source>
         <translation>စီစဉ်သတ်မှတ်မှုဖိုင်များ (*.vpn)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="124"/>
         <source>Config file saved</source>
         <translation>စီစဉ်သတ်မှတ်မှုဖိုင်ကို သိမ်းဆည်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="138"/>
         <source>Show key text</source>
         <translation>သော့စာသားကို ပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="172"/>
         <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
         <translation>Amnezia အပလီကေးရှင်းတွင် QR ကုဒ်ကို ဖတ်ရန် ပင်မမီနူးတွင် + ကို နှိပ်ပါ → &apos;QR ကုဒ်&apos;</translation>
     </message>
@@ -3938,42 +3991,42 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiSupport</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="22"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="51"/>
         <source>Telegram</source>
         <translation>Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="63"/>
         <source>Email</source>
         <translation>အီးမေးလ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="38"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="75"/>
         <source>Email Billing &amp; Orders</source>
         <translation>ငွေတောင်းခံမှုနှင့် အော်ဒါ အီးမေးလ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="46"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="89"/>
         <source>Website</source>
         <translation>ဝဘ်ဆိုက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="38"/>
         <source>Support</source>
         <translation>ကူညီရေး</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="39"/>
         <source>Our technical support specialists are available to assist you at any time</source>
         <translation>ကျွန်ုပ်တို့၏ နည်းပညာကူညီရေး ကျွမ်းကျင်သူများသည် အချိန်မရွေး သင့်ကို ကူညီရန် အသင့်ရှိပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="105"/>
         <source>Support tag</source>
         <translation>ကူညီပံ့ပိုးမှု tag</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="112"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
@@ -3986,57 +4039,62 @@ Create one from the current settings.</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် split tunneling ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="35"/>
         <source>Only the apps from the list should have access via VPN</source>
         <translation>စာရင်းတွင်းပါဝင်သောအက်ပ်များသာလျှင် VPN မှတစ်ဆင့် ဝင်ရောက်ခွင့်ရှိလိမ့်မည်ဖြစ်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="35"/>
+        <source>Via VPN</source>
+        <translation>VPN မှတစ်ဆင့်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="36"/>
         <source>Apps from the list should not have access via VPN</source>
         <translation>စာရင်းတွင်းပါဝင်သောအက်ပ်များကို VPN မှတစ်ဆင့် ဝင်ရောက်ခွင့်ရရှိလိမ့်မည်မဟုတ်ပေ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="36"/>
+        <source>Directly</source>
+        <translation>တိုက်ရိုက်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="78"/>
         <source>App split tunneling</source>
         <translation>အပလီကေးရှင်း split tunneling</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="127"/>
-        <source>Mode</source>
-        <translation>Mode</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="138"/>
         <source>Only &quot;Apps from the list should not have access via VPN&quot; mode is available on Windows</source>
         <translation>Windows တွင် &apos;စာရင်းရှိ အပလီကေးရှင်းများသည် VPN မှတဆင့် ဝင်ရောက်ခွင့် မရှိရပါ&apos; စနစ်သာ ရရှိနိုင်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="159"/>
         <source>Remove </source>
         <translation>ဖယ်ရှားမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="160"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="191"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="161"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="229"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="199"/>
         <source>application name</source>
         <translation>အပလီကေးရှင်းအမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="240"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="210"/>
         <source>Open executable file</source>
         <translation>စီမံလုပ်ဆောင်နိုင်မှုဖိုင်ကိုဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="211"/>
         <source>Executable files (*.*)</source>
         <translation>စီမံလုပ်ဆောင်နိုင်မှုဖိုင်များ (*.*)</translation>
     </message>
@@ -4121,7 +4179,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="254"/>
         <source>Logging</source>
-        <translation>Logging</translation>
+        <translation>မှတ်တမ်းတင်ခြင်း</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="255"/>
@@ -4465,62 +4523,145 @@ Create one from the current settings.</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="103"/>
         <source>IPv4 address</source>
         <translation>IPv4 လိပ်စာ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="104"/>
         <source>Import / Export addresses</source>
         <translation>လိပ်စာများ တင်သွင်း / ထုတ်ယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="154"/>
-        <source>Import</source>
-        <translation>တင်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="145"/>
         <source>Save address list</source>
         <translation>လိပ်စာစာရင်း သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="153"/>
         <source>Save addresses</source>
         <translation>လိပ်စာများ သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="177"/>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="253"/>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="170"/>
         <source>Address files (*.json)</source>
         <translation>လိပ်စာဖိုင်များ (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="226"/>
-        <source>Back</source>
-        <translation>နောက်သို့</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="239"/>
-        <source>Import address list</source>
-        <translation>လိပ်စာစာရင်း တင်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="134"/>
         <source>Replace address list</source>
         <translation>လိပ်စာစာရင်းကို အစားထိုးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="252"/>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="270"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="169"/>
         <source>Open address file</source>
         <translation>လိပ်စာဖိုင်ကို ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="267"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="123"/>
         <source>Add imported addresses to existing ones</source>
         <translation>တင်သွင်းလိုက်သော လိပ်စာများကို လက်ရှိလိပ်စာများတွင် ထည့်မည်</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsLocalProxy</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="39"/>
+        <source>Failed to enable local proxy. Check the port (%1-%2)</source>
+        <translation>စက်တွင်း ပရောက်စီကို ဖွင့်၍မရပါ။ Port ကို စစ်ဆေးပါ (%1-%2)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="52"/>
+        <source>Port must be between %1 and %2</source>
+        <translation>Port သည် %1 နှင့် %2 ကြား ဖြစ်ရမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="56"/>
+        <source>Port %1 is already in use on this device. Choose a different one</source>
+        <translation>Port %1 ကို ဤစက်တွင် အသုံးပြုနေပြီးဖြစ်သည်။ အခြားတစ်ခုကို ရွေးပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="67"/>
+        <source>Port is required</source>
+        <translation>Port လိုအပ်ပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="83"/>
+        <source>Local proxy is available only for Amnezia Premium</source>
+        <translation>စက်တွင်း ပရောက်စီကို Amnezia Premium အတွက်သာ ရနိုင်ပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="93"/>
+        <source>Unable to determine the current server</source>
+        <translation>လက်ရှိဆာဗာကို သတ်မှတ်၍မရပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="100"/>
+        <source>Local proxy is already enabled for another server</source>
+        <translation>စက်တွင်း ပရောက်စီကို အခြားဆာဗာအတွက် ဖွင့်ထားပြီးဖြစ်သည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="139"/>
+        <source>Local proxy stopped</source>
+        <translation>စက်တွင်း ပရောက်စီ ရပ်တန့်သွားပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="165"/>
+        <source>Local proxy</source>
+        <translation>စက်တွင်း ပရောက်စီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="166"/>
+        <source>Used by specific apps (e.g., CensorTracker extension) via Amnezia Premium.
+Only one can be active at a time: VPN or local proxy</source>
+        <translation>Amnezia Premium မှတစ်ဆင့် သတ်မှတ်ထားသော အက်ပ်များ (ဥပမာ CensorTracker extension) က အသုံးပြုသည်။
+တစ်ကြိမ်လျှင် တစ်ခုသာ ဖွင့်ထားနိုင်သည်: VPN သို့မဟုတ် စက်တွင်း ပရောက်စီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="195"/>
+        <source>Local proxy is already running for &quot;%1&quot;. Turn it off there to use it with this server</source>
+        <translation>စက်တွင်း ပရောက်စီသည် &quot;%1&quot; အတွက် လည်ပတ်နေပြီးဖြစ်သည်။ ဤဆာဗာနှင့် အသုံးပြုရန် ထိုနေရာတွင် ပိတ်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="206"/>
+        <source>Learn more</source>
+        <translation>ပိုမိုလေ့လာရန်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="225"/>
+        <source>Address and port</source>
+        <translation>လိပ်စာနှင့် Port</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="238"/>
+        <source>Copied: 127.0.0.1:%1</source>
+        <translation>ကူးယူပြီးပါပြီ: 127.0.0.1:%1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="286"/>
+        <source>Save</source>
+        <translation>သိမ်းဆည်းမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="300"/>
+        <source>Port saved: %1</source>
+        <translation>Port ကို သိမ်းဆည်းပြီးပါပြီ: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="321"/>
+        <source>Port %1 is in use — selected free port %2</source>
+        <translation>Port %1 ကို အသုံးပြုနေသည် — အလွတ် port %2 ကို ရွေးချယ်လိုက်သည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="325"/>
+        <source>VPN off. Local proxy running: 127.0.0.1:%1</source>
+        <translation>VPN ပိတ်ထားသည်။ စက်တွင်း ပရောက်စီ လည်ပတ်နေသည်: 127.0.0.1:%1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLocalProxy.qml" line="328"/>
+        <source>Local proxy running: 127.0.0.1:%1</source>
+        <translation>စက်တွင်း ပရောက်စီ လည်ပတ်နေသည်: 127.0.0.1:%1</translation>
     </message>
 </context>
 <context>
@@ -4536,14 +4677,29 @@ Create one from the current settings.</source>
         <translation>မှတ်တမ်းဖိုင်များ (*.log)</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="110"/>
+        <source>Failed to save logs. Try again later</source>
+        <translation>မှတ်တမ်းများကို သိမ်းဆည်း၍မရပါ။ နောက်မှ ထပ်စမ်းကြည့်ပါ</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="113"/>
         <source>Logs file saved</source>
         <translation>မှတ်တမ်းဖိုင်များသိမ်းဆည်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="152"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="125"/>
+        <source>Tunnel</source>
+        <translation>Tunnel</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="150"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="233"/>
+        <source>No logs yet</source>
+        <translation>မှတ်တမ်းများ မရှိသေးပါ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="125"/>
@@ -4556,12 +4712,62 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="107"/>
         <source>Logging</source>
-        <translation>Logging</translation>
+        <translation>မှတ်တမ်းတင်ခြင်း</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="108"/>
+        <source>Logs help support figure out what&apos;s wrong</source>
+        <translation>မှတ်တမ်းများသည် ပြဿနာကို ရှာဖွေရာတွင် အကူအညီပေးရေးအဖွဲ့ကို ကူညီပေးသည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
+        <source>Record logs</source>
+        <translation>မှတ်တမ်းတင်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
+        <source>Recording turns off after 14 days and logs are deleted</source>
+        <translation>14 ရက်အကြာတွင် မှတ်တမ်းတင်ခြင်း ပိတ်သွားပြီး မှတ်တမ်းများကို ဖျက်ပါမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="160"/>
+        <source>Logs</source>
+        <translation>မှတ်တမ်းများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="171"/>
+        <source>Tunnel</source>
+        <translation>Tunnel</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="172"/>
+        <source>Connection events</source>
+        <translation>ချိတ်ဆက်မှု ဖြစ်ရပ်များ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Application</source>
         <translation>အပလီကေးရှင်း</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="187"/>
+        <source>App events</source>
+        <translation>အက်ပ် ဖြစ်ရပ်များ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="206"/>
+        <source>Save all logs</source>
+        <translation>မှတ်တမ်းအားလုံး သိမ်းဆည်းမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="207"/>
+        <source>.zip archive with both logs</source>
+        <translation>မှတ်တမ်းနှစ်မျိုးလုံးပါသော .zip ဖိုင်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="220"/>
+        <source>Clear all logs</source>
+        <translation>မှတ်တမ်းအားလုံး ရှင်းလင်းမည်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
@@ -4574,9 +4780,34 @@ Create one from the current settings.</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="36"/>
+        <source>Archive files (*.zip)</source>
+        <translation>Archive ဖိုင်များ (*.zip)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="58"/>
+        <source>Clear all logs?</source>
+        <translation>မှတ်တမ်းအားလုံး ရှင်းလင်းမလား။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
+        <source>App and tunnel logs will be deleted from the device and can&apos;t be restored</source>
+        <translation>အက်ပ်နှင့် tunnel မှတ်တမ်းများကို စက်မှ ဖျက်ပစ်မည်ဖြစ်ပြီး ပြန်လည်ရယူ၍ မရနိုင်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="60"/>
+        <source>Clear</source>
+        <translation>ရှင်းလင်းမည်</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="81"/>
         <source>Logs file saved</source>
         <translation>မှတ်တမ်းဖိုင်များသိမ်းဆည်းပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="83"/>
+        <source>Failed to save logs. Try again later</source>
+        <translation>မှတ်တမ်းများကို သိမ်းဆည်း၍မရပါ။ နောက်မှ ထပ်စမ်းကြည့်ပါ</translation>
     </message>
 </context>
 <context>
@@ -4590,113 +4821,113 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsServerData</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="28"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="26"/>
         <source>All installed containers have been added to the application</source>
         <translation>ထည့်သွင်းထားသည့် ကွန်တိန်နာအားလုံးကို အပလီကေးရှင်းသို့ ပေါင်းထည့်လိုက်ပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="28"/>
         <source>No new installed containers found</source>
         <translation>အသစ်ထည့်သွင်းထားသော ကွန်တိန်နာများ မတွေ့ရှိပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="77"/>
         <source>Check the server for previously installed Amnezia services</source>
         <translation>ယခင်က ထည့်သွင်းထားသော Amnezia ဝန်ဆောင်မှုများရှိမရှိ ဆာဗာကို စစ်ဆေးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="78"/>
         <source>Add them to the application if they were not displayed</source>
         <translation>ဖော်ဆောင်ပြသခြင်းမရှိပါက ၎င်းတို့ကို အပလီကေးရှင်းထဲသို့ ထည့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="94"/>
         <source>Reboot server</source>
         <translation>ဆာဗာကို ပြန်လည်စတင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="98"/>
         <source>Do you want to reboot the server?</source>
         <translation>ဆာဗာကို ပြန်လည်စတင်ချင်ပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="99"/>
         <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
         <translation>ပြန်လည်စတင်သည့် လုပ်ငန်းစဉ်သည် စက္ကန့် 30 ခန့် ကြာနိုင်သည်. ဆက်လက်လုပ်ဆောင်လိုပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="121"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="151"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="181"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="210"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="164"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="196"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="122"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="152"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="182"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="197"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="105"/>
         <source>Cannot reboot server during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း ဆာဗာကို ပြန်လည်စတင်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="125"/>
         <source>Remove server from application</source>
         <translation>ဆာဗာကို အပလီကေးရှင်းမှဖယ်ရှားမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="129"/>
         <source>Do you want to remove the server from application?</source>
         <translation>ဆာဗာကို အပလီကေးရှင်းမှဖယ်ရှားချင်ပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="130"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
         <translation>ထည့်သွင်းထားသော AmneziaVPN ဝန်ဆောင်မှုများအားလုံးသည် ဆာဗာပေါ်တွင် ဆက်လက်ရှိနေမည်ဖြစ်သည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="136"/>
         <source>Cannot remove server during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း ဆာဗာကို ဖယ်ရှား၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="158"/>
         <source>Clear server from Amnezia software</source>
         <translation>ဆာဗာကို Amnezia ဆော့ဖ်ဝဲလ်မှ ရှင်းလင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="162"/>
         <source>Do you want to clear server from Amnezia software?</source>
         <translation>ဆာဗာကို Amnezia ဆော့ဖ်ဝဲလ်မှ ရှင်းလင်းလိုပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="180"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="163"/>
         <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>သင်၏ချိတ်ဆက်မှကို မျှဝေထားသည့် အသုံးပြုသူအားလုံး ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="186"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
         <source>Cannot clear server from Amnezia software during active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆာဗာကို Amnezia ဆော့ဖ်ဝဲလ်မှ ရှင်းလင်း၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="190"/>
         <source>Reset API config</source>
         <translation>API config ကို ပြန်လည်သတ်မှတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="208"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="194"/>
         <source>Do you want to reset API config?</source>
         <translation>API config ကို ပြန်လည်သတ်မှတ်ချင်ပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="201"/>
         <source>Cannot reset API config during active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် API config ကို ပြန်လည်သတ်မှတ်၍မရပါ</translation>
     </message>
@@ -4704,17 +4935,17 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="124"/>
         <source>Protocols</source>
         <translation>ပရိုတိုကောများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="131"/>
         <source>Services</source>
         <translation>ဝန်ဆောင်မှုများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="136"/>
         <source>Management</source>
         <translation>စီမံခန့်ခွဲမှု</translation>
     </message>
@@ -4807,7 +5038,7 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsServersList</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="30"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="29"/>
         <source>Servers</source>
         <translation>ဆာဗာများ</translation>
     </message>
@@ -4825,112 +5056,100 @@ Create one from the current settings.</source>
         <translation>မူရင်းဆာဗာသည် split tunneling လုပ်ဆောင်ချက်ကို အထောက်အပံ့မပေးပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="52"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
         <translation>ဤနေရာတွင်ဖော်ပြထားသောဆိုက်များကိုသာ VPN မှတဆင့်ဝင်ရောက်ပါမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="52"/>
+        <source>Via VPN</source>
+        <translation>VPN မှတစ်ဆင့်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="53"/>
         <source>Addresses from the list should not be accessed via VPN</source>
         <translation>စာရင်းတွင်ဖော်ပြထားသောလိပ်စာများကို VPN ဖြင့် ဝင်ရောက်ခြင်းပြုနိုင်လိမ့်မည် မဟုတ်ပေ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="53"/>
+        <source>Directly</source>
+        <translation>တိုက်ရိုက်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="101"/>
         <source>Split tunneling</source>
         <translation>ခွဲထွက် tunneling</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="149"/>
-        <source>Mode</source>
-        <translation>Mode</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="174"/>
         <source>Remove </source>
         <translation>ဖယ်ရှားမည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="202"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="325"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="175"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="274"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="203"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="326"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="275"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="232"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="198"/>
         <source>website or IP</source>
         <translation>ဝဘ်ဆိုက် သို့မဟုတ် IP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="199"/>
         <source>Additional options</source>
         <translation>ထပ်ဆောင်း ရွေးချယ်စရာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="276"/>
-        <source>Import</source>
-        <translation>တင်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="291"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="240"/>
         <source>Save site list</source>
         <translation>ဆိုက်စာရင်းကို သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="248"/>
         <source>Save sites</source>
         <translation>ဆိုက်များသိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="299"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="412"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="292"/>
         <source>Sites files (*.json)</source>
         <translation>ဆိုက်ဖိုင်များ (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="320"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="267"/>
         <source>Clear site list</source>
         <translation>ဝဘ်ဆိုက်စာရင်းကို ရှင်းလင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="323"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="272"/>
         <source>Clear site list?</source>
         <translation>ဝဘ်ဆိုက်စာရင်းကို ရှင်းလင်းမလား။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="324"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="273"/>
         <source>All sites will be removed from list.</source>
         <translation>ဝဘ်ဆိုက်အားလုံးကို စာရင်းမှ ဖယ်ရှားပါမည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="367"/>
-        <source>Back</source>
-        <translation>နောက်သို့</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="380"/>
-        <source>Import a list of sites</source>
-        <translation>ဆိုက်စာရင်းတစ်ခု တင်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="409"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="229"/>
         <source>Replace site list</source>
         <translation>ဆိုက်စာရင်းကို အစားထိုးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="411"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="291"/>
         <source>Open sites file</source>
         <translation>ဆိုက်ဖိုင်များ ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="422"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="218"/>
         <source>Add imported sites to existing ones</source>
         <translation>တင်သွင်းထားသော ဆိုက်များကို ရှိပြီးသားဆိုက်များထဲသို့ ထည့်မည်</translation>
     </message>
@@ -5098,143 +5317,143 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardConfigSource</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
         <source>Connection</source>
         <translation>ချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="312"/>
         <source>Settings</source>
         <translation>ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="323"/>
         <source>Enable logs</source>
         <translation>မှတ်တမ်းများ ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="339"/>
         <source>Export client logs</source>
         <translation>Client မှတ်တမ်းများ ထုတ်ယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="349"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="350"/>
         <source>Logs files (*.log)</source>
         <translation>မှတ်တမ်းဖိုင်များ (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="359"/>
         <source>Logs file saved</source>
         <translation>မှတ်တမ်းဖိုင်များသိမ်းဆည်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="83"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="160"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="313"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="390"/>
         <source>Support tag</source>
         <translation>ကူညီပံ့ပိုးမှု tag</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="164"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="394"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="46"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="52"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
         <translation>Key ကိုထည့်မည်၊ ဖွဲ့စည်းမှုဖိုင်တစ်ခုကိုထည့်မည် သို့မဟုတ် QR-ကုဒ်ကို စကင်န်ဖတ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="187"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="79"/>
         <source>Insert key</source>
         <translation>Key ကိုထည့်သွင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="80"/>
         <source>Insert</source>
         <translation>ထည့်သွင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="95"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="111"/>
         <source>Other connection options</source>
         <translation>အခြားချိတ်ဆက်မှုရွေးချယ်စရာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="239"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="123"/>
         <source>Recommended</source>
         <translation>အကြံပြုထားသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="262"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="281"/>
         <source>Site Amnezia</source>
         <translation>Amnezia ဝဘ်ဆိုက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
         <source>VPN by Amnezia</source>
         <translation>Amnezia မှ VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="287"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="121"/>
         <source>The easiest way to connect to the VPN</source>
         <translation>VPN ကို ချိတ်ဆက်ရန် အလွယ်ကူဆုံး နည်းလမ်း</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="145"/>
         <source>Self-hosted VPN</source>
         <translation>ကိုယ်တိုင် host လုပ်ထားသော VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="306"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="146"/>
         <source>Configure Amnezia VPN on your own server</source>
         <translation>Amnezia VPN ကို သင်၏ကိုယ်ပိုင်ဆာဗာပေါ်တွင် စီစဥ်ချိန်ညှိမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="318"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="163"/>
         <source>Restore from backup</source>
         <translation>အရံဖိုင်မှ ပြန်လည်ရယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="326"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="173"/>
         <source>Open backup file</source>
         <translation>အရံဖိုင်ကို ဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="327"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="174"/>
         <source>Backup files (*.backup)</source>
         <translation>အရံဖိုင်များ (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="344"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="193"/>
         <source>File with connection settings</source>
         <translation>ချိတ်ဆက်မှုဆက်တင်များပါဝင်သောဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="350"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="201"/>
         <source>Open config file</source>
         <translation>config ဖိုင်ကိုဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="363"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="218"/>
         <source>QR code</source>
         <translation>QR-ကုဒ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="379"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="240"/>
         <source>Restore purchases</source>
         <translation>ဝယ်ယူထားသည့်များကို ပြန်လည်ရယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="261"/>
         <source>I have nothing</source>
         <translation>ကျွန်ုပ်တွင်ဘာမှမရှိပါ</translation>
     </message>
@@ -5273,8 +5492,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="133"/>
-        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
-        <translation>Amnezia hosting။ ရှုပ်ထွေးသော ဆက်တင်များနှင့် ခေါင်းကိုက်စရာများ မလိုသော VPN ဆာဗာများ</translation>
+        <source>Amnezia Hosting - VPN servers without complicated settings</source>
+        <translation>Amnezia Hosting - ရှုပ်ထွေးသော ဆက်တင်များ မလိုသော VPN ဆာဗာများ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="147"/>
@@ -5330,27 +5549,27 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardEasy</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="70"/>
         <source>Choose Installation Type</source>
         <translation>ထည့်သွင်းမှု အမျိုးအစား ရွေးချယ်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="112"/>
         <source>Manual</source>
         <translation>ကိုယ်တိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="113"/>
         <source>Choose a VPN protocol</source>
         <translation>VPN ပရိုတိုကောကို ရွေးပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="137"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="169"/>
         <source>Skip setup</source>
         <translation>စနစ်ထည့်သွင်းမှုကို ကျော်မည်</translation>
     </message>
@@ -5384,12 +5603,12 @@ Create one from the current settings.</source>
         <translation>ဆာဗာကို အခြားဆော့ဖ်ဝဲကို ထည့်သွင်းခြင်း မပြီးမချင်း ခေတ္တရပ်ထားပါမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="103"/>
         <source>Installing</source>
         <translation>ထည့်သွင်းနေသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="149"/>
         <source>Cancel installation</source>
         <translation>ထည့်သွင်းမှုကို ပယ်ဖျက်မည်</translation>
     </message>
@@ -5502,7 +5721,7 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="51"/>
         <source>Let&apos;s get started</source>
         <translation>စတင်လိုက်ကြရအောင်</translation>
     </message>
@@ -5553,17 +5772,17 @@ Create one from the current settings.</source>
         <translation>အကြောင်းအရာများကိုပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="130"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
         <translation>WireGuard obfuscation ကိုဖွင့်ထားပါ။ အကယ်၍ သင်၏အင်တာနက်ဝန်ဆောင်မှုပေးသောကုမ္ပဏီက WireGuard ပိတ်ဆို့ထားသော် ၎င်းကိုဖွင့်ထားခြင်းအားဖြင့်အသုံးဝင်နိုင်သည်။.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>သင်ယုံကြည်ရသော ရင်းမြစ်များမှရရှိသော ချိတ်ဆက်ကုဒ်များကိုသာ အသုံးပြုပါ။ လူတိုင်းဝင်ရောက်ရယူနေနိုင်သော ရင်းမြစ်များမှကုဒ်များသည် သင့်ဒေတာကို ကြားဖြတ်ရယူရန် ဖန်တီးထားသောကုဒ်များဖြစ်နေနိုင်သည်။.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="188"/>
         <source>Connect</source>
         <translation>ချိတ်ဆက်မည်</translation>
     </message>
@@ -5611,87 +5830,87 @@ Create one from the current settings.</source>
         <translation>ဤဆာဗာနှင့်ချိတ်ဆက်မှု ဆက်တင်များပါရှိသော ဖိုင် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="102"/>
         <source>For the AmneziaVPN app</source>
         <translation>AmneziaVPN အက်ပ်အတွက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="103"/>
         <source>OpenVPN native format</source>
         <translation>OpenVPN မူရင်းဖောမတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="104"/>
         <source>WireGuard native format</source>
         <translation>WireGuard မူရင်းဖော်မတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="105"/>
         <source>AmneziaWG native format</source>
         <translation>AmneziaWG မူရင်းဖော်မတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="106"/>
         <source>XRay native format</source>
         <translation>XRay မူရင်းဖော်မတ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="259"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="237"/>
         <source>Share VPN Access</source>
         <translation>VPN အသုံးပြုခွင့်ကိုမျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="192"/>
         <source>Share full access to the server and VPN</source>
         <translation>ဆာဗာနှင့် VPN သို့ အပြည့်အဝဝင်ရောက်ခွင့်ကို မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="193"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
         <translation>သင့်ကိုယ်ပိုင်စက်ပစ္စည်းများအတွက် အသုံးပြုရန် သို့မဟုတ် ဆာဗာကို စီမံခန့်ခွဲရန် သင်ယုံကြည်ရသူများနှင့် မျှဝေရန်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="225"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="566"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="515"/>
         <source>Share</source>
         <translation>မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="277"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="255"/>
         <source>Connection</source>
         <translation>ချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="277"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="587"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="536"/>
         <source>Users</source>
         <translation>အသုံးပြုသူများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="275"/>
         <source>Share VPN access without the ability to manage the server</source>
         <translation>ဆာဗာကို စီမံခန့်ခွဲနိုင်စွမ်းမပါရှိဘဲ VPN အသုံးပြုခွင့်ကို မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="289"/>
         <source>User name</source>
         <translation>အသုံးပြုသူနာမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="331"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="310"/>
         <source>Server</source>
         <translation>ဆာဗာ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="395"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="396"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="371"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="372"/>
         <source>Protocol</source>
         <translation>ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="506"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="507"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="487"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="488"/>
         <source>Connection format</source>
         <translation>ချိတ်ဆက်မှုဖောမတ်</translation>
     </message>
@@ -5741,22 +5960,22 @@ Create one from the current settings.</source>
         <translation>ပြန်ရုပ်သိမ်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="143"/>
         <source>Revoke the config for a user - %1?</source>
         <translation>အသုံးပြုသူ %1 အတွက် config ကို ပြန်လည်ရုပ်သိမ်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="144"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>ဤအသုံးပြုသူသည် သင့်ဆာဗာသို့ ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="145"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="146"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
@@ -5824,28 +6043,28 @@ Create one from the current settings.</source>
         <translation>သင်သည် အခြားသူများနှင့် အပြည့်အဝဝင်ရောက်ခွင့်ကို မျှဝေပါက၊ ၎င်းတို့သည် ပရိုတိုကောများနှင့် ဝန်ဆောင်မှုများကို ဆာဗာသို့ထည့်သွင်းခြင်း ဆာဗာမှဖယ်ရှားခြင်းများ ပြုလုပ်နိုင်သောကြောင့် အသုံးပြုသူများအားလုံးအတွက် VPN မှားယွင်းစွာ လုပ်ဆောင်ခြင်းများဖြစ်စေနိုင်ပါသည်. </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="63"/>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="62"/>
         <source>Server</source>
         <translation>ဆာဗာ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="96"/>
         <source>Accessing </source>
         <translation>ဝင်ရောက်နေသည် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="97"/>
         <source>File with accessing settings to </source>
         <translation>ဤဆာဗာနှင့်ဝင်ရောက်နိုင်မှု ဆက်တင်များပါရှိသော ဖိုင် </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="114"/>
         <source>Share</source>
         <translation>မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="122"/>
         <source>Access error!</source>
         <translation>အသုံးပြုခွင့်တွင်အမှားပါနေပါသည်!</translation>
     </message>
@@ -5853,37 +6072,37 @@ Create one from the current settings.</source>
 <context>
     <name>PageStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="198"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
         <translation>၁၄ ရက်အကြာတွင် Logging ကို ပိတ်ခဲ့သည်၊ မှတ်တမ်းဖိုင်များကို ဖျက်ပစ်လိုက်ပြီဖြစ်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="202"/>
         <source>Settings restored from backup file</source>
         <translation>ဆက်တင်များကို အရံဖိုင်မှ ပြန်လည်ရယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="225"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="208"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
         <translation>မှတ်တမ်းတင်မှု ဖွင့်ထားပါသည်။ ၁၄ ရက်အကြာတွင် အလိုအလျောက် ပိတ်သွားမည်ဖြစ်ပြီး မှတ်တမ်းဖိုင်အားလုံး ဖျက်မည်ကို သတိပြုပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="312"/>
         <source>Home</source>
         <translation>ပင်မ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="361"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="339"/>
         <source>Share</source>
         <translation>မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="374"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="350"/>
         <source>Settings</source>
         <translation>ဆက်တင်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageStart.qml" line="388"/>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="362"/>
         <source>Add</source>
         <translation>ထည့်မည်</translation>
     </message>
@@ -5891,53 +6110,58 @@ Create one from the current settings.</source>
 <context>
     <name>PageUpdate</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="24"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="29"/>
         <source>Done. Install the update</source>
         <translation>ပြီးပါပြီ။ အပ်ဒိတ်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="26"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="31"/>
         <source>Download failed. Download manually from amnezia.org</source>
         <translation>ဒေါင်းလုဒ် မအောင်မြင်ပါ။ amnezia.org မှ ကိုယ်တိုင် ဒေါင်းလုဒ်လုပ်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="167"/>
         <source>New version available</source>
         <translation>ဗားရှင်းအသစ် ရရှိနိုင်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="177"/>
+        <source>No release notes yet</source>
+        <translation>ထုတ်ဝေမှုမှတ်စုများ မရှိသေးပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="184"/>
         <source>New</source>
         <translation>အသစ်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="192"/>
         <source>Improved</source>
         <translation>တိုးတက်မှုများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="192"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="200"/>
         <source>Fixed</source>
         <translation>ပြုပြင်ပြီးများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="226"/>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="232"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="229"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="235"/>
         <source>Update app</source>
         <translation>အက်ပ်ကို အပ်ဒိတ်လုပ်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="229"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="232"/>
         <source>Downloading update...</source>
         <translation>အပ်ဒိတ်ကို ဒေါင်းလုဒ်လုပ်နေသည်...</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="233"/>
         <source>Install update</source>
         <translation>အပ်ဒိတ်ကို ထည့်သွင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="231"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="234"/>
         <source>Retry</source>
         <translation>ထပ်မံကြိုးစားမည်</translation>
     </message>
@@ -6204,6 +6428,46 @@ Create one from the current settings.</source>
         <translation>အသုံးပြုသူ၏ စကားဝှက် လိုအပ်ပါသည်</translation>
     </message>
     <message>
+        <location filename="../core/utils/errorStrings.cpp" line="43"/>
+        <source>Server error: could not create a TLS certificate on the XRay server. The previous settings were left unchanged. Try again, or use Reality.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: XRay ဆာဗာတွင် TLS လက်မှတ်ကို ဖန်တီး၍မရပါ။ ယခင်ဆက်တင်များကို မပြောင်းလဲဘဲ ထားခဲ့သည်။ ထပ်စမ်းကြည့်ပါ သို့မဟုတ် Reality ကို အသုံးပြုပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="47"/>
+        <source>Server error: XRay rejected the new configuration. Nothing was changed, the server keeps running with the previous settings.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: XRay က စီစဉ်သတ်မှတ်မှုအသစ်ကို ငြင်းပယ်ခဲ့သည်။ မည်သည့်အရာမျှ မပြောင်းလဲပါ၊ ဆာဗာသည် ယခင်ဆက်တင်များဖြင့် ဆက်လက်လည်ပတ်နေသည်။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="51"/>
+        <source>Server error: XRay did not start with the new configuration. The previous settings were restored and the server is running again.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: XRay သည် စီစဉ်သတ်မှတ်မှုအသစ်ဖြင့် မစတင်ခဲ့ပါ။ ယခင်ဆက်တင်များကို ပြန်လည်ထားရှိပြီး ဆာဗာ ပြန်လည်လည်ပတ်နေပါပြီ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="55"/>
+        <source>Server error: XRay is not accepting connections and the previous configuration could not be restored. The server needs attention: check it over SSH, or reinstall the protocol.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: XRay သည် ချိတ်ဆက်မှုများကို လက်မခံဘဲ ယခင်စီစဉ်သတ်မှတ်မှုကိုလည်း ပြန်လည်ထားရှိ၍ မရပါ။ ဆာဗာကို စစ်ဆေးရန် လိုအပ်သည်: SSH ဖြင့် စစ်ဆေးပါ သို့မဟုတ် ပရိုတိုကောကို ပြန်လည်ထည့်သွင်းပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="60"/>
+        <source>Server error: the previous data volume could not be removed. Installing on top of it would reuse the old keys, so the configurations you expected to revoke would keep working. Check the server and try again.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: ယခင် data volume ကို ဖယ်ရှား၍မရပါ။ ၎င်းအပေါ်တွင် ထည့်သွင်းပါက သော့အဟောင်းများကို ပြန်သုံးမည်ဖြစ်သောကြောင့် သင်ရုပ်သိမ်းလိုသော စီစဉ်သတ်မှတ်မှုများ ဆက်လက်အလုပ်လုပ်နေပါမည်။ ဆာဗာကို စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="65"/>
+        <source>Server error: XRay could not generate its keys on the server. Check the server and try again.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: XRay သည် ဆာဗာပေါ်တွင် ၎င်း၏သော့များကို ဖန်တီး၍မရပါ။ ဆာဗာကို စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="69"/>
+        <source>Server error: could not preserve the XRay keys stored on the server. The settings were not changed, so the existing configurations keep working. Check that the server is reachable and try again.</source>
+        <translation>ဆာဗာ မှားယွင်းမှု: ဆာဗာတွင် သိမ်းဆည်းထားသော XRay သော့များကို ထိန်းသိမ်း၍မရပါ။ ဆက်တင်များကို မပြောင်းလဲထားသောကြောင့် လက်ရှိစီစဉ်သတ်မှတ်မှုများ ဆက်လက်အလုပ်လုပ်ပါမည်။ ဆာဗာကို ဝင်ရောက်နိုင်ကြောင်း စစ်ဆေးပြီး ထပ်စမ်းကြည့်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <source>The old XRay container will not start, so its keys cannot be preserved. Applying these settings will recreate it with new keys, and all existing configurations will stop working.</source>
+        <translation>XRay ကွန်တိန်နာအဟောင်း မစတင်နိုင်သောကြောင့် ၎င်း၏သော့များကို ထိန်းသိမ်း၍မရပါ။ ဤဆက်တင်များကို အသုံးချပါက ၎င်းကို သော့အသစ်များဖြင့် ပြန်လည်ဖန်တီးမည်ဖြစ်ပြီး လက်ရှိစီစဉ်သတ်မှတ်မှုအားလုံး အလုပ်မလုပ်တော့ပါ။</translation>
+    </message>
+    <message>
         <location filename="../core/utils/errorStrings.cpp" line="90"/>
         <source>SCP error: Generic failure</source>
         <translation>SCP မှားယွင်းမှု: ယေဘုယ မအောင်မြင်ခြင်း</translation>
@@ -6242,6 +6506,11 @@ Create one from the current settings.</source>
         <location filename="../core/utils/errorStrings.cpp" line="104"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN pool မှားယွင်းမှု: ရရှိနိုင်သောလိပ်စာများမရှိပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>This is an XRay settings file, not a connection config. Import it on the XRay Configurations page using &apos;Import settings&apos;.</source>
+        <translation>ဤဖိုင်သည် XRay ဆက်တင်ဖိုင်ဖြစ်ပြီး ချိတ်ဆက်မှု config မဟုတ်ပါ။ XRay စီစဉ်သတ်မှတ်မှုများ စာမျက်နှာတွင် &apos;ဆက်တင်များ တင်သွင်းမည်&apos; ကို အသုံးပြု၍ တင်သွင်းပါ။</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="111"/>
@@ -6817,7 +7086,7 @@ For more detailed information, you can
 <context>
     <name>RadioItemType</name>
     <message>
-        <location filename="../ui/qml/Controls2/RadioItemType.qml" line="38"/>
+        <location filename="../ui/qml/Controls2/RadioItemType.qml" line="43"/>
         <source>Available in Premium</source>
         <translation>Premium တွင် ရရှိနိုင်သည်</translation>
     </message>
@@ -6825,12 +7094,12 @@ For more detailed information, you can
 <context>
     <name>RenameServerDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="36"/>
+        <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="35"/>
         <source>Server name</source>
         <translation>ဆာဗာအမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="47"/>
+        <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="46"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
@@ -6841,6 +7110,11 @@ For more detailed information, you can
         <location filename="../ui/qml/Controls2/SearchFieldType.qml" line="22"/>
         <source>Search</source>
         <translation>ရှာဖွေမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Controls2/SearchFieldType.qml" line="125"/>
+        <source>Clear</source>
+        <translation>ရှင်းလင်းမည်</translation>
     </message>
 </context>
 <context>
@@ -6875,17 +7149,17 @@ For more detailed information, you can
 <context>
     <name>ServersListView</name>
     <message>
-        <location filename="../ui/qml/Components/ServersListView.qml" line="66"/>
+        <location filename="../ui/qml/Components/ServersListView.qml" line="50"/>
         <source>Subscription expired. Please renew</source>
         <translation>အသင်းဝင်မှု သက်တမ်းကုန်သွားပါပြီ။ ကျေးဇူးပြု၍ သက်တမ်းတိုးပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ServersListView.qml" line="66"/>
+        <location filename="../ui/qml/Components/ServersListView.qml" line="50"/>
         <source>Subscription expiring soon</source>
         <translation>အသင်းဝင်မှု မကြာမီ သက်တမ်းကုန်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ServersListView.qml" line="81"/>
+        <location filename="../ui/qml/Components/ServersListView.qml" line="62"/>
         <source>Unable change server while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆာဗာကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -6929,9 +7203,32 @@ For more detailed information, you can
 <context>
     <name>SnackbarType</name>
     <message>
-        <location filename="../ui/qml/Controls2/SnackbarType.qml" line="193"/>
+        <location filename="../ui/qml/Controls2/SnackbarType.qml" line="206"/>
         <source>Close</source>
         <translation>ပိတ်မည်</translation>
+    </message>
+</context>
+<context>
+    <name>SortCountriesDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SortCountriesDrawer.qml" line="30"/>
+        <source>Filters</source>
+        <translation>စစ်ထုတ်မှုများ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SortCountriesDrawer.qml" line="31"/>
+        <source>Sorting</source>
+        <translation>စီစဉ်ပုံ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SortCountriesDrawer.qml" line="41"/>
+        <source>By region</source>
+        <translation>ဒေသအလိုက်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SortCountriesDrawer.qml" line="58"/>
+        <source>Alphabetically</source>
+        <translation>အက္ခရာစဉ်အလိုက်</translation>
     </message>
 </context>
 <context>
@@ -6952,7 +7249,7 @@ For more detailed information, you can
         <translation>သက်တမ်းတိုးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="65"/>
+        <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="66"/>
         <source>Support</source>
         <translation>ကူညီရေး</translation>
     </message>
@@ -7074,7 +7371,7 @@ For more detailed information, you can
 <context>
     <name>TextFieldType</name>
     <message>
-        <location filename="../ui/qml/Controls2/TextFieldType.qml" line="117"/>
+        <location filename="../ui/qml/Controls2/TextFieldType.qml" line="120"/>
         <source>The field can&apos;t be empty</source>
         <translation>ဖြည့်သွင်းရမည့်နေရာသည် အလွတ်မဖြစ်ရပါ</translation>
     </message>
@@ -7107,27 +7404,27 @@ For more detailed information, you can
         <translation>https://t.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="60"/>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="61"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="61"/>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="62"/>
         <source>Support email</source>
         <translation>ကူညီရေး အီးမေးလ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="66"/>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="67"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="75"/>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="78"/>
         <source>amnezia.org</source>
         <translation>amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="76"/>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="79"/>
         <source>Download the update manually</source>
         <translation>အပ်ဒိတ်ကို ကိုယ်တိုင် ဒေါင်းလုဒ်လုပ်ပါ</translation>
     </message>
@@ -7143,42 +7440,42 @@ For more detailed information, you can
 <context>
     <name>VpnProtocol</name>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="136"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="150"/>
         <source>Unknown</source>
         <translation>အမည်မသိ</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="137"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="151"/>
         <source>Disconnected</source>
         <translation>ဖြုတ်လိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="138"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="152"/>
         <source>Preparing</source>
         <translation>ပြင်ဆင်နေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="139"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="153"/>
         <source>Connecting...</source>
         <translation>ချိတ်ဆက်နေပါပြီ...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="140"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="154"/>
         <source>Connected</source>
         <translation>ချိတ်ဆက်ပြီးသွားပါပြီ</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="141"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="155"/>
         <source>Disconnecting...</source>
         <translation>အဆက်အသွယ်ဖြတ်နေပါသည်...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="142"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="156"/>
         <source>Reconnecting...</source>
         <translation>ပြန်လည်ချိတ်ဆက်နေပါသည်...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="143"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="157"/>
         <source>Error</source>
         <translation>မှားယွင်းမှု</translation>
     </message>
@@ -7186,22 +7483,47 @@ For more detailed information, you can
 <context>
     <name>XrayConfigModel</name>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="709"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="672"/>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.</source>
+        <translation>သင် ချိတ်ဆက်မှုကို မျှဝေထားသော အသုံးပြုသူအားလုံး ၎င်းသို့ ချိတ်ဆက်နိုင်တော့မည် မဟုတ်ပါ။ ချိတ်ဆက်မှုကို ထပ်မံမျှဝေရန် လိုအပ်ပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="674"/>
+        <source>The server will be recreated. This takes up to a minute, and connections that were already shared keep working.</source>
+        <translation>ဆာဗာကို ပြန်လည်ဖန်တီးပါမည်။ ၎င်းသည် တစ်မိနစ်အထိ ကြာနိုင်ပြီး မျှဝေထားပြီးသော ချိတ်ဆက်မှုများ ဆက်လက်အလုပ်လုပ်ပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="678"/>
+        <source>The server configuration will be updated. All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.</source>
+        <translation>ဆာဗာ စီစဉ်သတ်မှတ်မှုကို အပ်ဒိတ်လုပ်ပါမည်။ သင် ချိတ်ဆက်မှုကို မျှဝေထားသော အသုံးပြုသူအားလုံး ၎င်းသို့ ချိတ်ဆက်နိုင်တော့မည် မဟုတ်ပါ။ ချိတ်ဆက်မှုကို ထပ်မံမျှဝေရန် လိုအပ်ပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="680"/>
+        <source>The server configuration will be updated. The container will not be recreated.</source>
+        <translation>ဆာဗာ စီစဉ်သတ်မှတ်မှုကို အပ်ဒိတ်လုပ်ပါမည်။ ကွန်တိန်နာကို ပြန်လည်ဖန်တီးမည် မဟုတ်ပါ။</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="683"/>
+        <source>The server will not be changed now. The new settings apply the next time you connect.</source>
+        <translation>ဆာဗာကို ယခု ပြောင်းလဲမည် မဟုတ်ပါ။ ဆက်တင်အသစ်များသည် နောက်တစ်ကြိမ် ချိတ်ဆက်သည့်အခါ သက်ရောက်ပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="941"/>
         <source>Port must be in the range of 1 to 65535</source>
         <translation>Port သည် 1 မှ 65535 အတွင်း ဖြစ်ရမည်</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="715"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="947"/>
         <source>SNI: enter a valid IP address or domain name</source>
         <translation>SNI: တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="721"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="953"/>
         <source>Host: enter a valid IP address or domain name</source>
         <translation>Host: တိကျသော IP လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်ကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="724"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="956"/>
         <source>Path must start with &quot;/&quot;</source>
         <translation>လမ်းကြောင်းသည် &quot;/&quot; ဖြင့် စတင်ရမည်</translation>
     </message>
@@ -7217,39 +7539,39 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="226"/>
+        <location filename="../ui/qml/main2.qml" line="196"/>
         <source>Private key passphrase</source>
         <translation>ကိုယ်ပိုင် key စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="236"/>
+        <location filename="../ui/qml/main2.qml" line="206"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="313"/>
+        <location filename="../ui/qml/main2.qml" line="280"/>
         <source>This subscription format is no longer supported</source>
         <translation>ဤအသင်းဝင်မှု ပုံစံကို ပံ့ပိုးမထားတော့ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="314"/>
+        <location filename="../ui/qml/main2.qml" line="281"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
         <translation>ဤ Amnezia အသင်းဝင်မှု အမျိုးအစားအဟောင်းကို ဤအပလီကေးရှင်း ဗားရှင်းတွင် ချိတ်ဆက်ရန် အသုံးပြု၍မရတော့ပါ။
 ဆက်လက်လုပ်ဆောင်ရန် ဆာဗာကို အပလီကေးရှင်းမှ ဖယ်ရှားပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="315"/>
+        <location filename="../ui/qml/main2.qml" line="282"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="316"/>
+        <location filename="../ui/qml/main2.qml" line="283"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="320"/>
+        <location filename="../ui/qml/main2.qml" line="287"/>
         <source>Cannot remove server during active connection</source>
         <translation>ချိတ်ဆက်မှုရှိနေချိန်အတွင်း ဆာဗာကို ဖယ်ရှား၍မရပါ</translation>
     </message>

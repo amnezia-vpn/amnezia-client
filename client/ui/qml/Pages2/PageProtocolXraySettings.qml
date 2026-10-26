@@ -15,11 +15,10 @@ import "../Components"
 PageType {
     id: root
 
-    enableTimer: false
+    focusOnActivation: false
 
     readonly property bool hasWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
-    property bool portDirty: false
     property string portText: ""
 
     function save() {
@@ -39,18 +38,11 @@ PageType {
                 return
             }
 
-            var content = listView.itemAtIndex(0)
-            if (content) {
-                content.commitPort()
-            }
-
             PageController.goToPage(PageEnum.PageSetupWizardInstalling);
             InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
         }
-        var noButtonFunction = function() {
-            if (!GC.isMobile()) saveButton.forceActiveFocus()
-        }
-        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        var noButtonFunction = function() {}
+        Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
     function formatTransport(value) {
@@ -76,7 +68,7 @@ PageType {
 
         function onXrayKeyMigrationNeedsConfirm(message) {
             PageController.showBusyIndicator(false)
-            showQuestionDrawer(
+            Dialogs.askQuestion(
                 qsTr("Recreate XRay with new keys?"),
                 message,
                 qsTr("Continue"),
@@ -90,45 +82,39 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
-        model: XrayConfigModel
+        contentHeight: content.implicitHeight
 
-        header: NavigationBarType {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            title: qsTr("XRay VLESS settings")
-
-            IconButtonType {
-                enabled: root.hasWriteAccess
-                size: IconButtonType.Small
-                icon.source: "qrc:/images/controls/more-vertical.svg"
-                onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
-            }
-        }
-
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
-            function commitPort() {
-                if (portField.textField.text !== port) {
-                    port = portField.textField.text
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("XRay VLESS settings")
+
+                IconButtonType {
+                    enabled: root.hasWriteAccess
+                    icon.source: "qrc:/images/controls/more-vertical.svg"
+                    onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
                 }
             }
 
             LinkButtonType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
 
                 size: LinkButtonType.Medium
                 horizontalPadding: 14
@@ -155,7 +141,7 @@ PageType {
                 Binding {
                     target: portField.textField
                     property: "text"
-                    value: port
+                    value: XrayConfigModel.port
                     when: !portField.textField.activeFocus
                     restoreMode: Binding.RestoreNone
                 }
@@ -165,14 +151,12 @@ PageType {
                     regularExpression: /^(|\d{1,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/
                 }
                 textField.onActiveFocusChanged: {
-                    if (textField.activeFocus && textField.text === "" && port !== "") {
-                        textField.text = port
+                    if (textField.activeFocus && textField.text === "" && XrayConfigModel.port !== "") {
+                        textField.text = XrayConfigModel.port
                     }
                 }
-                textField.onTextChanged: {
-                    root.portText = textField.text
-                    root.portDirty = (textField.text !== port)
-                }
+                textField.onTextChanged: root.portText = textField.text
+                textField.onTextEdited: XrayConfigModel.port = textField.text
                 textField.onEditingFinished: {
                     var v = portField.textField.text
                     if (v !== "") {
@@ -185,9 +169,8 @@ PageType {
                         if (portField.textField.text !== v)
                             portField.textField.text = v
                     }
-                    if (v !== port)
-                        port = v
-                    root.portDirty = false
+                    if (v !== XrayConfigModel.port)
+                        XrayConfigModel.port = v
                 }
             }
 
@@ -199,7 +182,7 @@ PageType {
 
                 enabled: root.hasWriteAccess
                 text: qsTr("Transport")
-                subtitle: root.formatTransport(transport)
+                subtitle: root.formatTransport(XrayConfigModel.transport)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
@@ -212,7 +195,7 @@ PageType {
 
                 enabled: root.hasWriteAccess
                 text: qsTr("Security")
-                subtitle: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
+                subtitle: root.formatSecurity((XrayConfigModel.security === "reality" && XrayConfigModel.transport === "mkcp") ? "none" : XrayConfigModel.security)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
@@ -225,7 +208,7 @@ PageType {
 
                 enabled: root.hasWriteAccess
                 text: qsTr("Flow")
-                subtitle: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
+                subtitle: root.formatFlow((XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw") ? XrayConfigModel.flow : "")
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
@@ -246,7 +229,7 @@ PageType {
                             qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
                         XrayConfigModel.resetToDefaults()
                     }
-                    showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
+                    Dialogs.askQuestion(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
                         qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {
                         })
                 }
@@ -267,15 +250,12 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: root.hasWriteAccess && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
-        enabled: visible && root.portText !== ""
+        visible: root.hasWriteAccess
+        enabled: XrayConfigModel.hasUnsavedChanges && root.portText !== ""
         text: qsTr("Save")
 
-        onClicked: {
-            saveButton.forceActiveFocus()
-            root.save()
-        }
+        onClicked: root.save()
     }
 }

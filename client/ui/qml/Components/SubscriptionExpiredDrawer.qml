@@ -43,7 +43,7 @@ SheetType {
             visible: root.isRenewalAvailable
 
             Layout.fillWidth: true
-            Layout.topMargin: 26
+            Layout.topMargin: 32
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
@@ -56,10 +56,11 @@ SheetType {
 
         ButtonType {
             Layout.fillWidth: true
-            Layout.topMargin: root.isRenewalAvailable ? 12 : 26
+            Layout.topMargin: root.isRenewalAvailable ? 12 : 32
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
+            size: ButtonType.Medium
             variant: ButtonType.Text
 
             text: qsTr("Support")

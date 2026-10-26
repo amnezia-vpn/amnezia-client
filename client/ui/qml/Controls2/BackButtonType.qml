@@ -1,6 +1,6 @@
 import QtQuick
 
-FocusScope {
+Item {
     id: root
 
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"

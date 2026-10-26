@@ -31,14 +31,11 @@ PageType {
         H3TextType {
             id: headerText
 
-            property string progressString
-
             Layout.fillWidth: true
-            Layout.topMargin: 12
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            text: qsTr("Point the camera at the QR code and hold for a couple of seconds. ") + progressString
+            text: qsTr("Point the camera at the QR code and hold for a couple of seconds. ")
         }
 
         ProgressBarType {
@@ -48,6 +45,20 @@ PageType {
             Layout.topMargin: 16
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+        }
+
+        SmallTextType {
+            id: progressText
+
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.preferredHeight: lineHeight
+
+            color: AmneziaStyle.color.textTertiary
+            maximumLineCount: 1
+            elide: Text.ElideRight
         }
     }
 
@@ -80,7 +91,7 @@ PageType {
            onCodeReaded: function(code) {
                ImportController.parseQrCodeChunk(code)
                progressBar.value = ImportController.getQrCodeScanProgressBarValue()
-               headerText.progressString = ImportController.getQrCodeScanProgressString()
+               progressText.text = ImportController.getQrCodeScanProgressString()
            }
 
            function start() {

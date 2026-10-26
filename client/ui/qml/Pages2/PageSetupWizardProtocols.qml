@@ -68,7 +68,7 @@ PageType {
 
                 text: name
                 subtitle: description
-                maximumLineCount: 2
+                maximumLineCount: 6
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {

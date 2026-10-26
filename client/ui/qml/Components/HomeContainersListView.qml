@@ -14,22 +14,16 @@ ListViewType {
     rightMargin: 16
     bottomMargin: 16
 
-    ButtonGroup {
-        id: containersRadioButtonGroup
-    }
-
     delegate: RadioItemType {
         width: root.width - root.leftMargin - root.rightMargin
 
         text: name
         subtitle: description
+        maximumLineCount: 6
         showSeparator: index < root.count - 1
-
-        ButtonGroup.group: containersRadioButtonGroup
 
         icon.source: isInstalled ? "" : "qrc:/images/controls/download.svg"
 
-        checkable: isInstalled && !ConnectionController.isConnected
         checked: root.model.mapToSource(index) === ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId)
 
         onClicked: {
@@ -43,8 +37,8 @@ ListViewType {
             if (!isInstalled) {
                 ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 ServersUiController.processedContainerIndex = containerIndex
-                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 root.activated()
+                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 return
             }
 

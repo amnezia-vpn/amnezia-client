@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QTranslator>
 #include <QTimer>
@@ -178,6 +179,7 @@ void CoreController::initCoreControllers()
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
+    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, m_subscriptionController, this);
 }
 
 void CoreController::initControllers()
@@ -210,6 +212,9 @@ void CoreController::initControllers()
 
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
+
+    m_localProxyUiController = new LocalProxyUiController(m_localProxyController, this);
+    setQmlContextProperty("LocalProxyController", m_localProxyUiController);
 
     m_logsUiController = new LogsUiController(m_settingsController, this);
     setQmlContextProperty("LogsController", m_logsUiController);

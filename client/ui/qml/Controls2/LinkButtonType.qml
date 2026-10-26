@@ -21,7 +21,7 @@ AbstractButton {
 
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     QtObject {
         id: d
@@ -71,6 +71,7 @@ AbstractButton {
 
                 text: root.text
                 color: d.contentColor
+                font.weight: 600
                 font.letterSpacing: -0.4
                 font.pixelSize: root.size === LinkButtonType.Medium ? 16 : 14
                 lineHeight: (root.size === LinkButtonType.Medium ? 24 : 18) + LanguageUiController.getLineHeightAppend()

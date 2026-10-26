@@ -9,7 +9,10 @@ Item {
     id: root
 
     property string placeholderText: ""
+    property bool moreButtonVisible: true
+    property string moreButtonAccessibleName: ""
     property alias textField: searchField.textField
+    readonly property alias moreButton: moreButton
 
     signal addClicked(string text)
     signal moreClicked()
@@ -28,10 +31,10 @@ Item {
         id: content
 
         anchors.fill: parent
-        anchors.topMargin: 16
+        anchors.topMargin: 24
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         spacing: 8
 
@@ -52,10 +55,16 @@ Item {
         }
 
         IconButtonType {
-            implicitWidth: 64
-            implicitHeight: 64
+            id: moreButton
+
+            Layout.preferredWidth: 56
+            Layout.preferredHeight: 56
+            Layout.alignment: Qt.AlignVCenter
+
+            visible: root.moreButtonVisible
 
             icon.source: "qrc:/images/controls/more-vertical.svg"
+            Accessible.name: root.moreButtonAccessibleName
 
             onClicked: root.moreClicked()
         }

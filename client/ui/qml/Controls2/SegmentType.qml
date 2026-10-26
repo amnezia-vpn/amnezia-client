@@ -18,26 +18,30 @@ RadioButton {
     horizontalPadding: 12
     verticalPadding: 0
 
+    checkable: false
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : (root.checked ? 0.4 : 0.65)
+    opacity: root.enabled ? 1 : 0.4
 
     indicator: null
 
     background: Rectangle {
         radius: 16
 
-        color: {
-            if (root.checked) {
-                return AmneziaStyle.color.bgSurfaceAlt
-            }
-            return root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
-        }
-        border.width: root.checked || (root.enabled && root.down) ? 1 : 0
-        border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderMedium
+        color: root.checked ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.transparent
+        border.width: root.checked ? 1 : 0
+        border.color: AmneziaStyle.color.accentLight
 
-        Behavior on color {
-            ColorAnimation { duration: 150 }
+        Rectangle {
+            anchors.fill: parent
+
+            radius: parent.radius
+            color: root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer
+            opacity: !root.checked && root.enabled && (root.hovered || root.down) ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
         }
 
         FocusRingType {
@@ -49,7 +53,6 @@ RadioButton {
     contentItem: BodyTextType {
         text: root.text
         color: AmneziaStyle.color.textPrimary
-        opacity: !root.enabled && !root.checked ? 0.36 : 1
 
         lineHeight: (root.size === SegmentType.Small ? 18 : 24) + LanguageUiController.getLineHeightAppend()
         font.pixelSize: root.size === SegmentType.Small ? 14 : 16
@@ -67,16 +70,12 @@ RadioButton {
 
     Keys.onEnterPressed: function(event) {
         if (!event.isAutoRepeat && !root.checked) {
-            root.toggle()
-            root.toggled()
             root.clicked()
         }
     }
 
     Keys.onReturnPressed: function(event) {
         if (!event.isAutoRepeat && !root.checked) {
-            root.toggle()
-            root.toggled()
             root.clicked()
         }
     }

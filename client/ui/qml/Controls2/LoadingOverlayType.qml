@@ -19,9 +19,14 @@ Popup {
         color: AmneziaStyle.color.bgOverlay
     }
 
-    background: Rectangle {
+    property Item blurSource
+
+    background: BackdropBlurType {
+        sourceItem: root.blurSource
+        blurRadius: 20
         radius: 16
-        color: AmneziaStyle.color.bgOverlay
+        tintColor: Qt.alpha(AmneziaStyle.color.bgOverlay, 0.75)
+        borderColor: AmneziaStyle.color.transparent
     }
 
     contentItem: SpinnerType {

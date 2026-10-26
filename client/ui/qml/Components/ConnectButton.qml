@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Shapes
 
 import Style 1.0
@@ -43,34 +42,13 @@ Button {
         implicitWidth: 190
         implicitHeight: 190
 
-        Shape {
-            anchors.fill: parent
-
-            visible: root.inProgress
-            opacity: 0.1
-            preferredRendererType: Shape.CurveRenderer
-
-            ShapePath {
-                fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.borderEmphasis
-                strokeWidth: 1
-
-                PathAngleArc {
-                    centerX: root.width / 2
-                    centerY: root.height / 2
-                    radiusX: d.ringRadius
-                    radiusY: d.ringRadius
-                    startAngle: 0
-                    sweepAngle: 360
-                }
-            }
-        }
-
         Item {
             anchors.fill: parent
 
+            opacity: 0.1
+
             Item {
-                id: ringSource
+                id: diskSource
 
                 anchors.fill: parent
                 anchors.margins: -d.glowMargin
@@ -83,31 +61,66 @@ Button {
                     ShapePath {
                         fillColor: AmneziaStyle.color.transparent
                         strokeColor: d.ringColor
-                        strokeWidth: 2
-                        capStyle: ShapePath.RoundCap
+                        strokeWidth: 1
 
                         PathAngleArc {
-                            centerX: ringSource.width / 2
-                            centerY: ringSource.height / 2
+                            centerX: diskSource.width / 2
+                            centerY: diskSource.height / 2
                             radiusX: d.ringRadius
                             radiusY: d.ringRadius
-                            startAngle: 100
-                            sweepAngle: root.inProgress ? 160 : 360
+                            startAngle: 0
+                            sweepAngle: 360
                         }
                     }
                 }
             }
 
-            MultiEffect {
-                anchors.fill: ringSource
+            ShadowType {
+                anchors.fill: diskSource
+                z: -1
 
-                source: ringSource
-                shadowEnabled: true
-                shadowColor: d.ringColor
-                shadowBlur: 0.6
-                shadowHorizontalOffset: 0
-                shadowVerticalOffset: 0
-                blurMax: 16
+                source: diskSource
+                color: AmneziaStyle.color.shadowGlow
+                blur: 6
+            }
+        }
+
+        Item {
+            anchors.fill: parent
+
+            RingGlowType {
+                anchors.fill: parent
+                anchors.margins: -d.glowMargin
+
+                color: d.ringColor
+                radius: d.ringRadius
+                startAngle: 100
+                sweepAngle: root.inProgress ? 160 : 360
+            }
+
+            Shape {
+                id: ringSource
+
+                anchors.fill: parent
+                anchors.margins: -d.glowMargin
+
+                preferredRendererType: Shape.CurveRenderer
+
+                ShapePath {
+                    fillColor: AmneziaStyle.color.transparent
+                    strokeColor: d.ringColor
+                    strokeWidth: 2
+                    capStyle: ShapePath.RoundCap
+
+                    PathAngleArc {
+                        centerX: ringSource.width / 2
+                        centerY: ringSource.height / 2
+                        radiusX: d.ringRadius
+                        radiusY: d.ringRadius
+                        startAngle: 100
+                        sweepAngle: root.inProgress ? 160 : 360
+                    }
+                }
             }
 
             RotationAnimator on rotation {
@@ -131,6 +144,7 @@ Button {
         color: root.connected && !root.inProgress ? AmneziaStyle.color.textAccent : AmneziaStyle.color.textPrimary
         lineHeight: 30 + LanguageUiController.getLineHeightAppend()
         font.pixelSize: 20
+        font.weight: 700
 
         leftPadding: 16
         rightPadding: 16

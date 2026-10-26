@@ -80,8 +80,10 @@ public:
 
     int countryListSortMode(const QString &listId) const;
     void setCountryListSortMode(const QString &listId, int mode);
-    QStringList favoriteLocations() const;
-    void setFavoriteLocations(const QStringList &codes);
+    QStringList favoriteLocations(const QString &serverId) const;
+    void setFavoriteLocations(const QString &serverId, const QStringList &codes);
+    void removeFavoriteLocations(const QString &serverId);
+    void migrateLegacyFavoriteLocations(const QStringList &serverIds);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 
@@ -104,6 +106,13 @@ public:
 
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
+
+    QString localProxyOwnerId() const;
+    void setLocalProxyOwnerId(const QString &serverId);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
 
 signals:
     void appLanguageChanged(QLocale locale);

@@ -40,8 +40,8 @@ AbstractButton {
 
     leftPadding: 16
     rightPadding: root.isPrimary ? 4 : 16
-    topPadding: root.isPrimary ? 0 : 12
-    bottomPadding: root.isPrimary ? 0 : 12
+    topPadding: root.isPrimary ? 0 : 4
+    bottomPadding: root.isPrimary ? 0 : 4
 
     hoverEnabled: true
 
@@ -56,9 +56,9 @@ AbstractButton {
                 return AmneziaStyle.color.bgSurface
             }
             if (root.down) {
-                return AmneziaStyle.color.buttonPrimaryPress
+                return AmneziaStyle.color.bgActionPress
             }
-            return root.hovered ? AmneziaStyle.color.buttonPrimaryHover : AmneziaStyle.color.buttonPrimaryBg
+            return root.hovered ? AmneziaStyle.color.bgActionHover : AmneziaStyle.color.bgAction
         }
 
         Behavior on color {
@@ -144,7 +144,7 @@ AbstractButton {
     SheetType {
         id: menu
 
-        property real measuredContentHeight: 0
+        readonly property real measuredContentHeight: container.fitHeight
         expandedHeight: (root.fitContent && measuredContentHeight > 0)
             ? Math.min(measuredContentHeight, windowHeight * root.drawerHeight)
             : windowHeight * root.drawerHeight
@@ -155,8 +155,6 @@ AbstractButton {
 
             property real fitHeight: backButton.implicitHeight + titleLabel.implicitHeight
                                      + (listViewLoader.item ? listViewLoader.item.contentHeight : 0) + 48
-            onFitHeightChanged: menu.measuredContentHeight = fitHeight
-            Component.onCompleted: menu.measuredContentHeight = fitHeight
 
             ColumnLayout {
                 id: header
@@ -174,7 +172,7 @@ AbstractButton {
                     id: titleLabel
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
+                    Layout.bottomMargin: 32
                     Layout.fillWidth: true
 
                     headerText: root.headerText

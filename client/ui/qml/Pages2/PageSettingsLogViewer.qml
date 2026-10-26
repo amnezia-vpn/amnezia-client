@@ -124,45 +124,47 @@ PageType {
 
         title: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
 
-        header.headerTextMaximumLineCount: 1
-
-        IconButtonType {
-            id: refreshButton
-
-            size: IconButtonType.Small
-
-            icon.source: "qrc:/images/controls/refresh-cw.svg"
-            enabled: !root.isLoading
-
-            onClicked: {
-                root.reload()
-            }
-        }
-
-        IconButtonType {
-            id: copyButton
-
-            size: IconButtonType.Small
-
-            icon.source: "qrc:/images/controls/copy.svg"
-            enabled: root.hasText
-
-            onClicked: {
-                LogsController.copyLoaded()
-                PageController.showNotificationMessage(qsTr("Copied"))
-            }
-        }
-
         IconButtonType {
             id: exportButton
-
-            size: IconButtonType.Small
 
             icon.source: GC.isMobile() ? "qrc:/images/controls/share-2.svg" : "qrc:/images/controls/save.svg"
             enabled: root.hasText
 
             onClicked: {
                 root.exportCurrentStream()
+            }
+        }
+
+        IconButtonType {
+            id: moreButton
+
+            icon.source: "qrc:/images/controls/more-vertical.svg"
+
+            onClicked: moreActionsMenu.openBelow(moreButton)
+        }
+    }
+
+    PopupMenuType {
+        id: moreActionsMenu
+
+        PopupMenuItemType {
+            text: qsTr("Refresh")
+            enabled: !root.isLoading
+
+            onClicked: {
+                moreActionsMenu.close()
+                root.reload()
+            }
+        }
+
+        PopupMenuItemType {
+            text: qsTr("Copy")
+            enabled: root.hasText
+
+            onClicked: {
+                moreActionsMenu.close()
+                LogsController.copyLoaded()
+                PageController.showNotificationMessage(qsTr("Copied"))
             }
         }
     }
@@ -174,13 +176,12 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: 1
 
         clip: true
         visible: root.hasText
 
         contentWidth: width
-        contentHeight: logCard.y + logCard.height + 16 + PageController.safeAreaBottomMargin
+        contentHeight: logCard.y + logCard.height + 24 + PageController.safeAreaBottomMargin
         boundsBehavior: Flickable.StopAtBounds
 
         ScrollBar.vertical: ScrollBarType {}
@@ -189,8 +190,7 @@ PageType {
             id: logCard
 
             x: 16
-            y: 16
-            width: logFlickable.width - 31
+            width: logFlickable.width - 32
             height: logText.height + 32
 
             radius: 16
@@ -220,15 +220,20 @@ PageType {
     }
 
     SpinnerType {
-        anchors.centerIn: logFlickable
-        size: SpinnerType.Large
+        anchors.top: logFlickable.top
+        anchors.topMargin: 200
+        anchors.horizontalCenter: logFlickable.horizontalCenter
         running: root.isLoading
         visible: root.isLoading
     }
 
-    BodyTextType {
+    H3TextType {
+        anchors.top: logFlickable.top
+        anchors.topMargin: 200
+        anchors.horizontalCenter: logFlickable.horizontalCenter
+
+        font.weight: 400
         color: AmneziaStyle.color.textPrimary
-        anchors.centerIn: logFlickable
 
         visible: !root.isLoading && logText.length === 0
 

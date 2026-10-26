@@ -5,11 +5,13 @@
 #include <QFutureWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QMetaObject>
+#include <QJsonObject>
 #include <QThread>
+#include <QUrl>
 #include <QtConcurrent/QtConcurrentRun>
 
 #include "core/repositories/secureAppSettingsRepository.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/api/apiUtils.h"
 
@@ -32,12 +34,20 @@ namespace
         constexpr QLatin1String s3FallbackEndpoints("s3_fallback_endpoints");
         constexpr QLatin1String isDevEnvironment("is_dev_environment");
         constexpr QLatin1String requestTimeoutMsecs("request_timeout_msecs");
+        constexpr QLatin1String proxyRequestTimeoutMsecs("proxy_request_timeout_msecs");
+        constexpr QLatin1String proxyStorageTimeoutMsecs("proxy_storage_timeout_msecs");
+        constexpr QLatin1String proxyHealthTimeoutMsecs("proxy_health_timeout_msecs");
     }
 
     namespace agwOptionsKey
     {
         constexpr QLatin1String serviceType("service_type");
         constexpr QLatin1String userCountryCode("user_country_code");
+    }
+
+    namespace agwStateKey
+    {
+        constexpr QLatin1String workingProxy("working_proxy");
     }
 
     constexpr QLatin1String agwStateCacheKey("agw_state");
@@ -71,6 +81,7 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
                                      const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
                                      QObject *parent)
     : QObject(parent),
+      m_gatewayEndpoint(gatewayEndpoint),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled),
       m_appSettingsRepository(appSettingsRepository)
 {
@@ -93,13 +104,11 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
     config[agwConfigKey::s3FallbackEndpoints] = QJsonArray::fromStringList(fallbackEndpoints);
     config[agwConfigKey::isDevEnvironment] = isDevEnvironment;
     config[agwConfigKey::requestTimeoutMsecs] = requestTimeoutMsecs;
+    config[agwConfigKey::proxyRequestTimeoutMsecs] = apiDefs::proxyRequestTimeoutMsecs;
+    config[agwConfigKey::proxyStorageTimeoutMsecs] = apiDefs::proxyStorageTimeoutMsecs;
+    config[agwConfigKey::proxyHealthTimeoutMsecs] = apiDefs::proxyHealthTimeoutMsecs;
 
-    agw_callbacks callbacks {};
-    callbacks.struct_size = sizeof(agw_callbacks);
-    callbacks.on_before_request = &GatewayController::onBeforeRequest;
-    callbacks.on_before_request_user_data = this;
-
-    m_client = agw_client_create(QJsonDocument(config).toJson(QJsonDocument::Compact).constData(), &callbacks);
+    m_client = agw_client_create(QJsonDocument(config).toJson(QJsonDocument::Compact).constData(), nullptr);
     if (m_client == 0) {
         qCritical() << "GatewayController: failed to create gateway client (missing key or endpoint?)";
         return;
@@ -137,6 +146,7 @@ amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonO
 
 QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject apiPayload)
 {
+    prepareRequest();
     return QtConcurrent::run(
             [this, endpoint, apiPayload]() -> QPair<amnezia::ErrorCode, QByteArray> { return executePost(endpoint, apiPayload); });
 }
@@ -190,42 +200,53 @@ amnezia::ErrorCode GatewayController::mapResultCode(const int code, const QByteA
     }
 }
 
-void GatewayController::onBeforeRequest(const char *host, void *userData)
-{
-    auto *controller = static_cast<GatewayController *>(userData);
-    const QString hostString = QString::fromUtf8(host);
-    if (QThread::currentThread() == controller->thread()) {
-        controller->handleBeforeRequest(hostString);
-    } else {
-        QMetaObject::invokeMethod(
-                controller, [controller, hostString]() { controller->handleBeforeRequest(hostString); },
-                Qt::BlockingQueuedConnection);
-    }
-}
-
-void GatewayController::handleBeforeRequest(const QString &host)
+void GatewayController::prepareRequest()
 {
 #ifdef Q_OS_IOS
-    Q_UNUSED(host);
     IosController::Instance()->requestInetAccess();
     QThread::msleep(10);
 #endif
 
 #ifdef AMNEZIA_DESKTOP
-    if (m_isStrictKillSwitchEnabled) {
+    if (!m_isStrictKillSwitchEnabled) {
+        return;
+    }
+    QStringList ips;
+    for (const QString &host : requestHosts()) {
         const QString ip = NetworkUtilities::getIPAddress(host);
         if (!ip.isEmpty()) {
-            IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-                QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
-                if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-                    qWarning() << "GatewayController::handleBeforeRequest(): failed to add killswitch exception for" << host;
-                }
-            });
+            ips.append(ip);
         }
     }
-#else
-    Q_UNUSED(host);
+    if (ips.isEmpty()) {
+        return;
+    }
+    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(ips);
+        if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+            qWarning() << "GatewayController::prepareRequest(): Failed to execute remote addKillSwitchAllowedRange call";
+        }
+    });
 #endif
+}
+
+QStringList GatewayController::requestHosts() const
+{
+    QStringList hosts;
+    if (m_client != 0) {
+        char *state = agw_export_state(m_client);
+        if (state != nullptr) {
+            const QString workingProxy = QJsonDocument::fromJson(QByteArray(state)).object().value(agwStateKey::workingProxy).toString();
+            agw_string_free(state);
+            if (!workingProxy.isEmpty()) {
+                hosts.append(QUrl(workingProxy).host());
+            }
+        }
+    }
+    hosts.append(QUrl(m_gatewayEndpoint).host());
+    hosts.removeAll(QString());
+    hosts.removeDuplicates();
+    return hosts;
 }
 
 void GatewayController::persistState()

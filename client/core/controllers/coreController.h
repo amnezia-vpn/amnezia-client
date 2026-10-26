@@ -24,6 +24,7 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/settingsUiController.h"
+#include "ui/controllers/localProxyUiController.h"
 #include "ui/controllers/logsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
@@ -44,6 +45,7 @@
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/localProxyController.h"
 #include "core/controllers/connectionController.h"
 #include "core/controllers/updateController.h"
 
@@ -140,6 +142,10 @@ protected:
     ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
+    SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
+    ApiCountryModel* apiCountryModelProtected() const { return m_apiCountryModel; }
+    ApiCountryListModel* apiCountryListModelProtected() const { return m_apiCountryListModel; }
+    ApiCountryListModel* apiConfigsCountryListModelProtected() const { return m_apiConfigsCountryListModel; }
 
 private:
     void initRepositories();
@@ -167,13 +173,14 @@ private:
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
     ConnectionUiController* m_connectionUiController;
-    FocusController* m_focusController;
+    FocusController* m_focusController = nullptr;
     PageController* m_pageController;
     InstallUiController* m_installUiController;
     ImportUiController* m_importController;
     ImportController* m_importCoreController;
     ExportUiController* m_exportUiController;
     SettingsUiController* m_settingsUiController;
+    LocalProxyUiController* m_localProxyUiController;
     LogsUiController* m_logsUiController;
     ServersUiController* m_serversUiController;
     IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;
@@ -203,6 +210,7 @@ private:
     ExportController* m_exportController;
     ConnectionController* m_connectionController;
     SettingsController* m_settingsController;
+    LocalProxyController* m_localProxyController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

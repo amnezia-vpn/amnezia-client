@@ -24,7 +24,7 @@ Button {
     icon.height: d.iconSize
     icon.color: root.filled ? AmneziaStyle.color.iconInverted : AmneziaStyle.color.iconDefault
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     QtObject {
         id: d
@@ -46,10 +46,11 @@ Button {
                 if (root.filled) {
                     return root.hovered || root.down ? AmneziaStyle.color.bgSurfaceInverseAlt : AmneziaStyle.color.bgSurfaceInverse
                 }
-                return root.hovered || root.down ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
+                if (root.down) {
+                    return AmneziaStyle.color.bgStateLayerPressed
+                }
+                return root.hovered ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
             }
-            border.width: !root.filled && root.down ? 1 : 0
-            border.color: AmneziaStyle.color.borderMedium
 
             Behavior on color {
                 ColorAnimation { duration: 150 }

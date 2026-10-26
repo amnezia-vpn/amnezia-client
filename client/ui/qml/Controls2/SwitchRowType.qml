@@ -18,7 +18,7 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     ColumnLayout {
         id: content
@@ -35,7 +35,8 @@ Item {
 
             BodyTextType {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: lineCount === 1 ? Math.max(0, (switcher.implicitHeight - lineHeight) / 2) : 0
 
                 text: root.text
                 color: AmneziaStyle.color.textPrimary
@@ -52,7 +53,7 @@ Item {
             SwitchType {
                 id: switcher
 
-                Layout.alignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignTop
 
                 Accessible.name: root.text
                 Accessible.description: root.descriptionText

@@ -20,7 +20,6 @@ ListViewType {
     leftMargin: 16
     rightMargin: 16
     boundsBehavior: Flickable.StopAtBounds
-    interactive: contentWidth > width
 
     model: root.chips
 

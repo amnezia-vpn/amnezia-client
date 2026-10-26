@@ -385,14 +385,57 @@ void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, 
     setValue("Conf/countryListSortMode/" + listId, mode);
 }
 
-QStringList SecureAppSettingsRepository::favoriteLocations() const
+QStringList SecureAppSettingsRepository::favoriteLocations(const QString &serverId) const
 {
-    return value("Conf/favoriteLocations").toStringList();
+    QStringList codes = value("Conf/favoriteLocations").toMap().value(serverId).toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+    codes.sort();
+    return codes;
 }
 
-void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)
+void SecureAppSettingsRepository::setFavoriteLocations(const QString &serverId, const QStringList &codes)
 {
-    setValue("Conf/favoriteLocations", codes);
+    if (serverId.isEmpty()) {
+        return;
+    }
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (codes.isEmpty()) {
+        favorites.remove(serverId);
+    } else {
+        favorites.insert(serverId, codes);
+    }
+    setValue("Conf/favoriteLocations", favorites);
+}
+
+void SecureAppSettingsRepository::removeFavoriteLocations(const QString &serverId)
+{
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (favorites.remove(serverId) > 0) {
+        setValue("Conf/favoriteLocations", favorites);
+    }
+}
+
+void SecureAppSettingsRepository::migrateLegacyFavoriteLocations(const QStringList &serverIds)
+{
+    // Before per-subscription favorites the key held one list shared by all servers
+    const QVariant stored = value("Conf/favoriteLocations");
+    const int type = stored.typeId();
+    if (type != QMetaType::QStringList && type != QMetaType::QVariantList && type != QMetaType::QString) {
+        return;
+    }
+
+    QStringList codes = stored.toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+
+    QVariantMap favorites;
+    if (!codes.isEmpty()) {
+        for (const QString &serverId : serverIds) {
+            favorites.insert(serverId, codes);
+        }
+    }
+    setValue("Conf/favoriteLocations", favorites);
 }
 
 bool SecureAppSettingsRepository::isNewsNotifications() const
@@ -503,4 +546,34 @@ QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
 void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
 {
     setValue("Xray/savedConfigs", data);
+}
+
+QString SecureAppSettingsRepository::localProxyOwnerId() const
+{
+    return value("Conf/localProxyOwnerId", "").toString();
+}
+
+void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
+{
+    setValue("Conf/localProxyOwnerId", serverId);
+}
+
+quint16 SecureAppSettingsRepository::localProxyPort() const
+{
+    return static_cast<quint16>(value("Conf/localProxyPort", 10808).toUInt());
+}
+
+void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+}
+
+bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
 }
