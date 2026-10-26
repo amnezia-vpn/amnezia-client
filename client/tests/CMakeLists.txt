@@ -20,6 +20,18 @@ function(amnezia_copy_runtime_dlls)
     endforeach()
 endfunction()
 
+function(add_new_test target source)
+    add_executable(${target}
+        ${source}
+        ${ARGN}
+    )
+
+    target_link_libraries(${target} PRIVATE
+        Qt6::Test
+        test_common
+    )
+endfunction()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -62,182 +74,31 @@ target_include_directories(test_common PUBLIC
 )
 
 if(NOT ANDROID)
-    add_executable(test_multiple_imports
-        testMultipleImports.cpp
-    )
-
-    target_link_libraries(test_multiple_imports PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_server_edit
-        testServerEdit.cpp
-    )
-
-    target_link_libraries(test_server_edit PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_default_server_change
-        testDefaultServerChange.cpp
-    )
-
-    target_link_libraries(test_default_server_change PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_server_edge_cases
-        testServerEdgeCases.cpp
-    )
-
-    target_link_libraries(test_server_edge_cases PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_signal_order
-        testSignalOrder.cpp
-    )
-
-    target_link_libraries(test_signal_order PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_servers_model_sync
-        testServersModelSync.cpp
-    )
-
-    target_link_libraries(test_servers_model_sync PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_server_rename
-        testServerRename.cpp
-    )
-
-    target_link_libraries(test_server_rename PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_settings_signals
-        testSettingsSignals.cpp
-    )
-
-    target_link_libraries(test_settings_signals PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_ui_servers_model_and_controller
-        testUiServersModelAndController.cpp
-    )
-
-    target_link_libraries(test_ui_servers_model_and_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_config_format_version
-        testConfigFormatVersion.cpp
-    )
-
-    target_link_libraries(test_config_format_version PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_xray_serialization
-        testXraySerialization.cpp
-    )
-
-    target_link_libraries(test_xray_serialization PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_ui_language_model_and_controller
-        testUiLanguageModelAndController.cpp
-    )
-
-    target_link_libraries(test_ui_language_model_and_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_ui_ip_model_and_controller
-        testUiIpModelAndController.cpp
-    )
-
-    target_link_libraries(test_ui_ip_model_and_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_ui_app_st_model_and_controller
-        testUiAppSTModelAndController.cpp
-    )
-
-    target_link_libraries(test_ui_app_st_model_and_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_ui_allowed_dns_model_and_controller
-        testUiAllowedDnsModelAndController.cpp
-    )
-
-    target_link_libraries(test_ui_allowed_dns_model_and_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
+    add_new_test(test_multiple_imports                    testMultipleImports.cpp)
+    add_new_test(test_server_edit                         testServerEdit.cpp)
+    add_new_test(test_default_server_change               testDefaultServerChange.cpp)
+    add_new_test(test_server_edge_cases                   testServerEdgeCases.cpp)
+    add_new_test(test_signal_order                        testSignalOrder.cpp)
+    add_new_test(test_servers_model_sync                  testServersModelSync.cpp)
+    add_new_test(test_server_rename                       testServerRename.cpp)
+    add_new_test(test_settings_signals                    testSettingsSignals.cpp)
+    add_new_test(test_ui_servers_model_and_controller     testUiServersModelAndController.cpp)
+    add_new_test(test_config_format_version               testConfigFormatVersion.cpp)
+    add_new_test(test_xray_serialization                  testXraySerialization.cpp)
+    add_new_test(test_ui_language_model_and_controller    testUiLanguageModelAndController.cpp)
+    add_new_test(test_ui_ip_model_and_controller          testUiIpModelAndController.cpp)
+    add_new_test(test_ui_app_st_model_and_controller      testUiAppSTModelAndController.cpp)
+    add_new_test(test_ui_allowed_dns_model_and_controller testUiAllowedDnsModelAndController.cpp)
+    add_new_test(test_backup_export_import                testBackupExportImport.cpp)
+    add_new_test(test_connection                          testConnection.cpp)
+    add_new_test(test_logs_controller                     testLogsController.cpp)
+    add_new_test(test_openssl_library                     testOpenSSLLibrary.cpp)
 
     add_executable(test_favorite_locations_restore
         testFavoriteLocationsRestore.cpp
     )
 
     target_link_libraries(test_favorite_locations_restore PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_backup_export_import
-        testBackupExportImport.cpp
-    )
-
-    target_link_libraries(test_backup_export_import PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_connection
-        testConnection.cpp
-    )
-
-    target_link_libraries(test_connection PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_logs_controller
-        testLogsController.cpp
-    )
-
-    target_link_libraries(test_logs_controller PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_openssl_library
-        testOpenSSLLibrary.cpp
-    )
-
-    target_link_libraries(test_openssl_library PRIVATE
         Qt6::Test
         test_common
     )
@@ -425,33 +286,34 @@ print('SONAME patch done.')
 endif()
 
 if(NOT ANDROID)
-    add_subdirectory(selfHostedAdmin)
     add_subdirectory(api)
+    add_subdirectory(selfHostedAdmin)
+    add_subdirectory(unit)
 endif()
 
 enable_testing()
 
 if(NOT ANDROID)
-    add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
-    add_test(NAME ServerEditTest                   COMMAND test_server_edit)
+    add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
+    add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
+    add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)
+    add_test(NAME FavoriteLocationsRestoreTest     COMMAND test_favorite_locations_restore)
+    add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
+    add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
+    add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME ServerEdgeCasesTest              COMMAND test_server_edge_cases)
-    add_test(NAME SignalOrderTest                  COMMAND test_signal_order)
-    add_test(NAME ServersModelSyncTest             COMMAND test_servers_model_sync)
+    add_test(NAME ServerEditTest                   COMMAND test_server_edit)
     add_test(NAME ServerRenameTest                 COMMAND test_server_rename)
+    add_test(NAME ServersModelSyncTest             COMMAND test_servers_model_sync)
+    add_test(NAME SignalOrderTest                  COMMAND test_signal_order)
     add_test(NAME SettingsSignalsTest              COMMAND test_settings_signals)
+    add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
+    add_test(NAME UiAppSTModelAndControllerTest    COMMAND test_ui_app_st_model_and_controller)
+    add_test(NAME UiIpModelAndControllerTest       COMMAND test_ui_ip_model_and_controller)
+    add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
     add_test(NAME UiServersModelAndControllerTest  COMMAND test_ui_servers_model_and_controller)
     add_test(NAME XraySerializationTest            COMMAND test_xray_serialization)
-    add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
-    add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
-    add_test(NAME UiIpModelAndControllerTest       COMMAND test_ui_ip_model_and_controller)
-    add_test(NAME UiAppSTModelAndControllerTest    COMMAND test_ui_app_st_model_and_controller)
-    add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
-    add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
-    add_test(NAME FavoriteLocationsRestoreTest     COMMAND test_favorite_locations_restore)
-    add_test(NAME ConnectionTest                   COMMAND test_connection)
-    add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
-    add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
