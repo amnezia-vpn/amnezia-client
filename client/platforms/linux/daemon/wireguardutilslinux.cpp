@@ -9,6 +9,7 @@
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
+#include <QHostAddress>
 #include <QLocalSocket>
 #include <QTimer>
 #include <QThread>
@@ -183,6 +184,15 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
             params.dnsServers.append(config.m_primaryDnsServer);
             if (!config.m_secondaryDnsServer.isEmpty()) {
                 params.dnsServers.append(config.m_secondaryDnsServer);
+            }
+            // DNS exceptions from the KillSwitch settings; entries go into a shell command, so accept plain IPs only
+            for (const QString& dns : config.m_allowedDnsServers) {
+                const QHostAddress addr(dns);
+                if (addr.isNull() || !addr.scopeId().isEmpty()) {
+                    logger.warning() << "Ignoring invalid allowed DNS server:" << dns;
+                    continue;
+                }
+                params.dnsServers.append(dns);
             }
             if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
