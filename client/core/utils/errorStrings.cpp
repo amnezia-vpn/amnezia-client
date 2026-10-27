@@ -141,6 +141,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiEmailCodeSendError): errorMessage = QObject::tr("Unable to send the sign-in code. Please try again in a minute"); break;
     case (ErrorCode::ApiEmailCodeInvalidError): errorMessage = QObject::tr("The code is invalid or has expired. Request a new one"); break;
     case (ErrorCode::ApiAccountSessionError): errorMessage = QObject::tr("Unable to sign in to the account. Please try again"); break;
+    case (ErrorCode::ApiEmailSignInRequiredError): errorMessage = QObject::tr("Sign in with your email to use the free service"); break;
     case (ErrorCode::ApiPurchasePendingError):
 #if defined(Q_OS_ANDROID)
         errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");

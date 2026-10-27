@@ -58,6 +58,7 @@ public slots:
     bool importTrialFromGateway(const QString &email);
     bool startFreeAccountLogin();
     bool startFreeAccountLoginForKey(const QJsonObject &keyConfig);
+    bool isFreeEmailSignInRequiredForKey(const QJsonObject &keyConfig);
     void refreshFreeAccountCaptcha();
     bool solveFreeAccountCaptcha(const QString &solution);
     bool requestFreeEmailCode(const QString &email);
@@ -100,6 +101,7 @@ signals:
     void freeEmailCodeSent(int retryAfterSec);
     void freeAccountLoginFailed(const QString &kind, int retryAfterSec);
     void freeAccountLoginFinished();
+    void freeEmailSignInRequired();
     void subscriptionExpiredOnServer();
     void renewalLinkReceived(const QString &url);
 

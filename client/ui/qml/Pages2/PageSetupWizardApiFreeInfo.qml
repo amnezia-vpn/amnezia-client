@@ -16,6 +16,7 @@ PageType {
 
     property string freeHeaderName: ""
     property string freeHeaderDescription: ""
+    property bool emailSignInRequested: false
 
     function syncFromModel() {
         root.freeHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
@@ -25,6 +26,22 @@ PageType {
     Component.onCompleted: syncFromModel()
 
     Component.onDestruction: SubscriptionUiController.cancelFreeAccountLogin()
+
+    function startEmailSignIn() {
+        if (SubscriptionUiController.startFreeAccountLogin()) {
+            PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
+        }
+    }
+
+    Connections {
+        target: SubscriptionUiController
+        enabled: root.visible
+
+        function onFreeEmailSignInRequired() {
+            root.emailSignInRequested = true
+            root.startEmailSignIn()
+        }
+    }
 
     FlickableType {
         id: flick
@@ -117,8 +134,24 @@ PageType {
             text: qsTr("Continue")
 
             onClicked: {
-                if (SubscriptionUiController.startFreeAccountLogin()) {
-                    PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
+                if (ApiServicesModel.getSelectedServiceData("emailRegistrationRequired") === true) {
+                    root.startEmailSignIn()
+                    return
+                }
+
+                root.emailSignInRequested = false
+                PageController.showBusyIndicator(true)
+                var result = SubscriptionUiController.importFreeFromGateway()
+                PageController.showBusyIndicator(false)
+
+                if (!result) {
+                    if (SubscriptionUiController.isCaptchaAwaitingUser() || root.emailSignInRequested) {
+                        return
+                    }
+                    var endpoint = ApiServicesModel.getStoreEndpoint()
+                    Qt.openUrlExternally(endpoint)
+                    PageController.closePage()
+                    PageController.closePage()
                 }
             }
         }

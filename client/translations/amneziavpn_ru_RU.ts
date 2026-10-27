@@ -6780,6 +6780,10 @@ Create one from the current settings.</source>
         <translation>Не удалось войти в учётную запись. Попробуйте ещё раз</translation>
     </message>
     <message>
+        <source>Sign in with your email to use the free service</source>
+        <translation>Для бесплатного доступа войдите по почте</translation>
+    </message>
+    <message>
         <location filename="../core/utils/errorStrings.cpp" line="182"/>
         <source>ErrorCode: %1. </source>
         <translation>Код ошибки: %1. </translation>

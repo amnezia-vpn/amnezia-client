@@ -472,6 +472,9 @@ bool SubscriptionUiController::importFreeFromGateway()
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
                              captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
         return false;
+    } else if (errorCode == ErrorCode::ApiEmailSignInRequiredError) {
+        emit freeEmailSignInRequired();
+        return false;
     } else {
         emit errorOccurred(errorCode);
         return false;
@@ -509,6 +512,13 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
         m_captchaState.isPending = false;
         emit captchaFlowDismissRequested();
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+        return;
+    }
+
+    if (errorCode == ErrorCode::ApiEmailSignInRequiredError) {
+        m_captchaState.isPending = false;
+        emit captchaFlowDismissRequested();
+        emit freeEmailSignInRequired();
         return;
     }
 
@@ -575,6 +585,10 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
     if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfo.isRequired) {
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
                              captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
+    } else if (errorCode == ErrorCode::ApiEmailSignInRequiredError) {
+        m_captchaState.isPending = false;
+        emit captchaFlowDismissRequested();
+        emit freeEmailSignInRequired();
     } else if (errorCode != ErrorCode::NoError) {
         m_captchaState.isPending = false;
         emit errorOccurred(errorCode);
@@ -661,6 +675,12 @@ bool SubscriptionUiController::startFreeAccountLoginForKey(const QJsonObject &ke
     m_freeAccount.serviceProtocol = keyServer.apiConfig.serviceProtocol;
     m_freeAccount.serviceName = keyServer.name.isEmpty() ? QStringLiteral("Amnezia Free") : keyServer.name;
     return beginFreeAccountLogin();
+}
+
+bool SubscriptionUiController::isFreeEmailSignInRequiredForKey(const QJsonObject &keyConfig)
+{
+    const ApiV2ServerConfig keyServer = ApiV2ServerConfig::fromJson(keyConfig);
+    return keyServer.isFree() && m_apiServicesModel->isEmailRegistrationRequired(keyServer.apiConfig.serviceType);
 }
 
 bool SubscriptionUiController::beginFreeAccountLogin()
