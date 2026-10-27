@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT AmneziaVPN)
@@ -9,10 +9,10 @@ if(NOT AMNEZIAVPN_VERSION)
 endif()
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
+include(${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_bootstrap.cmake)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     ${CMAKE_SOURCE_DIR}/cmake/platform_settings.cmake
-    ${CMAKE_SOURCE_DIR}/cmake/recipes_bootstrap.cmake
-    ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake
+    ${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_provider.cmake
     CACHE STRING "" FORCE)
 
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
