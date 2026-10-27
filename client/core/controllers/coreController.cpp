@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QTranslator>
 #include <QTimer>
@@ -10,6 +11,7 @@
 #include "core/controllers/coreSignalHandlers.h"
 #include "logger.h"
 #include "secureQSettings.h"
+#include "core/utils/appUiConfig.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -18,7 +20,10 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+#endif
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "core/utils/swiftBridge.h"
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
@@ -112,6 +117,9 @@ void CoreController::initModels()
     m_telemtConfigModel = new TelemtConfigModel(this);
     setQmlContextProperty("TelemtConfigModel", m_telemtConfigModel);
 
+    m_tProxyConfigModel = new TProxyConfigModel(this);
+    setQmlContextProperty("TProxyConfigModel", m_tProxyConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 
@@ -120,6 +128,12 @@ void CoreController::initModels()
 
     m_apiCountryModel = new ApiCountryModel(this);
     setQmlContextProperty("ApiCountryModel", m_apiCountryModel);
+
+    m_apiCountryListModel = new ApiCountryListModel(m_apiCountryModel, "picker", this);
+    setQmlContextProperty("ApiCountryListModel", m_apiCountryListModel);
+
+    m_apiConfigsCountryListModel = new ApiCountryListModel(m_apiCountryModel, "nativeConfigs", this);
+    setQmlContextProperty("ApiConfigsCountryListModel", m_apiConfigsCountryListModel);
 
     m_apiSubscriptionPlansModel = new ApiSubscriptionPlansModel(this);
     setQmlContextProperty("ApiSubscriptionPlansModel", m_apiSubscriptionPlansModel);
@@ -156,6 +170,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
+    m_storePurchaseController = new StorePurchaseController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
@@ -164,6 +179,7 @@ void CoreController::initCoreControllers()
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
+    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, m_subscriptionController, this);
 }
 
 void CoreController::initControllers()
@@ -173,7 +189,6 @@ void CoreController::initControllers()
 
     if (m_engine) {
         m_focusController = new FocusController(m_engine, this);
-        setQmlContextProperty("FocusController", m_focusController);
     }
 
     m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,
@@ -182,6 +197,7 @@ void CoreController::initControllers()
                                                      m_ikev2ConfigModel,
 #endif
                                                      m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel,
+                                                     m_tProxyConfigModel,
                                                      m_connectionController, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
@@ -196,6 +212,12 @@ void CoreController::initControllers()
 
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
+
+    m_localProxyUiController = new LocalProxyUiController(m_localProxyController, this);
+    setQmlContextProperty("LocalProxyController", m_localProxyUiController);
+
+    m_logsUiController = new LogsUiController(m_settingsController, this);
+    setQmlContextProperty("LogsController", m_logsUiController);
 
     m_pageController = new PageController(m_serversController, m_settingsController, this);
     setQmlContextProperty("PageController", m_pageController);
@@ -223,6 +245,7 @@ void CoreController::initControllers()
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
     m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController,
+                                                              m_storePurchaseController,
                                                               m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_apiAccountInfoModel,
                                                               m_apiCountryModel, m_apiDevicesModel, m_settingsController,
                                                               m_connectionController, this);
@@ -258,13 +281,13 @@ void CoreController::initAppleController()
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
+    QTimer::singleShot(0, this, [this]() { SWIFT_BRIDGE_NAMESPACE::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
 #endif
 }
 
 void CoreController::initLogging()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#ifndef Q_OS_ANDROID
     bool enabled = m_appSettingsRepository->isSaveLogs();
     if (enabled) {
         if (!Logger::init(false)) {
@@ -272,6 +295,11 @@ void CoreController::initLogging()
         }
     }
     Logger::setServiceLogsEnabled(enabled);
+#endif
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    if (m_appSettingsRepository->isSaveLogs()) {
+        SWIFT_BRIDGE_NAMESPACE::toggleLogging(true);
+    }
 #endif
 }
 
@@ -286,9 +314,14 @@ void CoreController::initSignalHandlers()
         m_apiNewsUiController->fetchNews(false);
     }
 
-    #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-        m_updateController->checkForUpdates();
-    #endif    
+}
+
+void CoreController::checkForAppUpdates()
+{
+    if (!m_appSettingsRepository->isAutoUpdateCheckEnabled()) {
+        return;
+    }
+    m_updateController->checkForUpdates();
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -298,15 +331,15 @@ void CoreController::updateTranslator(const QLocale &locale)
     }
 
     QStringList availableTranslations;
-    QDirIterator it(":/translations", QStringList("amneziavpn_*.qm"), QDir::Files);
+    QDirIterator it(":/translations", QStringList(APP_TS_PREFIX "_*.qm"), QDir::Files);
     while (it.hasNext()) {
         availableTranslations << it.next();
     }
 
     // This code allow to load translation for the language only, without country code
     const QString lang = locale.name().split("_").first();
-    const QString translationFilePrefix = QString(":/translations/amneziavpn_") + lang;
-    QString strFileName = QString(":/translations/amneziavpn_%1.qm").arg(locale.name());
+    const QString translationFilePrefix = QString(":/translations/" APP_TS_PREFIX "_") + lang;
+    QString strFileName = QString(":/translations/" APP_TS_PREFIX "_%1.qm").arg(locale.name());
     for (const QString &translation : availableTranslations) {
         if (translation.contains(translationFilePrefix)) {
             strFileName = translation;
@@ -317,7 +350,7 @@ void CoreController::updateTranslator(const QLocale &locale)
     if (m_translator->load(strFileName)) {
         QCoreApplication::installTranslator(m_translator);
     } else {
-        if (m_translator->load(QString(":/translations/amneziavpn_en.qm"))) {
+        if (m_translator->load(QString(":/translations/" APP_TS_PREFIX "_en.qm"))) {
             QCoreApplication::installTranslator(m_translator);
         }
     }

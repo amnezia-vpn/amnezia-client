@@ -1,37 +1,60 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
+import Style 1.0
 
 import "../Controls2"
-import "../Controls2/TextTypes"
-
 
 ListViewType {
     id: root
 
     anchors.fill: parent
 
-    delegate: ColumnLayout {
-        width: root.width
+    delegate: Item {
+        id: delegateRoot
 
-        LabelWithButtonType {
-            Layout.fillWidth: true
+        readonly property bool isOutdatedAwgContainer: Boolean(isInstalled && ServersUiController.isContainerOutdatedAwg(root.model.mapToSource(index)))
+
+        implicitWidth: root.width
+        implicitHeight: containerItem.implicitHeight
+
+        ListItemType {
+            id: containerItem
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
             text: name
-            descriptionText: description
-            rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
+            subtitle: description
+            maximumLineCount: 4
+            trailingIconSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
+            trailingContentVisible: delegateRoot.isOutdatedAwgContainer
 
-            clickedFunction: function() {
+            Item {
+                Layout.preferredWidth: 48
+                Layout.preferredHeight: 48
+
+                IconImage {
+                    anchors.centerIn: parent
+                    width: 24
+                    height: 24
+
+                    source: "qrc:/images/controls/alert-circle.svg"
+                    sourceSize: Qt.size(24, 24)
+                    color: AmneziaStyle.color.statusWarning
+                }
+            }
+
+            onClicked: {
                 if (isInstalled) {
                     var containerIndex = root.model.mapToSource(index)
                     ServersUiController.processedContainerIndex = containerIndex
 
                     if (isVpnContainer) {
-                        // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
                             InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
@@ -50,6 +73,9 @@ ListViewType {
                     } else if (isTelemt) {
                         TelemtConfigModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
+                    } else if (isTProxy) {
+                        TProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTProxySettings, false)
                     } else {
                         InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
@@ -61,14 +87,11 @@ ListViewType {
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
-            }
         }
+    }
 
-        DividerType {}
+    footer: Item {
+        width: root.width
+        height: 16 + PageController.safeAreaBottomMargin
     }
 }

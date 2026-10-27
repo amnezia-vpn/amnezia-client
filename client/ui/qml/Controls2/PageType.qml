@@ -2,29 +2,34 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "../Config"
 
 Item {
     id: root
 
     property StackView stackView: StackView.view
-    property bool enableTimer: true
+    property bool focusOnActivation: true
+    property Item initialFocusItem: root
+    property bool isTabBarHidden: false
 
-    onVisibleChanged: {
-        if (visible && enableTimer) {
-            timer.start()
-        }
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+
+        color: AmneziaStyle.color.bgBase
     }
 
-    // Set a timer to set focus after a short delay
-    Timer {
-        id: timer
-        interval: 200 // Milliseconds
-        onTriggered: {
-            FocusController.resetRootObject()
-            FocusController.setFocusOnDefaultItem()
+    StackView.onActivated: {
+        if (!root.focusOnActivation) {
+            return
         }
-        repeat: false // Stop the timer after one trigger
-        running: enableTimer // Start the timer
+        for (let item = root.Window.activeFocusItem; item; item = item.parent) {
+            if (item === root.Overlay.overlay) {
+                return
+            }
+        }
+        root.initialFocusItem.forceActiveFocus()
     }
 }

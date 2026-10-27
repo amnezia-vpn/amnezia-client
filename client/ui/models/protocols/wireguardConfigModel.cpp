@@ -8,71 +8,66 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
-WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
+WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QObject(parent)
 {
 }
 
-int WireGuardConfigModel::rowCount(const QModelIndex &parent) const
+QString WireGuardConfigModel::subnetAddress() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.serverConfig.subnetAddress;
 }
 
-bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void WireGuardConfigModel::setSubnetAddress(const QString &value)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
-        return false;
+    if (m_protocolConfig.serverConfig.subnetAddress == value) {
+        return;
     }
-
-    QString strValue = value.toString();
-
-    switch (role) {
-    case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
-    case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
-    case Roles::ClientMtuRole: {
-        if (!m_protocolConfig.clientConfig.has_value()) {
-            m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
-        }
-        m_protocolConfig.clientConfig->mtu = strValue;
-        break;
-    }
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
+    m_protocolConfig.serverConfig.subnetAddress = value;
+    emit changed();
 }
 
-QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
+QString WireGuardConfigModel::port() const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
-    }
+    return m_protocolConfig.serverConfig.port;
+}
 
-    switch (role) {
-    case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
-    case Roles::PortRole: return m_protocolConfig.serverConfig.port;
-    case Roles::ClientMtuRole: {
-        if (m_protocolConfig.clientConfig.has_value()) {
-            return m_protocolConfig.clientConfig->mtu;
-        }
-        return QString(protocols::wireguard::defaultMtu);
+void WireGuardConfigModel::setPort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.port == value) {
+        return;
     }
-    }
+    m_protocolConfig.serverConfig.port = value;
+    emit changed();
+}
 
-    return QVariant();
+QString WireGuardConfigModel::clientMtu() const
+{
+    if (m_protocolConfig.clientConfig.has_value()) {
+        return m_protocolConfig.clientConfig->mtu;
+    }
+    return QString(protocols::wireguard::defaultMtu);
+}
+
+void WireGuardConfigModel::setClientMtu(const QString &value)
+{
+    if (!m_protocolConfig.clientConfig.has_value()) {
+        m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
+    }
+    if (m_protocolConfig.clientConfig->mtu == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->mtu = value;
+    emit changed();
 }
 
 void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::WireGuardProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     
     m_protocolConfig = protocolConfig;
     
     applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
-    
+
     if (!m_protocolConfig.clientConfig.has_value()) {
         m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
     }
@@ -80,20 +75,13 @@ void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const
     
     m_originalProtocolConfig = m_protocolConfig;
     
-    endResetModel();
+    emit changed();
 }
 
 void WireGuardConfigModel::applyDefaultsToServerConfig(amnezia::WireGuardServerConfig& config)
 {
     if (config.subnetAddress.isEmpty()) {
         config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
-    }
-    if (config.port.isEmpty()) {
-        config.port = protocols::wireguard::defaultPort;
-    }
-    if (config.transportProto.isEmpty()) {
-        config.transportProto = ProtocolUtils::transportProtoToString(
-            ProtocolUtils::defaultTransportProto(amnezia::Proto::WireGuard), amnezia::Proto::WireGuard);
     }
 }
 
@@ -119,15 +107,3 @@ bool WireGuardConfigModel::isServerSettingsEqual()
 {
     return m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 }
-
-QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[SubnetAddressRole] = "subnetAddress";
-    roles[PortRole] = "port";
-    roles[ClientMtuRole] = "clientMtu";
-
-    return roles;
-}
-

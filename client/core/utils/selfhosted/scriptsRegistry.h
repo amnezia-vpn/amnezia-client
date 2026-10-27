@@ -38,8 +38,7 @@ enum ProtocolScriptType {
     container_startup,
     openvpn_template,
     wireguard_template,
-    awg_template,
-    xray_template
+    awg_template
 };
 
 enum ClientScriptType {
@@ -70,6 +69,7 @@ ScriptVars genSftpVars(const ContainerConfig &containerConfig);
 ScriptVars genSocks5ProxyVars(const ContainerConfig &containerConfig);
 ScriptVars genMtProxyVars(const ContainerConfig &containerConfig);
 ScriptVars genTelemtVars(const ContainerConfig &containerConfig);
+ScriptVars genTProxyVars(const ContainerConfig &containerConfig);
 
 ScriptVars genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig);
 }

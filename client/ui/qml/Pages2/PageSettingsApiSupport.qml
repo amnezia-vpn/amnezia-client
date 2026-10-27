@@ -16,111 +16,96 @@ import "../Components"
 PageType {
     id: root
 
-    QtObject {
-        id: telegram
+    FlickableType {
+        id: flickable
 
-        readonly property string title: qsTr("Telegram")
-        readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
-        readonly property string link: "https://t.me/" + ApiAccountInfoModel.getTelegramBotLink()
-    }
+        anchors.top: parent.top
 
-    QtObject {
-        id: techSupport
+        contentHeight: content.implicitHeight
 
-        readonly property string title: qsTr("Email")
-        readonly property string description: ApiAccountInfoModel.getEmailLink()
-        readonly property string link: "mailto:" + ApiAccountInfoModel.getEmailLink()
-    }
+        ColumnLayout {
+            id: content
 
-    QtObject {
-        id: paymentSupport
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        readonly property string title: qsTr("Email Billing & Orders")
-        readonly property string description: ApiAccountInfoModel.getBillingEmailLink()
-        readonly property string link: "mailto:" + ApiAccountInfoModel.getBillingEmailLink()
-    }
+            spacing: 0
 
-    QtObject {
-        id: site
+            NavigationBarType {
+                Layout.fillWidth: true
 
-        readonly property string title: qsTr("Website")
-        readonly property string description: ApiAccountInfoModel.getSiteLink()
-        readonly property string link: ApiAccountInfoModel.getFullSiteLink()
-    }
-
-    property list<QtObject> supportModel: [
-        telegram,
-        techSupport,
-        paymentSupport,
-        site
-    ]
-
-    ListViewType {
-        id: listView
-
-        anchors.fill: parent
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        anchors.bottomMargin: 24
-
-        model: supportModel
-
-        header: ColumnLayout {
-            width: listView.width
-
-            BackButtonType {
-                id: backButton
+                title: qsTr("Support")
+                description: qsTr("Our technical support specialists are available to assist you at any time")
             }
 
-            BaseHeaderType {
-                id: header
-
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                headerText: qsTr("Support")
-                descriptionText: qsTr("Our technical support specialists are available to assist you at any time")
+                text: qsTr("Telegram")
+                subtitle: "@" + ApiAccountInfoModel.getTelegramBotLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally("https://telegram.me/" + ApiAccountInfoModel.getTelegramBotLink())
             }
-        }
 
-        delegate: ColumnLayout {
-            width: listView.width
-
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
-                visible: link !== ""
-                text: title
-                descriptionText: description
-                rightImageSource: "qrc:/images/controls/external-link.svg"
-                clickedFunction: function() {
-                    Qt.openUrlExternally(link)
-                }
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Email")
+                subtitle: ApiAccountInfoModel.getEmailLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally("mailto:" + ApiAccountInfoModel.getEmailLink())
             }
-            DividerType {}
-        }
 
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-        footer: ColumnLayout {
-            width: listView.width
+                text: qsTr("Email Billing & Orders")
+                subtitle: ApiAccountInfoModel.getBillingEmailLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
 
-            LabelWithButtonType {
+                onClicked: Qt.openUrlExternally("mailto:" + ApiAccountInfoModel.getBillingEmailLink())
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: ApiAccountInfoModel.getFullSiteLink() !== ""
+
+                text: qsTr("Website")
+                subtitle: ApiAccountInfoModel.getSiteLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally(ApiAccountInfoModel.getFullSiteLink())
+            }
+
+            ListItemType {
                 id: supportUuid
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Support tag")
-                descriptionText: SettingsController.getInstallationUuid()
+                showSeparator: false
 
-                descriptionOnTop: true
+                overline: qsTr("Support tag")
+                text: SettingsController.getInstallationUuid()
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
-                    if (!GC.isMobile()) {
-                        this.rightButton.forceActiveFocus()
-                    }
                 }
             }
         }

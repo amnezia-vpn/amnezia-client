@@ -99,9 +99,6 @@ bool TelemtProtocolConfig::equalsDockerDeploymentSettings(const TelemtProtocolCo
     const auto normTransport = [](const QString &t) {
         return t.isEmpty() ? QString(protocols::telemt::transportModeStandard) : t;
     };
-    const auto normWorkersMode = [](const QString &m) {
-        return m.isEmpty() ? QString(protocols::telemt::workersModeAuto) : m;
-    };
 
     if (normPort(port) != normPort(other.port)) {
         return false;
@@ -133,16 +130,7 @@ bool TelemtProtocolConfig::equalsDockerDeploymentSettings(const TelemtProtocolCo
     if (userName != other.userName) {
         return false;
     }
-    if (normWorkersMode(workersMode) != normWorkersMode(other.workersMode)) {
-        return false;
-    }
-    if (workers != other.workers) {
-        return false;
-    }
     if (natEnabled != other.natEnabled) {
-        return false;
-    }
-    if (natInternalIp != other.natInternalIp) {
         return false;
     }
     if (natExternalIp != other.natExternalIp) {

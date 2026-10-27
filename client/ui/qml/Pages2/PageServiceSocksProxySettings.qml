@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
@@ -26,252 +24,235 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
+    function openSettings() {
+        changeSettingsDrawer.open()
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: changeSettingsButton.top
+        anchors.bottomMargin: 24
 
-        model: Socks5ProxyConfigModel
+        contentHeight: content.implicitHeight
 
-        delegate: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("SOCKS5 settings")
+            }
+
+            ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: qsTr("SOCKS5 settings")
-            }
+                dense: true
+                overline: qsTr("Host")
+                text: ServersUiController.serverHostName(ServersUiController.processedServerId)
+                Accessible.name: overline + " " + text
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                text: qsTr("Host")
-                descriptionText: ServersUiController.serverHostName(ServersUiController.processedServerId)
-
-                descriptionOnTop: true
-
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                text: qsTr("Port")
-                descriptionText: port
+                dense: true
+                overline: qsTr("Port")
+                text: Socks5ProxyConfigModel.port
+                Accessible.name: overline + " " + text
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                text: qsTr("User name")
-                descriptionText: username
+                dense: true
+                overline: qsTr("User name")
+                text: Socks5ProxyConfigModel.username
+                Accessible.name: overline + " " + text
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
+                id: passwordLabel
+
+                property bool masked: true
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
-                text: qsTr("Password")
-                descriptionText: password
+                showSeparator: false
+                dense: true
+                overline: qsTr("Password")
+                text: masked ? "*".repeat(Socks5ProxyConfigModel.password.length) : Socks5ProxyConfigModel.password
+                Accessible.name: overline
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(Socks5ProxyConfigModel.password)
                     PageController.showNotificationMessage(qsTr("Copied"))
+                }
+
+                IconButtonType {
+                    icon.source: passwordLabel.masked ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                    Accessible.name: passwordLabel.masked ? qsTr("Show password") : qsTr("Hide password")
+
+                    onClicked: passwordLabel.masked = !passwordLabel.masked
                 }
             }
 
-            DrawerType2 {
+            SheetType {
                 id: changeSettingsDrawer
+
                 parent: root
 
-                anchors.fill: parent
-                expandedHeight: root.height * 0.9
+                expandedHeight: drawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
-                expandedStateContent: ColumnLayout {
-                    property string tempPort: port
-                    property string tempUsername: username
-                    property string tempPassword: password
+                ColumnLayout {
+                    id: drawerContent
+
+                    property string tempPort: Socks5ProxyConfigModel.port
+                    property string tempUsername: Socks5ProxyConfigModel.username
+                    property string tempPassword: Socks5ProxyConfigModel.password
 
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.topMargin: 32
                     anchors.leftMargin: 16
                     anchors.rightMargin: 16
-                    spacing: 0
+
+                    spacing: 12
 
                     Connections {
                         target: changeSettingsDrawer
+
                         function onOpened() {
-                            tempPort = port
-                            tempUsername = username
-                            tempPassword = password
+                            drawerContent.tempPort = Socks5ProxyConfigModel.port
+                            drawerContent.tempUsername = Socks5ProxyConfigModel.username
+                            drawerContent.tempPassword = Socks5ProxyConfigModel.password
                         }
+
                         function onClosed() {
-                            port = tempPort
-                            username = tempUsername
-                            password = tempPassword
-                            portTextField.textField.text = port
-                            usernameTextField.textField.text = username
-                            passwordTextField.textField.text = password
+                            Socks5ProxyConfigModel.port = drawerContent.tempPort
+                            Socks5ProxyConfigModel.username = drawerContent.tempUsername
+                            Socks5ProxyConfigModel.password = drawerContent.tempPassword
+                            portTextField.textField.text = Socks5ProxyConfigModel.port
+                            usernameTextField.textField.text = Socks5ProxyConfigModel.username
+                            passwordTextField.textField.text = Socks5ProxyConfigModel.password
                         }
                     }
 
-                    BaseHeaderType {
+                    SectionHeaderType {
                         Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
+                        Layout.topMargin: 16
+                        Layout.bottomMargin: 20
 
                         headerText: qsTr("SOCKS5 settings")
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: portTextField
 
                         Layout.fillWidth: true
-                        Layout.topMargin: 40
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
 
                         headerText: qsTr("Port")
-                        textField.text: port
+                        textField.text: Socks5ProxyConfigModel.port
                         textField.maximumLength: 5
                         textField.validator: IntValidator { bottom: 1; top: 65535 }
 
+                        textField.onTextEdited: Socks5ProxyConfigModel.port = textField.text
+
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== port) {
-                                port = textField.text
-                            }
+                            Socks5ProxyConfigModel.port = textField.text
                         }
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: usernameTextField
 
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
 
                         headerText: qsTr("Username")
                         textField.placeholderText: "username"
-                        textField.text: username
+                        textField.text: Socks5ProxyConfigModel.username
                         textField.maximumLength: 32
+
+                        textField.onTextEdited: Socks5ProxyConfigModel.username = textField.text
 
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== username) {
-                                username = textField.text
-                            }
+                            Socks5ProxyConfigModel.username = textField.text
                         }
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: passwordTextField
 
-                        property bool hidePassword: true
-
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
 
                         headerText: qsTr("Password")
                         textField.placeholderText: "password"
-                        textField.text: password
+                        textField.text: Socks5ProxyConfigModel.password
                         textField.maximumLength: 32
+                        passwordToggle: true
 
-                        textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                        buttonImageSource: textField.text !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
-                                                                 : ""
+                        textField.onTextEdited: Socks5ProxyConfigModel.password = textField.text
 
-                        clickedFunc: function() {
-                            hidePassword = !hidePassword
-                        }
-
-                        textField.onFocusChanged: {
+                        textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== password) {
-                                password = textField.text
-                            }
+                            Socks5ProxyConfigModel.password = textField.text
                         }
                     }
 
-                    BasicButtonType {
+                    ButtonType {
                         id: saveButton
 
                         Layout.fillWidth: true
-                        Layout.topMargin: 24
-                        Layout.bottomMargin: 24
-                        Layout.rightMargin: 16
+                        Layout.topMargin: 12
 
                         text: qsTr("Change connection settings")
 
-                        clickedFunc: function() {
+                        onClicked: {
+                            Socks5ProxyConfigModel.port = Socks5ProxyConfigModel.port.trim()
+                            Socks5ProxyConfigModel.username = Socks5ProxyConfigModel.username.trim()
+                            Socks5ProxyConfigModel.password = Socks5ProxyConfigModel.password.trim()
+
                             if (!portTextField.textField.acceptableInput) {
                                 portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
                                 return
@@ -286,30 +267,31 @@ PageType {
 
                             PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                             InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Socks5Proxy)
-                            tempPort = portTextField.textField.text
-                            tempUsername = usernameTextField.textField.text
-                            tempPassword = passwordTextField.textField.text
-                            changeSettingsDrawer.closeTriggered()
+                            drawerContent.tempPort = portTextField.textField.text
+                            drawerContent.tempUsername = usernameTextField.textField.text
+                            drawerContent.tempPassword = passwordTextField.textField.text
+                            changeSettingsDrawer.close()
                         }
                     }
                 }
             }
+        }
+    }
 
-            BasicButtonType {
-                id: changeSettingsButton
+    ButtonType {
+        id: changeSettingsButton
 
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Change connection settings")
+        text: qsTr("Change connection settings")
 
-                clickedFunc: function() {
-                    changeSettingsDrawer.openTriggered()
-                }
-            }
+        onClicked: {
+            root.openSettings()
         }
     }
 }

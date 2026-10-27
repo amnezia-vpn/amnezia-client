@@ -33,6 +33,7 @@
 #include "linuxfirewall.h"
 #include "logger.h"
 #include "xray_defs.h"
+#include <QFileInfo>
 #include <QProcess>
 
 #define BRAND_CODE "amn"
@@ -109,7 +110,7 @@ int LinuxFirewall::linkChain(LinuxFirewall::IPVersion ip, const QString& chain, 
         //    (we can't safely delete all rules at once since rule numbers change)
         // TODO: occasionally this script results in warnings in logs "Bad rule (does a matching rule exist in the chain?)" - this happens when
         // the e.g OUTPUT chain is empty but this script attempts to delete things from it anyway. It doesn't cause any problems, but we should still fix at some point..
-        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
+        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs -r %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
     }
     else
         return execute(QStringLiteral("if ! %1 -C %2 -j %3 -t %4 2> /dev/null ; then %1 -A %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
@@ -188,40 +189,6 @@ void LinuxFirewall::uninstallAnchor(LinuxFirewall::IPVersion ip, const QString& 
     deleteChain(ip, actualChain, tableName);
 }
 
-QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-o amn0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o amn0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun2+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun2+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-    }
-    return result;
-}
-
-QStringList LinuxFirewall::getAllowRule(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-d %1 -j ACCEPT").arg(server);
-    }
-    return result;
-}
-
-QStringList LinuxFirewall::getBlockRule(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-d %1 -j REJECT").arg(server);
-    }
-    return result;
-}
 
 
 void LinuxFirewall::install()
@@ -290,6 +257,8 @@ void LinuxFirewall::install()
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
 
     installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
+
+    installAnchor(Both, QStringLiteral("400.allowPIA"), {});
 
     installAnchor(Both, QStringLiteral("100.blockAll"), {
                                                             QStringLiteral("-j REJECT"),
@@ -454,16 +423,33 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
     static QStringList existingServers {};
 
     existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
-    for (const QString& rule : getDNSRules(servers))
-        execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.320.allowDNS").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    const QStringList ifaces = {
+        QStringLiteral("amn0+"), QStringLiteral("tun0+"), QStringLiteral("tun2+")
+    };
+    for (const QString& server : servers) {
+        for (const QString& iface : ifaces) {
+            executeIptables(QStringLiteral("iptables"),
+                {QStringLiteral("-A"), chain, QStringLiteral("-o"), iface,
+                 QStringLiteral("-d"), server, QStringLiteral("-p"), QStringLiteral("udp"),
+                 QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+            executeIptables(QStringLiteral("iptables"),
+                {QStringLiteral("-A"), chain, QStringLiteral("-o"), iface,
+                 QStringLiteral("-d"), server, QStringLiteral("-p"), QStringLiteral("tcp"),
+                 QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+        }
+    }
 }
 
 void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
-    execute(QStringLiteral("iptables -F %1.110.allowNets").arg(kAnchorName));
-    for (const QString& rule : getAllowRule(servers))
-        execute(QStringLiteral("iptables -A %1.110.allowNets %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.110.allowNets").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    for (const QString& server : servers)
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-j"), QStringLiteral("ACCEPT")});
 }
 
 void LinuxFirewall::updateBlockNets(const QStringList& servers)
@@ -471,9 +457,12 @@ void LinuxFirewall::updateBlockNets(const QStringList& servers)
     static QStringList existingServers {};
 
     existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.120.blockNets").arg(kAnchorName));
-    for (const QString& rule : getBlockRule(servers))
-        execute(QStringLiteral("iptables -A %1.120.blockNets %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.120.blockNets").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    for (const QString& server : servers)
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-j"), QStringLiteral("REJECT")});
 }
 
 int waitForExitCode(QProcess& process)
@@ -506,10 +495,39 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
     return exitCode;
 }
 
+int LinuxFirewall::executeIptables(const QString &program, const QStringList &args, bool ignoreErrors)
+{
+    QProcess p;
+    p.start(program, args, QProcess::ReadOnly);
+    p.closeWriteChannel();
+
+    int exitCode = waitForExitCode(p);
+    auto out = p.readAllStandardOutput().trimmed();
+    auto err = p.readAllStandardError().trimmed();
+    if ((exitCode != 0 || !err.isEmpty()) && !ignoreErrors)
+        logger.warning() << "(" << exitCode << ") $ " << program << args.join(QLatin1Char(' '));
+    if (!out.isEmpty())
+        logger.info() << out;
+    if (!err.isEmpty())
+        logger.warning() << err;
+    return exitCode;
+}
+
 void LinuxFirewall::setupTrafficSplitting()
 {
+    const QString cgroupBase = QStringLiteral("/sys/fs/cgroup/net_cls");
+    if (!QFileInfo::exists(cgroupBase)) {
+        logger.warning() << "net_cls cgroup v1 not available, traffic splitting disabled";
+        return;
+    }
+
+    execute(QStringLiteral(
+        "if ! grep -qE '^[0-9]+[[:space:]]+%1$' /etc/iproute2/rt_tables 2>/dev/null ; then "
+        "echo '200 %1' >> /etc/iproute2/rt_tables ; fi"
+    ).arg(kRtableName));
+
     auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
-    logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
+    logger.info() << "Setting up cgroup in" << cGroupDir << "for traffic splitting";
     execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
     // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
     execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi").arg(kPacketTag, kRtableName));
@@ -518,7 +536,7 @@ void LinuxFirewall::setupTrafficSplitting()
 void LinuxFirewall::teardownTrafficSplitting()
 {
     logger.info() << "Tearing down cgroup and routing rules";
-    execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(kPacketTag, kRtableName));
-    execute(QStringLiteral("ip route flush table %1").arg(kRtableName));
+    execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2>/dev/null ; fi").arg(kPacketTag, kRtableName));
+    execute(QStringLiteral("ip route flush table %1 2>/dev/null || true").arg(kRtableName));
     execute(QStringLiteral("ip route flush cache"));
 }

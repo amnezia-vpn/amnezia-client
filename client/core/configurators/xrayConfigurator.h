@@ -2,6 +2,7 @@
 #define XRAY_CONFIGURATOR_H
 
 #include <QObject>
+#include <QJsonArray>
 #include <QJsonObject>
 
 #include "configuratorBase.h"
@@ -30,13 +31,34 @@ public:
                                                    bool appendNewClient,
                                                    QString *outClientId = nullptr);
 
+    amnezia::ErrorCode writeServerConfigForSetup(const amnezia::ServerCredentials &credentials,
+                                                 amnezia::DockerContainer container,
+                                                 amnezia::ContainerConfig &containerConfig,
+                                                 const amnezia::DnsSettings &dnsSettings,
+                                                 bool useAtomicApply = false);
+
 private:
+    QJsonArray collectServerClients(const amnezia::ServerCredentials &credentials,
+                                    amnezia::DockerContainer container, const QString &flowValue,
+                                    const QString &fallbackClientId, amnezia::ErrorCode &outError) const;
+
+    amnezia::ErrorCode uploadServerConfigAtomically(const amnezia::ServerCredentials &credentials,
+                                                    amnezia::DockerContainer container, const QString &listenPort,
+                                                    const QJsonObject &serverConfig) const;
+
+    bool restartXrayContainer(const amnezia::ServerCredentials &credentials,
+                              amnezia::DockerContainer container) const;
+
+    bool xrayProcessIsUp(const amnezia::ServerCredentials &credentials,
+                         amnezia::DockerContainer container) const;
+
+    amnezia::ErrorCode readContainerKeyFile(amnezia::DockerContainer container,
+                                            const amnezia::ServerCredentials &credentials,
+                                            const QString &path, QString &out) const;
+
     QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode);
-
-    amnezia::ErrorCode uploadServerConfigJson(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
-                                              const amnezia::DnsSettings &dnsSettings, const QJsonObject &serverConfig) const;
 
     amnezia::XrayProtocolConfig buildClientProtocolConfig(const amnezia::ServerCredentials &credentials,
                                                           amnezia::DockerContainer container,
@@ -44,18 +66,17 @@ private:
                                                           const QString &clientId,
                                                           amnezia::ErrorCode &errorCode,
                                                           const QString &prefetchedRealityPublicKey = {},
-                                                          const QString &prefetchedRealityShortId = {}) const;
+                                                          const QString &prefetchedRealityShortId = {},
+                                                          const QString &prefetchedTlsPin = {}) const;
 
     amnezia::ErrorCode readRealityKeyFiles(amnezia::DockerContainer container,
                                            const amnezia::ServerCredentials &credentials,
                                            QString &outPublicKey,
                                            QString &outShortId) const;
 
-    QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
-                                                    const QJsonObject &existingStreamSettings) const;
-
-    QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv,
-                                    const QString &clientId) const;
+    amnezia::ErrorCode ensureTlsCertificate(const amnezia::ServerCredentials &credentials,
+                                            amnezia::DockerContainer container,
+                                            QString &outFingerprint) const;
 };
 
 #endif // XRAY_CONFIGURATOR_H

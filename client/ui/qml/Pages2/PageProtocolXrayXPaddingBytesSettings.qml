@@ -15,81 +15,84 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
+    FlickableType {
+        id: flickable
 
-    BackButtonType {
-        id: backButton
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
-    ListViewType {
-        id: listView
-        anchors.top: backButton.bottom
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+        contentHeight: content.implicitHeight
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("xPaddingBytes")
+
+                title: qsTr("xPaddingBytes")
             }
 
-            CaptionTextType {
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 8
-                text: qsTr("Range")
-                color: AmneziaStyle.color.mutedGray
-            }
 
-            MinMaxRowType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                minValue: xPaddingBytesMin
-                maxValue: xPaddingBytesMax
-                onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
-                onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
-                onEdited: root.editDirty = true
+                spacing: 12
+
+                SmallTextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Range")
+                }
+
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    minValue: XrayConfigModel.xPaddingBytesMin
+                    maxValue: XrayConfigModel.xPaddingBytesMax
+                    minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
+                    maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
+                    onMinChanged: function(val) { XrayConfigModel.xPaddingBytesMin = val }
+                    onMaxChanged: function(val) { XrayConfigModel.xPaddingBytesMax = val }
+                }
             }
 
             Item {
-                Layout.preferredHeight: 16
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {
@@ -97,15 +100,13 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

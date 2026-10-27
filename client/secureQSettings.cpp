@@ -17,11 +17,14 @@ using namespace QKeychain;
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
     constexpr const char *settingsIvTag = "settingsIvTag";
-    constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+#ifndef CLIENT_KEYCHAIN_NAME_STR
+#define CLIENT_KEYCHAIN_NAME_STR "AmneziaVPN-Keychain"
+#endif
+    constexpr const char *keyChainName = CLIENT_KEYCHAIN_NAME_STR;
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent, bool enableEncryption)
-    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" }), m_encryptionEnabled(enableEncryption)
+    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList", "Conf/favoriteLocations", "Conf/proxyUrls/agw_state" }), m_encryptionEnabled(enableEncryption)
 {
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
@@ -121,21 +124,16 @@ QByteArray SecureQSettings::backupAppConfig() const
 
     QJsonObject cfg;
 
-    const auto needToBackup = [this](const auto &key) {
-      for (const auto &item : m_fieldsToBackup)
-      {
-        if (key == "Conf/installationUuid")
-        {
-          return false;
+    const auto needToBackup = [this](const QString &key) {
+        if (isExcludedFromBackup(key)) {
+            return false;
         }
-
-        if (key.startsWith(item))
-        {
-            return true;
+        for (const auto &item : m_fieldsToBackup) {
+            if (key.startsWith(item)) {
+                return true;
+            }
         }
-      }
-
-      return false;
+        return false;
     };
 
     for (const QString &key : m_settings.allKeys()) {
@@ -160,7 +158,7 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
         return false;
 
     for (const QString &key : cfg.keys()) {
-        if (key == "Conf/installationUuid") {
+        if (isExcludedFromBackup(key)) {
             continue;
         }
 
@@ -168,6 +166,16 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
     }
 
     return true;
+}
+
+bool SecureQSettings::isExcludedFromBackup(const QString &key) const
+{
+    for (const auto &item : m_fieldsExcludedFromBackup) {
+        if (key.startsWith(item)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void SecureQSettings::clearSettings()

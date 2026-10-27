@@ -120,34 +120,60 @@ QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
     return value("Conf/" + routeModeString(mode)).toMap();
 }
 
+QStringList SecureAppSettingsRepository::siteIpList(const QVariant &value)
+{
+    // QVariant::toStringList() handles both a QStringList/QVariantList and a single QString
+    // (a single string is returned as a one-element list), which covers the legacy format.
+    QStringList result = value.toStringList();
+    result.removeAll(QString());
+    result.removeDuplicates();
+    return result;
+}
+
 void SecureAppSettingsRepository::setVpnSites(RouteMode mode, const QVariantMap &sites)
 {
     setValue("Conf/" + routeModeString(mode), sites);
 }
 
-bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
+bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QStringList &ips)
 {
     QVariantMap sites = vpnSites(mode);
-    if (sites.contains(site) && ip.isEmpty())
+    const bool siteExisted = sites.contains(site);
+
+    if (siteExisted && ips.isEmpty())
         return false;
 
-    sites.insert(site, ip);
+    QStringList mergedIps = siteIpList(sites.value(site));
+    bool changed = !siteExisted;
+    for (const QString &ip : ips) {
+        if (!ip.isEmpty() && !mergedIps.contains(ip)) {
+            mergedIps.append(ip);
+            changed = true;
+        }
+    }
+
+    if (!changed)
+        return false;
+
+    sites.insert(site, mergedIps);
     setVpnSites(mode, sites);
     emit sitesChanged(mode);
     return true;
 }
 
-void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
+void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QStringList> &sites)
 {
     QVariantMap allSites = vpnSites(mode);
     for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
         const QString &site = i.key();
-        const QString &ip = i.value();
 
-        if (allSites.contains(site) && allSites.value(site) == ip)
-            continue;
+        QStringList mergedIps = siteIpList(allSites.value(site));
+        for (const QString &ip : i.value()) {
+            if (!ip.isEmpty() && !mergedIps.contains(ip))
+                mergedIps.append(ip);
+        }
 
-        allSites.insert(site, ip);
+        allSites.insert(site, mergedIps);
     }
 
     setVpnSites(mode, allSites);
@@ -349,6 +375,69 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
+{
+    return value("Conf/countryListSortMode/" + listId, 0).toInt();
+}
+
+void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, int mode)
+{
+    setValue("Conf/countryListSortMode/" + listId, mode);
+}
+
+QStringList SecureAppSettingsRepository::favoriteLocations(const QString &serverId) const
+{
+    QStringList codes = value("Conf/favoriteLocations").toMap().value(serverId).toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+    codes.sort();
+    return codes;
+}
+
+void SecureAppSettingsRepository::setFavoriteLocations(const QString &serverId, const QStringList &codes)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (codes.isEmpty()) {
+        favorites.remove(serverId);
+    } else {
+        favorites.insert(serverId, codes);
+    }
+    setValue("Conf/favoriteLocations", favorites);
+}
+
+void SecureAppSettingsRepository::removeFavoriteLocations(const QString &serverId)
+{
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (favorites.remove(serverId) > 0) {
+        setValue("Conf/favoriteLocations", favorites);
+    }
+}
+
+void SecureAppSettingsRepository::migrateLegacyFavoriteLocations(const QStringList &serverIds)
+{
+    // Before per-subscription favorites the key held one list shared by all servers
+    const QVariant stored = value("Conf/favoriteLocations");
+    const int type = stored.typeId();
+    if (type != QMetaType::QStringList && type != QMetaType::QVariantList && type != QMetaType::QString) {
+        return;
+    }
+
+    QStringList codes = stored.toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+
+    QVariantMap favorites;
+    if (!codes.isEmpty()) {
+        for (const QString &serverId : serverIds) {
+            favorites.insert(serverId, codes);
+        }
+    }
+    setValue("Conf/favoriteLocations", favorites);
+}
+
 bool SecureAppSettingsRepository::isNewsNotifications() const
 {
     return value("Conf/newsNotifications", true).toBool();
@@ -357,6 +446,16 @@ bool SecureAppSettingsRepository::isNewsNotifications() const
 void SecureAppSettingsRepository::setNewsNotifications(bool enabled)
 {
     setValue("Conf/newsNotifications", enabled);
+}
+
+bool SecureAppSettingsRepository::isAutoUpdateCheckEnabled() const
+{
+    return value("Conf/autoUpdateCheck", true).toBool();
+}
+
+void SecureAppSettingsRepository::setAutoUpdateCheckEnabled(bool enabled)
+{
+    setValue("Conf/autoUpdateCheck", enabled);
 }
 
 bool SecureAppSettingsRepository::isSaveLogs() const
@@ -416,16 +515,6 @@ void SecureAppSettingsRepository::disableHomeAdLabel()
     setValue("Conf/homeAdLabelVisible", false);
 }
 
-bool SecureAppSettingsRepository::isPremV1MigrationReminderActive() const
-{
-    return value("Conf/premV1MigrationReminderActive", true).toBool();
-}
-
-void SecureAppSettingsRepository::disablePremV1MigrationReminder()
-{
-    setValue("Conf/premV1MigrationReminderActive", false);
-}
-
 QByteArray SecureAppSettingsRepository::backupAppConfig() const
 {
     return m_settings->backupAppConfig();
@@ -457,4 +546,34 @@ QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
 void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
 {
     setValue("Xray/savedConfigs", data);
+}
+
+QString SecureAppSettingsRepository::localProxyOwnerId() const
+{
+    return value("Conf/localProxyOwnerId", "").toString();
+}
+
+void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
+{
+    setValue("Conf/localProxyOwnerId", serverId);
+}
+
+quint16 SecureAppSettingsRepository::localProxyPort() const
+{
+    return static_cast<quint16>(value("Conf/localProxyPort", 10808).toUInt());
+}
+
+void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+}
+
+bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
 }

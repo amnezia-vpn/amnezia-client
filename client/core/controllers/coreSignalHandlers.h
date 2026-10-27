@@ -20,6 +20,8 @@ private:
     void initExportControllerHandler();
     void initImportControllerHandler();
     void initApiCountryModelUpdateHandler();
+    void initCountryListSortModeHandler();
+    void initCountryListStateHandler();
     void initSubscriptionRefreshHandler();
     void initAdminConfigRevokedHandler();
     void initPassphraseRequestHandler();
@@ -34,6 +36,7 @@ private:
     void initAppSplitTunnelingModelUpdateHandler();
     void initPrepareConfigHandler();
     void initUnsupportedConnectDrawerHandler();
+    void initBackNavigationHandler();
     void initStrictKillSwitchHandler();
     void initAndroidSettingsHandler();
     void initAndroidConnectionHandler();
@@ -41,6 +44,7 @@ private:
     void initIosSettingsHandler();
     void initNotificationHandler();
     void initUpdateFoundHandler();
+    void initLocalProxyHandler();
 
     CoreController* m_coreController;
 };

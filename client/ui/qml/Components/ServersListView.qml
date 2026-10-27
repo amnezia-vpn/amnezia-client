@@ -1,140 +1,72 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-
-import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ContainerProps 1.0
-import ContainersModelFilters 1.0
 import Style 1.0
 
-import "./"
 import "../Controls2"
-import "../Controls2/TextTypes"
-import "../Config"
 
 ListViewType {
     id: root
 
-    property int selectedIndex: ServersUiController.getServerIndexById(ServersUiController.defaultServerId)
+    signal serverSettingsOpened()
 
-    anchors.top: serversMenuHeader.bottom
-    anchors.right: parent.right
-    anchors.left: parent.left
-    anchors.bottom: parent.bottom
-    anchors.topMargin: 16
+    leftMargin: 16
+    rightMargin: 16
+    bottomMargin: 16
 
     model: ServersModel
 
-    Connections {
-        target: ServersUiController
-        function onDefaultServerIdChanged() {
-            root.selectedIndex = ServersUiController.getServerIndexById(ServersUiController.defaultServerId)
+    function openServerSettings(serverId) {
+        ServersUiController.setProcessedServerId(serverId)
+
+        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
+            if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
+                root.serverSettingsOpened()
+                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+            } else {
+                PageController.showBusyIndicator(true)
+                let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+                PageController.showBusyIndicator(false)
+                if (!result) {
+                    return
+                }
+
+                root.serverSettingsOpened()
+                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+            }
+        } else {
+            root.serverSettingsOpened()
+            PageController.goToPage(PageEnum.PageSettingsServerInfo)
         }
     }
 
-    delegate: Item {
-        id: menuContentDelegate
-        objectName: "menuContentDelegate"
+    delegate: ServerListItem {
+        readonly property bool subscriptionAlert: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
 
-        property variant delegateData: model
-        property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
+        width: root.width - root.leftMargin - root.rightMargin
 
-        implicitWidth: root.width
-        implicitHeight: serverRadioButtonContent.implicitHeight
+        text: name
+        subtitle: subscriptionAlert
+                  ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew") : qsTr("Subscription expiring soon"))
+                  : serverDescription
+        subtitleColor: subscriptionAlert
+                       ? (isSubscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.statusWarning)
+                       : AmneziaStyle.color.textTertiary
+        showWarning: ServersUiController.serverHasOutdatedAwgContainer(serverId)
+        showSeparator: index < root.count - 1
 
-        ColumnLayout {
-            id: serverRadioButtonContent
-            objectName: "serverRadioButtonContent"
+        checked: serverId === ServersUiController.defaultServerId
 
-            anchors.fill: parent
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            spacing: 0
-
-            RowLayout {
-                objectName: "serverRadioButtonRowLayout"
-
-                Layout.fillWidth: true
-
-                VerticalRadioButton {
-                    id: serverRadioButton
-                    objectName: "serverRadioButton"
-
-                    Layout.fillWidth: true
-
-                    text: name
-                    descriptionText: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
-                        ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew") : qsTr("Subscription expiring soon"))
-                        : serverDescription
-                    descriptionColor: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
-                        ? (isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot)
-                        : AmneziaStyle.color.mutedGray
-
-                    checked: index === root.selectedIndex
-                    checkable: !ConnectionController.isConnected
-
-                    ButtonGroup.group: serversRadioButtonGroup
-
-                    onClicked: {
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                            return
-                        }
-
-                        root.selectedIndex = index
-
-                        ServersUiController.setDefaultServerAtIndex(index)
-                    }
-
-                    Keys.onEnterPressed: serverRadioButton.clicked()
-                    Keys.onReturnPressed: serverRadioButton.clicked()
-                }
-
-                ImageButtonType {
-                    id: serverInfoButton
-                    objectName: "serverInfoButton"
-
-                    image: "qrc:/images/controls/settings.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    implicitWidth: 56
-                    implicitHeight: 56
-
-                    z: 1
-
-                    onClicked: function() {
-                        ServersUiController.setProcessedServerId(serverId)
-
-                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
-                            if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
-                                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
-                            } else {
-                                PageController.showBusyIndicator(true)
-                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                                PageController.showBusyIndicator(false)
-                                if (!result) {
-                                    return
-                                }
-
-                                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                            }
-                        } else {
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                        }
-
-                        drawer.closeTriggered()
-                    }
-                }
+        onClicked: {
+            if (ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                return
             }
 
-            DividerType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 0
-                Layout.rightMargin: 0
-            }
+            ServersUiController.setDefaultServerAtIndex(index)
         }
+
+        onSettingsRequested: root.openServerSettings(serverId)
     }
 }

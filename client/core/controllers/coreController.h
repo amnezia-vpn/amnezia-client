@@ -3,7 +3,9 @@
 
 #include <QObject>
 #include <QQmlContext>
+#include <QSharedPointer>
 #include <QThread>
+#include <QTranslator>
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/utils/systemTrayNotificationHandler.h"
@@ -22,6 +24,8 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/settingsUiController.h"
+#include "ui/controllers/localProxyUiController.h"
+#include "ui/controllers/logsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
@@ -36,10 +40,12 @@
 #include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
+#include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/localProxyController.h"
 #include "core/controllers/connectionController.h"
 #include "core/controllers/updateController.h"
 
@@ -56,6 +62,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
+#include "ui/models/api/apiCountryListModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -73,6 +80,7 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
+#include "ui/models/services/tProxyConfigModel.h"
 
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
@@ -95,6 +103,7 @@ public:
 
     PageController* pageController() const;
     void setQmlRoot();
+    void checkForAppUpdates();
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
@@ -133,6 +142,10 @@ protected:
     ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
+    SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
+    ApiCountryModel* apiCountryModelProtected() const { return m_apiCountryModel; }
+    ApiCountryListModel* apiCountryListModelProtected() const { return m_apiCountryListModel; }
+    ApiCountryListModel* apiConfigsCountryListModelProtected() const { return m_apiConfigsCountryListModel; }
 
 private:
     void initRepositories();
@@ -160,13 +173,15 @@ private:
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
     ConnectionUiController* m_connectionUiController;
-    FocusController* m_focusController;
+    FocusController* m_focusController = nullptr;
     PageController* m_pageController;
     InstallUiController* m_installUiController;
     ImportUiController* m_importController;
     ImportController* m_importCoreController;
     ExportUiController* m_exportUiController;
     SettingsUiController* m_settingsUiController;
+    LocalProxyUiController* m_localProxyUiController;
+    LogsUiController* m_logsUiController;
     ServersUiController* m_serversUiController;
     IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;
     SystemController* m_systemController;
@@ -188,12 +203,14 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    StorePurchaseController* m_storePurchaseController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
     InstallController* m_installController;
     ExportController* m_exportController;
     ConnectionController* m_connectionController;
     SettingsController* m_settingsController;
+    LocalProxyController* m_localProxyController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;
@@ -210,6 +227,8 @@ private:
     ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
     ApiBenefitsModel* m_apiBenefitsModel;
     ApiCountryModel* m_apiCountryModel;
+    ApiCountryListModel* m_apiCountryListModel;
+    ApiCountryListModel* m_apiConfigsCountryListModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiDevicesModel* m_apiDevicesModel;
 
@@ -226,6 +245,7 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    TProxyConfigModel* m_tProxyConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
 };

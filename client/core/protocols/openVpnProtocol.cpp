@@ -61,6 +61,10 @@ void OpenVpnProtocol::cleanupResources()
 
 void OpenVpnProtocol::stop()
 {
+    if (guardStop()) {
+        return;
+    }
+
     qDebug() << "OpenVpnProtocol::stop()";
 
     const bool wasActive = m_connectionState == Vpn::ConnectionState::Preparing
@@ -179,6 +183,8 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
 
 ErrorCode OpenVpnProtocol::start()
 {
+    resetStopGuard();
+
     cleanupResources();
 
     if (!QFileInfo::exists(configPath())) {
@@ -219,6 +225,18 @@ ErrorCode OpenVpnProtocol::start()
         qDebug() << "Set VPN route gateway" << m_routeGateway;
     } else {
         qWarning() << "Unable to set VPN route gateway, output:\n" << s;
+    }
+#endif
+
+#ifdef Q_OS_WIN
+    // In "all except sites" mode the config uses redirect-gateway !ipv4, so OpenVPN
+    // never reports net_route_v4_best_gw and m_routeGateway would stay empty
+    const QString winGateway = NetworkUtilities::getGatewayAndIface().first;
+    if (!winGateway.isEmpty()) {
+        m_routeGateway = winGateway;
+        qDebug() << "Set VPN route gateway" << m_routeGateway;
+    } else {
+        qWarning() << "Unable to detect physical default gateway";
     }
 #endif
 

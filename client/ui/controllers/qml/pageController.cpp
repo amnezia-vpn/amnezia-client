@@ -2,12 +2,14 @@
 
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
+#include "core/utils/appUiConfig.h"
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <QGuiApplication>
+    #include <QInputMethod>
 #else
     #include <QApplication>
 #endif
@@ -40,6 +42,10 @@ PageController::PageController(ServersController* serversController, SettingsCon
     });
 #endif
 
+#ifdef Q_OS_IOS
+    connect(QGuiApplication::inputMethod(), &QInputMethod::visibleChanged, this, &PageController::safeAreaBottomMarginChanged);
+#endif
+
 #if defined Q_OS_MACX
     connect(this, &PageController::raiseMainWindow, []() {
         setDockIconVisible(true);
@@ -63,7 +69,8 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<PageLoader::PageEnum>();
     QString pageName = metaEnum.valueToKey(static_cast<int>(page));
-    return "qrc:/ui/qml/Pages2/" + pageName + ".qml";
+
+    return QStringLiteral(APP_QML_PAGES_PREFIX) + pageName + QStringLiteral(".qml");
 }
 
 void PageController::closeWindow()
@@ -82,29 +89,12 @@ void PageController::hideWindow()
 #endif
 }
 
-void PageController::keyPressEvent(Qt::Key key)
-{
-    switch (key) {
-    case Qt::Key_Back:
-    case Qt::Key_Escape: {
-        if (m_drawerDepth) {
-            emit closeTopDrawer();
-            decrementDrawerDepth();
-        } else {
-            emit escapePressed();
-        }
-        break;
-    }
-    default: return;
-    }
-}
-
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
     if (m_serversController->getServersCount()) {
-        return 0xFF1C1D21;
+        return 0xFF1F1F23;
     } else {
-        return 0xFF0E0E11;
+        return 0xFF101012;
     }
 }
 
@@ -146,32 +136,6 @@ void PageController::setTriggeredByConnectButton(bool trigger)
 void PageController::closeApplication()
 {
     qApp->quit();
-}
-
-void PageController::setDrawerDepth(const int depth)
-{
-    if (depth >= 0) {
-        m_drawerDepth = depth;
-    }
-}
-
-int PageController::getDrawerDepth() const
-{
-    return m_drawerDepth;
-}
-
-int PageController::incrementDrawerDepth()
-{
-    return ++m_drawerDepth;
-}
-
-int PageController::decrementDrawerDepth()
-{
-    if (m_drawerDepth == 0) {
-        return m_drawerDepth;
-    } else {
-        return --m_drawerDepth;
-    }
 }
 
 bool PageController::isEdgeToEdgeEnabled()
@@ -220,7 +184,7 @@ int PageController::getSafeAreaTopMargin()
         return result;
     }
 #endif
-    return 0;
+    return m_safeAreaMargins.top();
 }
 
 int PageController::getSafeAreaBottomMargin()
@@ -236,7 +200,24 @@ int PageController::getSafeAreaBottomMargin()
         return result;
     }
 #endif
-    return 0;
+#ifdef Q_OS_IOS
+    if (QGuiApplication::inputMethod()->isVisible()) {
+        return 0;
+    }
+#endif
+    return m_safeAreaMargins.bottom();
+}
+
+void PageController::setSafeAreaMargins(const QMargins &margins)
+{
+    const QMargins previous = m_safeAreaMargins;
+    m_safeAreaMargins = margins;
+    if (previous.top() != margins.top()) {
+        emit safeAreaTopMarginChanged();
+    }
+    if (previous.bottom() != margins.bottom()) {
+        emit safeAreaBottomMarginChanged();
+    }
 }
 
 int PageController::getImeHeight()
@@ -249,7 +230,7 @@ void PageController::onShowErrorMessage(ErrorCode errorCode)
     const auto fullErrorMessage = errorString(errorCode);
     const auto errorMessage = fullErrorMessage.mid(fullErrorMessage.indexOf(". ") + 1); // remove ErrorCode %1.
     const auto errorUrl = QStringLiteral("troubleshooting/error-codes/#error-%1-%2").arg(static_cast<int>(errorCode)).arg(utils::enumToString(errorCode).toLower());
-    const auto fullMessage = QStringLiteral("<a href=\"%1\" style=\"color: #FBB26A;\">ErrorCode: %2</a>. %3").arg(errorUrl).arg(static_cast<int>(errorCode)).arg(errorMessage);
+    const auto fullMessage = QStringLiteral("<a href=\"%1\">ErrorCode: %2</a>. %3").arg(errorUrl).arg(static_cast<int>(errorCode)).arg(errorMessage);
 
     emit showErrorMessage(fullMessage);
 }

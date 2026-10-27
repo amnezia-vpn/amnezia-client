@@ -15,94 +15,90 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
+    readonly property bool realityAllowed: XrayConfigModel.transport !== "mkcp"
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
+
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
-    ListViewType {
-        id: listView
-        anchors.top: backButton.bottom
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+        contentHeight: content.implicitHeight
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("Security")
+
+                title: qsTr("Security")
             }
 
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
-                checked: security === "none"
-                onClicked: security = "none"
+                checked: XrayConfigModel.security === "none" || (XrayConfigModel.security === "reality" && !root.realityAllowed)
+                onClicked: XrayConfigModel.security = "none"
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("TLS")
-                checked: security === "tls"
-                onClicked: security = "tls"
+                checked: XrayConfigModel.security === "tls"
+                onClicked: XrayConfigModel.security = "tls"
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
-                checked: security === "reality"
-                onClicked: security = "reality"
+                enabled: root.realityAllowed
+                checked: XrayConfigModel.security === "reality" && root.realityAllowed
+                onClicked: XrayConfigModel.security = "reality"
             }
 
-            DividerType {
-            }
-
-            // ── TLS fields ────────────────────────────────────────────
-            ColumnLayout {
-                visible: security === "tls"
+            SmallTextType {
                 Layout.fillWidth: true
-                spacing: 0
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+                visible: !root.realityAllowed
+                color: AmneziaStyle.color.textAccent
+                text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: XrayConfigModel.security === "tls"
+                spacing: 12
 
                 DropDownType {
                     id: tlsAlpnDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: alpn
+                    text: XrayConfigModel.alpn
                     descriptionText: qsTr("ALPN")
                     headerText: qsTr("ALPN")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
+                        currentValue: XrayConfigModel.alpn
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.alpnOptions()
@@ -111,42 +107,30 @@ PageType {
                                 }
                             }
                         }
-                        clickedFunction: function () {
-                            alpn = selectedText
-                            tlsAlpnDropDown.text = selectedText
-                            tlsAlpnDropDown.closeTriggered()
+                        onActivated: {
+                            XrayConfigModel.alpn = selectedText
+                            tlsAlpnDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === alpn) {
+                                if (model.get(i).name === XrayConfigModel.alpn) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            tlsAlpnDropDown.text = alpn
                         }
                     }
                 }
 
                 DropDownType {
                     id: tlsFingerprintDropDown
+                    visible: XrayConfigModel.transport !== "mkcp"
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: fingerprint
+                    text: XrayConfigModel.fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.fingerprintOptions()
@@ -155,68 +139,55 @@ PageType {
                                 }
                             }
                         }
-                        clickedFunction: function () {
-                            fingerprint = selectedText
-                            tlsFingerprintDropDown.text = selectedText
-                            tlsFingerprintDropDown.closeTriggered()
+                        currentValue: XrayConfigModel.fingerprint
+                        onActivated: {
+                            XrayConfigModel.fingerprint = selectedText
+                            tlsFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === fingerprint) {
+                                if (model.get(i).name === XrayConfigModel.fingerprint) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            tlsFingerprintDropDown.text = fingerprint
-                        }
-                    }
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: sniFieldTls
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
-                    textField.text: sni
-                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== sni)
+                    placeholderText: XrayConfigModel.sniDefault()
+                    textField.text: XrayConfigModel.sni
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._-]*$/ }
+                    textField.onTextEdited: XrayConfigModel.sni = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== sni) sni = v
-                        else if (textField.text !== v) textField.text = v
+                        if (v !== XrayConfigModel.sni) XrayConfigModel.sni = v
                         sniFieldTls.errorText = XrayConfigModel.isValidSni(v) ? "" : qsTr("Enter a valid IP address or domain name")
-                        root.editDirty = false
                     }
                 }
             }
 
-            // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: security === "reality"
                 Layout.fillWidth: true
-                spacing: 0
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: XrayConfigModel.security === "reality" && root.realityAllowed
+                spacing: 12
 
                 DropDownType {
                     id: realityFingerprintDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: fingerprint
+                    text: XrayConfigModel.fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.fingerprintOptions()
@@ -225,76 +196,66 @@ PageType {
                                 }
                             }
                         }
-                        clickedFunction: function () {
-                            fingerprint = selectedText
-                            realityFingerprintDropDown.text = selectedText
-                            realityFingerprintDropDown.closeTriggered()
+                        currentValue: XrayConfigModel.fingerprint
+                        onActivated: {
+                            XrayConfigModel.fingerprint = selectedText
+                            realityFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === fingerprint) {
+                                if (model.get(i).name === XrayConfigModel.fingerprint) {
                                     selectedIndex = i;
                                     break
                                 }
                             }
                         }
                     }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            realityFingerprintDropDown.text = fingerprint
-                        }
-                    }
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: sniFieldReality
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
-                    textField.text: sni
-                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== sni)
+                    placeholderText: XrayConfigModel.sniDefault()
+                    textField.text: XrayConfigModel.sni
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._-]*$/ }
+                    textField.onTextEdited: XrayConfigModel.sni = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
-                        if (v !== sni) sni = v
-                        else if (textField.text !== v) textField.text = v
+                        if (v !== XrayConfigModel.sni) XrayConfigModel.sni = v
                         sniFieldReality.errorText = XrayConfigModel.isValidSni(v) ? "" : qsTr("Enter a valid IP address or domain name")
-                        root.editDirty = false
                     }
                 }
             }
 
             Item {
-                Layout.preferredHeight: 16
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
+            saveButton.forceActiveFocus()
             var errs = XrayConfigModel.validationErrors()
             if (errs.length > 0) {
                 PageController.showErrorMessage(errs.join("\n"))
                 return
             }
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {
@@ -302,15 +263,13 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

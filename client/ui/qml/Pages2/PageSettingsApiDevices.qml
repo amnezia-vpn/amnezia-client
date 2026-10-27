@@ -23,56 +23,63 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        anchors.bottomMargin: 24
 
         model: ApiDevicesModel
 
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {
-                id: backButton
+            z: 2
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Active Devices")
+                description: qsTr("Manage currently connected devices")
             }
 
-            BaseHeaderType {
-                id: header
-
+            NotificationType {
                 Layout.fillWidth: true
+                Layout.bottomMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Active Devices")
-                descriptionText: qsTr("Manage currently connected devices")
-            }
-
-            WarningType {
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.fillWidth: true
-
-                textString: qsTr("You can find the identifier on the Support tab or, for older versions of the app, "
+                text: qsTr("You can find the identifier on the Support tab or, for older versions of the app, "
                                  + "by tapping '+' and then the three dots at the top of the page.")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
+        }
+
+        footer: Item {
+            width: listView.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: osVersion + (isCurrentDevice ? qsTr(" (current device)") : "")
-                descriptionText: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
-                rightImageSource: "qrc:/images/controls/trash.svg"
+                subtitle: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
+                maximumLineCount: 3
+                trailingIconSource: "qrc:/images/controls/trash.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     if (isCurrentDevice && ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        return
+                    }
+
+                    if (isCurrentDevice && LocalProxyController.isEnabled
+                            && LocalProxyController.ownerId === ServersUiController.processedServerId) {
+                        PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         return
                     }
 
@@ -88,11 +95,9 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 

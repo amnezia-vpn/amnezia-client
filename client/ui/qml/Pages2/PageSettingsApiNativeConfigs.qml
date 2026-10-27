@@ -1,13 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import QtCore
 
-import SortFilterProxyModel 0.2
-
-import PageEnum 1.0
 import Style 1.0
 
 import "./"
@@ -19,160 +15,301 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save AmneziaVPN config")
 
-    BackButtonType {
-        id: backButton
+    Component.onCompleted: {
+        ApiConfigsCountryListModel.applyDefaultState(false)
+    }
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
+    property int stickyRevision: 0
+    property real savedScroll: 0
+
+    Connections {
+        target: ApiConfigsCountryListModel
+
+        function onLayoutRebuilt() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                root.stickyRevision += 1
+            })
+        }
+
+        function onSourceAboutToRefresh() {
+            root.savedScroll = menuContent.contentY - menuContent.originY
+        }
+
+        function onSourceRefreshed() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                const maxScroll = Math.max(0, menuContent.contentHeight - menuContent.height)
+                menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
+            })
+        }
+
+        function onFavoritesLimitExceeded() {
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiConfigsCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
+        }
+    }
+
+    function openConfigOptions(countryCode, countryName) {
+        moreOptionsDrawer.countryName = countryName
+        moreOptionsDrawer.countryCode = countryCode
+        moreOptionsDrawer.open()
+    }
+
+    function downloadConfig(countryCode, countryName, isIssued) {
+        if (isIssued) {
+            root.showQuestion(true, countryCode, countryName)
+        } else {
+            root.issueConfig(countryCode)
         }
     }
 
     ListViewType {
-        id: listView
+        id: menuContent
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        reuseItems: true
+
+        anchors.top: parent.top
+        anchors.topMargin: pageHeader.topBarHeight
         anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
 
-        model: ApiCountryModel
+        model: ApiConfigsCountryListModel
 
-        header: ColumnLayout {
-            width: listView.width
 
-            BaseHeaderType {
-                id: header
+        ScrollBar.vertical: pageHeader.scrollBar
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+        header: pageHeader.listHeader
 
-                headerText: qsTr("Configuration Files")
-                descriptionText: qsTr("For router setup or the AmneziaWG app")
-            }
+        footer: Item {
+            width: menuContent.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
-        delegate: ColumnLayout {
-            width: listView.width
+        delegate: Item {
+            id: rowItem
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 6
+            required property int index
+            required property string rowType
+            required property string sectionKey
+            required property string countryName
+            required property string countryCode
+            required property string countryImageCode
+            required property bool isIssued
+            required property bool isWorkerExpired
+            required property bool isFavorite
 
-                text: countryName
-                descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
-                hideDescription: isWorkerExpired ? false : true
-                descriptionColor: AmneziaStyle.color.vibrantRed
+            width: menuContent.width
 
-                leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
-                rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : countryItem.implicitHeight
+            height: implicitHeight
 
-                clickedFunction: function() {
-                    if (isIssued) {
-                        moreOptionsDrawer.countryName = countryName
-                        moreOptionsDrawer.countryCode = countryCode
-                        moreOptionsDrawer.openTriggered()
-                    } else {
-                        issueConfig(countryCode)
-                    }
-                }
+            CountrySectionHeader {
+                id: sectionHeader
+
+                listModel: ApiConfigsCountryListModel
+                width: rowItem.width
+                visible: rowItem.rowType === "section"
+
+                sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
-            DividerType {}
+            CountryListItem {
+                id: countryItem
+
+                x: 16
+                width: rowItem.width - 32
+                height: rowItem.height
+
+                visible: rowItem.rowType === "country"
+
+                text: rowItem.countryName
+                subtitle: rowItem.isWorkerExpired ? qsTr("Update available") : ""
+                maximumLineCount: 1
+                countryFlagCode: rowItem.countryImageCode
+                favorite: rowItem.isFavorite
+
+                onClicked: {
+                    if (rowItem.isIssued) {
+                        root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
+                    } else {
+                        root.issueConfig(rowItem.countryCode)
+                    }
+                }
+                onFavoriteToggled: ApiConfigsCountryListModel.toggleFavorite(rowItem.countryCode)
+
+                IconButtonType {
+                    icon.source: "qrc:/images/controls/download.svg"
+                    Accessible.name: qsTr("Download configuration file")
+
+                    onClicked: root.downloadConfig(rowItem.countryCode, rowItem.countryName, rowItem.isIssued)
+                }
+
+                IconButtonType {
+                    visible: rowItem.isIssued
+                    icon.source: "qrc:/images/controls/more-vertical.svg"
+                    Accessible.name: qsTr("Configuration file options")
+
+                    onClicked: root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
+                }
+            }
         }
     }
 
-    DrawerType2 {
+    ListPageHeaderType {
+        id: pageHeader
+
+        anchors.fill: parent
+
+        listView: menuContent
+        title: qsTr("Configuration files")
+
+        collapsibleContent: ColumnLayout {
+            spacing: 0
+
+            BodyTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: 8
+
+                text: qsTr("For router setup or the AmneziaWG app")
+                color: AmneziaStyle.color.textSecondary
+            }
+        }
+
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
+
+                listModel: ApiConfigsCountryListModel
+
+                onSortRequested: sortDrawer.open()
+            },
+
+            CountryUseCaseChips {
+                id: useCaseChips
+
+                listModel: ApiConfigsCountryListModel
+
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.preferredHeight: useCaseChips.implicitHeight
+            },
+
+            NotificationType {
+                id: warning
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 24
+
+                text: qsTr("New configurations are available for some locations. We recommend updating the files")
+
+                visible: ApiCountryModel.hasExpiredWorkerConfigs
+            },
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 24
+            }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiConfigsCountryListModel
+            listView: menuContent
+            header: pageHeader
+            revision: root.stickyRevision
+        }
+
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: pageHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
+
+            visible: !ApiConfigsCountryListModel.hasResults
+
+            isSearchResult: ApiConfigsCountryListModel.isSearchActive
+            categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
+                          ? CountryRegionNames.useCaseName(ApiConfigsCountryListModel, ApiConfigsCountryListModel.activeUseCaseId)
+                          : ""
+
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiConfigsCountryListModel.activeUseCaseId = "all"
+            }
+        }
+    }
+
+    SortCountriesDrawer {
+        id: sortDrawer
+
+        listModel: ApiConfigsCountryListModel
+    }
+
+    SheetType {
         id: moreOptionsDrawer
 
         property string countryName
         property string countryCode
 
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.4375
+        expandedHeight: moreOptionsContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
-        expandedStateContent: Item {
-            implicitHeight: moreOptionsDrawer.expandedHeight
+        ColumnLayout {
+            id: moreOptionsContent
 
-            BackButtonType {
-                id: moreOptionsDrawerBackButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 16
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
+            spacing: 0
 
-                backButtonFunction: function() {
-                    moreOptionsDrawer.closeTriggered()
+            SectionHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
+
+                headerText: moreOptionsDrawer.countryName + qsTr(" configuration file")
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Generate a new configuration file")
+                subtitle: qsTr("The previously created one will stop working")
+
+                onClicked: {
+                    root.showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                 }
             }
 
-            ListViewType {
-                id: drawerListView
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                anchors.top: moreOptionsDrawerBackButton.bottom
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
+                text: qsTr("Revoke the current configuration file")
 
-                header: ColumnLayout {
-                    width: drawerListView.width
-
-                    Header2Type {
-                        Layout.fillWidth: true
-                        Layout.margins: 16
-
-                        headerText: moreOptionsDrawer.countryName + qsTr(" configuration file")
-                    }
-                }
-
-                model: 1 // fake model to force the ListView to be created without a model
-
-                delegate: ColumnLayout {
-                    width: drawerListView.width
-
-                    LabelWithButtonType {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-
-                        text: qsTr("Generate a new configuration file")
-                        descriptionText: qsTr("The previously created one will stop working")
-
-                        clickedFunction: function() {
-                            showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
-                        }
-                    }
-
-                    DividerType {}
-                }
-
-                footer: ColumnLayout {
-                    width: drawerListView.width
-
-                    LabelWithButtonType {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-
-                        text: qsTr("Revoke the current configuration file")
-
-                        clickedFunction: function() {
-                            showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
-                        }
-                    }
-
-                    DividerType {}
+                onClicked: {
+                    root.showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                 }
             }
         }
@@ -227,14 +364,20 @@ PageType {
 
         var yesButtonFunction = function() {
             if (isConfigIssue) {
-                issueConfig(countryCode)
+                root.issueConfig(countryCode)
             } else {
-                revokeConfig(countryCode)
+                root.revokeConfig(countryCode)
             }
-            moreOptionsDrawer.closeTriggered()
+            moreOptionsDrawer.close()
         }
         var noButtonFunction = function() {}
 
-        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
+
+    SnackbarType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiConfigsCountryListModel.activeUseCaseId = "favorites"
     }
 }

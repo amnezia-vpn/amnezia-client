@@ -6,8 +6,7 @@ import os
 
 class Golang(ConanFile):
     name = "go"
-    version = "1.26.0"
-    
+    version = "1.27.1"
     settings = "os", "arch"
 
     def layout(self):

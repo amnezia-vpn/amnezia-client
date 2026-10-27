@@ -1,11 +1,7 @@
 #include "languageUiController.h"
 
-LanguageUiController::LanguageUiController(SettingsController* settingsController,
-                                           LanguageModel* languageModel,
-                                           QObject *parent)
-    : QObject(parent),
-      m_settingsController(settingsController),
-      m_languageModel(languageModel)
+LanguageUiController::LanguageUiController(SettingsController *settingsController, LanguageModel *languageModel, QObject *parent)
+    : QObject(parent), m_settingsController(settingsController), m_languageModel(languageModel)
 {
 }
 
@@ -33,6 +29,11 @@ int LanguageUiController::getCurrentLanguageIndex() const
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
     case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
     case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
+    case QLocale::Korean: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Korean); break;
+    case QLocale::Spanish: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Spanish); break;
+    case QLocale::French: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::French); break;
+    case QLocale::Thai: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Thai); break;
+    case QLocale::Indonesian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Indonesian); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
@@ -64,18 +65,25 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
     case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
     case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
     case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
+    case QLocale::Korean: return LanguageSettings::AvailableLanguageEnum::Korean;
     case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
+    case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
+    case QLocale::French: return LanguageSettings::AvailableLanguageEnum::French;
+    case QLocale::Thai: return LanguageSettings::AvailableLanguageEnum::Thai;
+    case QLocale::Indonesian: return LanguageSettings::AvailableLanguageEnum::Indonesian;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
 }
 
 QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
 {
+    const QString utm("utm_source=app&utm_campaign=amnezia_hello");
     auto locale = m_settingsController->getAppLanguage();
     if (locale.language() == QLocale::Russian) {
-        return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+        const QString mirror("https://storage.googleapis.com/amnezia/amnezia.org");
+        return path.isEmpty() ? QString("%1?%2").arg(mirror, utm) : QString("%1?m-path=%2&%3").arg(mirror, path, utm);
     }
-    return QString("https://amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+    return path.isEmpty() ? QString("https://amnezia.org?%1").arg(utm) : QString("https://amnezia.org/%1?%2").arg(path, utm);
 }
 
 QString LanguageUiController::getCurrentDocsUrl(const QString &path) const
@@ -85,6 +93,15 @@ QString LanguageUiController::getCurrentDocsUrl(const QString &path) const
         return "https://storage.googleapis.com/amnezia/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }
     return QString("https://docs.amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+}
+
+QString LanguageUiController::getCurrentHostUrl(const QString &path) const
+{
+    auto locale = m_settingsController->getAppLanguage();
+    if (locale.language() == QLocale::Russian) {
+        return "https://storage.googleapis.com/amnezia/host" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    }
+    return QString("https://amnezia.host") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
 }
 
 QString LanguageUiController::getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const
@@ -100,6 +117,11 @@ QString LanguageUiController::getLocalLanguageName(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
+    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
+    case LanguageSettings::AvailableLanguageEnum::Spanish: strLanguage = "Español"; break;
+    case LanguageSettings::AvailableLanguageEnum::French: strLanguage = "Français"; break;
+    case LanguageSettings::AvailableLanguageEnum::Thai: strLanguage = "ไทย"; break;
+    case LanguageSettings::AvailableLanguageEnum::Indonesian: strLanguage = "Bahasa Indonesia"; break;
     default: break;
     }
 
@@ -118,7 +140,11 @@ QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Burmese: return QLocale::Burmese;
     case LanguageSettings::AvailableLanguageEnum::Urdu: return QLocale::Urdu;
     case LanguageSettings::AvailableLanguageEnum::Hindi: return QLocale::Hindi;
+    case LanguageSettings::AvailableLanguageEnum::Korean: return QLocale::Korean;
+    case LanguageSettings::AvailableLanguageEnum::Spanish: return QLocale::Spanish;
+    case LanguageSettings::AvailableLanguageEnum::French: return QLocale::French;
+    case LanguageSettings::AvailableLanguageEnum::Thai: return QLocale::Thai;
+    case LanguageSettings::AvailableLanguageEnum::Indonesian: return QLocale::Indonesian;
     default: return QLocale::English;
     }
 }
-

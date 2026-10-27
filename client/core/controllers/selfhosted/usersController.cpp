@@ -2,6 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDateTime>
 
 #include "core/utils/containerEnum.h"
@@ -55,6 +56,33 @@ int UsersController::clientIndexById(const QString &clientId, const QJsonArray &
     return -1;
 }
 
+QString UsersController::readXrayVolumeUuid(const DockerContainer container, const ServerCredentials &credentials,
+                                            SshSession *sshSession) const
+{
+    ErrorCode error = ErrorCode::NoError;
+    const QString uuid = QString::fromUtf8(sshSession->getTextFileFromContainer(
+            container, credentials, QString::fromLatin1(amnezia::protocols::xray::uuidPath), error));
+    if (error != ErrorCode::NoError) {
+        return {};
+    }
+    return uuid.trimmed();
+}
+
+int UsersController::stripXrayVolumeUuidFromTable(QJsonArray &clientsTable, const QString &volumeUuid)
+{
+    if (volumeUuid.isEmpty()) {
+        return 0;
+    }
+    int removed = 0;
+    for (int i = clientsTable.size() - 1; i >= 0; --i) {
+        if (clientsTable.at(i).toObject().value(configKey::clientId).toString() == volumeUuid) {
+            clientsTable.removeAt(i);
+            ++removed;
+        }
+    }
+    return removed;
+}
+
 void UsersController::migration(const QByteArray &clientsTableString, QJsonArray &clientsTable)
 {
     QJsonObject clientsTableObj = QJsonDocument::fromJson(clientsTableString).object();
@@ -81,7 +109,7 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
+        stdOut += data;
         return ErrorCode::NoError;
     };
 
@@ -103,16 +131,6 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
 
     const auto getStrValue = [](const auto str) { return str.mid(str.indexOf(":") + 1).trimmed(); };
 
-    const auto parts = stdOut.split('\n');
-    const auto peerList = parts.filter("peer:");
-    const auto latestHandshakeList = parts.filter("latest handshake:");
-    const auto transferredDataList = parts.filter("transfer:");
-    const auto allowedIpsList = parts.filter("allowed ips:");
-
-    if (allowedIpsList.isEmpty() || latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty()) {
-        return error;
-    }
-
     const auto changeHandshakeFormat = [](QString &latestHandshake) {
         const std::vector<std::pair<QString, QString>> replaceMap = { { " days", "d" },    { " hours", "h" }, { " minutes", "m" },
                                                                       { " seconds", "s" }, { " day", "d" },   { " hour", "h" },
@@ -123,20 +141,49 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
         }
     };
 
-    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size() && i < allowedIpsList.size(); ++i) {
+    const auto lines = stdOut.split('\n');
+    WgShowData currentPeer;
+    bool hasPeer = false;
 
-        const auto transferredData = getStrValue(transferredDataList[i]).split(",");
-        auto latestHandshake = getStrValue(latestHandshakeList[i]);
-        auto serverBytesReceived = transferredData.front().trimmed();
-        auto serverBytesSent = transferredData.back().trimmed();
-        auto allowedIps = getStrValue(allowedIpsList[i]);
+    for (const QString &line : lines) {
+        const QString trimmedLine = line.trimmed();
 
-        changeHandshakeFormat(latestHandshake);
-
-        serverBytesReceived.chop(QStringLiteral(" received").length());
-        serverBytesSent.chop(QStringLiteral(" sent").length());
-
-        data.push_back({ getStrValue(peerList[i]), latestHandshake, serverBytesSent, serverBytesReceived, allowedIps });
+        if (trimmedLine.startsWith("peer:")) {
+            if (hasPeer) {
+                data.push_back(currentPeer);
+            }
+            currentPeer = WgShowData();
+            currentPeer.clientId = getStrValue(trimmedLine);
+            hasPeer = true;
+        } else if (hasPeer) {
+            if (trimmedLine.startsWith("latest handshake:")) {
+                auto latestHandshake = getStrValue(trimmedLine);
+                changeHandshakeFormat(latestHandshake);
+                currentPeer.latestHandshake = latestHandshake;
+            } else if (trimmedLine.startsWith("transfer:")) {
+                const auto transferredData = getStrValue(trimmedLine).split(",");
+                if (transferredData.size() == 2) {
+                    auto serverBytesReceived = transferredData.front().trimmed();
+                    auto serverBytesSent = transferredData.back().trimmed();
+                    if (serverBytesReceived.endsWith(" received")) {
+                        serverBytesReceived.chop(QStringLiteral(" received").length());
+                    }
+                    if (serverBytesSent.endsWith(" sent")) {
+                        serverBytesSent.chop(QStringLiteral(" sent").length());
+                    }
+                    currentPeer.dataReceived = serverBytesSent;
+                    currentPeer.dataSent = serverBytesReceived;
+                } else {
+                    logger.warning() << QString("Unexpected %1 show transfer format, skipping traffic stats for the peer")
+                                                .arg(showBin);
+                }
+            } else if (trimmedLine.startsWith("allowed ips:")) {
+                currentPeer.allowedIps = getStrValue(trimmedLine);
+            }
+        }
+    }
+    if (hasPeer) {
+        data.push_back(currentPeer);
     }
 
     return error;
@@ -229,7 +276,8 @@ ErrorCode UsersController::getWireGuardClients(const DockerContainer container, 
 }
 
 ErrorCode UsersController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                                                     SshSession* sshSession, int &count, QJsonArray &clientsTable)
+                                                     SshSession* sshSession, int &count, QJsonArray &clientsTable,
+                                                     const QString &volumeDefaultUuid)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -264,6 +312,7 @@ ErrorCode UsersController::getXrayClients(const DockerContainer container, const
     }
 
     const QJsonArray clients = settings[protocols::xray::clients].toArray();
+    const QString xrayDefaultUuid = volumeDefaultUuid;
     for (const auto &clientValue : clients) {
         const QJsonObject clientObj = clientValue.toObject();
         if (!clientObj.contains(protocols::xray::id)) {
@@ -271,9 +320,6 @@ ErrorCode UsersController::getXrayClients(const DockerContainer container, const
             continue;
         }
         QString clientId = clientObj[protocols::xray::id].toString();
-        
-        QString xrayDefaultUuid = sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
-        xrayDefaultUuid.replace("\n", "");
 
         if (!isClientExists(clientId, clientsTable) && clientId != xrayDefaultUuid) {
             QJsonObject client;
@@ -320,6 +366,9 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
 
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
+    const QString xrayVolumeUuid =
+            (container == DockerContainer::Xray) ? readXrayVolumeUuid(container, credentials, &sshSession) : QString();
+
     if (m_clientsTable.isEmpty()) {
         migration(clientsTableString, m_clientsTable);
 
@@ -330,7 +379,7 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
         } else if (container == DockerContainer::WireGuard || ContainerUtils::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, &sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::Xray) {
-            error = getXrayClients(container, credentials, &sshSession, count, m_clientsTable);
+            error = getXrayClients(container, credentials, &sshSession, count, m_clientsTable, xrayVolumeUuid);
         }
         if (error != ErrorCode::NoError) {
             emit clientsUpdated(QJsonArray());
@@ -343,6 +392,15 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
             if (error != ErrorCode::NoError) {
                 logger.error() << "Failed to upload the clientsTable file to the server";
             }
+        }
+    }
+
+    if (container == DockerContainer::Xray) {
+        const int stripped = stripXrayVolumeUuidFromTable(m_clientsTable, xrayVolumeUuid);
+        if (stripped > 0) {
+            const QByteArray strippedTable = QJsonDocument(m_clientsTable).toJson();
+            const ErrorCode writeError =
+                    sshSession.uploadTextFileToContainer(container, credentials, strippedTable, clientsTableFile);
         }
     }
 
@@ -403,6 +461,13 @@ ErrorCode UsersController::appendClient(const QString &serverId, const QString &
     error = updateClients(serverId, container);
     if (error != ErrorCode::NoError) {
         return error;
+    }
+
+    if (container == DockerContainer::Xray) {
+        const QString volumeUuid = readXrayVolumeUuid(container, credentials, &sshSession);
+        if (!volumeUuid.isEmpty() && clientId == volumeUuid) {
+            return ErrorCode::NoError;
+        }
     }
 
     int existingIndex = clientIndexById(clientId, m_clientsTable);
@@ -615,6 +680,19 @@ ErrorCode UsersController::revokeXray(const int row,
 
     ErrorCode error = ErrorCode::NoError;
 
+    auto client = clientsTable.at(row).toObject();
+    QString clientId = client.value(configKey::clientId).toString();
+
+    const QString volumeUuid = readXrayVolumeUuid(container, credentials, sshSession);
+    if (!volumeUuid.isEmpty() && clientId == volumeUuid) {
+        clientsTable.removeAt(row);
+        const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+        const QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable")
+                                                 .arg(ContainerUtils::containerTypeToString(container));
+        error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+        return ErrorCode::NoError;
+    }
+
     const QString serverConfigPath = amnezia::protocols::xray::serverConfigPath;
     const QString configString = sshSession->getTextFileFromContainer(container, credentials, serverConfigPath, error);
     if (error != ErrorCode::NoError) {
@@ -627,9 +705,6 @@ ErrorCode UsersController::revokeXray(const int row,
         logger.error() << "Failed to parse xray server config JSON";
         return ErrorCode::InternalError;
     }
-
-    auto client = clientsTable.at(row).toObject();
-    QString clientId = client.value(configKey::clientId).toString();
 
     QJsonObject configObj = serverConfig.object();
     if (!configObj.contains(protocols::xray::inbounds)) {

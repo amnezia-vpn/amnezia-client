@@ -48,11 +48,15 @@ namespace amnezia
 
         namespace xray
         {
+            constexpr char dataDir[] = "/opt/amnezia/xray";
             constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
+            constexpr char expectedServerXrayRelease[] = "v26.7.28";
             constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char tlsCertPath[] = "/opt/amnezia/xray/tls_cert.pem";
+            constexpr char tlsKeyPath[] = "/opt/amnezia/xray/tls_key.pem";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";
@@ -60,25 +64,27 @@ namespace amnezia
             constexpr char defaultLocalAddr[] = "10.33.0.2";
             constexpr char defaultLocalListenAddr[] = "127.0.0.1";
 
+            constexpr int settingsVersionCurrent = 2;
+
             constexpr char defaultSecurity[] = "reality";
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
             constexpr char defaultSni[] = "www.googletagmanager.com";
-            constexpr char defaultAlpn[] = "HTTP/2";
+            constexpr char defaultAlpn[] = "h2";
 
-            constexpr char defaultXhttpMode[] = "Auto";
-            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
+            constexpr char defaultXhttpMode[] = "Stream-one";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
-            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "";
             constexpr char defaultXhttpSeqPlacement[] = "Path";
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
             constexpr char defaultXhttpHost[] = "www.googletagmanager.com";
+            constexpr char defaultXhttpPath[] = "/";
             constexpr char defaultXhttpUplinkChunkSize[] = "0";
-            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1";
-            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "100";
+            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1000000";
+            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "1000000";
             constexpr char defaultXhttpScMinPostsIntervalMsMin[] = "100";
             constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
             constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
@@ -86,17 +92,24 @@ namespace amnezia
 
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";
+            constexpr char defaultXPaddingKey[] = "x_padding";
+            constexpr char defaultXPaddingHeader[] = "X-Padding";
+            constexpr char defaultXPaddingBytesMin[] = "100";
+            constexpr char defaultXPaddingBytesMax[] = "1000";
 
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";
             constexpr char defaultMkcpDownlinkCapacity[] = "20";
-            constexpr char defaultMkcpReadBufferSize[] = "2";
-            constexpr char defaultMkcpWriteBufferSize[] = "2";
+            constexpr char defaultMkcpMtu[] = "1350";
+            constexpr char defaultMkcpCwndMultiplier[] = "1";
 
             constexpr char outbounds[] = "outbounds";
             constexpr char inbounds[] = "inbounds";
             constexpr char settings[] = "settings";
             constexpr char streamSettings[] = "streamSettings";
+            constexpr char tag[] = "tag";
+            constexpr char sockopt[] = "sockopt";
+            constexpr char dialerProxy[] = "dialerProxy";
             constexpr char vnext[] = "vnext";
             constexpr char users[] = "users";
             constexpr char servers[] = "servers";
@@ -117,6 +130,92 @@ namespace amnezia
             constexpr char spiderX[] = "spiderX";
             constexpr char user[] = "user";
             constexpr char pass[] = "pass";
+
+            constexpr char logBlock[] = "log";
+            constexpr char logLevel[] = "loglevel";
+            constexpr char logLevelError[] = "error";
+            constexpr char protocol[] = "protocol";
+            constexpr char protocolVless[] = "vless";
+            constexpr char protocolFreedom[] = "freedom";
+            constexpr char protocolSocks[] = "socks";
+            constexpr char decryption[] = "decryption";
+            constexpr char decryptionNone[] = "none";
+            constexpr char listen[] = "listen";
+            constexpr char udp[] = "udp";
+
+            constexpr char tlsSettings[] = "tlsSettings";
+            constexpr char xhttpSettings[] = "xhttpSettings";
+            constexpr char kcpSettings[] = "kcpSettings";
+            constexpr char alpn[] = "alpn";
+            constexpr char certificates[] = "certificates";
+            constexpr char certificateFile[] = "certificateFile";
+            constexpr char keyFile[] = "keyFile";
+            constexpr char allowInsecure[] = "allowInsecure";
+            constexpr char pinnedPeerCertSha256[] = "pinnedPeerCertSha256";
+
+            constexpr char dest[] = "dest";
+            constexpr char privateKey[] = "privateKey";
+            constexpr char shortIds[] = "shortIds";
+
+            constexpr char xhttpHost[] = "host";
+            constexpr char xhttpPath[] = "path";
+            constexpr char xhttpMode[] = "mode";
+            constexpr char noGrpcHeader[] = "noGRPCHeader";
+            constexpr char noSseHeader[] = "noSSEHeader";
+            constexpr char sessionIdPlacement[] = "sessionIDPlacement";
+            constexpr char sessionIdKey[] = "sessionIDKey";
+            constexpr char seqPlacement[] = "seqPlacement";
+            constexpr char seqKey[] = "seqKey";
+            constexpr char uplinkDataPlacement[] = "uplinkDataPlacement";
+            constexpr char uplinkDataKey[] = "uplinkDataKey";
+            constexpr char uplinkHttpMethod[] = "uplinkHTTPMethod";
+            constexpr char uplinkChunkSize[] = "uplinkChunkSize";
+            constexpr char scMaxBufferedPosts[] = "scMaxBufferedPosts";
+            constexpr char scMaxEachPostBytes[] = "scMaxEachPostBytes";
+            constexpr char scMinPostsIntervalMs[] = "scMinPostsIntervalMs";
+            constexpr char scStreamUpServerSecs[] = "scStreamUpServerSecs";
+            constexpr char xPaddingObfsMode[] = "xPaddingObfsMode";
+            constexpr char xPaddingBytes[] = "xPaddingBytes";
+            constexpr char xPaddingKey[] = "xPaddingKey";
+            constexpr char xPaddingHeader[] = "xPaddingHeader";
+            constexpr char xPaddingPlacement[] = "xPaddingPlacement";
+            constexpr char xPaddingMethod[] = "xPaddingMethod";
+
+            constexpr char xmux[] = "xmux";
+            constexpr char xmuxMaxConcurrency[] = "maxConcurrency";
+            constexpr char xmuxMaxConnections[] = "maxConnections";
+            constexpr char xmuxCMaxReuseTimes[] = "cMaxReuseTimes";
+            constexpr char xmuxHMaxRequestTimes[] = "hMaxRequestTimes";
+            constexpr char xmuxHMaxReusableSecs[] = "hMaxReusableSecs";
+            constexpr char xmuxHKeepAlivePeriod[] = "hKeepAlivePeriod";
+
+            constexpr char kcpTti[] = "tti";
+            constexpr char kcpMtu[] = "mtu";
+            constexpr char kcpUplinkCapacity[] = "uplinkCapacity";
+            constexpr char kcpDownlinkCapacity[] = "downlinkCapacity";
+            constexpr char kcpCwndMultiplier[] = "cwndMultiplier";
+            constexpr char kcpMaxSendingWindow[] = "maxSendingWindow";
+
+            constexpr char legacyXhttpMethod[] = "method";
+            constexpr char legacySessionPlacement[] = "sessionPlacement";
+            constexpr char legacyScSessionPlacement[] = "scSessionPlacement";
+            constexpr char legacyScSeqPlacement[] = "scSeqPlacement";
+            constexpr char legacyScUplinkDataPlacement[] = "scUplinkDataPlacement";
+            constexpr char legacySessionKey[] = "sessionKey";
+            constexpr char legacyUplinkChunkSize[] = "xhttpUplinkChunkSize";
+            constexpr char legacyXPaddingBlock[] = "xPadding";
+            constexpr char legacyRangeFrom[] = "from";
+            constexpr char legacyRangeTo[] = "to";
+
+            constexpr char networkTcp[] = "tcp";
+            constexpr char networkXhttp[] = "xhttp";
+            constexpr char networkKcp[] = "kcp";
+            constexpr char transportRaw[] = "raw";
+            constexpr char transportXhttp[] = "xhttp";
+            constexpr char transportMkcp[] = "mkcp";
+            constexpr char securityNone[] = "none";
+            constexpr char securityTls[] = "tls";
+            constexpr char securityReality[] = "reality";
         }
 
         namespace cloak
@@ -183,23 +282,39 @@ namespace amnezia
             constexpr char defaultJunkPacketCount[] = "3";
             constexpr char defaultJunkPacketMinSize[] = "10";
             constexpr char defaultJunkPacketMaxSize[] = "30";
-            constexpr char defaultInitPacketJunkSize[] = "15";
-            constexpr char defaultResponsePacketJunkSize[] = "18";
-            constexpr char defaultCookieReplyPacketJunkSize[] = "20";
-            constexpr char defaultTransportPacketJunkSize[] = "23";
+            constexpr int junkPacketSizeMin = 12;
+            constexpr int initPacketJunkSizeMax = 150;
+            constexpr int responsePacketJunkSizeMax = 150;
+            constexpr int cookieReplyPacketJunkSizeMax = 64;
 
-            constexpr char defaultInitPacketMagicHeader[] = "1020325451";
-            constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
-            constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
-            constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+            constexpr char defaultInitPacketMagicHeader[] = "1";
+            constexpr char defaultResponsePacketMagicHeader[] = "2";
+            constexpr char defaultUnderloadPacketMagicHeader[] = "3";
+            constexpr char defaultTransportPacketMagicHeader[] = "4";
             constexpr char defaultSpecialJunk1[] = "<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>";
             constexpr char defaultSpecialJunk2[] = "";
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
             constexpr char defaultSpecialJunk5[] = "";
+            constexpr char defaultPadding[] = "12";
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
+            constexpr char awgV3[] = "3.1";
+
+            constexpr char defaultContentPaddingAddition[] = "10-100";
+            constexpr char defaultRekeyAfterTime[] = "100-120";
+            constexpr char defaultRekeyTimeout[] = "3-7";
+            constexpr char defaultRejectAfterTime[] = "150-180";
+            constexpr char defaultKeepaliveTimeout[] = "5-15";
+            constexpr char defaultMaxHandshakeAttempts[] = "15-20";
+            constexpr char defaultPersistentKeepAlive[] = "25-35";
+            constexpr char defaultRandomTrailers[] = "on";
+            constexpr char defaultDisableCookies[] = "on";
+            constexpr char awgBoolOn[] = "on";
+            constexpr char awgBoolOff[] = "off";
+
+
         }
 
         namespace socks5Proxy
@@ -235,7 +350,8 @@ namespace amnezia
 
             constexpr char defaultPort[]           = "443";
             constexpr char defaultWorkers[]        = "2";
-            constexpr int  maxWorkers              = 32;
+            // mtproto-proxy loses connectivity with -M >= 20; keep the cap at the highest known-good value.
+            constexpr int  maxWorkers              = 19;
             constexpr int  botTagHexLength         = 32;
             constexpr char defaultTlsDomain[]      = "googletagmanager.com";
         }
@@ -254,7 +370,6 @@ namespace amnezia
             constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
             constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
             constexpr char userNameKey[]          = "telemt_user_name";
-            // Stored for UI only (Telemt server ignores these; same controls as MTProxy page)
             constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
             constexpr char workersKey[]           = "telemt_workers";
             constexpr char workersModeKey[]       = "telemt_workers_mode";
@@ -273,6 +388,29 @@ namespace amnezia
             constexpr char workersModeManual[]     = "manual";
             constexpr int  maxWorkers              = 32;
             constexpr int  botTagHexLength         = 32;
+        }
+
+        namespace tProxy
+        {
+            constexpr char secretKey[]        = "tproxy_secret";
+            constexpr char hostnameKey[]      = "tproxy_hostname";
+            constexpr char acmeEmailKey[]     = "tproxy_acme_email";
+            constexpr char carrierModeKey[]   = "tproxy_carrier_mode";
+            constexpr char tgLinkKey[]        = "tproxy_tg_link";
+            constexpr char tmeLinkKey[]       = "tproxy_tme_link";
+            constexpr char isEnabledKey[]     = "tproxy_is_enabled";
+            constexpr char workersKey[]       = "tproxy_workers";
+            constexpr char httpPortKey[]      = "tproxy_http_port";
+
+            constexpr char carrierModeHttps[]          = "https";
+            constexpr char carrierModeHttpsLanes[]     = "https-lanes";
+            constexpr char carrierModeWebsocket[]      = "websocket";
+            constexpr char carrierModeWebsocketLanes[] = "websocket-lanes";
+
+            constexpr char defaultHttpPort[] = "80";
+            constexpr char defaultPort[]     = "443";
+            constexpr char defaultWorkers[] = "1";
+            constexpr int  maxWorkers       = 32;
         }
 
     } // namespace protocols

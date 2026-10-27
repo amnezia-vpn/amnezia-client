@@ -8,8 +8,9 @@
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
-#ifdef Q_OS_ANDROID
-    #include "platforms/android/android_controller.h"
+#include "core/controllers/logsController.h"
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "core/utils/swiftBridge.h"
 #endif
 
 QString getPlatformName()
@@ -87,6 +88,9 @@ void SettingsController::toggleLogging(bool enable)
         }
     }
 #endif
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
+#endif
     Logger::setServiceLogsEnabled(enable);
 
     if (enable) {
@@ -96,12 +100,8 @@ void SettingsController::toggleLogging(bool enable)
 
 void SettingsController::clearLogs()
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->clearLogs();
-#else
-    Logger::clearLogs(false);
-    Logger::clearServiceLogs();
-#endif
+    LogsController::clear(LogsController::Stream::App);
+    LogsController::clear(LogsController::Stream::Tunnel);
 }
 
 QByteArray SettingsController::backupAppConfig() const
@@ -117,6 +117,11 @@ QByteArray SettingsController::backupAppConfig() const
     config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     return QJsonDocument(config).toJson();
+}
+
+int SettingsController::unsupportedFormatConfigsSkippedCount() const
+{
+    return m_serversRepository->unsupportedFormatConfigsCount();
 }
 
 ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
@@ -250,6 +255,16 @@ void SettingsController::toggleNewsNotificationsEnabled(bool enable)
     m_appSettingsRepository->setNewsNotifications(enable);
 }
 
+bool SettingsController::isAutoUpdateCheckEnabled() const
+{
+    return m_appSettingsRepository->isAutoUpdateCheckEnabled();
+}
+
+void SettingsController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_appSettingsRepository->setAutoUpdateCheckEnabled(enable);
+}
+
 bool SettingsController::isKillSwitchEnabled() const
 {
     return m_appSettingsRepository->isKillSwitchEnabled();
@@ -349,16 +364,6 @@ QLocale SettingsController::getAppLanguage() const
 void SettingsController::setAppLanguage(const QLocale &locale)
 {
     m_appSettingsRepository->setAppLanguage(locale);
-}
-
-bool SettingsController::isPremV1MigrationReminderActive() const
-{
-    return m_appSettingsRepository->isPremV1MigrationReminderActive();
-}
-
-void SettingsController::disablePremV1MigrationReminder()
-{
-    m_appSettingsRepository->disablePremV1MigrationReminder();
 }
 
 QString SettingsController::nextAvailableServerName() const

@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
-
     function clampSigned(text) {
         if (text === "" || text === "-")
             return ""
@@ -30,200 +28,174 @@ PageType {
         return String(n)
     }
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
+    FlickableType {
+        id: flickable
 
-    ListViewType {
-        id: listView
-        anchors.top: backButton.bottom
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+        contentHeight: content.implicitHeight
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("xmux")
-            }
 
-            SwitcherType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-                text: qsTr("xmux")
-                checked: xmuxEnabled
-                onToggled: xmuxEnabled = checked
-            }
-
-            DividerType {
+                title: qsTr("xmux")
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
-                enabled: xmuxEnabled
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                // maxConcurrency
-                CaptionTextType {
+                spacing: 12
+
+                SwitchRowType {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 24
-                    Layout.bottomMargin: 8
-                    text: qsTr("maxConcurrency")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxMaxConcurrencyMin
-                    maxValue: xmuxMaxConcurrencyMax
-                    onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    text: qsTr("xmux")
+                    descriptionText: qsTr("Set either maxConcurrency or maxConnections, not both")
+                    checked: XrayConfigModel.xmuxEnabled
+                    onToggled: XrayConfigModel.xmuxEnabled = checked
                 }
 
-                // maxConnections
-                CaptionTextType {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("maxConnections")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxMaxConnectionsMin
-                    maxValue: xmuxMaxConnectionsMax
-                    onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    Layout.topMargin: 12
 
-                // cMaxReuseTimes
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("cMaxReuseTimes")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxCMaxReuseTimesMin
-                    maxValue: xmuxCMaxReuseTimesMax
-                    onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    enabled: XrayConfigModel.xmuxEnabled
+                    spacing: 12
 
-                // hMaxRequestTimes
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("hMaxRequestTimes")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxHMaxRequestTimesMin
-                    maxValue: xmuxHMaxRequestTimesMax
-                    onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("maxConcurrency")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: XrayConfigModel.xmuxMaxConcurrencyMin
+                        maxValue: XrayConfigModel.xmuxMaxConcurrencyMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { XrayConfigModel.xmuxMaxConcurrencyMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxMaxConcurrencyMax = val }
+                    }
 
-                // hMaxReusableSecs
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("hMaxReusableSecs")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxHMaxReusableSecsMin
-                    maxValue: xmuxHMaxReusableSecsMax
-                    onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("maxConnections")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: XrayConfigModel.xmuxMaxConnectionsMin
+                        maxValue: XrayConfigModel.xmuxMaxConnectionsMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { XrayConfigModel.xmuxMaxConnectionsMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxMaxConnectionsMax = val }
+                    }
 
-                TextFieldWithHeaderType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    headerText: qsTr("hKeepAlivePeriod")
-                    subtitleText: qsTr("Integer, may be negative")
-                    textField.text: xmuxHKeepAlivePeriod
-                    textField.maximumLength: 11
-                    textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xmuxHKeepAlivePeriod)
-                    textField.onEditingFinished: {
-                        var v = root.clampSigned(textField.text)
-                        if (v !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("cMaxReuseTimes")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: XrayConfigModel.xmuxCMaxReuseTimesMin
+                        maxValue: XrayConfigModel.xmuxCMaxReuseTimesMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { XrayConfigModel.xmuxCMaxReuseTimesMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxCMaxReuseTimesMax = val }
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("hMaxRequestTimes")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: XrayConfigModel.xmuxHMaxRequestTimesMin
+                        maxValue: XrayConfigModel.xmuxHMaxRequestTimesMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { XrayConfigModel.xmuxHMaxRequestTimesMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxHMaxRequestTimesMax = val }
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("hMaxReusableSecs")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: XrayConfigModel.xmuxHMaxReusableSecsMin
+                        maxValue: XrayConfigModel.xmuxHMaxReusableSecsMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { XrayConfigModel.xmuxHMaxReusableSecsMin = val }
+                        onMaxChanged: function(val) { XrayConfigModel.xmuxHMaxReusableSecsMax = val }
+                    }
+
+                    TextFieldType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        headerText: qsTr("hKeepAlivePeriod")
+                        helperText: qsTr("HTTP keep-alive period. Integer, may be negative.")
+                        textField.text: XrayConfigModel.xmuxHKeepAlivePeriod
+                        textField.maximumLength: 11
+                        textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
+                        textField.onTextEdited: XrayConfigModel.xmuxHKeepAlivePeriod = textField.text
+                        textField.onEditingFinished: {
+                            var v = root.clampSigned(textField.text)
+                            if (v !== XrayConfigModel.xmuxHKeepAlivePeriod) XrayConfigModel.xmuxHKeepAlivePeriod = v
+                        }
                     }
                 }
             }
 
             Item {
-                Layout.preferredHeight: 16
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {
@@ -231,15 +203,13 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

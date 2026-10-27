@@ -4,6 +4,8 @@
 
 #include "platforms/ios/iosnotificationhandler.h"
 
+#include "core/utils/appUiConfig.h"
+
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
 
@@ -75,7 +77,8 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
   UNTimeIntervalNotificationTrigger* trigger =
       [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timerSec repeats:NO];
 
-  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"amneziavpn"
+  UNNotificationRequest* request =
+      [UNNotificationRequest requestWithIdentifier:[NSString stringWithUTF8String:APP_NOTIFICATION_IDENTIFIER]
                                                                         content:content
                                                                         trigger:trigger];
 
@@ -157,7 +160,8 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
   UNTimeIntervalNotificationTrigger* trigger =
       [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timerSec repeats:NO];
 
-  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"amneziavpn"
+  UNNotificationRequest* request =
+      [UNNotificationRequest requestWithIdentifier:[NSString stringWithUTF8String:APP_NOTIFICATION_IDENTIFIER]
                                                                         content:content
                                                                         trigger:trigger];
 

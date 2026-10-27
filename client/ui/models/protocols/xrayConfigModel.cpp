@@ -5,6 +5,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
+#include "core/utils/containers/containerUtils.h"
 
 #include <QHostAddress>
 #include <QRegularExpression>
@@ -12,261 +13,609 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
-XrayConfigModel::XrayConfigModel(QObject* parent) : QAbstractListModel(parent)
+namespace
 {
-}
-
-int XrayConfigModel::rowCount(const QModelIndex& parent) const
-{
-    Q_UNUSED(parent);
-    return 1;
-}
-
-bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, int role)
-{
-    // This model always has a single row (row 0). Using rowCount() avoids
-    // coupling editing ability to global container list size.
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount())
+    QJsonObject comparableJson(amnezia::XrayServerConfig config)
     {
-        return false;
+        if (config.transport != QLatin1String(protocols::xray::transportXhttp)) {
+            config.xhttp = {};
+        }
+        if (config.transport != QLatin1String(protocols::xray::transportMkcp)) {
+            config.mkcp = {};
+        }
+        auto &x = config.xhttp.xmux;
+        for (QString *limit : { &x.maxConcurrencyMin, &x.maxConcurrencyMax, &x.maxConnectionsMin, &x.maxConnectionsMax,
+                                &x.cMaxReuseTimesMin, &x.cMaxReuseTimesMax, &x.hMaxRequestTimesMin, &x.hMaxRequestTimesMax,
+                                &x.hMaxReusableSecsMin, &x.hMaxReusableSecsMax }) {
+            if (limit->isEmpty()) {
+                *limit = QStringLiteral("0");
+            }
+        }
+        return config.toJson();
     }
+}
 
+XrayConfigModel::XrayConfigModel(QObject* parent) : QObject(parent)
+{
+}
+
+QString XrayConfigModel::site() const
+{
+    return m_protocolConfig.serverConfig.site;
+}
+
+void XrayConfigModel::setSite(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.site, value);
+}
+
+QString XrayConfigModel::port() const
+{
+    return m_protocolConfig.serverConfig.port;
+}
+
+void XrayConfigModel::setPort(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.port, value);
+}
+
+QString XrayConfigModel::transport() const
+{
+    return m_protocolConfig.serverConfig.transport;
+}
+
+void XrayConfigModel::setTransport(const QString &value)
+{
+    auto &srv = m_protocolConfig.serverConfig;
+    if (srv.transport == value) {
+        return;
+    }
     const bool wasUnsavedChanges = hasUnsavedChanges();
-
-    auto& srv = m_protocolConfig.serverConfig;
-    auto& xhttp = srv.xhttp;
-    auto& mkcp = srv.mkcp;
-    auto& pad = xhttp.xPadding;
-    auto& mux = xhttp.xmux;
-
-    QString str = value.toString();
-
-    switch (role)
-    {
-    // ── Main ──────────────────────────────────────────────────────────
-    case Roles::SiteRole: srv.site = str;
-        break;
-    case Roles::PortRole: srv.port = str;
-        break;
-    case Roles::TransportRole: srv.transport = str;
-        break;
-    case Roles::SecurityRole: srv.security = str;
-        break;
-    case Roles::FlowRole: srv.flow = str;
-        break;
-
-    // ── Security ──────────────────────────────────────────────────────
-    case Roles::FingerprintRole: srv.fingerprint = str;
-        break;
-    case Roles::SniRole: srv.sni = str;
-        break;
-    case Roles::AlpnRole: srv.alpn = str;
-        break;
-
-    // ── XHTTP ─────────────────────────────────────────────────────────
-    case Roles::XhttpModeRole: xhttp.mode = str;
-        break;
-    case Roles::XhttpHostRole: xhttp.host = str;
-        break;
-    case Roles::XhttpPathRole: xhttp.path = str;
-        break;
-    case Roles::XhttpHeadersTemplateRole: xhttp.headersTemplate = str;
-        break;
-    case Roles::XhttpUplinkMethodRole: xhttp.uplinkMethod = str;
-        break;
-    case Roles::XhttpDisableGrpcRole: xhttp.disableGrpc = value.toBool();
-        break;
-    case Roles::XhttpDisableSseRole: xhttp.disableSse = value.toBool();
-        break;
-
-    case Roles::XhttpSessionPlacementRole: xhttp.sessionPlacement = str;
-        break;
-    case Roles::XhttpSessionKeyRole: xhttp.sessionKey = str;
-        break;
-    case Roles::XhttpSeqPlacementRole: xhttp.seqPlacement = str;
-        break;
-    case Roles::XhttpSeqKeyRole: xhttp.seqKey = str;
-        break;
-    case Roles::XhttpUplinkDataPlacementRole: xhttp.uplinkDataPlacement = str;
-        break;
-    case Roles::XhttpUplinkDataKeyRole: xhttp.uplinkDataKey = str;
-        break;
-
-    case Roles::XhttpUplinkChunkSizeRole: xhttp.uplinkChunkSize = str;
-        break;
-    case Roles::XhttpScMaxBufferedPostsRole: xhttp.scMaxBufferedPosts = str;
-        break;
-    case Roles::XhttpScMaxEachPostBytesMinRole: xhttp.scMaxEachPostBytesMin = str;
-        break;
-    case Roles::XhttpScMaxEachPostBytesMaxRole: xhttp.scMaxEachPostBytesMax = str;
-        break;
-    case Roles::XhttpScMinPostsIntervalMsMinRole: xhttp.scMinPostsIntervalMsMin = str;
-        break;
-    case Roles::XhttpScMinPostsIntervalMsMaxRole: xhttp.scMinPostsIntervalMsMax = str;
-        break;
-    case Roles::XhttpScStreamUpServerSecsMinRole: xhttp.scStreamUpServerSecsMin = str;
-        break;
-    case Roles::XhttpScStreamUpServerSecsMaxRole: xhttp.scStreamUpServerSecsMax = str;
-        break;
-
-    // ── mKCP ──────────────────────────────────────────────────────────
-    case Roles::MkcpTtiRole: mkcp.tti = str;
-        break;
-    case Roles::MkcpUplinkCapacityRole: mkcp.uplinkCapacity = str;
-        break;
-    case Roles::MkcpDownlinkCapacityRole: mkcp.downlinkCapacity = str;
-        break;
-    case Roles::MkcpReadBufferSizeRole: mkcp.readBufferSize = str;
-        break;
-    case Roles::MkcpWriteBufferSizeRole: mkcp.writeBufferSize = str;
-        break;
-    case Roles::MkcpCongestionRole: mkcp.congestion = value.toBool();
-        break;
-
-    // ── xPadding ──────────────────────────────────────────────────────
-    case Roles::XPaddingBytesMinRole: pad.bytesMin = str;
-        break;
-    case Roles::XPaddingBytesMaxRole: pad.bytesMax = str;
-        break;
-    case Roles::XPaddingObfsModeRole: pad.obfsMode = value.toBool();
-        break;
-    case Roles::XPaddingKeyRole: pad.key = str;
-        break;
-    case Roles::XPaddingHeaderRole: pad.header = str;
-        break;
-    case Roles::XPaddingPlacementRole: pad.placement = str;
-        break;
-    case Roles::XPaddingMethodRole: pad.method = str;
-        break;
-
-    // ── xmux ──────────────────────────────────────────────────────────
-    case Roles::XmuxEnabledRole: mux.enabled = value.toBool();
-        break;
-    case Roles::XmuxMaxConcurrencyMinRole: mux.maxConcurrencyMin = str;
-        break;
-    case Roles::XmuxMaxConcurrencyMaxRole: mux.maxConcurrencyMax = str;
-        break;
-    case Roles::XmuxMaxConnectionsMinRole: mux.maxConnectionsMin = str;
-        break;
-    case Roles::XmuxMaxConnectionsMaxRole: mux.maxConnectionsMax = str;
-        break;
-    case Roles::XmuxCMaxReuseTimesMinRole: mux.cMaxReuseTimesMin = str;
-        break;
-    case Roles::XmuxCMaxReuseTimesMaxRole: mux.cMaxReuseTimesMax = str;
-        break;
-    case Roles::XmuxHMaxRequestTimesMinRole: mux.hMaxRequestTimesMin = str;
-        break;
-    case Roles::XmuxHMaxRequestTimesMaxRole: mux.hMaxRequestTimesMax = str;
-        break;
-    case Roles::XmuxHMaxReusableSecsMinRole: mux.hMaxReusableSecsMin = str;
-        break;
-    case Roles::XmuxHMaxReusableSecsMaxRole: mux.hMaxReusableSecsMax = str;
-        break;
-    case Roles::XmuxHKeepAlivePeriodRole: mux.hKeepAlivePeriod = str;
-        break;
-
-    default:
-        return false;
+    srv.transport = value;
+    if (value == QLatin1String(protocols::xray::transportXhttp)) {
+        srv.applyDefaults(false);
     }
+    emitChanged(wasUnsavedChanges);
+}
 
-    emit dataChanged(index, index, QList{role});
+QString XrayConfigModel::security() const
+{
+    return m_protocolConfig.serverConfig.security;
+}
+
+void XrayConfigModel::setSecurity(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.security, value);
+}
+
+QString XrayConfigModel::flow() const
+{
+    return m_protocolConfig.serverConfig.flow;
+}
+
+void XrayConfigModel::setFlow(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.flow, value);
+}
+
+QString XrayConfigModel::fingerprint() const
+{
+    return m_protocolConfig.serverConfig.fingerprint;
+}
+
+void XrayConfigModel::setFingerprint(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.fingerprint, value);
+}
+
+QString XrayConfigModel::sni() const
+{
+    return m_protocolConfig.serverConfig.sni;
+}
+
+void XrayConfigModel::setSni(const QString &value)
+{
+    auto &srv = m_protocolConfig.serverConfig;
+    if (srv.sni == value && srv.site == value) {
+        return;
+    }
+    const bool wasUnsavedChanges = hasUnsavedChanges();
+    srv.sni = value;
+    srv.site = value;
+    emitChanged(wasUnsavedChanges);
+}
+
+QString XrayConfigModel::alpn() const
+{
+    return m_protocolConfig.serverConfig.alpn;
+}
+
+void XrayConfigModel::setAlpn(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.alpn, value);
+}
+
+QString XrayConfigModel::xhttpMode() const
+{
+    return m_protocolConfig.serverConfig.xhttp.mode;
+}
+
+void XrayConfigModel::setXhttpMode(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.mode, value);
+}
+
+QString XrayConfigModel::xhttpHost() const
+{
+    return m_protocolConfig.serverConfig.xhttp.host;
+}
+
+void XrayConfigModel::setXhttpHost(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.host, value);
+}
+
+QString XrayConfigModel::xhttpPath() const
+{
+    return m_protocolConfig.serverConfig.xhttp.path;
+}
+
+void XrayConfigModel::setXhttpPath(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.path, value);
+}
+
+QString XrayConfigModel::xhttpUplinkMethod() const
+{
+    return m_protocolConfig.serverConfig.xhttp.uplinkMethod;
+}
+
+void XrayConfigModel::setXhttpUplinkMethod(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.uplinkMethod, value);
+}
+
+bool XrayConfigModel::xhttpDisableGrpc() const
+{
+    return m_protocolConfig.serverConfig.xhttp.disableGrpc;
+}
+
+void XrayConfigModel::setXhttpDisableGrpc(bool value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.disableGrpc, value);
+}
+
+bool XrayConfigModel::xhttpDisableSse() const
+{
+    return m_protocolConfig.serverConfig.xhttp.disableSse;
+}
+
+void XrayConfigModel::setXhttpDisableSse(bool value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.disableSse, value);
+}
+
+QString XrayConfigModel::xhttpSessionPlacement() const
+{
+    return m_protocolConfig.serverConfig.xhttp.sessionPlacement;
+}
+
+void XrayConfigModel::setXhttpSessionPlacement(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.sessionPlacement, value);
+}
+
+QString XrayConfigModel::xhttpSessionKey() const
+{
+    return m_protocolConfig.serverConfig.xhttp.sessionKey;
+}
+
+void XrayConfigModel::setXhttpSessionKey(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.sessionKey, value);
+}
+
+QString XrayConfigModel::xhttpSeqPlacement() const
+{
+    return m_protocolConfig.serverConfig.xhttp.seqPlacement;
+}
+
+void XrayConfigModel::setXhttpSeqPlacement(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.seqPlacement, value);
+}
+
+QString XrayConfigModel::xhttpSeqKey() const
+{
+    return m_protocolConfig.serverConfig.xhttp.seqKey;
+}
+
+void XrayConfigModel::setXhttpSeqKey(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.seqKey, value);
+}
+
+QString XrayConfigModel::xhttpUplinkDataPlacement() const
+{
+    return m_protocolConfig.serverConfig.xhttp.uplinkDataPlacement;
+}
+
+void XrayConfigModel::setXhttpUplinkDataPlacement(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.uplinkDataPlacement, value);
+}
+
+QString XrayConfigModel::xhttpUplinkDataKey() const
+{
+    return m_protocolConfig.serverConfig.xhttp.uplinkDataKey;
+}
+
+void XrayConfigModel::setXhttpUplinkDataKey(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.uplinkDataKey, value);
+}
+
+QString XrayConfigModel::xhttpUplinkChunkSize() const
+{
+    return m_protocolConfig.serverConfig.xhttp.uplinkChunkSize;
+}
+
+void XrayConfigModel::setXhttpUplinkChunkSize(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.uplinkChunkSize, value);
+}
+
+QString XrayConfigModel::xhttpScMaxBufferedPosts() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scMaxBufferedPosts;
+}
+
+void XrayConfigModel::setXhttpScMaxBufferedPosts(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scMaxBufferedPosts, value);
+}
+
+QString XrayConfigModel::xhttpScMaxEachPostBytesMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scMaxEachPostBytesMin;
+}
+
+void XrayConfigModel::setXhttpScMaxEachPostBytesMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scMaxEachPostBytesMin, value);
+}
+
+QString XrayConfigModel::xhttpScMaxEachPostBytesMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scMaxEachPostBytesMax;
+}
+
+void XrayConfigModel::setXhttpScMaxEachPostBytesMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scMaxEachPostBytesMax, value);
+}
+
+QString XrayConfigModel::xhttpScMinPostsIntervalMsMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scMinPostsIntervalMsMin;
+}
+
+void XrayConfigModel::setXhttpScMinPostsIntervalMsMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scMinPostsIntervalMsMin, value);
+}
+
+QString XrayConfigModel::xhttpScMinPostsIntervalMsMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scMinPostsIntervalMsMax;
+}
+
+void XrayConfigModel::setXhttpScMinPostsIntervalMsMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scMinPostsIntervalMsMax, value);
+}
+
+QString XrayConfigModel::xhttpScStreamUpServerSecsMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scStreamUpServerSecsMin;
+}
+
+void XrayConfigModel::setXhttpScStreamUpServerSecsMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scStreamUpServerSecsMin, value);
+}
+
+QString XrayConfigModel::xhttpScStreamUpServerSecsMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.scStreamUpServerSecsMax;
+}
+
+void XrayConfigModel::setXhttpScStreamUpServerSecsMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.scStreamUpServerSecsMax, value);
+}
+
+QString XrayConfigModel::mkcpTti() const
+{
+    return m_protocolConfig.serverConfig.mkcp.tti;
+}
+
+void XrayConfigModel::setMkcpTti(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.tti, value);
+}
+
+QString XrayConfigModel::mkcpMtu() const
+{
+    return m_protocolConfig.serverConfig.mkcp.mtu;
+}
+
+void XrayConfigModel::setMkcpMtu(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.mtu, value);
+}
+
+QString XrayConfigModel::mkcpUplinkCapacity() const
+{
+    return m_protocolConfig.serverConfig.mkcp.uplinkCapacity;
+}
+
+void XrayConfigModel::setMkcpUplinkCapacity(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.uplinkCapacity, value);
+}
+
+QString XrayConfigModel::mkcpDownlinkCapacity() const
+{
+    return m_protocolConfig.serverConfig.mkcp.downlinkCapacity;
+}
+
+void XrayConfigModel::setMkcpDownlinkCapacity(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.downlinkCapacity, value);
+}
+
+QString XrayConfigModel::mkcpCwndMultiplier() const
+{
+    return m_protocolConfig.serverConfig.mkcp.cwndMultiplier;
+}
+
+void XrayConfigModel::setMkcpCwndMultiplier(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.cwndMultiplier, value);
+}
+
+QString XrayConfigModel::mkcpMaxSendingWindow() const
+{
+    return m_protocolConfig.serverConfig.mkcp.maxSendingWindow;
+}
+
+void XrayConfigModel::setMkcpMaxSendingWindow(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.mkcp.maxSendingWindow, value);
+}
+
+QString XrayConfigModel::xPaddingBytesMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.bytesMin;
+}
+
+void XrayConfigModel::setXPaddingBytesMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.bytesMin, value);
+}
+
+QString XrayConfigModel::xPaddingBytesMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.bytesMax;
+}
+
+void XrayConfigModel::setXPaddingBytesMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.bytesMax, value);
+}
+
+bool XrayConfigModel::xPaddingObfsMode() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.obfsMode;
+}
+
+void XrayConfigModel::setXPaddingObfsMode(bool value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.obfsMode, value);
+}
+
+QString XrayConfigModel::xPaddingKey() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.key;
+}
+
+void XrayConfigModel::setXPaddingKey(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.key, value);
+}
+
+QString XrayConfigModel::xPaddingHeader() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.header;
+}
+
+void XrayConfigModel::setXPaddingHeader(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.header, value);
+}
+
+QString XrayConfigModel::xPaddingPlacement() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.placement;
+}
+
+void XrayConfigModel::setXPaddingPlacement(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.placement, value);
+}
+
+QString XrayConfigModel::xPaddingMethod() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xPadding.method;
+}
+
+void XrayConfigModel::setXPaddingMethod(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xPadding.method, value);
+}
+
+bool XrayConfigModel::xmuxEnabled() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.enabled;
+}
+
+void XrayConfigModel::setXmuxEnabled(bool value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.enabled, value);
+}
+
+QString XrayConfigModel::xmuxMaxConcurrencyMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.maxConcurrencyMin;
+}
+
+void XrayConfigModel::setXmuxMaxConcurrencyMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.maxConcurrencyMin, value);
+}
+
+QString XrayConfigModel::xmuxMaxConcurrencyMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.maxConcurrencyMax;
+}
+
+void XrayConfigModel::setXmuxMaxConcurrencyMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.maxConcurrencyMax, value);
+}
+
+QString XrayConfigModel::xmuxMaxConnectionsMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.maxConnectionsMin;
+}
+
+void XrayConfigModel::setXmuxMaxConnectionsMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.maxConnectionsMin, value);
+}
+
+QString XrayConfigModel::xmuxMaxConnectionsMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.maxConnectionsMax;
+}
+
+void XrayConfigModel::setXmuxMaxConnectionsMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.maxConnectionsMax, value);
+}
+
+QString XrayConfigModel::xmuxCMaxReuseTimesMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.cMaxReuseTimesMin;
+}
+
+void XrayConfigModel::setXmuxCMaxReuseTimesMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.cMaxReuseTimesMin, value);
+}
+
+QString XrayConfigModel::xmuxCMaxReuseTimesMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.cMaxReuseTimesMax;
+}
+
+void XrayConfigModel::setXmuxCMaxReuseTimesMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.cMaxReuseTimesMax, value);
+}
+
+QString XrayConfigModel::xmuxHMaxRequestTimesMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.hMaxRequestTimesMin;
+}
+
+void XrayConfigModel::setXmuxHMaxRequestTimesMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.hMaxRequestTimesMin, value);
+}
+
+QString XrayConfigModel::xmuxHMaxRequestTimesMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.hMaxRequestTimesMax;
+}
+
+void XrayConfigModel::setXmuxHMaxRequestTimesMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.hMaxRequestTimesMax, value);
+}
+
+QString XrayConfigModel::xmuxHMaxReusableSecsMin() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.hMaxReusableSecsMin;
+}
+
+void XrayConfigModel::setXmuxHMaxReusableSecsMin(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.hMaxReusableSecsMin, value);
+}
+
+QString XrayConfigModel::xmuxHMaxReusableSecsMax() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.hMaxReusableSecsMax;
+}
+
+void XrayConfigModel::setXmuxHMaxReusableSecsMax(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.hMaxReusableSecsMax, value);
+}
+
+QString XrayConfigModel::xmuxHKeepAlivePeriod() const
+{
+    return m_protocolConfig.serverConfig.xhttp.xmux.hKeepAlivePeriod;
+}
+
+void XrayConfigModel::setXmuxHKeepAlivePeriod(const QString &value)
+{
+    assignField(m_protocolConfig.serverConfig.xhttp.xmux.hKeepAlivePeriod, value);
+}
+
+void XrayConfigModel::assignField(QString &field, const QString &value)
+{
+    if (field == value) {
+        return;
+    }
+    const bool wasUnsavedChanges = hasUnsavedChanges();
+    field = value;
+    emitChanged(wasUnsavedChanges);
+}
+
+void XrayConfigModel::assignField(bool &field, bool value)
+{
+    if (field == value) {
+        return;
+    }
+    const bool wasUnsavedChanges = hasUnsavedChanges();
+    field = value;
+    emitChanged(wasUnsavedChanges);
+}
+
+void XrayConfigModel::emitChanged(bool wasUnsavedChanges)
+{
+    emit changed();
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
     }
-    return true;
-}
-
-QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
-{
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
-    }
-
-    const auto& srv = m_protocolConfig.serverConfig;
-    const auto& xhttp = srv.xhttp;
-    const auto& mkcp = srv.mkcp;
-    const auto& pad = xhttp.xPadding;
-    const auto& mux = xhttp.xmux;
-
-    switch (role)
-    {
-    // ── Main ──────────────────────────────────────────────────────────
-    case Roles::SiteRole: return srv.site;
-    case Roles::PortRole: return srv.port;
-    case Roles::TransportRole: return srv.transport;
-    case Roles::SecurityRole: return srv.security;
-    case Roles::FlowRole: return srv.flow;
-
-    // ── Security ──────────────────────────────────────────────────────
-    case Roles::FingerprintRole: return srv.fingerprint;
-    case Roles::SniRole: return srv.sni;
-    case Roles::AlpnRole: return srv.alpn;
-
-    // ── XHTTP ─────────────────────────────────────────────────────────
-    case Roles::XhttpModeRole: return xhttp.mode;
-    case Roles::XhttpHostRole: return xhttp.host;
-    case Roles::XhttpPathRole: return xhttp.path;
-    case Roles::XhttpHeadersTemplateRole: return xhttp.headersTemplate;
-    case Roles::XhttpUplinkMethodRole: return xhttp.uplinkMethod;
-    case Roles::XhttpDisableGrpcRole: return xhttp.disableGrpc;
-    case Roles::XhttpDisableSseRole: return xhttp.disableSse;
-
-    case Roles::XhttpSessionPlacementRole: return xhttp.sessionPlacement;
-    case Roles::XhttpSessionKeyRole: return xhttp.sessionKey;
-    case Roles::XhttpSeqPlacementRole: return xhttp.seqPlacement;
-    case Roles::XhttpSeqKeyRole: return xhttp.seqKey;
-    case Roles::XhttpUplinkDataPlacementRole: return xhttp.uplinkDataPlacement;
-    case Roles::XhttpUplinkDataKeyRole: return xhttp.uplinkDataKey;
-
-    case Roles::XhttpUplinkChunkSizeRole: return xhttp.uplinkChunkSize;
-    case Roles::XhttpScMaxBufferedPostsRole: return xhttp.scMaxBufferedPosts;
-    case Roles::XhttpScMaxEachPostBytesMinRole: return xhttp.scMaxEachPostBytesMin;
-    case Roles::XhttpScMaxEachPostBytesMaxRole: return xhttp.scMaxEachPostBytesMax;
-    case Roles::XhttpScMinPostsIntervalMsMinRole: return xhttp.scMinPostsIntervalMsMin;
-    case Roles::XhttpScMinPostsIntervalMsMaxRole: return xhttp.scMinPostsIntervalMsMax;
-    case Roles::XhttpScStreamUpServerSecsMinRole: return xhttp.scStreamUpServerSecsMin;
-    case Roles::XhttpScStreamUpServerSecsMaxRole: return xhttp.scStreamUpServerSecsMax;
-
-    // ── mKCP ──────────────────────────────────────────────────────────
-    case Roles::MkcpTtiRole: return mkcp.tti;
-    case Roles::MkcpUplinkCapacityRole: return mkcp.uplinkCapacity;
-    case Roles::MkcpDownlinkCapacityRole: return mkcp.downlinkCapacity;
-    case Roles::MkcpReadBufferSizeRole: return mkcp.readBufferSize;
-    case Roles::MkcpWriteBufferSizeRole: return mkcp.writeBufferSize;
-    case Roles::MkcpCongestionRole: return mkcp.congestion;
-
-    // ── xPadding ──────────────────────────────────────────────────────
-    case Roles::XPaddingBytesMinRole: return pad.bytesMin;
-    case Roles::XPaddingBytesMaxRole: return pad.bytesMax;
-    case Roles::XPaddingObfsModeRole: return pad.obfsMode;
-    case Roles::XPaddingKeyRole: return pad.key;
-    case Roles::XPaddingHeaderRole: return pad.header;
-    case Roles::XPaddingPlacementRole: return pad.placement;
-    case Roles::XPaddingMethodRole: return pad.method;
-
-    // ── xmux ──────────────────────────────────────────────────────────
-    case Roles::XmuxEnabledRole: return mux.enabled;
-    case Roles::XmuxMaxConcurrencyMinRole: return mux.maxConcurrencyMin;
-    case Roles::XmuxMaxConcurrencyMaxRole: return mux.maxConcurrencyMax;
-    case Roles::XmuxMaxConnectionsMinRole: return mux.maxConnectionsMin;
-    case Roles::XmuxMaxConnectionsMaxRole: return mux.maxConnectionsMax;
-    case Roles::XmuxCMaxReuseTimesMinRole: return mux.cMaxReuseTimesMin;
-    case Roles::XmuxCMaxReuseTimesMaxRole: return mux.cMaxReuseTimesMax;
-    case Roles::XmuxHMaxRequestTimesMinRole: return mux.hMaxRequestTimesMin;
-    case Roles::XmuxHMaxRequestTimesMaxRole: return mux.hMaxRequestTimesMax;
-    case Roles::XmuxHMaxReusableSecsMinRole: return mux.hMaxReusableSecsMin;
-    case Roles::XmuxHMaxReusableSecsMaxRole: return mux.hMaxReusableSecsMax;
-    case Roles::XmuxHKeepAlivePeriodRole: return mux.hKeepAlivePeriod;
-    }
-
-    return QVariant();
 }
 
 void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
-
-    beginResetModel();
 
     m_container = container;
 
@@ -281,97 +630,80 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
     m_originalProtocolConfig = m_protocolConfig;
 
-    endResetModel();
-    if (wasUnsavedChanges != hasUnsavedChanges()) {
-        emit hasUnsavedChangesChanged();
-    }
+    emitChanged(wasUnsavedChanges);
 }
 
 void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config, bool fillFlowDefault)
 {
-    if (config.port.isEmpty()) {
-        config.port = protocols::xray::defaultPort;
-    }
-
-    if (config.transportProto.isEmpty()) {
-        config.transportProto = ProtocolUtils::transportProtoToString(
-            ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
-    }
-
-    if (config.site.isEmpty()) {
-        config.site = protocols::xray::defaultSite;
-    }
-
-    if (config.transport.isEmpty()) {
-        config.transport = protocols::xray::defaultTransport;
-    }
-
-    if (config.security.isEmpty()) {
-        config.security = protocols::xray::defaultSecurity;
-    }
-
-    if (fillFlowDefault && config.flow.isEmpty()) {
-        config.flow = protocols::xray::defaultFlow;
-    }
-
-    if (config.fingerprint.isEmpty()) {
-        config.fingerprint = protocols::xray::defaultFingerprint;
-    } else if (config.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
-        config.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
-    }
-
-    if (config.sni.isEmpty()) {
-        config.sni = protocols::xray::defaultSni;
-    }
-
-    if (config.alpn.isEmpty()) {
-        config.alpn = protocols::xray::defaultAlpn;
-    }
-
-    // XHTTP transport defaults
-    if (config.xhttp.host.isEmpty()) {
-        config.xhttp.host = protocols::xray::defaultXhttpHost;
-    }
-    if (config.xhttp.mode.isEmpty()) {
-        config.xhttp.mode = protocols::xray::defaultXhttpMode;
-    }
-    if (config.xhttp.headersTemplate.isEmpty()) {
-        config.xhttp.headersTemplate = protocols::xray::defaultXhttpHeadersTemplate;
-    }
-    if (config.xhttp.uplinkMethod.isEmpty()) {
-        config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
-    }
-    if (config.xhttp.sessionPlacement.isEmpty()) {
-        config.xhttp.sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
-    }
-    if (config.xhttp.sessionKey.isEmpty()) {
-        config.xhttp.sessionKey = protocols::xray::defaultXhttpSessionKey;
-    }
-    if (config.xhttp.seqPlacement.isEmpty()) {
-        config.xhttp.seqPlacement = protocols::xray::defaultXhttpSeqPlacement;
-    }
-    if (config.xhttp.uplinkDataPlacement.isEmpty()) {
-        config.xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
-    }
-
-    // xPadding defaults
-    if (config.xhttp.xPadding.placement.isEmpty()) {
-        config.xhttp.xPadding.placement = protocols::xray::defaultXPaddingPlacement;
-    }
-    if (config.xhttp.xPadding.method.isEmpty()) {
-        config.xhttp.xPadding.method = protocols::xray::defaultXPaddingMethod;
-    }
+    config.applyDefaults(fillFlowDefault);
 }
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
-    const bool serverSettingsChanged =
-            !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    if (!m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig)) {
+        m_protocolConfig.clearClientConfig();
+        return m_protocolConfig;
+    }
 
-    if (serverSettingsChanged) {
+    if (comparableJson(m_protocolConfig.serverConfig) == comparableJson(m_originalProtocolConfig.serverConfig)) {
+        return m_protocolConfig;
+    }
+
+    if (!m_protocolConfig.regenerateClientConfigFromNative()) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
+}
+
+amnezia::XrayServerConfig XrayConfigModel::pendingServerConfig(const QString &pendingPort) const
+{
+    amnezia::XrayServerConfig pending = m_protocolConfig.serverConfig;
+    if (!pendingPort.isEmpty()) {
+        pending.port = pendingPort;
+    }
+    return pending;
+}
+
+bool XrayConfigModel::pendingChangeTouchesServer(const QString &pendingPort) const
+{
+    return !pendingServerConfig(pendingPort).hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+}
+
+bool XrayConfigModel::pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const
+{
+    return pendingServerConfig(pendingPort).breaksIssuedConfigs(m_originalProtocolConfig.serverConfig);
+}
+
+bool XrayConfigModel::pendingChangeRequiresReinstall(const QString &pendingPort) const
+{
+    const auto effectivePort = [](const QString &port) -> QString {
+        return port.isEmpty() ? QString::fromLatin1(protocols::xray::defaultPort) : port;
+    };
+    const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
+    return effectivePort(pending.port) != effectivePort(m_originalProtocolConfig.serverConfig.port);
+}
+
+QString XrayConfigModel::saveDescription(const QString &pendingPort) const
+{
+    const bool touchesServer = pendingChangeTouchesServer(pendingPort);
+    const bool breaksIssued = pendingChangeBreaksIssuedConfigs(pendingPort);
+    const bool requiresReinstall = pendingChangeRequiresReinstall(pendingPort);
+
+    if (requiresReinstall) {
+        if (breaksIssued) {
+            return tr("All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server will be recreated. This takes up to a minute, and connections that were already shared keep working.");
+        }
+    } else if (touchesServer) {
+        if (breaksIssued) {
+            return tr("The server configuration will be updated. All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server configuration will be updated. If XRay on the server is outdated, the container will be recreated with the current version; connections that were already shared keep working.");
+        }
+    } else {
+        return tr("The server will not be changed now. The new settings apply the next time you connect.");
+    }
 }
 
 bool XrayConfigModel::isServerSettingsEqual() const
@@ -381,112 +713,29 @@ bool XrayConfigModel::isServerSettingsEqual() const
 
 bool XrayConfigModel::hasUnsavedChanges() const
 {
-    return !isServerSettingsEqual();
-}
-
-QHash<int, QByteArray> XrayConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    // Main
-    roles[SiteRole] = "site";
-    roles[PortRole] = "port";
-    roles[TransportRole] = "transport";
-    roles[SecurityRole] = "security";
-    roles[FlowRole] = "flow";
-
-    // Security
-    roles[FingerprintRole] = "fingerprint";
-    roles[SniRole] = "sni";
-    roles[AlpnRole] = "alpn";
-
-    // XHTTP
-    roles[XhttpModeRole] = "xhttpMode";
-    roles[XhttpHostRole] = "xhttpHost";
-    roles[XhttpPathRole] = "xhttpPath";
-    roles[XhttpHeadersTemplateRole] = "xhttpHeadersTemplate";
-    roles[XhttpUplinkMethodRole] = "xhttpUplinkMethod";
-    roles[XhttpDisableGrpcRole] = "xhttpDisableGrpc";
-    roles[XhttpDisableSseRole] = "xhttpDisableSse";
-
-    roles[XhttpSessionPlacementRole] = "xhttpSessionPlacement";
-    roles[XhttpSessionKeyRole] = "xhttpSessionKey";
-    roles[XhttpSeqPlacementRole] = "xhttpSeqPlacement";
-    roles[XhttpSeqKeyRole] = "xhttpSeqKey";
-    roles[XhttpUplinkDataPlacementRole] = "xhttpUplinkDataPlacement";
-    roles[XhttpUplinkDataKeyRole] = "xhttpUplinkDataKey";
-
-    roles[XhttpUplinkChunkSizeRole] = "xhttpUplinkChunkSize";
-    roles[XhttpScMaxBufferedPostsRole] = "xhttpScMaxBufferedPosts";
-    roles[XhttpScMaxEachPostBytesMinRole] = "xhttpScMaxEachPostBytesMin";
-    roles[XhttpScMaxEachPostBytesMaxRole] = "xhttpScMaxEachPostBytesMax";
-    roles[XhttpScMinPostsIntervalMsMinRole] = "xhttpScMinPostsIntervalMsMin";
-    roles[XhttpScMinPostsIntervalMsMaxRole] = "xhttpScMinPostsIntervalMsMax";
-    roles[XhttpScStreamUpServerSecsMinRole] = "xhttpScStreamUpServerSecsMin";
-    roles[XhttpScStreamUpServerSecsMaxRole] = "xhttpScStreamUpServerSecsMax";
-
-    // mKCP
-    roles[MkcpTtiRole] = "mkcpTti";
-    roles[MkcpUplinkCapacityRole] = "mkcpUplinkCapacity";
-    roles[MkcpDownlinkCapacityRole] = "mkcpDownlinkCapacity";
-    roles[MkcpReadBufferSizeRole] = "mkcpReadBufferSize";
-    roles[MkcpWriteBufferSizeRole] = "mkcpWriteBufferSize";
-    roles[MkcpCongestionRole] = "mkcpCongestion";
-
-    // xPadding
-    roles[XPaddingBytesMinRole] = "xPaddingBytesMin";
-    roles[XPaddingBytesMaxRole] = "xPaddingBytesMax";
-    roles[XPaddingObfsModeRole] = "xPaddingObfsMode";
-    roles[XPaddingKeyRole] = "xPaddingKey";
-    roles[XPaddingHeaderRole] = "xPaddingHeader";
-    roles[XPaddingPlacementRole] = "xPaddingPlacement";
-    roles[XPaddingMethodRole] = "xPaddingMethod";
-
-    // xmux
-    roles[XmuxEnabledRole] = "xmuxEnabled";
-    roles[XmuxMaxConcurrencyMinRole] = "xmuxMaxConcurrencyMin";
-    roles[XmuxMaxConcurrencyMaxRole] = "xmuxMaxConcurrencyMax";
-    roles[XmuxMaxConnectionsMinRole] = "xmuxMaxConnectionsMin";
-    roles[XmuxMaxConnectionsMaxRole] = "xmuxMaxConnectionsMax";
-    roles[XmuxCMaxReuseTimesMinRole] = "xmuxCMaxReuseTimesMin";
-    roles[XmuxCMaxReuseTimesMaxRole] = "xmuxCMaxReuseTimesMax";
-    roles[XmuxHMaxRequestTimesMinRole] = "xmuxHMaxRequestTimesMin";
-    roles[XmuxHMaxRequestTimesMaxRole] = "xmuxHMaxRequestTimesMax";
-    roles[XmuxHMaxReusableSecsMinRole] = "xmuxHMaxReusableSecsMin";
-    roles[XmuxHMaxReusableSecsMaxRole] = "xmuxHMaxReusableSecsMax";
-    roles[XmuxHKeepAlivePeriodRole] = "xmuxHKeepAlivePeriod";
-
-    return roles;
+    return comparableJson(m_protocolConfig.serverConfig) != comparableJson(m_originalProtocolConfig.serverConfig);
 }
 
 void XrayConfigModel::resetToDefaults()
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
 
-    beginResetModel();
     m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
-    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
-    endResetModel();
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig, true);
 
-    if (wasUnsavedChanges != hasUnsavedChanges()) {
-        emit hasUnsavedChangesChanged();
-    }
+    emitChanged(wasUnsavedChanges);
 }
 
 void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverConfig)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
 
-    beginResetModel();
     m_protocolConfig.serverConfig = serverConfig;
-    // Clear client config since server settings changed
-    m_protocolConfig.clearClientConfig();
-    m_originalProtocolConfig = m_protocolConfig;
-    endResetModel();
-
-    if (wasUnsavedChanges != hasUnsavedChanges()) {
-        emit hasUnsavedChangesChanged();
+    if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
+        m_protocolConfig.serverConfig.applyDefaults(false);
     }
+
+    emitChanged(wasUnsavedChanges);
 }
 
 QStringList XrayConfigModel::flowOptions()
@@ -515,17 +764,12 @@ QStringList XrayConfigModel::fingerprintOptions()
 
 QStringList XrayConfigModel::alpnOptions()
 {
-    return { "HTTP/2", "HTTP/1.1", "HTTP/2,HTTP/1.1" };
+    return { "h2", "http/1.1", "h2,http/1.1" };
 }
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
     return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
-}
-
-QStringList XrayConfigModel::xhttpHeadersTemplateOptions()
-{
-    return { "HTTP", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -535,22 +779,16 @@ QStringList XrayConfigModel::xhttpUplinkMethodOptions()
 
 QStringList XrayConfigModel::xhttpSessionPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
-}
-
-QStringList XrayConfigModel::xhttpSessionKeyOptions()
-{
-    return { "Path", "Header", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
-    // Matches splithttp uplink payload placement (packet-up / advanced)
     return { "Body", "Auto", "Header", "Cookie" };
 }
 
@@ -580,14 +818,84 @@ QString XrayConfigModel::mkcpDefaultDownlinkCapacity()
     return QString::fromLatin1(protocols::xray::defaultMkcpDownlinkCapacity);
 }
 
-QString XrayConfigModel::mkcpDefaultReadBufferSize()
+QString XrayConfigModel::mkcpDefaultMtu()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpReadBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpMtu);
 }
 
-QString XrayConfigModel::mkcpDefaultWriteBufferSize()
+QString XrayConfigModel::mkcpDefaultCwndMultiplier()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpCwndMultiplier);
+}
+
+QString XrayConfigModel::portDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultPort);
+}
+
+QString XrayConfigModel::sniDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultSni);
+}
+
+QString XrayConfigModel::xhttpHostDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpHost);
+}
+
+QString XrayConfigModel::xhttpUplinkChunkSizeDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpUplinkChunkSize);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMin);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMax);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMin);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMax);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMin);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMax);
+}
+
+QString XrayConfigModel::xPaddingKeyDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingKey);
+}
+
+QString XrayConfigModel::xPaddingHeaderDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingHeader);
+}
+
+QString XrayConfigModel::xPaddingBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMin);
+}
+
+QString XrayConfigModel::xPaddingBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMax);
 }
 
 namespace {
@@ -628,19 +936,10 @@ bool XrayConfigModel::isValidSni(const QString &sni)
     if (t.isEmpty()) {
         return true;
     }
-    if (t.startsWith(QLatin1String("*."))) {
-        return isValidSingleHost(t.mid(2));
+    if (t.contains(QLatin1Char('*'))) {
+        return false;
     }
     return isValidSingleHost(t);
-}
-
-bool XrayConfigModel::isValidPath(const QString &path)
-{
-    const QString t = path.trimmed();
-    if (t.isEmpty()) {
-        return true;
-    }
-    return t.startsWith(QLatin1Char('/'));
 }
 
 QStringList XrayConfigModel::validationErrors() const
@@ -648,7 +947,7 @@ QStringList XrayConfigModel::validationErrors() const
     QStringList errs;
     const auto &srv = m_protocolConfig.serverConfig;
 
-    if (!srv.port.isEmpty()) {
+    if (!srv.port.isEmpty() || !srv.isThirdPartyConfig) {
         bool ok = false;
         const int p = srv.port.toInt(&ok);
         if (!ok || p < 1 || p > 65535) {
@@ -656,7 +955,8 @@ QStringList XrayConfigModel::validationErrors() const
         }
     }
 
-    if (srv.security == QLatin1String("tls") || srv.security == QLatin1String("reality")) {
+    const QString security = xrayEffective::security(srv);
+    if (security == QLatin1String("tls") || security == QLatin1String("reality")) {
         if (!isValidSni(srv.sni)) {
             errs << tr("SNI: enter a valid IP address or domain name");
         }
@@ -666,8 +966,11 @@ QStringList XrayConfigModel::validationErrors() const
         if (!isValidHost(srv.xhttp.host)) {
             errs << tr("Host: enter a valid IP address or domain name");
         }
-        if (!isValidPath(srv.xhttp.path)) {
-            errs << tr("Path must start with \"/\"");
+        const auto &xmux = srv.xhttp.xmux;
+        auto isSet = [](const QString &v) { return !v.isEmpty() && v != QLatin1String("0"); };
+        if (xmux.enabled && (isSet(xmux.maxConcurrencyMin) || isSet(xmux.maxConcurrencyMax))
+            && (isSet(xmux.maxConnectionsMin) || isSet(xmux.maxConnectionsMax))) {
+            errs << tr("XMux: set either maxConcurrency or maxConnections, not both");
         }
     }
 

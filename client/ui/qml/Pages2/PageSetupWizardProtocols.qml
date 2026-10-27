@@ -41,43 +41,16 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
 
-        header: ColumnLayout {
+        anchors.fill: parent
+
+        header: NavigationBarType {
             width: listView.width
 
-            BaseHeaderType {
-                id: header
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                headerText: qsTr("VPN protocol")
-                descriptionText: qsTr("Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.")
-            }
+            title: qsTr("VPN protocol")
+            description: qsTr("Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.")
         }
 
         model: proxyContainersModel
@@ -88,20 +61,26 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: name
-                descriptionText: description
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                subtitle: description
+                maximumLineCount: 6
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function () {
+                onClicked: {
                     ServersUiController.processedContainerIndex = proxyContainersModel.mapToSource(index)
-                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings);
+                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }
+        }
 
-            DividerType {}
+        footer: Item {
+            width: listView.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
     }
 }

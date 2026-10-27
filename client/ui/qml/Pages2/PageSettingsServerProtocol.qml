@@ -19,41 +19,37 @@ PageType {
 
     property bool isUnsupportedContainer: ContainerProps.isUnsupportedContainer(ServersUiController.processedContainerIndex)
     property bool isClearCacheVisible: !isUnsupportedContainer && ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
-
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+    property bool isOutdatedAwgContainer: ServersUiController.isProcessedContainerOutdatedAwg()
 
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.fill: parent
 
         header: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
+            z: 2
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: ContainersModel.getProcessedContainerName() + qsTr(" settings")
+                description: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""
+            }
+
+            NotificationType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 32
+                Layout.bottomMargin: 24
 
-                headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
-                descriptionText: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""
+                visible: root.isOutdatedAwgContainer
+
+                variant: NotificationType.Warning
+                text: qsTr("AmneziaWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AmneziaWG 3.1 by deploying a new container on the server is recommended for stronger protocol security")
             }
         }
 
@@ -64,19 +60,23 @@ PageType {
 
             width: listView.width
 
-            property bool isClientSettingsVisible: isWireGuard || isAwg
-            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess()
+            spacing: 0
 
-            LabelWithButtonType {
+            property bool isClientSettingsVisible: isWireGuard || isAwg
+            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess() || isXray
+
+            ListItemType {
                 id: clientSettings
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: protocolName + qsTr(" connection settings")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                 visible: delegateContent.isClientSettingsVisible
 
-                clickedFunction: function() {
+                onClicked: {
                     if (isClientProtocolExists) {
                         InstallController.openClientSettings(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
@@ -84,58 +84,43 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
                     }
                 }
-
-                MouseArea {
-                    anchors.fill: clientSettings
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
             }
 
-            DividerType {
-                visible: delegateContent.isClientSettingsVisible
-            }
-
-            LabelWithButtonType {
+            ListItemType {
                 id: serverSettings
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: protocolName + qsTr(" server settings")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                 visible: delegateContent.isServerSettingsVisible
 
-                clickedFunction: function() {
+                onClicked: {
                     InstallController.openServerSettings(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
-
-                MouseArea {
-                    anchors.fill: serverSettings
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
-            }
-
-            DividerType {
-                visible: delegateContent.isServerSettingsVisible
             }
         }
 
         footer: ColumnLayout {
-
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 id: clearCacheButton
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 visible: root.isClearCacheVisible
 
                 text: qsTr("Clear profile")
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("The connection configuration will be deleted for this device only")
                     var yesButtonText = qsTr("Continue")
@@ -156,31 +141,23 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-
-                MouseArea {
-                    anchors.fill: clearCacheButton
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
-            DividerType {
-                visible: root.isClearCacheVisible
-            }
-
-            LabelWithButtonType {
+            ListItemType {
                 id: removeButton
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ")
-                textColor: AmneziaStyle.color.vibrantRed
+                destructive: true
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
@@ -200,18 +177,13 @@ PageType {
 
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-
-                MouseArea {
-                    anchors.fill: removeButton
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
-            DividerType {
-                visible: ServersUiController.isProcessedServerHasWriteAccess()
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
     }

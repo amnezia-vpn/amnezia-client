@@ -19,11 +19,26 @@ VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
       m_connectionState(Vpn::ConnectionState::Unknown),
       m_rawConfig(configuration),
       m_timeoutTimer(new QTimer(this)),
+      m_lastError(ErrorCode::NoError),
       m_receivedBytes(0),
       m_sentBytes(0)
 {
     m_timeoutTimer->setSingleShot(true);
     connect(m_timeoutTimer, &QTimer::timeout, this, &VpnProtocol::onTimeout);
+}
+
+bool VpnProtocol::guardStop()
+{
+    if (m_stopped) {
+        return true;
+    }
+    m_stopped = true;
+    return false;
+}
+
+void VpnProtocol::resetStopGuard()
+{
+    m_stopped = false;
 }
 
 void VpnProtocol::setLastError(ErrorCode lastError)

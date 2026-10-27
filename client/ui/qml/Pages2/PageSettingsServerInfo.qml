@@ -49,7 +49,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -65,31 +64,17 @@ PageType {
     }
 
     ColumnLayout {
-        objectName: "mainLayout"
-
         anchors.fill: parent
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
-        spacing: 4
+        spacing: 0
 
-        BackButtonType {
-            id: backButton
-            objectName: "backButton"
-        }
-
-        HeaderTypeWithButton {
+        NavigationBarType {
             id: headerContent
-            objectName: "headerContent"
 
             Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 10
 
-            actionButtonImage: "qrc:/images/controls/edit-3.svg"
-
-            headerText: root.processedServer != null ? root.processedServer.name : ""
-            descriptionText: {
+            title: root.processedServer != null ? root.processedServer.name : ""
+            description: {
                 if (root.processedServer == null) {
                     return ""
                 }
@@ -102,8 +87,12 @@ PageType {
                 }
             }
 
-            actionButtonFunction: function() {
-                serverNameEditDrawer.openTriggered()
+            IconButtonType {
+                id: editButton
+
+                icon.source: "qrc:/images/controls/edit-3.svg"
+
+                onClicked: serverNameEditDrawer.open()
             }
         }
 
@@ -112,55 +101,35 @@ PageType {
 
             parent: root
 
-            anchors.fill: parent
-            expandedHeight: root.height * 0.35
-
             serverNameText: root.processedServer != null ? root.processedServer.name : ""
         }
 
-        TabBar {
+        TabsType {
             id: tabBar
 
             Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
                            && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
                               root.pageSettingsServerData : root.pageSettingsServerProtocols
 
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-            }
-
-
             TabButtonType {
                 id: protocolsTab
-                visible: protocolsPage.installedProtocolsCount
-                width: protocolsPage.installedProtocolsCount ? undefined : 0
-                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerProtocols
+                visible: protocolsPage.installedProtocolsCount > 0
                 text: qsTr("Protocols")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
             }
 
             TabButtonType {
                 id: servicesTab
-                visible: servicesPage.installedServicesCount
-                width: servicesPage.installedServicesCount ? undefined : 0
-                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerServices
+                visible: servicesPage.installedServicesCount > 0
                 text: qsTr("Services")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
             }
 
             TabButtonType {
                 id: dataTab
-                isSelected: tabBar.currentIndex === root.pageSettingsServerData
                 text: qsTr("Management")
-
-                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
-                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
             }
         }
 
@@ -168,6 +137,8 @@ PageType {
             id: nestedStackView
 
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.topMargin: 24
 
             currentIndex: tabBar.currentIndex
 

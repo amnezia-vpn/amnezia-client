@@ -31,6 +31,7 @@
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
+#include "ui/models/services/tProxyConfigModel.h"
 
 class InstallUiController : public QObject
 {
@@ -53,6 +54,7 @@ public:
                                Socks5ProxyConfigModel* socks5ConfigModel,
                                MtProxyConfigModel* mtConfigModel,
                                TelemtConfigModel* telemtConfigModel,
+                               TProxyConfigModel* tProxyConfigModel,
                                ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
@@ -64,7 +66,8 @@ public slots:
 
     void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true,
+                            bool acceptXrayKeyLoss = false);
     void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
     void removeServer(const QString &serverId);
@@ -122,6 +125,8 @@ signals:
     void installationErrorOccurred(ErrorCode errorCode);
     void wrongInstallationUser(const QString &message);
 
+    void xrayKeyMigrationNeedsConfirm(const QString &message);
+
     void serverAlreadyExists(int serverIndex);
 
     void passphraseRequestStarted();
@@ -155,12 +160,15 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    TProxyConfigModel* m_tProxyConfigModel;
     ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
-    
+
+    bool m_serverConfigUpdateInProgress = false;
+
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
 
     bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);

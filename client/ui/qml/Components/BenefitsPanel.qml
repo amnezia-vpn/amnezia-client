@@ -1,39 +1,41 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
-
-import "."
 
 import Style 1.0
 
-Rectangle {
+Pane {
     id: root
 
     property var benefitsModel: null
+    property int benefitsCount: 0
 
-    visible: benefitsModel && benefitsModel.rowCount() > 0
+    visible: root.benefitsCount > 0
 
-    radius: 16
-    color: AmneziaStyle.color.benefitsPanelBackground
-    implicitHeight: inner.implicitHeight + 24
+    padding: 16
 
-    ColumnLayout {
-        id: inner
+    background: Rectangle {
+        radius: 16
+        color: AmneziaStyle.color.bgSurface
+    }
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: 12
-        spacing: 20
+    contentItem: ColumnLayout {
+        spacing: 16
 
         Repeater {
-            model: benefitsModel
+            id: benefitsRepeater
+
+            model: root.benefitsModel
+
+            onCountChanged: root.benefitsCount = count
 
             delegate: BenefitRow {
                 Layout.fillWidth: true
+
                 iconSource: model.icon
-                titleText: model.title
-                bodyText: model.body
-                link: !!model.link
+                title: model.title
+                subtitle: model.body
+                isLink: !!model.link
             }
         }
     }

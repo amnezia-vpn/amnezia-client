@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    property Item settingsItem: null
+
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -29,238 +31,333 @@ PageType {
         ]
     }
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: bottomBar.top
 
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight + 16
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        currentIndex: -1
+            spacing: 0
 
-        model: proxyContainersModel
+            Repeater {
+                model: proxyContainersModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+                delegate: ColumnLayout {
+                    id: delegateRoot
 
-            BaseHeaderType {
-                id: header
+                    required property string name
+                    required property string description
+                    required property string detailedDescription
+                    required property int dockerContainer
+                    required property bool isTProxy
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                    function install() {
+                        if (isTProxy) {
+                            tproxyHostname.errorText = ""
+                            tproxyEmail.errorText = ""
 
-                headerText: qsTr("Installing %1").arg(name)
-                descriptionText: description
-            }
+                            var host = TProxyConfigModel.sanitizeHostnameFieldText(tproxyHostname.textField.text)
+                            var email = TProxyConfigModel.sanitizeAcmeEmailFieldText(tproxyEmail.textField.text)
+                            tproxyHostname.textField.text = host
+                            tproxyEmail.textField.text = email
 
-            BasicButtonType {
-                id: showDetailsButton
+                            var hasError = false
 
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                            if (!TProxyConfigModel.isValidHostname(host)) {
+                                tproxyHostname.errorText = qsTr("Enter a lowercase DNS hostname")
+                                hasError = true
+                            }
+                            if (!TProxyConfigModel.isValidAcmeEmail(email)) {
+                                tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
+                                hasError = true
+                            }
+                            if (hasError) {
+                                return
+                            }
 
-                implicitHeight: 32
+                            port.textField.text = TProxyConfigModel.defaultPort()
+                            TProxyConfigModel.setHostname(host)
+                            TProxyConfigModel.setAcmeEmail(email)
+                            TProxyConfigModel.setPort(TProxyConfigModel.defaultPort())
+                            TProxyConfigModel.setHttpPort(TProxyConfigModel.defaultHttpPort())
+                        } else if (!port.textField.acceptableInput &&
+                                ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
+                                ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
+                            port.errorText = qsTr("The port must be in the range of 1 to 65535")
+                            return
+                        }
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex, ServersUiController.processedServerId)
+                    }
 
-                text: qsTr("More detailed")
+                    Layout.fillWidth: true
 
-                clickedFunc: function() {
-                    showDetailsDrawer.openTriggered()
-                }
-            }
+                    spacing: 0
 
-            DrawerType2 {
-                id: showDetailsDrawer
-                parent: root
+                    NavigationBarType {
+                        Layout.fillWidth: true
 
-                anchors.fill: parent
-                expandedHeight: parent.height * 0.9
-                expandedStateContent: Item {
-                    implicitHeight: showDetailsDrawer.expandedHeight
+                        title: qsTr("Installing %1").arg(delegateRoot.name)
+                        description: delegateRoot.description
+                    }
 
-                    BackButtonType {
-                        id: showDetailsBackButton
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
+                        spacing: 12
 
-                        backButtonFunction: function() {
-                            showDetailsDrawer.closeTriggered()
+                        ButtonType {
+                            id: showDetailsButton
+
+                            Layout.alignment: Qt.AlignLeft
+
+                            variant: ButtonType.Text
+                            size: ButtonType.Medium
+
+                            text: qsTr("More detailed")
+
+                            onClicked: {
+                                showDetailsDrawer.open()
+                            }
+                        }
+
+                        BodyTextType {
+                            id: transportProtoHeader
+
+                            Layout.fillWidth: true
+
+                            text: qsTr("Network protocol")
+                            color: AmneziaStyle.color.textTertiary
+                        }
+
+                        TransportProtoSelector {
+                            id: transportProtoSelector
+
+                            Layout.fillWidth: true
+                        }
+
+                        TextFieldType {
+                            id: port
+
+                            Layout.fillWidth: true
+
+                            visible: !delegateRoot.isTProxy
+
+                            headerText: qsTr("Port")
+                            textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+                        }
+
+                        TextFieldType {
+                            id: tproxyHostname
+
+                            Layout.fillWidth: true
+
+                            visible: delegateRoot.isTProxy
+
+                            headerText: qsTr("Hostname")
+                            textField.placeholderText: qsTr("proxy.example.com")
+                            textField.onTextChanged: {
+                                var cur = tproxyHostname.textField.text
+                                var clean = TProxyConfigModel.sanitizeHostnameFieldText(cur)
+                                if (clean !== cur) {
+                                    textField.text = clean
+                                    textField.cursorPosition = clean.length
+                                    return
+                                }
+                                if (TProxyConfigModel.isHostnameTypingIncomplete(cur)) {
+                                    tproxyHostname.errorText = ""
+                                    return
+                                }
+                                if (!TProxyConfigModel.isValidHostname(clean)) {
+                                    tproxyHostname.errorText = qsTr("Use lowercase letters, digits, dots and hyphens")
+                                    return
+                                }
+                                tproxyHostname.errorText = ""
+                            }
+                        }
+
+                        TextFieldType {
+                            id: tproxyEmail
+
+                            Layout.fillWidth: true
+
+                            visible: delegateRoot.isTProxy
+
+                            headerText: qsTr("ACME email")
+                            textField.placeholderText: qsTr("you@example.com")
+                            textField.onTextChanged: {
+                                var cur = tproxyEmail.textField.text
+                                var clean = TProxyConfigModel.sanitizeAcmeEmailFieldText(cur)
+                                if (clean !== cur) {
+                                    textField.text = clean
+                                    textField.cursorPosition = clean.length
+                                    return
+                                }
+                                if (TProxyConfigModel.isAcmeEmailTypingIncomplete(cur)) {
+                                    tproxyEmail.errorText = ""
+                                    return
+                                }
+                                if (!TProxyConfigModel.isValidAcmeEmail(clean)) {
+                                    tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
+                                    return
+                                }
+                                tproxyEmail.errorText = ""
+                            }
+                        }
+
+                        CaptionTextType {
+                            Layout.fillWidth: true
+
+                            visible: delegateRoot.isTProxy
+
+                            text: qsTr("Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.")
+                            color: AmneziaStyle.color.textAccent
                         }
                     }
 
-                    ListViewType {
-                        id: showDetailsListView
+                    SheetType {
+                        id: showDetailsDrawer
 
-                        anchors.top: showDetailsBackButton.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
+                        parent: root
 
-                        header: ColumnLayout {
-                            width: showDetailsListView.width
+                        expandedHeight: windowHeight * 0.9
 
-                            Header2Type {
-                                id: showDetailsDrawerHeader
+                        Loader {
+                            anchors.fill: parent
 
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.rightMargin: 16
-                                Layout.leftMargin: 16
+                            active: showDetailsDrawer.visible
 
-                                headerText: name
-                            }
-                        }
+                            sourceComponent: Item {
+                                Item {
+                                    id: showDetailsNavigation
 
-                        model: 1 // fake model to force the ListView to be created without a model
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
 
-                        delegate: ColumnLayout {
-                            width: showDetailsListView.width
+                                    height: 48
 
-                            ParagraphTextType {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.bottomMargin: 16
-                                Layout.leftMargin: 16
-                                Layout.rightMargin: 16
+                                    IconButtonType {
+                                        x: 4
+                                        y: 0
+                                        icon.source: "qrc:/images/controls/arrow-left.svg"
+                                        Accessible.name: qsTr("Back")
 
-                                text: detailedDescription
-                                textFormat: Text.MarkdownText
-                            }
+                                        onClicked: showDetailsDrawer.close()
+                                    }
+                                }
 
-                            Rectangle {
-                                Layout.fillHeight: true
-                                Layout.leftMargin: 16
-                                Layout.rightMargin: 16
+                                FlickableType {
+                                    id: showDetailsFlickable
 
-                                color: AmneziaStyle.color.transparent
-                            }
-                        }
+                                    anchors.top: showDetailsNavigation.bottom
+                                    anchors.bottom: showDetailsCloseBar.top
 
-                        footer: ColumnLayout {
-                            width: showDetailsListView.width
+                                    contentHeight: showDetailsContent.implicitHeight + 28
 
-                            BasicButtonType {
-                                id: showDetailsCloseButton
-                                Layout.fillWidth: true
-                                Layout.bottomMargin: 32
-                                Layout.leftMargin: 16
-                                Layout.rightMargin: 16
+                                    ColumnLayout {
+                                        id: showDetailsContent
 
-                                text: qsTr("Close")
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 12
+                                        anchors.leftMargin: 16
+                                        anchors.rightMargin: 16
 
-                                clickedFunc: function()  {
-                                    showDetailsDrawer.closeTriggered()
+                                        spacing: 8
+
+                                        SectionHeaderType {
+                                            Layout.fillWidth: true
+
+                                            headerText: delegateRoot.name
+                                        }
+
+                                        BodyTextType {
+                                            Layout.fillWidth: true
+
+                                            text: delegateRoot.detailedDescription
+                                            textFormat: Text.MarkdownText
+                                        }
+                                    }
+                                }
+
+                                BottomBarType {
+                                    id: showDetailsCloseBar
+
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+
+                                    color: AmneziaStyle.color.transparent
+
+                                    ButtonType {
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Close")
+
+                                        onClicked: showDetailsDrawer.close()
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            }
 
-            ParagraphTextType {
-                id: transportProtoHeader
+                    Component.onCompleted: {
+                        root.settingsItem = delegateRoot
 
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                        var defaultContainerProto = ContainerProps.defaultProtocol(dockerContainer)
 
-                text: qsTr("Network protocol")
-            }
+                        if (InstallController.defaultPort(defaultContainerProto) < 0) {
+                            port.visible = false
+                        } else {
+                            port.textField.text = InstallController.getPortForInstall(defaultContainerProto)
+                        }
+                        transportProtoSelector.currentIndex = InstallController.defaultTransportProto(defaultContainerProto)
 
-            TransportProtoSelector {
-                id: transportProtoSelector
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                rootWidth: root.width
-            }
-
-            TextFieldWithHeaderType {
-                id: port
-
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                headerText: qsTr("Port")
-                textField.maximumLength: 5
-                textField.validator: IntValidator { bottom: 1; top: 65535 }
-            }
-
-            Rectangle {
-                Layout.fillHeight: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                color: AmneziaStyle.color.transparent
-            }
-
-            BasicButtonType {
-                id: installButton
-
-                Layout.fillWidth: true
-                Layout.bottomMargin: 32
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                text: qsTr("Install")
-
-                clickedFunc: function() {
-                    if (!port.textField.acceptableInput &&
-                            ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
-                            ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
-                        port.errorText = qsTr("The port must be in the range of 1 to 65535")
-                        return
+                        port.enabled = InstallController.defaultPortChangeable(defaultContainerProto)
+                        var protocolSelectorVisible = InstallController.defaultTransportProtoChangeable(defaultContainerProto)
+                        transportProtoSelector.visible = protocolSelectorVisible
+                        transportProtoHeader.visible = protocolSelectorVisible
                     }
-
-                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex, ServersUiController.processedServerId)
                 }
             }
+        }
+    }
 
-            Component.onCompleted: {
-                var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
+    BottomBarType {
+        id: bottomBar
 
-                if (InstallController.defaultPort(defaultContainerProto) < 0) {
-                    port.visible = false
-                } else {
-                    port.textField.text = InstallController.getPortForInstall(defaultContainerProto)
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        ButtonType {
+            id: installButton
+
+            Layout.fillWidth: true
+
+            enabled: root.settingsItem !== null
+
+            text: qsTr("Install")
+
+            onClicked: {
+                if (root.settingsItem) {
+                    root.settingsItem.install()
                 }
-                transportProtoSelector.currentIndex = InstallController.defaultTransportProto(defaultContainerProto)
-
-                port.enabled = InstallController.defaultPortChangeable(defaultContainerProto)
-                var protocolSelectorVisible = InstallController.defaultTransportProtoChangeable(defaultContainerProto)
-                transportProtoSelector.visible = protocolSelectorVisible
-                transportProtoHeader.visible = protocolSelectorVisible
             }
         }
     }

@@ -18,11 +18,7 @@ import "../Components"
 PageType {
     id: root
 
-    property var installedProtocolsCount
-
-    function resetView() {
-        settingsContainersListView.positionViewAtBeginning()
-    }
+    readonly property int installedProtocolsCount: proxyContainersModel.count
 
     SettingsContainersListView {
         id: settingsContainersListView
@@ -43,7 +39,6 @@ PageType {
             } else {
                 proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
             }
-            root.installedProtocolsCount = proxyContainersModel.count
         }
 
         model: SortFilterProxyModel {
@@ -55,10 +50,6 @@ PageType {
             ]
         }
 
-        Component.onCompleted: {
-            settingsContainersListView.isFocusable = true
-            settingsContainersListView.interactive = true
-            updateContainersModelFilters()
-        }
+        Component.onCompleted: updateContainersModelFilters()
     }
 }

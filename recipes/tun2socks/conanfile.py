@@ -66,7 +66,7 @@ class Tun2Socks(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.27.1")
         if self._is_windows:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -114,8 +114,9 @@ class Tun2Socks(ConanFile):
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 with env.vars(self).apply():
                     at = Autotools(self)
+                    make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make("tun2socks", args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        f"BUILD_DIR={make_build_dir}"
                     ])
                     if self._is_windows:
                         os.rename(

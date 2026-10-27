@@ -2,6 +2,7 @@
 #define CONFIGKEYS_H
 
 #include <QLatin1String>
+#include <QStringList>
 
 namespace amnezia
 {
@@ -24,6 +25,7 @@ namespace amnezia
         constexpr QLatin1String accessToken("api_key");
         constexpr QLatin1String config("config");
         constexpr QLatin1String configVersion("config_version");
+        constexpr QLatin1String formatVersion("format_version");
 
         constexpr QLatin1String sendPayload("send_payload");
         constexpr QLatin1String sendPayloadEndpoint("endpoint");
@@ -70,6 +72,8 @@ namespace amnezia
 
         constexpr QLatin1String lastConfig("last_config");
 
+        constexpr QLatin1String protocolVersion("protocol_version");
+
         constexpr QLatin1String isThirdPartyConfig("isThirdPartyConfig");
         constexpr QLatin1String isObfuscationEnabled("isObfuscationEnabled");
 
@@ -97,8 +101,37 @@ namespace amnezia
         constexpr QLatin1String rejectAfterTime("RejectAfterTime");
         constexpr QLatin1String keepaliveTimeout("KeepaliveTimeout");
         constexpr QLatin1String maxHandshakeAttempts("MaxHandshakeAttempts");
+        constexpr QLatin1String randomTrailers("RandomTrailers");
+        constexpr QLatin1String disableCookies("DisableCookies");
 
-        constexpr QLatin1String protocolVersion("protocol_version");
+        inline QStringList awgProtocolKeys()
+        {
+            return { junkPacketCount,
+                     junkPacketMinSize,
+                     junkPacketMaxSize,
+                     initPacketJunkSize,
+                     responsePacketJunkSize,
+                     cookieReplyPacketJunkSize,
+                     transportPacketJunkSize,
+                     initPacketMagicHeader,
+                     responsePacketMagicHeader,
+                     underloadPacketMagicHeader,
+                     transportPacketMagicHeader,
+                     specialJunk1,
+                     specialJunk2,
+                     specialJunk3,
+                     specialJunk4,
+                     specialJunk5,
+                     headerProtectionKey,
+                     contentPaddingAddition,
+                     rekeyAfterTime,
+                     rekeyTimeout,
+                     rejectAfterTime,
+                     keepaliveTimeout,
+                     maxHandshakeAttempts,
+                     randomTrailers,
+                     disableCookies };
+        }
 
         constexpr QLatin1String openvpn("openvpn");
         constexpr QLatin1String wireguard("wireguard");
@@ -110,6 +143,7 @@ namespace amnezia
         constexpr QLatin1String socks5proxy("socks5proxy");
         constexpr QLatin1String mtproxy("mtproxy");
         constexpr QLatin1String telemt("telemt");
+        constexpr QLatin1String tproxy("tproxy");
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
@@ -144,6 +178,8 @@ namespace amnezia
 
         // ── Xray-specific keys ────────────────────────────────────────
 
+        constexpr QLatin1String xraySettingsVersion("xray_settings_version");
+
         // Security
         constexpr QLatin1String xraySecurity("xray_security");       // none | tls | reality
         constexpr QLatin1String xrayFlow("xray_flow");               // "" | xtls-rprx-vision | xtls-rprx-vision-udp443
@@ -158,7 +194,6 @@ namespace amnezia
         constexpr QLatin1String xhttpMode("xhttp_mode"); // Auto | Packet-up | Stream-up | Stream-one
         constexpr QLatin1String xhttpHost("xhttp_host");
         constexpr QLatin1String xhttpPath("xhttp_path");
-        constexpr QLatin1String xhttpHeadersTemplate("xhttp_headers_template"); // HTTP | None
         constexpr QLatin1String xhttpUplinkMethod("xhttp_uplink_method");       // POST | PUT | PATCH
         constexpr QLatin1String xhttpDisableGrpc("xhttp_disable_grpc");         // bool
         constexpr QLatin1String xhttpDisableSse("xhttp_disable_sse");           // bool
@@ -183,11 +218,11 @@ namespace amnezia
 
         // Transport — mKCP
         constexpr QLatin1String mkcpTti("mkcp_tti");
+        constexpr QLatin1String mkcpMtu("mkcp_mtu");
         constexpr QLatin1String mkcpUplinkCapacity("mkcp_uplink_capacity");
         constexpr QLatin1String mkcpDownlinkCapacity("mkcp_downlink_capacity");
-        constexpr QLatin1String mkcpReadBufferSize("mkcp_read_buffer_size");
-        constexpr QLatin1String mkcpWriteBufferSize("mkcp_write_buffer_size");
-        constexpr QLatin1String mkcpCongestion("mkcp_congestion"); // bool
+        constexpr QLatin1String mkcpCwndMultiplier("mkcp_cwnd_multiplier");
+        constexpr QLatin1String mkcpMaxSendingWindow("mkcp_max_sending_window");
 
         // xPadding
         constexpr QLatin1String xPaddingBytesMin("xpadding_bytes_min");

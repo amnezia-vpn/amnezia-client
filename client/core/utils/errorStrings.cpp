@@ -36,8 +36,44 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::XrayServerNoVlessClients):
         errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
         break;
-    case(ErrorCode::XrayRealityKeysReadFailed):
+    case(ErrorCode::XrayKeysReadFailed):
         errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
+        break;
+    case(ErrorCode::XrayTlsNotSupported):
+        errorMessage = QObject::tr("Server error: could not create a TLS certificate on the XRay server. "
+                                   "The previous settings were left unchanged. Try again, or use Reality.");
+        break;
+    case(ErrorCode::XrayServerConfigRejected):
+        errorMessage = QObject::tr("Server error: XRay rejected the new configuration. "
+                                   "Nothing was changed, the server keeps running with the previous settings.");
+        break;
+    case(ErrorCode::XrayServerConfigRolledBack):
+        errorMessage = QObject::tr("Server error: XRay did not start with the new configuration. "
+                                   "The previous settings were restored and the server is running again.");
+        break;
+    case(ErrorCode::XrayServerNotServing):
+        errorMessage = QObject::tr("Server error: XRay is not accepting connections and the previous configuration "
+                                   "could not be restored. The server needs attention: check it over SSH, "
+                                   "or reinstall the protocol.");
+        break;
+    case(ErrorCode::ServerDataVolumeNotRemoved):
+        errorMessage = QObject::tr("Server error: the previous data volume could not be removed. "
+                                   "Installing on top of it would reuse the old keys, so the configurations you "
+                                   "expected to revoke would keep working. Check the server and try again.");
+        break;
+    case(ErrorCode::XrayKeyGenerationFailed):
+        errorMessage = QObject::tr("Server error: XRay could not generate its keys on the server. "
+                                   "Check the server and try again.");
+        break;
+    case(ErrorCode::XrayKeyMigrationFailed):
+        errorMessage = QObject::tr("Server error: could not preserve the XRay keys stored on the server. "
+                                   "The settings were not changed, so the existing configurations keep working. "
+                                   "Check that the server is reachable and try again.");
+        break;
+    case(ErrorCode::XrayKeyMigrationNeedsConfirm):
+        errorMessage = QObject::tr("The old XRay container will not start, so its keys cannot be preserved. "
+                                   "Applying these settings will recreate it with new keys, and all existing "
+                                   "configurations will stop working.");
         break;
     case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
     case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;
@@ -69,8 +105,11 @@ QString errorString(ErrorCode code) {
 
     case (ErrorCode::ImportInvalidConfigError): errorMessage = QObject::tr("The config does not contain any containers and credentials for connecting to the server"); break;
     case (ErrorCode::ImportBackupFileUseRestoreInstead): errorMessage = QObject::tr("Backup files cannot be imported here. Use 'Restore from backup' instead."); break;
+    case (ErrorCode::ImportXraySettingsFileUseXrayPage): errorMessage = QObject::tr("This is an XRay settings file, not a connection config. Import it on the XRay Configurations page using 'Import settings'."); break;
     case (ErrorCode::RestoreBackupInvalidError): errorMessage = QObject::tr("Backup file is corrupted or has invalid format"); break;
     case (ErrorCode::LegacyApiV1NotSupportedError): errorMessage = QObject::tr("This legacy Amnezia subscription format is no longer supported"); break;
+    case (ErrorCode::ConfigFormatVersionNotSupportedError): errorMessage = QObject::tr("This configuration was created in a newer version of the application and is not fully supported. Please update the application"); break;
+    case (ErrorCode::RestoreBackupUnsupportedConfigsSkipped): errorMessage = QObject::tr("Some configurations from the backup were not restored because they require a newer version of the application"); break;
     case (ErrorCode::LegacyContainerNotSupportedError): errorMessage = QObject::tr("This protocol is no longer supported. Please select another protocol or remove this container from the server settings."); break;
     case (ErrorCode::ImportOpenConfigError): errorMessage = QObject::tr("Unable to open config file"); break;
     case (ErrorCode::NoInstalledContainersError): errorMessage = QObject::tr("VPN Protocols is not installed.\n Please install VPN container at first"); break;
@@ -89,7 +128,6 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiServicesMissingError): errorMessage = QObject::tr("Missing list of available services"); break;
     case (ErrorCode::ApiConfigLimitError): errorMessage = QObject::tr("The limit of allowed configurations per subscription has been exceeded"); break;
     case (ErrorCode::ApiNotFoundError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
-    case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error has occurred. Please contact our technical support"); break;
     case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
     case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
     case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
@@ -100,6 +138,24 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
     case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
     case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPurchasePendingError):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.");
+#else
+        errorMessage = QObject::tr("Your payment is pending confirmation. Please complete the payment and then restore your subscription.");
+#endif
+        break;
+    case (ErrorCode::ApiNoPurchasesToRestore):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Apple ID used for the purchase.");
+#else
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same account used for the purchase.");
+#endif
+        break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
@@ -108,6 +164,15 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
     case(ErrorCode::FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
+
+    // Billing errors
+    case(ErrorCode::BillingCanceled): errorMessage = QObject::tr("Transaction was canceled by the user"); break;
+    case(ErrorCode::BillingError): errorMessage = QObject::tr("Billing error"); break;
+    case(ErrorCode::BillingGooglePlayError): errorMessage = QObject::tr("Internal Google Play error, please try again later"); break;
+    case(ErrorCode::BillingUnavailable): errorMessage = QObject::tr("Billing is unavailable, please try again later"); break;
+    case(ErrorCode::SubscriptionAlreadyOwned): errorMessage = QObject::tr("You already own this subscription"); break;
+    case(ErrorCode::SubscriptionUnavailable): errorMessage = QObject::tr("The requested subscription is not available for purchase"); break;
+    case(ErrorCode::BillingNetworkError): errorMessage = QObject::tr("A network error occurred during the operation, please check the Internet connection"); break;
 
     case(ErrorCode::InternalError):
     default:

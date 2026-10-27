@@ -2,6 +2,10 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QObject>
+#include <QSet>
+
+#include <algorithm>
 
 #include "../../../core/utils/protocolEnum.h"
 #include "../../../core/protocols/protocolUtils.h"
@@ -12,6 +16,54 @@ using namespace amnezia;
 using namespace ProtocolUtils;
 namespace amnezia
 {
+
+namespace
+{
+    template <typename T>
+    bool hasAwg3Markers(const T &config)
+    {
+        auto hasValue = [](const QString &value) { return !value.trimmed().isEmpty(); };
+
+        const QStringList awg3Params = { config.headerProtectionKey, config.contentPaddingAddition,
+                                         config.rekeyAfterTime,      config.rekeyTimeout,
+                                         config.rejectAfterTime,     config.keepaliveTimeout,
+                                         config.maxHandshakeAttempts };
+        if (std::any_of(awg3Params.begin(), awg3Params.end(), hasValue)) {
+            return true;
+        }
+
+        return AwgProtocolConfig::isToggleEnabled(config.randomTrailers)
+                || AwgProtocolConfig::isToggleEnabled(config.disableCookies);
+    }
+
+    template <typename T>
+    QString awgVersionOf(const T &config)
+    {
+        auto hasValue = [](const QString &value) { return !value.trimmed().isEmpty(); };
+
+        if (hasAwg3Markers(config)) {
+            return protocols::awg::awgV3;
+        }
+
+        const QStringList junkSizes = { config.cookieReplyPacketJunkSize, config.transportPacketJunkSize };
+        const QStringList magicHeaders = { config.initPacketMagicHeader, config.responsePacketMagicHeader,
+                                           config.underloadPacketMagicHeader, config.transportPacketMagicHeader };
+        bool hasJunkSizes = std::any_of(junkSizes.begin(), junkSizes.end(), hasValue);
+        bool hasHeaderRanges = std::any_of(magicHeaders.begin(), magicHeaders.end(),
+                                           [](const QString &header) { return header.contains('-'); });
+        if (hasJunkSizes || hasHeaderRanges) {
+            return protocols::awg::awgV2;
+        }
+
+        const QStringList specialJunk = { config.specialJunk1, config.specialJunk2, config.specialJunk3,
+                                          config.specialJunk4, config.specialJunk5 };
+        if (std::any_of(specialJunk.begin(), specialJunk.end(), hasValue)) {
+            return protocols::awg::awgV1_5;
+        }
+
+        return QString();
+    }
+} // namespace
 
 QJsonObject AwgServerConfig::toJson() const
 {
@@ -95,7 +147,13 @@ QJsonObject AwgServerConfig::toJson() const
     if (!maxHandshakeAttempts.isEmpty()) {
         obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
     }
-    
+    if (!randomTrailers.isEmpty()) {
+        obj[configKey::randomTrailers] = randomTrailers;
+    }
+    if (!disableCookies.isEmpty()) {
+        obj[configKey::disableCookies] = disableCookies;
+    }
+
     if (isThirdPartyConfig) {
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
@@ -139,7 +197,9 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
     config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
     config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
-    
+    config.randomTrailers = json.value(configKey::randomTrailers).toString();
+    config.disableCookies = json.value(configKey::disableCookies).toString();
+
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
     return config;
@@ -263,11 +323,13 @@ QJsonObject AwgClientConfig::toJson() const
     if (!maxHandshakeAttempts.isEmpty()) {
         obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
     }
-    
-    if (isObfuscationEnabled) {
-        obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
+    if (!randomTrailers.isEmpty()) {
+        obj[configKey::randomTrailers] = randomTrailers;
     }
-    
+    if (!disableCookies.isEmpty()) {
+        obj[configKey::disableCookies] = disableCookies;
+    }
+
     return obj;
 }
 
@@ -318,21 +380,20 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
     config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
     config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
-    
-    config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
-    
+    config.randomTrailers = json.value(configKey::randomTrailers).toString();
+    config.disableCookies = json.value(configKey::disableCookies).toString();
     return config;
 }
 
 QJsonObject AwgProtocolConfig::toJson() const
 {
     QJsonObject obj = serverConfig.toJson();
-    
+
     if (clientConfig.has_value()) {
         QJsonObject clientJson = clientConfig->toJson();
         obj[configKey::lastConfig] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
     }
-    
+
     return obj;
 }
 
@@ -351,6 +412,31 @@ AwgProtocolConfig AwgProtocolConfig::fromJson(const QJsonObject& json)
     }
     
     return config;
+}
+
+QString AwgProtocolConfig::serverProtocolVersion() const
+{
+    return awgVersionOf(serverConfig);
+}
+
+QString AwgProtocolConfig::clientProtocolVersion() const
+{
+    return clientConfig.has_value() ? awgVersionOf(clientConfig.value()) : QString();
+}
+
+bool AwgProtocolConfig::isToggleEnabled(const QString &value)
+{
+    const QString trimmedValue = value.trimmed();
+    return !trimmedValue.isEmpty()
+            && trimmedValue.compare(QLatin1String(protocols::awg::awgBoolOff), Qt::CaseInsensitive) != 0;
+}
+
+QString AwgProtocolConfig::protocolVersionString(const QString &version)
+{
+    if (version == protocols::awg::awgV3) return QObject::tr(" (version 3.1)");
+    if (version == protocols::awg::awgV2) return QObject::tr(" (version 2)");
+    if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
+    return "";
 }
 
 bool AwgProtocolConfig::hasClientConfig() const
@@ -381,24 +467,36 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
         specialJunk1 != other.specialJunk1 || specialJunk2 != other.specialJunk2 ||
         specialJunk3 != other.specialJunk3 || specialJunk4 != other.specialJunk4 ||
         specialJunk5 != other.specialJunk5 ||
-        headerProtectionKey != other.headerProtectionKey) {
+        cookieReplyPacketJunkSize != other.cookieReplyPacketJunkSize ||
+        transportPacketJunkSize != other.transportPacketJunkSize ||
+        headerProtectionKey != other.headerProtectionKey ||
+        contentPaddingAddition != other.contentPaddingAddition ||
+        rekeyAfterTime != other.rekeyAfterTime || rekeyTimeout != other.rekeyTimeout ||
+        rejectAfterTime != other.rejectAfterTime || keepaliveTimeout != other.keepaliveTimeout ||
+        maxHandshakeAttempts != other.maxHandshakeAttempts ||
+        randomTrailers != other.randomTrailers || disableCookies != other.disableCookies) {
         return false;
-    }
-
-    bool isV2 = protocolVersion == protocols::awg::awgV2;
-    if (isV2) {
-        if (cookieReplyPacketJunkSize != other.cookieReplyPacketJunkSize ||
-            transportPacketJunkSize != other.transportPacketJunkSize) {
-            return false;
-        }
     }
 
     return true;
 }
 
+bool AwgServerConfig::hasAwg3Params() const
+{
+    return hasAwg3Markers(*this);
+}
+
 bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
 {
-    return (h1 == h2) || (h1 == h3) || (h1 == h4) || (h2 == h3) || (h2 == h4) || (h3 == h4);
+    QSet<QString> uniqueHeaders;
+    int filledHeaders = 0;
+    for (const QString &header : { h1, h2, h3, h4 }) {
+        if (!header.trimmed().isEmpty()) {
+            ++filledHeaders;
+            uniqueHeaders.insert(header);
+        }
+    }
+    return uniqueHeaders.size() != filledHeaders;
 }
 
 bool AwgProtocolConfig::isPacketSizeEqual(int s1, int s2, int s3, int s4)

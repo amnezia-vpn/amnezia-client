@@ -25,9 +25,21 @@ H1 = $INIT_PACKET_MAGIC_HEADER
 H2 = $RESPONSE_PACKET_MAGIC_HEADER
 H3 = $UNDERLOAD_PACKET_MAGIC_HEADER
 H4 = $TRANSPORT_PACKET_MAGIC_HEADER
+HeaderProtectionKey = $HEADER_PROTECTION_KEY
+ContentPaddingAddition = $CONTENT_PADDING_ADDITION
+RekeyAfterTime = $REKEY_AFTER_TIME
+RekeyTimeout = $REKEY_TIMEOUT
+RejectAfterTime = $REJECT_AFTER_TIME
+KeepaliveTimeout = $KEEPALIVE_TIMEOUT
+MaxHandshakeAttempts = $MAX_HANDSHAKE_ATTEMPTS
+RandomTrailers = $RANDOM_TRAILERS
+DisableCookies = $DISABLE_COOKIES
 # I1 = $SPECIAL_JUNK_1
 # I2 = $SPECIAL_JUNK_2
 # I3 = $SPECIAL_JUNK_3
 # I4 = $SPECIAL_JUNK_4
 # I5 = $SPECIAL_JUNK_5
 EOF
+
+# Every AWG parameter is optional - drop the lines whose value came out empty
+sed -i '/^[^=]*= *$/d' /opt/amnezia/awg/awg0.conf

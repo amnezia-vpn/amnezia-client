@@ -8,7 +8,7 @@ import os
 
 class AwgWindows(ConanFile):
     name = "awg-windows"
-    version = "3.0.2"
+    version = "3.1.20260814"
     settings = "os", "arch"
 
     @property
@@ -56,14 +56,14 @@ class AwgWindows(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("mingw-builds/15.1.0")
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.27.1")
 
     def requirements(self):
         self.requires("wintun/[*]")
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-windows/archive/refs/tags/v{self.version}.zip",
-            sha256="e5755ef1e19fd8408881cab49684d37ee4a0822d706960bbabe89770f7c436f1", strip_root=True)
+            sha256="d941861e3c0fada70b6b66b08aad4c77098d612aa11dd41b8ad70dd8afa6c61b", strip_root=True)
         
     def generate(self):
         tc = AutotoolsToolchain(self)

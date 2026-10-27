@@ -38,11 +38,15 @@ public:
 
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode);
-    bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
-    void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites);
+    bool addVpnSite(RouteMode mode, const QString &site, const QStringList &ips = {});
+    void addVpnSites(RouteMode mode, const QMap<QString, QStringList> &sites);
     void removeVpnSite(RouteMode mode, const QString &site);
     void removeAllVpnSites(RouteMode mode);
     QVariantMap vpnSites(RouteMode mode) const;
+
+    // Normalizes a stored vpn site value into a list of IPs.
+    // Supports both the legacy format (a single IP string) and the current one (a list of IPs).
+    static QStringList siteIpList(const QVariant &value);
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
 
@@ -73,8 +77,18 @@ public:
     void setStartMinimized(bool enabled);
     bool isScreenshotsEnabled() const;
     void setScreenshotsEnabled(bool enabled);
+
+    int countryListSortMode(const QString &listId) const;
+    void setCountryListSortMode(const QString &listId, int mode);
+    QStringList favoriteLocations(const QString &serverId) const;
+    void setFavoriteLocations(const QString &serverId, const QStringList &codes);
+    void removeFavoriteLocations(const QString &serverId);
+    void migrateLegacyFavoriteLocations(const QStringList &serverIds);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
+
+    bool isAutoUpdateCheckEnabled() const;
+    void setAutoUpdateCheckEnabled(bool enabled);
     bool isSaveLogs() const;
     void setSaveLogs(bool enabled);
     QDateTime getLogEnableDate() const;
@@ -86,14 +100,19 @@ public:
 
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();
-    bool isPremV1MigrationReminderActive() const;
-    void disablePremV1MigrationReminder();
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();
 
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
+
+    QString localProxyOwnerId() const;
+    void setLocalProxyOwnerId(const QString &serverId);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
 
 signals:
     void appLanguageChanged(QLocale locale);
@@ -121,4 +140,3 @@ private:
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H
-

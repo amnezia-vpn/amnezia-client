@@ -69,7 +69,6 @@ private:
 
     QString generateVpnUrl(const QByteArray &compressedConfig);
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);
-    QString generateSingleQrCode(const QByteArray &data);
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;

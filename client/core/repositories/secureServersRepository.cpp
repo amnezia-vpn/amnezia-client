@@ -5,6 +5,7 @@
 #include <QJsonValue>
 #include <QSet>
 #include <QUuid>
+#include <QDebug>
 
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
@@ -142,23 +143,43 @@ void SecureServersRepository::persistDefaultServerFields()
 void SecureServersRepository::loadFromStorage()
 {
     clearServerStateMaps();
+    m_unsupportedFormatConfigsCount = 0;
 
     const QJsonArray serversArray =
             QJsonDocument::fromJson(value(QStringLiteral("Servers/serversList"), QByteArray()).toByteArray())
                     .array();
+
+    QJsonArray persistedArray;
+    bool hasGeneratedIds = false;
 
     for (int i = 0; i < serversArray.size(); ++i) {
         const QJsonObject json = serversArray.at(i).toObject();
         const QString candidateId = readStorageServerId(json);
         const QString serverId = normalizedOrGeneratedServerId(candidateId);
         const QJsonObject strippedJson = withoutStorageServerId(json);
+        if (!serverConfigUtils::isConfigFormatVersionSupported(strippedJson)) {
+            qWarning() << "Skipping stored server config with unsupported format version"
+                       << serverConfigUtils::configFormatVersion(strippedJson);
+            ++m_unsupportedFormatConfigsCount;
+            persistedArray.append(json);
+            continue;
+        }
         const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(strippedJson);
 
         if (m_serverJsonById.contains(serverId) || kind == serverConfigUtils::ConfigType::Invalid) {
+            persistedArray.append(json);
             continue;
         }
         m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedJson));
         m_orderedServerIds.append(serverId);
+        persistedArray.append(m_serverJsonById.value(serverId));
+        hasGeneratedIds = hasGeneratedIds || serverId != candidateId;
+    }
+
+    // Per-server settings are keyed by id, so a generated one must survive restarts.
+    // Unlike syncToStorage(), this keeps entries that were skipped above
+    if (hasGeneratedIds) {
+        setValue(QStringLiteral("Servers/serversList"), QJsonDocument(persistedArray).toJson());
     }
 
     updateDefaultServerFromStorage();
@@ -182,6 +203,11 @@ void SecureServersRepository::syncToStorage()
 void SecureServersRepository::invalidateCache()
 {
     loadFromStorage();
+}
+
+int SecureServersRepository::unsupportedFormatConfigsCount() const
+{
+    return m_unsupportedFormatConfigsCount;
 }
 
 void SecureServersRepository::clearServers()
@@ -222,7 +248,8 @@ QString SecureServersRepository::addServer(const QString &serverId, const QJsonO
         return id;
     }
     const QJsonObject strippedJson = withoutStorageServerId(serverJson);
-    if (serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
+    if (!serverConfigUtils::isConfigFormatVersionSupported(strippedJson)
+        || serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
         return id;
     }
     m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
@@ -307,6 +334,15 @@ serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString 
         return serverConfigUtils::ConfigType::Invalid;
     }
     return serverConfigUtils::configTypeFromJson(withoutStorageServerId(it.value()));
+}
+
+std::optional<QJsonObject> SecureServersRepository::serverJsonById(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    return it.value();
 }
 
 std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAdminConfig(const QString &serverId) const

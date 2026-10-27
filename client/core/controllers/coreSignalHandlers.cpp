@@ -1,5 +1,6 @@
 #include "coreSignalHandlers.h"
 
+#include <QCoreApplication>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -11,6 +12,7 @@
 #include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
+#include "ui/controllers/qml/focusController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"
@@ -32,6 +34,7 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/connectionController.h"
+#include "core/controllers/localProxyController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/containersModel.h"
@@ -48,7 +51,7 @@
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 CoreSignalHandlers::CoreSignalHandlers(CoreController* coreController, QObject* parent)
@@ -65,6 +68,8 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initCountryListSortModeHandler();
+    initCountryListStateHandler();
     initSubscriptionRefreshHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -79,6 +84,7 @@ void CoreSignalHandlers::initAllHandlers()
     initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
     initUnsupportedConnectDrawerHandler();
+    initBackNavigationHandler();
     initStrictKillSwitchHandler();
     initAndroidSettingsHandler();
     initAndroidConnectionHandler();
@@ -86,6 +92,7 @@ void CoreSignalHandlers::initAllHandlers()
     initIosSettingsHandler();
     initNotificationHandler();
     initUpdateFoundHandler();
+    initLocalProxyHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -173,6 +180,85 @@ void CoreSignalHandlers::initImportControllerHandler()
     });
 }
 
+void CoreSignalHandlers::initCountryListSortModeHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    const auto reloadSortModes = [repository, models]() {
+        for (ApiCountryListModel *model : models) {
+            model->setSortMode(repository->countryListSortMode(model->listId()));
+        }
+    };
+    reloadSortModes();
+
+    for (ApiCountryListModel *model : models) {
+        connect(model, &ApiCountryListModel::sortModeChanged, this, [repository, model]() {
+            repository->setCountryListSortMode(model->listId(), model->sortMode());
+        });
+    }
+
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished, this, reloadSortModes);
+    connect(repository, &SecureAppSettingsRepository::settingsCleared, this, reloadSortModes);
+}
+
+void CoreSignalHandlers::initCountryListStateHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    ApiCountryModel *countryModel = m_coreController->m_apiCountryModel;
+    SecureServersRepository *serversRepository = m_coreController->m_serversRepository;
+
+    const auto reloadFavorites = [repository, models, countryModel]() {
+        const QStringList codes = repository->favoriteLocations(countryModel->serverId());
+        for (ApiCountryListModel *model : models) {
+            model->setFavorites(codes);
+        }
+    };
+    const auto migrateLegacyFavorites = [repository, serversRepository]() {
+        QStringList apiServerIds;
+        for (const QString &serverId : serversRepository->orderedServerIds()) {
+            if (serversRepository->apiV2Config(serverId).has_value()) {
+                apiServerIds.append(serverId);
+            }
+        }
+        repository->migrateLegacyFavoriteLocations(apiServerIds);
+    };
+    migrateLegacyFavorites();
+    reloadFavorites();
+
+    connect(countryModel, &ApiCountryModel::serverIdChanged, this, reloadFavorites);
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished, this,
+            [migrateLegacyFavorites, reloadFavorites]() {
+                migrateLegacyFavorites();
+                reloadFavorites();
+            });
+    connect(repository, &SecureAppSettingsRepository::settingsCleared, this, reloadFavorites);
+    connect(serversRepository, &SecureServersRepository::serverRemoved, this,
+            [repository, countryModel](const QString &serverId) {
+                repository->removeFavoriteLocations(serverId);
+                if (countryModel->serverId() == serverId) {
+                    countryModel->setServerId(QString());
+                }
+            });
+
+    for (ApiCountryListModel *model : models) {
+        connect(model, &ApiCountryListModel::favoritesChanged, this, [repository, models, model, countryModel](const QStringList &codes) {
+            repository->setFavoriteLocations(countryModel->serverId(), codes);
+            for (ApiCountryListModel *other : models) {
+                if (other != model) {
+                    other->setFavorites(codes);
+                }
+            }
+        });
+    }
+}
+
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
     connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
@@ -186,8 +272,10 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
             return;
         }
 
+        m_coreController->m_apiCountryModel->setServerId(processedServerId);
         m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
-                                                           apiV2->apiConfig.serverCountryCode);
+                                                           apiV2->apiConfig.serverCountryCode,
+                                                           apiV2->apiConfig.userCountryCode);
     });
 }
 
@@ -230,6 +318,18 @@ void CoreSignalHandlers::initTranslationsUpdatedHandler()
     connect(m_coreController->m_languageUiController, &LanguageUiController::updateTranslations, m_coreController, &CoreController::updateTranslator);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_languageUiController, &LanguageUiController::translationsUpdated);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
+    connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_logsUiController, &LogsUiController::refreshSizes);
+
+    const QVector<ApiCountryListModel *> countryListModels { m_coreController->m_apiCountryListModel,
+                                                             m_coreController->m_apiConfigsCountryListModel };
+    auto applyUiLanguage = [this, countryListModels]() {
+        const QString languageCode = QLocale::languageToCode(m_coreController->m_settingsController->getAppLanguage().language());
+        for (ApiCountryListModel *model : countryListModels) {
+            model->setUiLanguage(languageCode);
+        }
+    };
+    applyUiLanguage();
+    connect(m_coreController, &CoreController::translationsUpdated, this, applyUiLanguage);
 }
 
 void CoreSignalHandlers::initLanguageHandler()
@@ -359,6 +459,16 @@ void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
             m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 
+void CoreSignalHandlers::initBackNavigationHandler()
+{
+    if (!m_coreController->m_focusController) {
+        return;
+    }
+
+    connect(m_coreController->m_focusController, &FocusController::backRequested,
+            m_coreController->m_pageController, &PageController::escapePressed);
+}
+
 void CoreSignalHandlers::initStrictKillSwitchHandler()
 {
     connect(m_coreController->m_settingsUiController, &SettingsUiController::strictKillSwitchEnabledChanged, m_coreController->m_connectionController,
@@ -413,7 +523,7 @@ void CoreSignalHandlers::initIosImportHandler()
 void CoreSignalHandlers::initIosSettingsHandler()
 {
 #ifdef Q_OS_IOS
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { SWIFT_BRIDGE_NAMESPACE::toggleScreenshots(enabled); });
 #endif
 }
 
@@ -439,14 +549,17 @@ void CoreSignalHandlers::initNotificationHandler()
 
 void CoreSignalHandlers::initUpdateFoundHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
-        const QString version = m_coreController->m_updateUiController->getVersion();
-        const QString updateId = version.isEmpty() ? QStringLiteral("update") : QStringLiteral("update-%1").arg(version);
-        m_coreController->m_newsModel->setUpdateNotification(
-                updateId, m_coreController->m_updateUiController->getHeaderText(), m_coreController->m_updateUiController->getChangelogText());
-        emit m_coreController->m_pageController->showChangelogDrawer();
+        emit m_coreController->m_pageController->goToPage(PageLoader::PageEnum::PageUpdate);
     });
-#endif
 }
 
+void CoreSignalHandlers::initLocalProxyHandler()
+{
+    connect(m_coreController->m_connectionController, &ConnectionController::openConnectionRequested, m_coreController->m_localProxyController,
+            &LocalProxyController::onVpnConnectionRequested);
+    connect(m_coreController->m_localProxyController, &LocalProxyController::stoppedByVpn, m_coreController->m_pageController,
+            &PageController::showNotificationMessage);
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, m_coreController->m_localProxyController,
+            &LocalProxyController::disable);
+}

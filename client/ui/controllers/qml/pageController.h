@@ -1,6 +1,7 @@
 #ifndef PAGECONTROLLER_H
 #define PAGECONTROLLER_H
 
+#include <QMargins>
 #include <QObject>
 #include <QQmlEngine>
 
@@ -9,96 +10,7 @@
 #include "core/utils/commonStructs.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/serversController.h"
-
-namespace PageLoader
-{
-    Q_NAMESPACE
-    enum class PageEnum {
-        PageStart = 0,
-        PageHome,
-        PageShare,
-        PageDeinstalling,
-
-        PageSettingsServersList,
-        PageSettings,
-        PageSettingsServerData,
-        PageSettingsServerInfo,
-        PageSettingsServerProtocols,
-        PageSettingsServerServices,
-        PageSettingsServerProtocol,
-        PageSettingsConnection,
-        PageSettingsDns,
-        PageSettingsApplication,
-        PageSettingsNewsNotifications,
-        PageSettingsNewsDetail,
-        PageSettingsBackup,
-        PageSettingsAbout,
-        PageSettingsLogging,
-        PageSettingsSplitTunneling,
-        PageSettingsAppSplitTunneling,
-        PageSettingsKillSwitch,
-        PageSettingsApiServerInfo,
-        PageSettingsApiAvailableCountries,
-        PageSettingsApiSupport,
-        PageSettingsApiInstructions,
-        PageSettingsApiNativeConfigs,
-        PageSettingsApiDevices,
-        PageSettingsApiSubscriptionKey,
-        PageSettingsKillSwitchExceptions,
-
-        PageServiceSftpSettings,
-        PageServiceTorWebsiteSettings,
-        PageServiceDnsSettings,
-        PageServiceSocksProxySettings,
-        PageServiceMtProxySettings,
-        PageServiceTelemtSettings,
-
-        PageSetupWizardStart,
-        PageSetupWizardCredentials,
-        PageSetupWizardProtocols,
-        PageSetupWizardEasy,
-        PageSetupWizardProtocolSettings,
-        PageSetupWizardInstalling,
-        PageSetupWizardConfigSource,
-        PageSetupWizardTextKey,
-        PageSetupWizardViewConfig,
-        PageSetupWizardQrReader,
-        PageSetupWizardApiServicesList,
-        PageSetupWizardApiFreeInfo,
-
-        PageProtocolOpenVpnSettings,
-        PageProtocolXraySettings,
-        PageProtocolWireGuardSettings,
-        PageProtocolAwgSettings,
-        PageProtocolIKev2Settings,
-        PageProtocolRaw,
-
-        PageProtocolWireGuardClientSettings,
-        PageProtocolAwgClientSettings,
-
-        PageShareFullAccess,
-        PageShareConnection,
-
-        PageSetupWizardApiPremiumInfo,
-        PageSetupWizardApiTrialEmail,
-
-        PageDevMenu,
-
-        PageProtocolXraySnapshots,
-        PageProtocolXrayTransportSettings,
-        PageProtocolXrayXmuxSettings,
-        PageProtocolXrayXPaddingSettings,
-        PageProtocolXrayFlowSettings,
-        PageProtocolXraySecuritySettings,
-        PageProtocolXrayXPaddingBytesSettings,
-    };
-    Q_ENUM_NS(PageEnum)
-
-    static void declareQmlPageEnum()
-    {
-        qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
-    }
-}
+#include "ui/utils/pageEnum.h"
 
 class PageController : public QObject
 {
@@ -117,7 +29,6 @@ public slots:
 
     void closeWindow();
     void hideWindow();
-    void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);
@@ -130,17 +41,14 @@ public slots:
 
     void closeApplication();
 
-    void setDrawerDepth(const int depth);
-    int getDrawerDepth() const;
-    int incrementDrawerDepth();
-    int decrementDrawerDepth();
-
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
     int getNavigationBarHeight();
     int getSafeAreaTopMargin();
     int getSafeAreaBottomMargin();
     int getImeHeight();
+
+    void setSafeAreaMargins(const QMargins &margins);
 
 private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
@@ -177,9 +85,7 @@ signals:
     void unsupportedConnectDrawerRequested();
 
     void escapePressed();
-    void closeTopDrawer();
 
-    void showChangelogDrawer();
     void imeHeightChanged(int height);
     void safeAreaTopMarginChanged();
     void safeAreaBottomMarginChanged();
@@ -190,12 +96,12 @@ private:
 
     bool m_isTriggeredByConnectButton;
 
-    int m_drawerDepth = 0;
-
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;
     mutable bool m_cachedEdgeToEdgeEnabled = false;
     mutable bool m_edgeToEdgeCached = false;
+
+    QMargins m_safeAreaMargins;
     int m_imeHeight = 0;
 };
 

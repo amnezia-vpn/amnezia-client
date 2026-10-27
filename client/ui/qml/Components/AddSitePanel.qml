@@ -1,73 +1,72 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
 import Style 1.0
+
 import "../Controls2"
-import "../Controls2/TextTypes"
 
 Item {
     id: root
 
-    property bool enabled: true
     property string placeholderText: ""
+    property bool moreButtonVisible: true
+    property string moreButtonAccessibleName: ""
     property alias textField: searchField.textField
+    readonly property alias moreButton: moreButton
 
     signal addClicked(string text)
     signal moreClicked()
 
     implicitWidth: 360
-    implicitHeight: 96
+    implicitHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
 
     Rectangle {
-        id: background
         anchors.fill: parent
-        color: "#0E0F12"
+
+        color: AmneziaStyle.color.bgBase
         opacity: 0.85
-        z: -1
     }
 
     RowLayout {
-        id: addSiteButton
+        id: content
 
-        enabled: root.enabled
-        spacing: 2
+        anchors.fill: parent
+        anchors.topMargin: 24
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        anchors {
-            fill: parent
-            topMargin: 16
-            leftMargin: 16
-            rightMargin: 16
-            bottomMargin: 24
-        }
+        spacing: 8
 
-        TextFieldWithHeaderType {
+        TextFieldType {
             id: searchField
 
             Layout.fillWidth: true
-            rightButtonClickedOnEnter: true
 
-            textField.placeholderText: root.placeholderText
+            rightButtonClickedOnEnter: true
+            placeholderText: root.placeholderText
             buttonImageSource: "qrc:/images/controls/plus.svg"
+            buttonJoined: true
 
             clickedFunc: function() {
-                root.addClicked(textField.text)
-                textField.text = ""
+                root.addClicked(searchField.textField.text)
+                searchField.textField.text = ""
             }
         }
 
-        ImageButtonType {
-            id: addSiteButtonImage
-            implicitWidth: 56
-            implicitHeight: 56
+        IconButtonType {
+            id: moreButton
 
-            image: "qrc:/images/controls/more-vertical.svg"
-            imageColor: AmneziaStyle.color.paleGray
+            Layout.preferredWidth: 56
+            Layout.preferredHeight: 56
+            Layout.alignment: Qt.AlignVCenter
+
+            visible: root.moreButtonVisible
+
+            icon.source: "qrc:/images/controls/more-vertical.svg"
+            Accessible.name: root.moreButtonAccessibleName
 
             onClicked: root.moreClicked()
-
-            Keys.onReturnPressed: addSiteButtonImage.clicked()
-            Keys.onEnterPressed: addSiteButtonImage.clicked()
         }
     }
-} 
+}

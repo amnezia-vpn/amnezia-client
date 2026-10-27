@@ -8,7 +8,7 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
-#include "logger.h"
+#include "core/controllers/logsController.h"
 #include "systemController.h"
 #include "amneziaApplication.h"
 #include "version.h"
@@ -17,7 +17,7 @@
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 SettingsUiController::SettingsUiController(SettingsController* settingsController,
@@ -80,9 +80,6 @@ bool SettingsUiController::isLoggingEnabled()
 void SettingsUiController::toggleLogging(bool enable)
 {
     m_settingsController->toggleLogging(enable);
-#if defined(Q_OS_IOS)
-    AmneziaVPN::toggleLogging(enable);
-#endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
@@ -90,36 +87,11 @@ void SettingsUiController::toggleLogging(bool enable)
     emit loggingStateChanged();
 }
 
-void SettingsUiController::openLogsFolder()
-{
-    Logger::openLogsFolder(false);
-}
-
-void SettingsUiController::openServiceLogsFolder()
-{
-    Logger::openLogsFolder(true);
-}
-
 void SettingsUiController::exportLogsFile(const QString &fileName)
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->exportLogsFile(fileName);
-#else
-    if (!SystemController::saveFile(fileName, Logger::getLogFile())) {
+    if (!SystemController::saveFile(fileName, LogsController::readAll(LogsController::Stream::App))) {
         qInfo() << "SettingsUiController::exportLogsFile: save or share was cancelled or failed";
     }
-#endif
-}
-
-void SettingsUiController::exportServiceLogsFile(const QString &fileName)
-{
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->exportLogsFile(fileName);
-#else
-    if (!SystemController::saveFile(fileName, Logger::getServiceLogFile())) {
-        qInfo() << "SettingsUiController::exportServiceLogsFile: save or share was cancelled or failed";
-    }
-#endif
 }
 
 void SettingsUiController::clearLogs()
@@ -141,14 +113,14 @@ void SettingsUiController::backupAppConfig(const QString &fileName)
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)
 {
-    QFile file(fileName);
+    QByteArray data;
 
-    if (!file.open(QIODevice::ReadOnly)) {
+    if (!SystemController::readFile(fileName, data)) {
         emit errorOccurred(ErrorCode::OpenError);
         return;
     }
 
-    restoreAppConfigFromData(file.readAll());
+    restoreAppConfigFromData(data);
 }
 
 void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
@@ -163,6 +135,10 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+
+        if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
+            emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
+        }
     } else {
         emit errorOccurred(errorCode);
     }
@@ -183,7 +159,7 @@ void SettingsUiController::clearSettings()
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    AmneziaVPN::clearSettings();
+    SWIFT_BRIDGE_NAMESPACE::clearSettings();
 #endif
 }
 
@@ -238,6 +214,16 @@ bool SettingsUiController::isNewsNotificationsEnabled()
 void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
 {
     m_settingsController->toggleNewsNotificationsEnabled(enable);
+}
+
+bool SettingsUiController::isAutoUpdateCheckEnabled()
+{
+    return m_settingsController->isAutoUpdateCheckEnabled();
+}
+
+void SettingsUiController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_settingsController->toggleAutoUpdateCheckEnabled(enable);
 }
 
 bool SettingsUiController::isCameraPresent()

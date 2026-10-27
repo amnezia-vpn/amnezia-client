@@ -28,6 +28,9 @@ rm -f /data/config.toml
     if [ -n "$TELEMT_TAG" ]; then
         echo "ad_tag = \"$TELEMT_TAG\""
     fi
+    if [ -n "$TELEMT_MIDDLE_PROXY_NAT_IP" ]; then
+        echo "middle_proxy_nat_ip = \"$TELEMT_MIDDLE_PROXY_NAT_IP\""
+    fi
     echo ""
     echo "[general.modes]"
     echo "classic = false"

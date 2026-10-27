@@ -36,27 +36,24 @@ PageType {
 
         anchors.fill: parent
 
-        spacing: 16
-
         model: proxyServersModel
 
         delegate: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            spacing: 0
 
-                headerText: qsTr("Removing services from %1").arg(name)
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                backButtonVisible: false
+                title: qsTr("Removing services from %1").arg(name)
             }
 
             ProgressBarType {
                 id: progressBar
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -72,7 +69,7 @@ PageType {
                 }
             }
 
-            ParagraphTextType {
+            SmallTextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
