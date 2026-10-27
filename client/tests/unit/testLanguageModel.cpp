@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "client/ui/models/languageModel.h"
+#include "ui/models/languageModel.h"
 
 class LanguageModelTest : public QObject
 {
