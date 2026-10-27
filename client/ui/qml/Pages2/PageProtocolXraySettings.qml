@@ -17,6 +17,8 @@ PageType {
 
     focusOnActivation: false
 
+    readonly property bool hasWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
+
     property string portText: ""
 
     function save() {
@@ -87,8 +89,6 @@ PageType {
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
         anchors.bottomMargin: saveButton.visible ? 24 : 0
 
-        enabled: ServersUiController.isProcessedServerHasWriteAccess()
-
         contentHeight: content.implicitHeight
 
         ColumnLayout {
@@ -106,24 +106,15 @@ PageType {
                 title: qsTr("XRay VLESS settings")
 
                 IconButtonType {
+                    enabled: root.hasWriteAccess
                     icon.source: "qrc:/images/controls/more-vertical.svg"
                     onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
                 }
             }
 
-            SmallTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: !flickable.enabled
-                color: AmneziaStyle.color.textSecondary
-                text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")
-            }
-
             LinkButtonType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: flickable.enabled ? 0 : 16
 
                 size: LinkButtonType.Medium
                 horizontalPadding: 14
@@ -142,7 +133,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: flickable.enabled
+                enabled: root.hasWriteAccess
                 headerText: qsTr("Port")
                 placeholderText: XrayConfigModel.portDefault()
                 checkEmptyText: true
@@ -189,7 +180,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: flickable.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Transport")
                 subtitle: root.formatTransport(XrayConfigModel.transport)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -202,7 +193,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: flickable.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Security")
                 subtitle: root.formatSecurity((XrayConfigModel.security === "reality" && XrayConfigModel.transport === "mkcp") ? "none" : XrayConfigModel.security)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -215,7 +206,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: flickable.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Flow")
                 subtitle: root.formatFlow((XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw") ? XrayConfigModel.flow : "")
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -228,7 +219,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: flickable.enabled
+                visible: root.hasWriteAccess
                 text: qsTr("Reset settings")
                 destructive: true
 
@@ -261,7 +252,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: flickable.enabled
+        visible: root.hasWriteAccess
         enabled: XrayConfigModel.hasUnsavedChanges && root.portText !== ""
         text: qsTr("Save")
 
