@@ -7,6 +7,16 @@
 
 using namespace amnezia;
 
+namespace
+{
+    class TestableProtocolsModel : public ProtocolsModel
+    {
+    public:
+        using ProtocolsModel::ProtocolsModel;
+        using ProtocolsModel::roleNames;
+    };
+} // namespace
+
 class TestProtocolsModel : public QObject
 {
     Q_OBJECT
@@ -24,7 +34,7 @@ private slots:
 
 void TestProtocolsModel::initialState()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
 
     QCOMPARE(model.rowCount(), 0);
     QCOMPARE(model.rowCount(QModelIndex()), 0);
@@ -33,7 +43,7 @@ void TestProtocolsModel::initialState()
 
 void TestProtocolsModel::rowCountDependsOnContainer()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     ContainerConfig config { };
 
     config.container = DockerContainer::None;
@@ -55,7 +65,7 @@ void TestProtocolsModel::rowCountDependsOnContainer()
 
 void TestProtocolsModel::updateModel()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     ContainerConfig config {};
 
     config.container = DockerContainer::WireGuard;
@@ -77,20 +87,20 @@ void TestProtocolsModel::updateModel()
 
 void TestProtocolsModel::dataReturnsInvalidForInvalidIndex()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     ContainerConfig config {};
 
     config.container = DockerContainer::WireGuard;
     model.updateModel(config);
 
-    QVERIFY(!model.data(QModelIndex(), ProtocolsModel::ProtocolNameRole).isValid());
-    QVERIFY(!model.data(model.index(-1, 0), ProtocolsModel::ProtocolNameRole).isValid());
-    QVERIFY(!model.data(model.index(1, 0), ProtocolsModel::ProtocolNameRole).isValid());
+    QVERIFY(!model.data(QModelIndex(), TestableProtocolsModel::ProtocolNameRole).isValid());
+    QVERIFY(!model.data(model.index(-1, 0), TestableProtocolsModel::ProtocolNameRole).isValid());
+    QVERIFY(!model.data(model.index(1, 0), TestableProtocolsModel::ProtocolNameRole).isValid());
 }
 
 void TestProtocolsModel::dataReturnsInvalidForUnknownRole()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     ContainerConfig config {};
 
     config.container = DockerContainer::WireGuard;
@@ -104,23 +114,23 @@ void TestProtocolsModel::dataReturnsInvalidForUnknownRole()
 
 void TestProtocolsModel::protocolTypeRoles()
 {
-    ProtocolsModel model;
-    ContainerConfig config { };
+    TestableProtocolsModel model;
+    ContainerConfig config {};
 
     config.container = DockerContainer::WireGuard;
     model.updateModel(config);
 
     const QModelIndex index = model.index(0, 0);
 
-    QCOMPARE(model.data(index, ProtocolsModel::IsWireGuardRole).toBool(), true);
-    QCOMPARE(model.data(index, ProtocolsModel::IsAwgRole).toBool(), false);
-    QCOMPARE(model.data(index, ProtocolsModel::IsOpenVpnRole).toBool(), false);
-    QCOMPARE(model.data(index, ProtocolsModel::IsXrayRole).toBool(), false);
+    QCOMPARE(model.data(index, TestableProtocolsModel::IsWireGuardRole).toBool(), true);
+    QCOMPARE(model.data(index, TestableProtocolsModel::IsAwgRole).toBool(), false);
+    QCOMPARE(model.data(index, TestableProtocolsModel::IsOpenVpnRole).toBool(), false);
+    QCOMPARE(model.data(index, TestableProtocolsModel::IsXrayRole).toBool(), false);
 }
 
 void TestProtocolsModel::rawConfigNormalizesLineEndings()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     ContainerConfig config {};
 
     config.container = DockerContainer::WireGuard;
@@ -129,25 +139,25 @@ void TestProtocolsModel::rawConfigNormalizesLineEndings()
     const QModelIndex index = model.index(0, 0);
 
     // A default configuration has no native client configuration.
-    QCOMPARE(model.data(index, ProtocolsModel::RawConfigRole).toString(), QStringLiteral("\n"));
+    QCOMPARE(model.data(index, TestableProtocolsModel::RawConfigRole).toString(), QStringLiteral("\n"));
 }
 
 void TestProtocolsModel::roleNames()
 {
-    ProtocolsModel model;
+    TestableProtocolsModel model;
     const auto roles = model.roleNames();
 
-    QCOMPARE(roles.value(ProtocolsModel::ProtocolNameRole), QByteArray("protocolName"));
-    QCOMPARE(roles.value(ProtocolsModel::ServerProtocolPageRole), QByteArray("serverProtocolPage"));
-    QCOMPARE(roles.value(ProtocolsModel::ClientProtocolPageRole), QByteArray("clientProtocolPage"));
-    QCOMPARE(roles.value(ProtocolsModel::ProtocolIndexRole), QByteArray("protocolIndex"));
-    QCOMPARE(roles.value(ProtocolsModel::ProtocolStringRole), QByteArray("protocolString"));
-    QCOMPARE(roles.value(ProtocolsModel::RawConfigRole), QByteArray("rawConfig"));
-    QCOMPARE(roles.value(ProtocolsModel::IsClientProtocolExistsRole), QByteArray("isClientProtocolExists"));
-    QCOMPARE(roles.value(ProtocolsModel::IsWireGuardRole), QByteArray("isWireGuard"));
-    QCOMPARE(roles.value(ProtocolsModel::IsAwgRole), QByteArray("isAwg"));
-    QCOMPARE(roles.value(ProtocolsModel::IsOpenVpnRole), QByteArray("isOpenVpn"));
-    QCOMPARE(roles.value(ProtocolsModel::IsXrayRole), QByteArray("isXray"));
+    QCOMPARE(roles.value(TestableProtocolsModel::ProtocolNameRole), QByteArray("protocolName"));
+    QCOMPARE(roles.value(TestableProtocolsModel::ServerProtocolPageRole), QByteArray("serverProtocolPage"));
+    QCOMPARE(roles.value(TestableProtocolsModel::ClientProtocolPageRole), QByteArray("clientProtocolPage"));
+    QCOMPARE(roles.value(TestableProtocolsModel::ProtocolIndexRole), QByteArray("protocolIndex"));
+    QCOMPARE(roles.value(TestableProtocolsModel::ProtocolStringRole), QByteArray("protocolString"));
+    QCOMPARE(roles.value(TestableProtocolsModel::RawConfigRole), QByteArray("rawConfig"));
+    QCOMPARE(roles.value(TestableProtocolsModel::IsClientProtocolExistsRole), QByteArray("isClientProtocolExists"));
+    QCOMPARE(roles.value(TestableProtocolsModel::IsWireGuardRole), QByteArray("isWireGuard"));
+    QCOMPARE(roles.value(TestableProtocolsModel::IsAwgRole), QByteArray("isAwg"));
+    QCOMPARE(roles.value(TestableProtocolsModel::IsOpenVpnRole), QByteArray("isOpenVpn"));
+    QCOMPARE(roles.value(TestableProtocolsModel::IsXrayRole), QByteArray("isXray"));
 }
 
 QTEST_MAIN(TestProtocolsModel)
