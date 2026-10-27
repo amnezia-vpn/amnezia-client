@@ -438,6 +438,57 @@ void SecureAppSettingsRepository::migrateLegacyFavoriteLocations(const QStringLi
     setValue("Conf/favoriteLocations", favorites);
 }
 
+QJsonObject SecureAppSettingsRepository::connectionHistory(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return {};
+    }
+
+    const QVariant stored = value("Conf/connectionHistory/" + serverId);
+    if (!stored.isValid()) {
+        return {};
+    }
+
+    const QJsonDocument document = QJsonDocument::fromJson(stored.toByteArray());
+    return document.isObject() ? document.object() : QJsonObject();
+}
+
+void SecureAppSettingsRepository::recordConnectionResult(const QString &serverId, const QString &countryCode,
+                                                        bool success, int setupMs, int errorCode)
+{
+    if (serverId.isEmpty() || countryCode.isEmpty()) {
+        return;
+    }
+
+    QJsonObject history = connectionHistory(serverId);
+    QJsonObject entry = history.value(countryCode).toObject();
+    const QString now = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+
+    entry.insert("lastAttemptAt", now);
+    entry.insert("setupMs", setupMs);
+
+    if (success) {
+        entry.insert("lastSuccessAt", now);
+        entry.insert("lastError", 0);
+    } else {
+        entry.insert("lastError", errorCode);
+    }
+
+    history.insert(countryCode, entry);
+    setValue("Conf/connectionHistory/" + serverId, QJsonDocument(history).toJson(QJsonDocument::Compact));
+    emit connectionHistoryChanged(serverId);
+}
+
+void SecureAppSettingsRepository::clearConnectionHistory(const QString &serverId)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
+
+    m_settings->remove("Conf/connectionHistory/" + serverId);
+    emit connectionHistoryChanged(serverId);
+}
+
 bool SecureAppSettingsRepository::isNewsNotifications() const
 {
     return value("Conf/newsNotifications", true).toBool();

@@ -56,6 +56,10 @@ LocalSocketController::LocalSocketController() {
   m_initializingTimer.setSingleShot(true);
   connect(&m_initializingTimer, &QTimer::timeout, this,
           &LocalSocketController::initializeInternal);
+
+  m_statusTimer.setInterval(1000);
+  connect(&m_statusTimer, &QTimer::timeout, this,
+          &LocalSocketController::checkStatus);
 }
 
 LocalSocketController::~LocalSocketController() {
@@ -80,6 +84,7 @@ void LocalSocketController::errorOccurred(
 }
 
 void LocalSocketController::disconnectInternal() {
+  m_statusTimer.stop();
   // We're still eReady as the Deamon is alive
   // and can make a new connection.
   m_daemonState = eReady;
@@ -266,6 +271,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
 void LocalSocketController::deactivate() {
   logger.debug() << "Deactivating";
+  m_statusTimer.stop();
 
   if (m_daemonState != eReady) {
     logger.debug() << "No disconnect, controller is not ready";
@@ -400,6 +406,9 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     }
 
     emit initialized(true, connected.toBool(), datetime);
+    if (connected.toBool()) {
+      m_statusTimer.start();
+    }
     return;
   }
 
@@ -455,6 +464,7 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     logger.debug() << "Handshake completed with:"
                    << pubkey.toString();
 
+    m_statusTimer.start();
     checkStatus();
 
     emit statusUpdated("", m_deviceIpv4, 0, 0);
