@@ -85,7 +85,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: GC.isDesktop()
                 enabled: root.pageEnabled
 
                 text: qsTr("App split tunneling")
@@ -110,7 +109,7 @@ PageType {
                 id: modeSelector
 
                 Layout.fillWidth: true
-                Layout.topMargin: GC.isDesktop() ? 24 : 0
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

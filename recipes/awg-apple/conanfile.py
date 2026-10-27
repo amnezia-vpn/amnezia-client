@@ -21,6 +21,12 @@ class AwgApple(ConanFile):
         archs = str(self.settings.arch).split("|")
         return " ".join(arch_map.get(arch, arch) for arch in archs)
 
+    @property
+    def _deployment_target_vars(self):
+        if self.settings.os == "iOS":
+            return "miphoneos-version-min", "IPHONEOS_DEPLOYMENT_TARGET"
+        return "mmacosx-version-min", "MACOSX_DEPLOYMENT_TARGET"
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -49,6 +55,14 @@ class AwgApple(ConanFile):
             f"ARCHS={self._goarch}",
             f"PLATFORM_NAME={sdk}"
         ]
+        os_version = self.settings.get_safe("os.version")
+        if os_version:
+            flag_name, env_name = self._deployment_target_vars
+            tc.make_args += [
+                f"DEPLOYMENT_TARGET_CLANG_FLAG_NAME={flag_name}",
+                f"DEPLOYMENT_TARGET_CLANG_ENV_NAME={env_name}",
+                f"{env_name}={os_version}",
+            ]
         tc.generate()
 
     def build(self):
