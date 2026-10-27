@@ -7589,6 +7589,10 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
+        <source>Signed in to %1 successfully.</source>
+        <translation>Вход в %1 выполнен.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="241"/>
         <source>Your subscription has been upgraded</source>
         <translation>Ваша подписка повышена</translation>

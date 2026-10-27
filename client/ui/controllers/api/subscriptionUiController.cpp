@@ -658,6 +658,22 @@ bool SubscriptionUiController::startFreeAccountLogin()
     return beginFreeAccountLogin();
 }
 
+bool SubscriptionUiController::startFreeAccountLoginForServer(const QString &serverId)
+{
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    if (!apiV2.has_value() || !apiV2->isFree()) {
+        return false;
+    }
+
+    m_freeAccount = FreeAccountState{};
+    m_freeAccount.serverId = serverId;
+    m_freeAccount.userCountryCode = apiV2->apiConfig.userCountryCode;
+    m_freeAccount.serviceType = apiV2->apiConfig.serviceType;
+    m_freeAccount.serviceProtocol = apiV2->apiConfig.serviceProtocol;
+    m_freeAccount.serviceName = apiV2->name.isEmpty() ? QStringLiteral("Amnezia Free") : apiV2->name;
+    return true;
+}
+
 bool SubscriptionUiController::beginFreeAccountLogin()
 {
     if (m_serversController->isServerFromApiAlreadyExists(m_freeAccount.userCountryCode, m_freeAccount.serviceType,
@@ -805,7 +821,7 @@ bool SubscriptionUiController::importFreeAccountConfig()
     SubscriptionController::CaptchaInfo captchaInfo;
     const ErrorCode importError = m_subscriptionController->importFreeAccountFromGateway(
             m_freeAccount.userCountryCode, m_freeAccount.serviceType, m_freeAccount.session.accessToken,
-            m_freeAccount.captchaId, m_freeAccount.captchaSolution, captchaInfo);
+            m_freeAccount.captchaId, m_freeAccount.captchaSolution, captchaInfo, m_freeAccount.serverId);
     if (captchaInfo.isRequired) {
         m_freeAccount.captchaId = captchaInfo.captchaId;
         m_freeAccount.captchaSolution.clear();
@@ -823,7 +839,9 @@ bool SubscriptionUiController::importFreeAccountConfig()
         return false;
     }
 
-    const QString serverId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
+    const QString serverId = m_freeAccount.serverId.isEmpty()
+            ? m_serversController->getServerId(m_serversController->getServersCount() - 1)
+            : m_freeAccount.serverId;
     QJsonObject accountInfo;
     const ErrorCode accountInfoError = m_subscriptionController->getAccountInfo(serverId, accountInfo);
     const auto apiV2 = m_serversController->apiV2Config(serverId);
@@ -834,9 +852,15 @@ bool SubscriptionUiController::importFreeAccountConfig()
     }
 
     const QString serviceName = m_freeAccount.serviceName;
+    const bool boundToExistingServer = !m_freeAccount.serverId.isEmpty();
     m_freeAccount = FreeAccountState{};
     emit freeAccountLoginFinished();
-    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(serviceName));
+    if (boundToExistingServer) {
+        emit installServerFromApiFinished(tr("Signed in to %1 successfully.").arg(serviceName),
+                                          m_serversController->indexOfServerId(serverId));
+    } else {
+        emit installServerFromApiFinished(tr("%1 installed successfully.").arg(serviceName));
+    }
     return true;
 }
 
@@ -891,6 +915,8 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
     } else {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
             emit subscriptionExpiredOnServer();
+        } else if (errorCode == ErrorCode::ApiEmailSignInRequiredError && startFreeAccountLoginForServer(serverId)) {
+            emit freeAccountLoginRequired();
         } else {
             emit errorOccurred(errorCode);
         }
@@ -980,6 +1006,12 @@ void SubscriptionUiController::validateConfig()
 
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
                              captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
+        emit configValidated(false);
+        return;
+    }
+
+    if (errorCode == ErrorCode::ApiEmailSignInRequiredError && startFreeAccountLoginForServer(serverId)) {
+        emit freeAccountLoginRequired();
         emit configValidated(false);
         return;
     }

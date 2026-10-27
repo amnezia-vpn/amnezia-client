@@ -230,7 +230,8 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 
 ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
                                                                const QString &accessToken, const QString &captchaId,
-                                                               const QString &captchaSolution, CaptchaInfo &captchaInfo)
+                                                               const QString &captchaSolution, CaptchaInfo &captchaInfo,
+                                                               const QString &bindServerId)
 {
     if (accessToken.isEmpty()) {
         return ErrorCode::ApiAccountSessionError;
@@ -260,10 +261,10 @@ ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &us
         return errorCode;
     }
 
-    return applyFreeAccountConfig(responseBody);
+    return applyFreeAccountConfig(responseBody, bindServerId);
 }
 
-ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &responseBody)
+ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &responseBody, const QString &bindServerId)
 {
     const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
 
@@ -305,6 +306,22 @@ ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &respo
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
     apiV2ServerConfig.apiConfig.vpnKey = vpnKey;
     apiV2ServerConfig.crc = qChecksum(QJsonDocument(configObject).toJson());
+
+    if (!bindServerId.isEmpty()) {
+        const auto existingConfig = m_serversRepository->apiV2Config(bindServerId);
+        if (!existingConfig.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        ApiV2ServerConfig boundConfig = *existingConfig;
+        boundConfig.authData = apiV2ServerConfig.authData;
+        if (boundConfig.apiConfig.vpnKey.isEmpty()) {
+            boundConfig.apiConfig.vpnKey = vpnKey;
+        }
+        m_serversRepository->editServer(bindServerId, boundConfig.toJson(),
+                                       serverConfigUtils::configTypeFromJson(boundConfig.toJson()));
+        return ErrorCode::NoError;
+    }
+
     m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
                                    serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;

@@ -57,6 +57,7 @@ public slots:
     bool restoreServiceFromStore();
     bool importTrialFromGateway(const QString &email);
     bool startFreeAccountLogin();
+    bool startFreeAccountLoginForServer(const QString &serverId);
     void refreshFreeAccountCaptcha();
     bool solveFreeAccountCaptcha(const QString &solution);
     bool requestFreeEmailCode(const QString &email);
@@ -100,6 +101,7 @@ signals:
     void freeAccountLoginFailed(const QString &kind, int retryAfterSec);
     void freeAccountLoginFinished();
     void freeEmailSignInRequired();
+    void freeAccountLoginRequired();
     void subscriptionExpiredOnServer();
     void renewalLinkReceived(const QString &url);
 
@@ -182,6 +184,7 @@ private:
         QString serviceType;
         QString serviceProtocol;
         QString serviceName;
+        QString serverId;
         QString captchaId;
         QString captchaSolution;
         QString email;
