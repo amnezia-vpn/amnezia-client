@@ -1,4 +1,3 @@
-#include "core/models/api/apiV2ServerConfig.h"
 #include "subscriptionUiController.h"
 
 #include "amneziaApplication.h"
@@ -657,30 +656,6 @@ bool SubscriptionUiController::startFreeAccountLogin()
     m_freeAccount.serviceProtocol = m_apiServicesModel->getSelectedServiceProtocol();
     m_freeAccount.serviceName = m_apiServicesModel->getSelectedServiceName();
     return beginFreeAccountLogin();
-}
-
-bool SubscriptionUiController::startFreeAccountLoginForKey(const QJsonObject &keyConfig)
-{
-    m_freeAccount = FreeAccountState{};
-
-    const ApiV2ServerConfig keyServer = ApiV2ServerConfig::fromJson(keyConfig);
-    if (!keyServer.isFree()) {
-        emit errorOccurred(ErrorCode::ImportInvalidConfigError);
-        emit freeAccountLoginFailed(QString(), 0);
-        return false;
-    }
-
-    m_freeAccount.userCountryCode = keyServer.apiConfig.userCountryCode;
-    m_freeAccount.serviceType = keyServer.apiConfig.serviceType;
-    m_freeAccount.serviceProtocol = keyServer.apiConfig.serviceProtocol;
-    m_freeAccount.serviceName = keyServer.name.isEmpty() ? QStringLiteral("Amnezia Free") : keyServer.name;
-    return beginFreeAccountLogin();
-}
-
-bool SubscriptionUiController::isFreeEmailSignInRequiredForKey(const QJsonObject &keyConfig)
-{
-    const ApiV2ServerConfig keyServer = ApiV2ServerConfig::fromJson(keyConfig);
-    return keyServer.isFree() && m_apiServicesModel->isEmailRegistrationRequired(keyServer.apiConfig.serviceType);
 }
 
 bool SubscriptionUiController::beginFreeAccountLogin()

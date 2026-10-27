@@ -16,7 +16,6 @@ import "../Config"
 PageType {
     id: root
 
-
     property bool isRestoringBackup: false
 
     Connections {
@@ -205,7 +204,7 @@ PageType {
 
                     onClicked: {
                         if (ImportController.extractConfigFromData(textKey.textField.text)) {
-                            ImportController.openImportedConfig()
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                         }
                     }
                 }
@@ -351,7 +350,7 @@ PageType {
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
                 if (ImportController.extractConfigFromFile(fileName)) {
-                    ImportController.openImportedConfig()
+                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
             }
         }

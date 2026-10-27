@@ -13,7 +13,6 @@ import "../Config"
 PageType {
     id: root
 
-
     FlickableType {
         id: flickable
 
@@ -74,7 +73,7 @@ PageType {
 
             onClicked: {
                 if (ImportController.extractConfigFromData(textKey.textField.text)) {
-                    ImportController.openImportedConfig()
+                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
             }
         }
