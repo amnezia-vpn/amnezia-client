@@ -36,9 +36,10 @@ void TestProtocolsModel::initialState()
 {
     TestableProtocolsModel model;
 
-    QCOMPARE(model.rowCount(), 0);
-    QCOMPARE(model.rowCount(QModelIndex()), 0);
-    QVERIFY(!model.index(0, 0).isValid());
+    QCOMPARE(model.rowCount(), 1);
+    QCOMPARE(model.rowCount(QModelIndex()), 1);
+    QVERIFY(model.index(0, 0).isValid());
+    QVERIFY(!model.index(1, 0).isValid());
 }
 
 void TestProtocolsModel::rowCountDependsOnContainer()
