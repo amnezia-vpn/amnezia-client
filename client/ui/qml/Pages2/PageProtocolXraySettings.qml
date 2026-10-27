@@ -38,8 +38,10 @@ PageType {
                 return
             }
 
-            PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+            var touchesServer = XrayConfigModel.pendingChangeTouchesServer(root.portText)
+            if (touchesServer)
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
         }
         var noButtonFunction = function() {}
         Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -208,7 +210,7 @@ PageType {
 
                 enabled: root.hasWriteAccess
                 text: qsTr("Flow")
-                subtitle: root.formatFlow((XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw") ? XrayConfigModel.flow : "")
+                subtitle: root.formatFlow(((XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw") && (XrayConfigModel.security === "tls" || XrayConfigModel.security === "reality")) ? XrayConfigModel.flow : "")
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
@@ -256,6 +258,9 @@ PageType {
         enabled: XrayConfigModel.hasUnsavedChanges && root.portText !== ""
         text: qsTr("Save")
 
-        onClicked: root.save()
+        onClicked: {
+            saveButton.forceActiveFocus()
+            root.save()
+        }
     }
 }
