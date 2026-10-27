@@ -79,7 +79,6 @@ private:
     qint64 m_xrayToken = 0;
     quint16 m_appliedProxyPort = 0;
     int m_activePort = 0;
-    int m_lastProxyPort = 0;
 };
 
 #endif // LOCALPROXYCONTROLLER_H

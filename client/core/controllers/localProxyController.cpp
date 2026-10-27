@@ -76,7 +76,6 @@ bool LocalProxyController::setPort(int port)
     const bool isPortChanged = m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port);
     if (isPortChanged) {
         m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
-        m_lastProxyPort = 0;
     }
     m_appSettingsRepository->setLocalProxyPortUserDefined(true);
     emit stateChanged();
@@ -226,7 +225,6 @@ bool LocalProxyController::startXray()
     }
 
     qDebug() << "Xray started on port" << config->proxyPort;
-    m_lastProxyPort = config->proxyPort;
     setActivePort(config->proxyPort);
     return true;
 }
@@ -327,35 +325,34 @@ std::optional<LocalProxyController::XrayConfig> LocalProxyController::buildXrayC
 
 std::optional<int> LocalProxyController::selectProxyPort() const
 {
-    int basePort = m_appSettingsRepository->localProxyPort();
-    if (basePort < localProxy::proxyPortMin || basePort > localProxy::proxyPortMax) {
-        basePort = localProxy::defaultProxyPort;
+    int port = m_appSettingsRepository->localProxyPort();
+    if (port < localProxy::proxyPortMin || port > localProxy::proxyPortMax) {
+        port = localProxy::defaultProxyPort;
     }
 
-    if (m_lastProxyPort == 0) {
-        if (portUtils::waitForPort(basePort, localProxy::portReleaseWaitMs)) {
-            return basePort;
-        }
-
-        if (m_appSettingsRepository->isLocalProxyPortUserDefined()) {
-            qWarning() << "Local proxy port" << basePort << "is already in use";
-            return std::nullopt;
-        }
+    if (portUtils::waitForPort(port, localProxy::portReleaseWaitMs)) {
+        return port;
     }
 
-    // Every restart moves to a new port so that clients notice the change and reconnect.
-    const int from = (m_lastProxyPort > 0 ? m_lastProxyPort : basePort) + 1;
-    auto freePort = portUtils::findFirstAvailablePort(from, localProxy::proxyPortMax);
-    if (!freePort && from > basePort + 1) {
-        freePort = portUtils::findFirstAvailablePort(basePort, from - 2);
-    }
-
-    if (!freePort) {
-        qWarning() << "No available local proxy port in range" << basePort << "-" << localProxy::proxyPortMax;
+    if (m_appSettingsRepository->isLocalProxyPortUserDefined()) {
+        qWarning() << "Local proxy port" << port << "is already in use";
         return std::nullopt;
     }
 
-    qDebug() << "Local proxy port selected:" << *freePort << "(previous" << m_lastProxyPort << ")";
+    std::optional<int> freePort;
+    if (port != localProxy::defaultProxyPort && portUtils::isPortAvailable(localProxy::defaultProxyPort)) {
+        freePort = localProxy::defaultProxyPort;
+    } else {
+        freePort = portUtils::findFirstAvailablePort(localProxy::defaultProxyPort + 1, localProxy::proxyPortMax);
+    }
+
+    if (!freePort) {
+        qWarning() << "No available local proxy port in range" << localProxy::defaultProxyPort + 1 << "-"
+                   << localProxy::proxyPortMax;
+        return std::nullopt;
+    }
+
+    qDebug() << "Local proxy port" << port << "is busy, using" << *freePort;
     return freePort;
 }
 
