@@ -4,6 +4,10 @@
 #include <QAbstractListModel>
 #include <QHash>
 #include <QJsonArray>
+#include <QJsonObject>
+#include <QStringList>
+
+class SecureAppSettingsRepository;
 
 class ApiCountryModel : public QAbstractListModel
 {
@@ -15,7 +19,13 @@ public:
         CountryCodeRole,
         CountryImageCodeRole,
         IsIssuedRole,
-        IsWorkerExpiredRole
+        IsWorkerExpiredRole,
+        AvailableProtocolsRole,
+        LastConnectionStateRole,
+        LastConnectionAtRole,
+        LastSuccessAtRole,
+        LastConnectionSetupMsRole,
+        LastConnectionErrorRole
     };
 
     struct CountryInfo
@@ -23,9 +33,12 @@ public:
         QString countryName;
         QString countryCode;
         QString countryCodeL10n;
+        QStringList availableProtocols;
     };
 
     explicit ApiCountryModel(QObject *parent = nullptr);
+
+    void setAppSettingsRepository(SecureAppSettingsRepository *settings);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -70,6 +83,8 @@ private:
     };
 
     bool isWorkerExpired(const IssuedConfigInfo &issuedConfigInfo) const;
+    QJsonObject connectionHistoryEntry(const QString &countryCode) const;
+    void refreshConnectionHistory();
 
     QVector<CountryInfo> m_countries;
     QString m_serverId;
@@ -77,6 +92,8 @@ private:
     QString m_currentCountryCode;
     QString m_userCountryCode;
     int m_currentIndex = -1;
+    SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
+    QJsonObject m_connectionHistory;
 };
 
 #endif // APICOUNTRYMODEL_H

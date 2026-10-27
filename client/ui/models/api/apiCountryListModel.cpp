@@ -107,6 +107,13 @@ ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, const QString 
             }
             emit dataChanged(index(0), index(m_rows.size() - 1), { IsCurrentRole });
         });
+        connect(m_source, &ApiCountryModel::dataChanged, this,
+                [this](const QModelIndex &, const QModelIndex &, const QVector<int> &) {
+                    if (m_rows.isEmpty()) {
+                        return;
+                    }
+                    emit dataChanged(index(0), index(m_rows.size() - 1));
+                });
     }
 
     reloadLocations();
@@ -149,6 +156,15 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
         case IsWorkerExpiredRole:
         case IsFavoriteRole:
             return false;
+        case AvailableProtocolsRole:
+            return QStringList();
+        case LastConnectionStateRole:
+        case LastConnectionSetupMsRole:
+            return 0;
+        case LastConnectionAtRole:
+        case LastSuccessAtRole:
+        case LastConnectionErrorRole:
+            return QString();
         default:
             return {};
         }
@@ -184,6 +200,27 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
     }
     case IsFavoriteRole:
         return m_favorites.contains(location.countryCode);
+    case AvailableProtocolsRole:
+    case LastConnectionStateRole:
+    case LastConnectionAtRole:
+    case LastSuccessAtRole:
+    case LastConnectionSetupMsRole:
+    case LastConnectionErrorRole: {
+        if (!m_source) {
+            return {};
+        }
+        int sourceRole = -1;
+        switch (role) {
+        case AvailableProtocolsRole: sourceRole = ApiCountryModel::AvailableProtocolsRole; break;
+        case LastConnectionStateRole: sourceRole = ApiCountryModel::LastConnectionStateRole; break;
+        case LastConnectionAtRole: sourceRole = ApiCountryModel::LastConnectionAtRole; break;
+        case LastSuccessAtRole: sourceRole = ApiCountryModel::LastSuccessAtRole; break;
+        case LastConnectionSetupMsRole: sourceRole = ApiCountryModel::LastConnectionSetupMsRole; break;
+        case LastConnectionErrorRole: sourceRole = ApiCountryModel::LastConnectionErrorRole; break;
+        default: break;
+        }
+        return m_source->data(m_source->index(location.sourceIndex), sourceRole);
+    }
     default:
         return {};
     }
@@ -203,6 +240,12 @@ QHash<int, QByteArray> ApiCountryListModel::roleNames() const
     roles[IsIssuedRole] = "isIssued";
     roles[IsWorkerExpiredRole] = "isWorkerExpired";
     roles[IsFavoriteRole] = "isFavorite";
+    roles[AvailableProtocolsRole] = "availableProtocols";
+    roles[LastConnectionStateRole] = "lastConnectionState";
+    roles[LastConnectionAtRole] = "lastConnectionAt";
+    roles[LastSuccessAtRole] = "lastSuccessAt";
+    roles[LastConnectionSetupMsRole] = "lastConnectionSetupMs";
+    roles[LastConnectionErrorRole] = "lastConnectionError";
     return roles;
 }
 

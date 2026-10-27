@@ -127,6 +127,7 @@ void CoreController::initModels()
     setQmlContextProperty("ApiServicesModel", m_apiServicesModel);
 
     m_apiCountryModel = new ApiCountryModel(this);
+    m_apiCountryModel->setAppSettingsRepository(m_appSettingsRepository);
     setQmlContextProperty("ApiCountryModel", m_apiCountryModel);
 
     m_apiCountryListModel = new ApiCountryListModel(m_apiCountryModel, "picker", this);
