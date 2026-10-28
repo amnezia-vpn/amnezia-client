@@ -8,6 +8,8 @@
 #include <systemconfiguration/scdynamicstore.h>
 #include <systemconfiguration/systemconfiguration.h>
 
+#include <dispatch/dispatch.h>
+
 #include <QHostAddress>
 #include <QMap>
 #include <QString>
@@ -26,8 +28,12 @@ class DnsUtilsMacos final : public DnsUtils {
   bool restoreResolvers() override;
 
  private:
-  void backupResolvers();
-  void backupService(const QString& uuid);
+  struct NotificationContext;
+  static void dnsChanged(SCDynamicStoreRef, CFArrayRef, void* info);
+  bool startMonitoring();
+  void stopMonitoring();
+  bool applyResolvers();
+  bool backupService(const QString& uuid);
 
  private:
   class DnsBackup {
@@ -46,6 +52,11 @@ class DnsUtilsMacos final : public DnsUtils {
 
   SCDynamicStoreRef m_scStore = nullptr;
   QMap<QString, DnsBackup> m_prevServices;
+  NotificationContext* m_notificationContext = nullptr;
+  dispatch_queue_t m_notificationQueue = nullptr;
+  CFDictionaryRef m_dnsConfig = nullptr;
+  quint64 m_generation = 0;
+  bool m_monitoring = false;
 };
 
 #endif  // DNSUTILSMACOS_H
