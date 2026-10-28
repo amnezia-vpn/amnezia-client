@@ -15,6 +15,16 @@ TabButton {
     readonly property int maximumHorizontalPadding: root.size === TabButtonType.Large ? 24 : 10
 
     implicitWidth: implicitContentWidth + 2 * root.maximumHorizontalPadding
+    width: {
+        if (!root.visible) {
+            return 0
+        }
+        const tabBar = root.TabBar.tabBar
+        if (!tabBar || tabBar.visibleTabCount === undefined) {
+            return implicitWidth
+        }
+        return tabBar.availableWidth / Math.max(1, tabBar.visibleTabCount)
+    }
     implicitHeight: root.size === TabButtonType.Large ? 48 : 36
 
     horizontalPadding: Math.max(4, Math.min(root.maximumHorizontalPadding, (root.width - implicitContentWidth) / 2))

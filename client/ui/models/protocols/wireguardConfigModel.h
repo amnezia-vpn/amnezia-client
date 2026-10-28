@@ -1,30 +1,32 @@
 #ifndef WIREGUARDCONFIGMODEL_H
 #define WIREGUARDCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 
-class WireGuardConfigModel : public QAbstractListModel
+class WireGuardConfigModel : public QObject
 {
     Q_OBJECT
 
-public:
-    enum Roles {
-        SubnetAddressRole = Qt::UserRole + 1,
-        PortRole,
-        ClientMtuRole
-    };
+    Q_PROPERTY(QString subnetAddress READ subnetAddress WRITE setSubnetAddress NOTIFY changed)
+    Q_PROPERTY(QString port READ port WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString clientMtu READ clientMtu WRITE setClientMtu NOTIFY changed)
 
+public:
     explicit WireGuardConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QString subnetAddress() const;
+    void setSubnetAddress(const QString &value);
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString port() const;
+    void setPort(const QString &value);
+
+    QString clientMtu() const;
+    void setClientMtu(const QString &value);
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::WireGuardProtocolConfig &protocolConfig);
@@ -32,8 +34,8 @@ public slots:
 
     bool isServerSettingsEqual();
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     amnezia::DockerContainer m_container;

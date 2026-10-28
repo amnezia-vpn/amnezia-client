@@ -41,7 +41,6 @@ SheetType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("Telegram")
                 subtitle: qsTr("We'll reply in chat")
                 icon.source: "qrc:/images/controls/telegram.svg"
@@ -57,7 +56,6 @@ SheetType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 text: qsTr("support@amnezia.org")
                 subtitle: qsTr("Support email")
                 icon.source: "qrc:/images/controls/mail.svg"
@@ -73,7 +71,6 @@ SheetType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                leadingSlotWidth: 24
                 showSeparator: false
                 text: qsTr("amnezia.org")
                 subtitle: qsTr("Download the update manually")

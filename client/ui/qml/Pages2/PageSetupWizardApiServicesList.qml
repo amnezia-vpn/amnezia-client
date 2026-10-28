@@ -24,11 +24,12 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("VPN by Amnezia")
                 description: qsTr("Choose a VPN service that suits your needs.")

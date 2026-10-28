@@ -13,7 +13,6 @@ SheetType {
     property string serverNameText
 
     id: root
-    objectName: "serverNameEditDrawer"
 
     expandedHeight: content.implicitHeight + 16 + 8 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
@@ -27,7 +26,7 @@ SheetType {
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        spacing: 26
+        spacing: 24
 
         TextFieldType {
             id: serverName

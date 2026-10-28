@@ -518,6 +518,14 @@ namespace xrayEffective
         return (rawTransport && secureFlow) ? srv.flow : QString();
     }
 
+    QString serverFlow(const XrayServerConfig &srv)
+    {
+        QString flow = clientFlow(srv);
+        if (flow.endsWith(QLatin1String("-udp443")))
+            flow.chop(int(qstrlen("-udp443")));
+        return flow;
+    }
+
     QString network(const XrayServerConfig &srv)
     {
         namespace px = protocols::xray;
@@ -576,7 +584,7 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
         }
         if (!alpnArray.isEmpty())
             tlsSettings[px::alpn] = alpnArray;
-        if (clientSide)
+        if (clientSide && transport != QLatin1String(px::transportMkcp))
             tlsSettings[px::fingerprint] = fingerprintEff;
         if (!clientSide && !isThirdPartyConfig) {
             QJsonObject cert;
@@ -597,9 +605,11 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
     if (transport == QLatin1String(px::transportXhttp)) {
         QJsonObject xo;
         xo[px::xhttpHost] = xhttp.host.isEmpty() ? QString::fromLatin1(px::defaultXhttpHost) : xhttp.host;
-        const QString pathEff = xhttp.path.trimmed().isEmpty()
+        QString pathEff = xhttp.path.trimmed().isEmpty()
                 ? QString::fromLatin1(px::defaultXhttpPath)
-                : xhttp.path;
+                : xhttp.path.trimmed();
+        if (!pathEff.startsWith(QLatin1Char('/')))
+            pathEff.prepend(QLatin1Char('/'));
         xo[px::xhttpPath] = pathEff;
         const QString modeEff = xrayEffective::xhttpModeSent(*this);
         xo[px::xhttpMode] = modeEff;
@@ -1186,7 +1196,10 @@ XrayServerJsonStatus XrayServerConfig::fromServerInboundJson(const QJsonObject &
     if (inbound.contains(px::settings)) {
         const QJsonArray clients = inbound.value(px::settings).toObject().value(px::clients).toArray();
         if (!clients.isEmpty()) {
-            srv.flow = clients[0].toObject().value(px::flow).toString();
+            const QString inboundFlow = clients[0].toObject().value(px::flow).toString();
+            if (srv.flow != inboundFlow + QLatin1String("-udp443")) {
+                srv.flow = inboundFlow;
+            }
         }
     }
 
@@ -1305,7 +1318,7 @@ QJsonObject XrayServerConfig::serverView() const
     view[QStringLiteral("port")] = port.isEmpty() ? QString::fromLatin1(px::defaultPort) : port;
     view[QStringLiteral("transportProto")] = transportProto;
 
-    view[px::flow] = xrayEffective::clientFlow(*this);
+    view[px::flow] = xrayEffective::serverFlow(*this);
 
     view[px::streamSettings] = serverStreamSettings();
 

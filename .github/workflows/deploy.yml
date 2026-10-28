@@ -324,7 +324,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-iOS
     if: ${{ always() }}
@@ -472,7 +472,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-15
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -1049,11 +1049,16 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1132,6 +1137,17 @@ jobs:
             -name "test_*" \
             -exec chmod +x {} \;
 
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
+
       - name: Run tests
         env:
           AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
@@ -1208,6 +1224,16 @@ jobs:
             -name "test_*" \
             -exec chmod +x {} \;
 
+      - name: Download Xray core
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
+
       - name: Run tests
         shell: bash
         run: |
@@ -1217,7 +1243,8 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
 
           ctest --test-dir deploy/build/client/tests --output-on-failure -VV \
-            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest)$"
+            --timeout 3600 \
+            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest|XrayVpsMatrixTest)$"
 
 # ------------------------------------------------------
 
@@ -1239,11 +1266,16 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1312,6 +1344,17 @@ jobs:
         with:
           arch: x64
 
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: pwsh
+        run: |
+          $release = (Select-String -Path client/server_scripts/xray/Dockerfile -Pattern '^ARG XRAY_RELEASE="(.*)"').Matches[0].Groups[1].Value
+          $zip = Join-Path $env:RUNNER_TEMP "xray.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "xray"
+          Invoke-WebRequest -Uri "https://github.com/XTLS/Xray-core/releases/download/$release/Xray-windows-64.zip" -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          "XRAY_BIN=$(Join-Path $dir 'xray.exe')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
       - name: Run tests
         env:
           AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
@@ -1351,6 +1394,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest

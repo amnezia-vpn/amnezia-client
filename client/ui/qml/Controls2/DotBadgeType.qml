@@ -13,8 +13,8 @@ Item {
     Rectangle {
         anchors.centerIn: parent
 
-        width: 6
-        height: 6
+        width: 5
+        height: 5
         radius: width / 2
 
         color: root.color

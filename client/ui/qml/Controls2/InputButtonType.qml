@@ -12,7 +12,7 @@ Button {
     property bool joined: false
     property string imageSource
 
-    implicitWidth: root.imageSource !== "" ? 48 : Math.max(83, implicitContentWidth + leftPadding + rightPadding)
+    implicitWidth: root.imageSource !== "" ? 83 : Math.max(83, implicitContentWidth + leftPadding + rightPadding)
     implicitHeight: 56
 
     horizontalPadding: 12

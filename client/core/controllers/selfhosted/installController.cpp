@@ -296,7 +296,7 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         portReinstall = isReinstallContainerRequired(container, oldConfig, newConfig);
         reinstallRequired = portReinstall;
     }
-    if (container == DockerContainer::Xray) {
+    if (container == DockerContainer::Xray && serverSettingsChanged) {
         if (credentials.isValid()) {
             binaryMismatch = xrayServerBinaryMismatchesExpected(credentials, sshSession);
             if (binaryMismatch) {

@@ -310,6 +310,14 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     Proto protocolType = static_cast<Proto>(protocolIndex);
 
+    if (protocolType == Proto::Xray || protocolType == Proto::SSXray) {
+        const QStringList errs = m_xrayConfigModel->validationErrors();
+        if (!errs.isEmpty()) {
+            emit installationErrorOccurred(ErrorCode::XrayServerConfigInvalid);
+            return;
+        }
+    }
+
     ContainerConfig containerConfig;
     if (!buildContainerConfigFromModel(containerIndex, protocolIndex, containerConfig)) {
         return;

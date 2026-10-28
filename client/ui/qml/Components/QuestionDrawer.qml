@@ -36,7 +36,7 @@ SheetType {
         SectionHeaderType {
             Layout.fillWidth: true
             Layout.topMargin: 16
-            Layout.bottomMargin: 14
+            Layout.bottomMargin: 20
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 

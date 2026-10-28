@@ -20,7 +20,8 @@ namespace LanguageSettings
         Spanish,
         Korean,
         French,
-        Thai
+        Thai,
+        Indonesian
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 

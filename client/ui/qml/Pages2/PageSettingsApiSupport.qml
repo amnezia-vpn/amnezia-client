@@ -16,54 +16,19 @@ import "../Components"
 PageType {
     id: root
 
-    QtObject {
-        id: telegram
+    FlickableType {
+        id: flickable
 
-        readonly property string title: qsTr("Telegram")
-        readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
-        readonly property string link: "https://telegram.me/" + ApiAccountInfoModel.getTelegramBotLink()
-    }
+        anchors.top: parent.top
 
-    QtObject {
-        id: techSupport
+        contentHeight: content.implicitHeight
 
-        readonly property string title: qsTr("Email")
-        readonly property string description: ApiAccountInfoModel.getEmailLink()
-        readonly property string link: "mailto:" + ApiAccountInfoModel.getEmailLink()
-    }
+        ColumnLayout {
+            id: content
 
-    QtObject {
-        id: paymentSupport
-
-        readonly property string title: qsTr("Email Billing & Orders")
-        readonly property string description: ApiAccountInfoModel.getBillingEmailLink()
-        readonly property string link: "mailto:" + ApiAccountInfoModel.getBillingEmailLink()
-    }
-
-    QtObject {
-        id: site
-
-        readonly property string title: qsTr("Website")
-        readonly property string description: ApiAccountInfoModel.getSiteLink()
-        readonly property string link: ApiAccountInfoModel.getFullSiteLink()
-    }
-
-    property list<QtObject> supportModel: [
-        telegram,
-        techSupport,
-        paymentSupport,
-        site
-    ]
-
-    ListViewType {
-        id: listView
-
-        anchors.fill: parent
-
-        model: supportModel
-
-        header: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
@@ -74,34 +39,55 @@ PageType {
                 description: qsTr("Our technical support specialists are available to assist you at any time")
             }
 
-            Item {
-                Layout.preferredHeight: 16
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Telegram")
+                subtitle: "@" + ApiAccountInfoModel.getTelegramBotLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally("https://telegram.me/" + ApiAccountInfoModel.getTelegramBotLink())
             }
-        }
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            spacing: 0
 
             ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: link !== ""
-                text: title
-                subtitle: description
+
+                text: qsTr("Email")
+                subtitle: ApiAccountInfoModel.getEmailLink()
                 trailingIconSource: "qrc:/images/controls/external-link.svg"
-                onClicked: {
-                    Qt.openUrlExternally(link)
-                }
+
+                onClicked: Qt.openUrlExternally("mailto:" + ApiAccountInfoModel.getEmailLink())
             }
-        }
 
-        footer: ColumnLayout {
-            width: listView.width
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            spacing: 0
+                text: qsTr("Email Billing & Orders")
+                subtitle: ApiAccountInfoModel.getBillingEmailLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally("mailto:" + ApiAccountInfoModel.getBillingEmailLink())
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: ApiAccountInfoModel.getFullSiteLink() !== ""
+
+                text: qsTr("Website")
+                subtitle: ApiAccountInfoModel.getSiteLink()
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                onClicked: Qt.openUrlExternally(ApiAccountInfoModel.getFullSiteLink())
+            }
 
             ListItemType {
                 id: supportUuid
@@ -120,9 +106,6 @@ PageType {
                 onClicked: {
                     GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
-                    if (!GC.isMobile()) {
-                        supportUuid.forceActiveFocus(Qt.TabFocusReason)
-                    }
                 }
             }
         }

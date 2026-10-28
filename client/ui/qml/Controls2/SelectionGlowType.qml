@@ -8,7 +8,7 @@ Item {
     property color color
 
     Repeater {
-        model: [[24, 1.0, 0], [24, 1.0, 0], [16, 1.0, 1]]
+        model: root.visible ? [[24, 1.0, 0], [24, 1.0, 0], [16, 1.0, 1]] : []
 
         MultiEffect {
             required property var modelData

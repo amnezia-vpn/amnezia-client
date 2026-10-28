@@ -19,13 +19,11 @@ PageType {
 
     ListViewType {
         id: servers
-        objectName: "servers"
 
         anchors.fill: parent
 
         header: NavigationBarType {
             width: servers.width
-            height: implicitHeight + 16
 
             title: qsTr("Servers")
         }
