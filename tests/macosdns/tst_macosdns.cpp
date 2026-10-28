@@ -21,6 +21,7 @@ bool failWrite = false;
 bool failWatch = false;
 bool failCreate = false;
 bool failQueue = false;
+bool wasUnsubscribed = false;
 QString failReadPath;
 int lastError = kSCStatusOK;
 
@@ -133,7 +134,8 @@ extern "C" Boolean SCDynamicStoreSetNotificationKeys(SCDynamicStoreRef, CFArrayR
   return !failWatch;
 }
 extern "C" Boolean SCDynamicStoreSetDispatchQueue(SCDynamicStoreRef, dispatch_queue_t next) {
-  if (next && failQueue) return false;
+  if (next && (failQueue || wasUnsubscribed)) return false;
+  if (!next && queue) wasUnsubscribed = true;
   if (next) dispatch_retain(next);
   if (queue) dispatch_release(queue);
   queue = next;
@@ -146,7 +148,7 @@ class MacosDnsTests : public QObject {
   void init() {
     callback = nullptr; callbackInfo = nullptr;
     writes = 0; failWrite = false; failWatch = false; failCreate = false;
-    failQueue = false; failReadPath.clear(); lastError = kSCStatusOK;
+    failQueue = false; wasUnsubscribed = false; failReadPath.clear(); lastError = kSCStatusOK;
     put(service, CFSTR("Wi-Fi"));
   }
   void cleanup() {

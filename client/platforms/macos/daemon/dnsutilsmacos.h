@@ -57,6 +57,7 @@ class DnsUtilsMacos final : public DnsUtils {
   CFDictionaryRef m_dnsConfig = nullptr;
   quint64 m_generation = 0;
   bool m_monitoring = false;
+  bool m_subscribed = false;
 };
 
 #endif  // DNSUTILSMACOS_H

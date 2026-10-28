@@ -63,6 +63,7 @@ DnsUtilsMacos::~DnsUtilsMacos() {
     m_notificationContext->receiver = nullptr;
   }
   restoreResolvers();
+  if (m_subscribed) SCDynamicStoreSetDispatchQueue(m_scStore, nullptr);
   if (m_scStore) CFRelease(m_scStore);
   if (m_notificationQueue) dispatch_release(m_notificationQueue);
   NotificationContext::release(m_notificationContext);
@@ -84,7 +85,10 @@ void DnsUtilsMacos::dnsChanged(SCDynamicStoreRef, CFArrayRef, void* info) {
 }
 
 bool DnsUtilsMacos::startMonitoring() {
-  if (m_monitoring) return true;
+  if (m_subscribed) {
+    m_monitoring = true;
+    return true;
+  }
   if (!m_scStore || !m_notificationQueue) return false;
   const void* patterns[] = {
       CFSTR("Setup:/Network/Service/[0-9A-F-]+"),
@@ -96,6 +100,7 @@ bool DnsUtilsMacos::startMonitoring() {
     logger.error() << "Failed to monitor DNS configuration changes";
     return false;
   }
+  m_subscribed = true;
   m_monitoring = true;
   return true;
 }
@@ -106,7 +111,9 @@ void DnsUtilsMacos::stopMonitoring() {
     QMutexLocker lock(&m_notificationContext->mutex);
     m_notificationContext->generation = ++m_generation;
   }
-  if (m_scStore) SCDynamicStoreSetDispatchQueue(m_scStore, nullptr);
+  // Keep the native subscription until destruction. Its cancellation is
+  // asynchronous; an immediate resubscribe during server switching can fail with
+  // kSCStatusNotifierActive. The generation/active checks disable repair now.
   if (m_dnsConfig) CFRelease(m_dnsConfig);
   m_dnsConfig = nullptr;
 }

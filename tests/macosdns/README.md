@@ -17,7 +17,8 @@ never read or modify host DNS and require no root access.
 
 Coverage includes deleted/replaced DNS overrides, new/deleted network services,
 original static/DHCP DNS restoration, idempotent notifications, write/setup errors,
-queued work across disconnect/reconnect, and late callbacks after destruction.
+queued work across disconnect/reconnect, asynchronous native cancellation, and
+late callbacks after destruction.
 The `macos_dns_native_compile` object target also compiles the changed production
 class with the real SystemConfiguration declarations and production logger.
 
