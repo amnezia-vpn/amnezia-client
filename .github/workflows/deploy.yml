@@ -1059,8 +1059,12 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - ClientManagementModelTest
+          - ContainersModelTest
+          - LanguageModelTest
+          - LanguageControllerTest
           - ProtocolsModelTest
           - ServersModelTest
+          - ServersUiControllerTest
 
     runs-on: ubuntu-22.04
 
@@ -1253,8 +1257,12 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - ClientManagementModelTest
+          - ContainersModelTest
+          - LanguageModelTest
+          - LanguageControllerTest
           - ProtocolsModelTest
           - ServersModelTest
+          - ServersUiControllerTest
 
     runs-on: windows-latest
 
@@ -1364,8 +1372,12 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - ClientManagementModelTest
+          - ContainersModelTest
+          - LanguageModelTest
+          - LanguageControllerTest
           - ProtocolsModelTest
           - ServersModelTest
+          - ServersUiControllerTest
 
     runs-on: macos-15
 
