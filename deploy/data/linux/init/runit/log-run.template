@@ -1,0 +1,3 @@
+#!/bin/sh
+mkdir -p "@LOGDIR@/runit-@NAME@"
+exec svlogd -tt "@LOGDIR@/runit-@NAME@"

@@ -63,6 +63,30 @@ if(LINUX AND NOT ANDROID)
         DESTINATION "."
         COMPONENT AmneziaVPN
     )
+
+    # Non-systemd support: init templates, the installer/uninstaller and
+    # their docs.  post_install.sh calls install.sh when systemd is not the
+    # running init system; DNS is handled natively by the daemon.
+    install(PROGRAMS
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/install.sh
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/uninstall.sh
+        DESTINATION "."
+        COMPONENT AmneziaVPN
+    )
+    install(DIRECTORY
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/init
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/lib
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/docs
+        DESTINATION "."
+        COMPONENT AmneziaVPN
+        USE_SOURCE_PERMISSIONS
+    )
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/README.md
+        ${CMAKE_SOURCE_DIR}/deploy/data/linux/README.ru.md
+        DESTINATION "."
+        COMPONENT AmneziaVPN
+    )
 endif()
 
 if(WIN32)
