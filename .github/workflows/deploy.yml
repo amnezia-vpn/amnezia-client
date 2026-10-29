@@ -1062,6 +1062,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: ubuntu-22.04
 
@@ -1082,6 +1090,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Checkout
@@ -1279,6 +1288,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: windows-latest
 
@@ -1298,7 +1315,8 @@ jobs:
       THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
-      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}|
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Checkout
@@ -1398,6 +1416,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: macos-15
 
@@ -1418,6 +1444,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Setup Xcode
@@ -1552,98 +1579,16 @@ jobs:
       #     KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
       #   run: echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
 
-      - name: 'Configure (Android x86_64)'
-        env:
-          QT_ANDROID: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64
-          QT_HOST: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
-          CMAKE_ANDROID_NDK: ${{ env.ANDROID_HOME }}/ndk/${{ env.NDK_VERSION }}
-        run: |
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_TOOLCHAIN_FILE=$QT_ANDROID/lib/cmake/Qt6/qt.toolchain.cmake \
-            -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \
-            -DCMAKE_ANDROID_NDK=$CMAKE_ANDROID_NDK \
-            -DQT_HOST_PATH=$QT_HOST \
-            -DANDROID_SDK_ROOT=$ANDROID_HOME \
-            -DAMNEZIA_BUILD_TESTS=ON
-
-      - name: 'Build Android tests'
-        # env:
-        #   QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        #   QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        #   QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
-        run: |
-          cmake --build build --target test_android_openssl_make_apk
-          cmake --build build --target test_android_restore_backup_make_apk
-
-      - name: 'Write Android test runner script'
-        run: |
-          cat > ci_run_android_tests.sh << 'EOF'
-          #!/usr/bin/env bash
-          set -euo pipefail
-
-          ADB=$(which adb)
-
-          echo ">>> Waiting for package manager to be ready..."
-          "$ADB" shell 'while ! pm list packages > /dev/null 2>&1; do sleep 2; done'
-          echo ">>> Package manager ready."
-
-          run_test() {
-            local target="$1"
-            local apk="build/client/tests/android-build/${target}.apk"
-            local pkg_name="org.qtproject.example.${target}"
-            local activity="${pkg_name}/org.qtproject.qt.android.bindings.QtActivity"
-
-            echo ">>> Installing ${target} APK..."
-            timeout 120 "$ADB" install -r "$apk"
-
-            "$ADB" shell "run-as $pkg_name sh -c 'mkdir -p files && : > files/stdout.txt'" 2>/dev/null || true
-            "$ADB" shell "run-as $pkg_name sh -c 'rm -f files/qtest_last_exit_code'" 2>/dev/null || true
-
-            echo ">>> Launching ${target}..."
-            "$ADB" shell am start -n "$activity"
-
-            echo ">>> Waiting for test to finish (up to 120s)..."
-            local elapsed=0 exit_code=""
-            while [[ $elapsed -lt 120 ]]; do
-              sleep 2
-              elapsed=$((elapsed + 2))
-              exit_code=$("$ADB" shell \
-                "run-as $pkg_name cat files/qtest_last_exit_code 2>/dev/null" \
-                | tr -d '[:space:]' || true)
-              [[ -n "$exit_code" ]] && break
-            done
-
-            local stdout_content
-            stdout_content=$("$ADB" shell \
-              "run-as $pkg_name cat files/stdout.txt 2>/dev/null" || true)
-            if [[ -n "$stdout_content" ]]; then
-              echo ">>> Test output:"
-              echo "$stdout_content"
-            fi
-
-            if [[ -z "$exit_code" ]]; then
-              echo ">>> TIMEOUT: ${target} did not complete within 120s."
-              exit 1
-            elif [[ "$exit_code" != "0" ]]; then
-              echo ">>> ${target} FAILED (exit code: $exit_code)"
-              exit 1
-            else
-              echo ">>> ${target} PASSED"
-            fi
-          }
-
-          run_test test_android_openssl
-          run_test test_android_restore_backup
-          EOF
-          chmod +x ci_run_android_tests.sh
-
       - name: 'Run Android tests on emulator'
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          QT_ROOT: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}
+          NDK_VERSION: ${{ env.NDK_VERSION }}
+          ANDROID_PLATFORM: ${{ env.ANDROID_PLATFORM }}
         with:
           api-level: 28
           arch: x86_64
           emulator-options: -no-snapshot -no-window -no-audio -no-boot-anim -accel on
           disable-animations: true
-          script: bash ci_run_android_tests.sh
+          script: bash client/tests/run_android_tests.sh --wait-boot
 
