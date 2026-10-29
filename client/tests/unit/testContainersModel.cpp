@@ -46,10 +46,14 @@ void TestContainersModel::testRowCount()
 {
     TestableContainersModel model;
 
-    QCOMPARE(model.rowCount(QModelIndex()), ContainerUtils::allContainers().size());
+    const int expectedCount = ContainerUtils::allContainers().size();
+
+    QCOMPARE(model.rowCount(), expectedCount);
+    QCOMPARE(model.rowCount(QModelIndex()), expectedCount);
 
     const QModelIndex parent = model.index(0, 0);
-    QCOMPARE(model.rowCount(parent), 0);
+    QVERIFY(parent.isValid());
+    QCOMPARE(model.rowCount(parent), expectedCount);
 }
 
 void TestContainersModel::testInvalidIndexes()
@@ -158,11 +162,22 @@ void TestContainersModel::testInstalledContainers()
     QVERIFY(!model.hasInstalledServices());
     QVERIFY(!model.hasInstalledProtocols());
 
+    const auto containers = ContainerUtils::allContainers();
+
     for (int row = 0; row < model.rowCount(); ++row) {
+        const QModelIndex index = model.index(row, 0);
+        QVERIFY(index.isValid());
         QVERIFY(model.getContainerConfig(row).isEmpty());
-        QVERIFY(!model.isServiceContainer(row));
+
+        QCOMPARE(model.data(index, TestableContainersModel::IsInstalledRole).toBool(), false);
+
+        const auto container = containers.at(row);
+        const bool expectedService = ContainerUtils::containerService(container) == ProtocolEnumNS::ServiceType::Other;
+
+        QCOMPARE(model.isServiceContainer(row), expectedService);
     }
 }
+
 
 QTEST_GUILESS_MAIN(TestContainersModel)
 #include "testContainersModel.moc"

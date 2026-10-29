@@ -8,7 +8,7 @@ class LanguageModelTest : public QObject
 
 private slots:
     void rowCount_returnsNumberOfAvailableLanguages();
-    void rowCount_returnsZeroForValidParent();
+    void rowCount_returnsCurrentCountForValidParent();
     void data_returnsLanguageName();
     void data_returnsLanguageIndex();
     void data_returnsInvalidVariantForInvalidIndex();
@@ -19,28 +19,29 @@ private slots:
 void LanguageModelTest::rowCount_returnsNumberOfAvailableLanguages()
 {
     LanguageModel model;
-
-    QCOMPARE(model.rowCount(), 12);
+    QCOMPARE(model.rowCount(), 14);
 }
 
-void LanguageModelTest::rowCount_returnsZeroForValidParent()
+void LanguageModelTest::rowCount_returnsCurrentCountForValidParent()
 {
     LanguageModel model;
 
     const QModelIndex parent = model.index(0, 0);
     QVERIFY(parent.isValid());
-    QCOMPARE(model.rowCount(parent), 0);
+    QCOMPARE(model.rowCount(parent), model.rowCount());
 }
 
 void LanguageModelTest::data_returnsLanguageName()
 {
     LanguageModel model;
 
-    const QStringList expectedNames = {
-        QStringLiteral("English"), QStringLiteral("Русский"), QStringLiteral("简体中文"),  QStringLiteral("Українська"),
-        QStringLiteral("فارسی"),   QStringLiteral("العربية"), QStringLiteral("မြန်မာဘာသာ"), QStringLiteral("اُرْدُوْ"),
-        QStringLiteral("हिन्दी"),   QStringLiteral("Español"), QStringLiteral("한국어"),    QStringLiteral("Français")
-    };
+    const QStringList expectedNames = { QStringLiteral("English"),    QStringLiteral("Русский"),
+                                        QStringLiteral("Українська"), QStringLiteral("简体中文"),
+                                        QStringLiteral("فارسی"),      QStringLiteral("العربية"),
+                                        QStringLiteral("မြန်မာဘာသာ"),  QStringLiteral("اُرْدُوْ"),
+                                        QStringLiteral("हिन्दी"),      QStringLiteral("Español"),
+                                        QStringLiteral("한국어"),     QStringLiteral("Français"),
+                                        QStringLiteral("ไทย"),        QStringLiteral("Bahasa Indonesia") };
 
     QCOMPARE(model.rowCount(), expectedNames.size());
 
@@ -90,7 +91,7 @@ void LanguageModelTest::roleNames_returnsExpectedNames()
 {
     LanguageModel model;
 
-    const auto roles = model.QAbstractItemModel::roleNames();
+    const auto roles = model.roleNames();
 
     QCOMPARE(roles.value(LanguageModel::NameRole), QByteArray("languageName"));
     QCOMPARE(roles.value(LanguageModel::IndexRole), QByteArray("languageIndex"));
