@@ -54,6 +54,10 @@ public:
     DaemonLocalServer server{qApp};
     MacOSDaemon daemon;
 #endif
+
+private:
+    void shutdown();
+    bool m_needsCleanup = false;
 };
 
 #endif // LOCALSERVER_H

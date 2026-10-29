@@ -138,6 +138,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/dnsutilswindows.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowssplittunnel.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowstunnelservice.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowstunnelpipe.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/wireguardutilswindows.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowstunnellogger.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsroutemonitor.h
