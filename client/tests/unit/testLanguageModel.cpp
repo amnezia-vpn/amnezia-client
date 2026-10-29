@@ -41,13 +41,22 @@ void LanguageModelTest::data_returnsLanguageName()
 {
     LanguageModel model;
 
-    const QStringList expectedNames = { QStringLiteral("English"),    QStringLiteral("Русский"),
-                                        QStringLiteral("Українська"), QStringLiteral("简体中文"),
-                                        QStringLiteral("فارسی"),      QStringLiteral("العربية"),
-                                        QStringLiteral("မြန်မာဘာသာ"),  QStringLiteral("اُرْدُوْ"),
-                                        QStringLiteral("हिन्दी"),      QStringLiteral("Español"),
-                                        QStringLiteral("한국어"),     QStringLiteral("Français"),
-                                        QStringLiteral("ไทย"),        QStringLiteral("Bahasa Indonesia") };
+    const QStringList expectedNames = {
+        QStringLiteral("English"),
+        QStringLiteral("Русский"),
+        QStringLiteral("简体中文"),
+        QStringLiteral("Українська"),
+        QStringLiteral("فارسی"),
+        QStringLiteral("العربية"),
+        QStringLiteral("မြန်မာဘာသာ"),
+        QStringLiteral("اُرْدُوْ"),
+        QStringLiteral("हिन्दी"),
+        QStringLiteral("Español"),
+        QStringLiteral("한국어"),
+        QStringLiteral("Français"),
+        QStringLiteral("ไทย"),
+        QStringLiteral("Bahasa Indonesia")
+    };
 
     QCOMPARE(model.rowCount(), expectedNames.size());
 
