@@ -29,6 +29,8 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
       m_vpnConnection(vpnConnection)
 {
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
+    connect(m_vpnConnection, &VpnConnection::bytesChanged, this, &ConnectionController::bytesChanged);
+    connect(this, &ConnectionController::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::killSwitchModeChangedRequested, m_vpnConnection, &VpnConnection::onKillSwitchModeChanged, Qt::QueuedConnection);
@@ -221,8 +223,61 @@ ErrorCode ConnectionController::openConnection(const QString &serverId)
         PayloadSender::sendAll(apiV2->sendPayload);
     }
 
+    m_currentServerId = serverId;
+    m_currentCountryCode = apiV2.has_value() ? apiV2->apiConfig.serverCountryCode : QString();
+    m_attemptInProgress = false;
+    m_connectionAttemptTimer.invalidate();
+
     emit openConnectionRequested(serverId, container, vpnConfiguration);
     return ErrorCode::NoError;
+}
+
+void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
+{
+    if (state == Vpn::ConnectionState::Preparing || state == Vpn::ConnectionState::Connecting) {
+        if (!m_attemptInProgress) {
+            m_attemptInProgress = true;
+            m_connectionAttemptTimer.start();
+        }
+        return;
+    }
+
+    if (state == Vpn::ConnectionState::Connected) {
+        if (m_attemptInProgress) {
+            recordConnectionAttempt(true, static_cast<int>(m_connectionAttemptTimer.elapsed()));
+            m_attemptInProgress = false;
+        }
+        return;
+    }
+
+    if (state == Vpn::ConnectionState::Error) {
+        if (m_attemptInProgress) {
+            ErrorCode errorCode = lastConnectionError();
+            if (errorCode == ErrorCode::NoError) {
+                errorCode = ErrorCode::UnknownError;
+            }
+            recordConnectionAttempt(false, static_cast<int>(m_connectionAttemptTimer.elapsed()),
+                                    static_cast<int>(errorCode));
+            m_attemptInProgress = false;
+        }
+        return;
+    }
+
+    if (state == Vpn::ConnectionState::Disconnected) {
+        m_attemptInProgress = false;
+        m_connectionAttemptTimer.invalidate();
+    }
+}
+
+void ConnectionController::recordConnectionAttempt(bool success, int setupMs, int errorCode)
+{
+    if (m_currentServerId.isEmpty() || m_currentCountryCode.isEmpty()) {
+        return;
+    }
+
+    m_appSettingsRepository->recordConnectionResult(m_currentServerId, m_currentCountryCode,
+                                                    success, setupMs, errorCode);
+    emit connectionHistoryChanged(m_currentServerId);
 }
 
 void ConnectionController::closeConnection()
