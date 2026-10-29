@@ -1,216 +1,18 @@
 #include "ipcserver.h"
 
-#include <QDateTime>
 #include <QDebug>
-#include <QFileInfo>
-#include <QHostAddress>
-#include <QJsonObject>
-#include <QLocalServer>
-#include <QLocalSocket>
-#include <QObject>
-#include <QRemoteObjectHost>
-#include <QRemoteObjectNode>
-#include <QString>
-#include <QStringList>
 
 #include "logger.h"
-#include "router.h"
-#include "killswitch.h"
-#include "xray.h"
-
-#ifdef Q_OS_WIN
-    #include "tapcontroller_win.h"
-#endif
-
 
 IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
 {
-    connect(&m_pingHelper, &PingHelper::connectionLose, this, &IpcServer::connectionLose);
-}
-
-int IpcServer::createPrivilegedProcess()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::createPrivilegedProcess";
-#endif
-
-    m_localpid++;
-
-    ProcessDescriptor pd(this);
-
-    pd.localServer->setSocketOptions(QLocalServer::WorldAccessOption);
-
-    if (!pd.localServer->listen(amnezia::getIpcProcessUrl(m_localpid))) {
-        qDebug() << QString("Unable to start the server: %1.").arg(pd.localServer->errorString());
-        return -1;
-    }
-
-    // Make sure any connections are handed to QtRO
-    QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
-        qDebug() << "IpcServer new connection";
-        if (pd.serverNode) {
-            pd.serverNode->addHostSideConnection(pd.localServer->nextPendingConnection());
-            pd.serverNode->enableRemoting(pd.ipcProcess.data());
-        }
-    });
-
-    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::error, this,
-                     [pd](QRemoteObjectNode::ErrorCode errorCode) { qDebug() << "QRemoteObjectHost::error" << errorCode; });
-
-    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::destroyed, this, [pd]() { qDebug() << "QRemoteObjectHost::destroyed"; });
-
-    m_processes.insert(m_localpid, pd);
-
-    return m_localpid;
-}
-
-int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::routeAddList";
-#endif
-
-    return Router::routeAddList(gw, ips);
-}
-
-bool IpcServer::clearSavedRoutes()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::clearSavedRoutes";
-#endif
-
-    return Router::clearSavedRoutes();
-}
-
-bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::routeDeleteList";
-#endif
-
-    return Router::routeDeleteList(gw, ips);
-}
-
-bool IpcServer::flushDns()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::flushDns";
-#endif
-
-    return Router::flushDns();
-}
-
-void IpcServer::resetIpStack()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::resetIpStack";
-#endif
-
-    Router::resetIpStack();
-}
-
-bool IpcServer::checkAndInstallDriver()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::checkAndInstallDriver";
-#endif
-
-#ifdef Q_OS_WIN
-    return TapController::checkAndSetup();
-#else
-    return true;
-#endif
-}
-
-QStringList IpcServer::getTapList()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::getTapList";
-#endif
-
-#ifdef Q_OS_WIN
-    return TapController::getTapList();
-#else
-    return QStringList();
-#endif
-}
-
-void IpcServer::cleanUp()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::cleanUp";
-#endif
-
-    Logger::deInit();
-    Logger::cleanUp();
-}
-
-void IpcServer::clearLogs()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::clearLogs";
-#endif
-
-    Logger::clearLogs(true);
-}
-
-bool IpcServer::createTun(const QString &dev, const QString &subnet)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::createTun";
-#endif
-
-    return Router::createTun(dev, subnet);
-}
-
-bool IpcServer::deleteTun(const QString &dev)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::deleteTun";
-#endif
-
-    return Router::deleteTun(dev);
-}
-
-bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress> &resolvers)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::updateResolvers";
-#endif
-
-    return Router::updateResolvers(ifname, resolvers);
-}
-
-bool IpcServer::restoreResolvers()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::restoreResolvers";
-#endif
-
-    return Router::restoreResolvers();
-}
-
-bool IpcServer::StartRoutingIpv6()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::StartRoutingIpv6";
-#endif
-
-    return Router::StartRoutingIpv6();
-}
-
-bool IpcServer::StopRoutingIpv6()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::StopRoutingIpv6";
-#endif
-
-    return Router::StopRoutingIpv6();
+    connect(&m_xtunController, &XtunController::statusChanged, this,
+            [this](amnezia::TunnelStatus status) { emit tunnelStatusChanged(static_cast<int>(status)); });
 }
 
 void IpcServer::setLogsEnabled(bool enabled)
 {
-#ifdef MZ_DEBUG
+#ifdef QT_DEBUG
     qDebug() << "IpcServer::setLogsEnabled";
 #endif
 
@@ -221,130 +23,71 @@ void IpcServer::setLogsEnabled(bool enabled)
     }
 }
 
-bool IpcServer::startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address)
+void IpcServer::clearLogs()
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::startNetworkCheck";
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::clearLogs";
 #endif
 
-    m_pingHelper.start(serverIpv4Gateway, deviceIpv4Address);
+    Logger::clearLogs(true);
+}
+
+int IpcServer::tunnelUp(const TunnelConfig &config)
+{
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::tunnelUp";
+#endif
+
+    return m_xtunController.up(config);
+}
+
+bool IpcServer::tunnelDown()
+{
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::tunnelDown";
+#endif
+
+    m_xtunController.down();
     return true;
 }
 
-bool IpcServer::stopNetworkCheck()
+bool IpcServer::setKillSwitchMode(int mode)
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::stopNetworkCheck";
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::setKillSwitchMode";
 #endif
 
-    m_pingHelper.stop();
-    return true;
+    return m_xtunController.setKillSwitchMode(static_cast<amnezia::KillSwitchMode>(mode));
 }
 
-bool IpcServer::resetKillSwitchAllowedRange(QStringList ranges)
+bool IpcServer::addKillSwitchAllowedRanges(const QStringList &ranges)
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::resetKillSwitchAllowedRange";
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::addKillSwitchAllowedRanges";
 #endif
 
-    return KillSwitch::instance()->resetAllowedRange(ranges);
+    return m_xtunController.addKillSwitchAllowedRanges(ranges);
 }
 
-bool IpcServer::addKillSwitchAllowedRange(QStringList ranges)
+bool IpcServer::localProxyUp(const QString &config)
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::addKillSwitchAllowedRange";
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::localProxyUp";
 #endif
 
-    return KillSwitch::instance()->addAllowedRange(ranges);
+    return m_xtunController.startLocalProxy(config);
 }
 
-bool IpcServer::disableAllTraffic()
+bool IpcServer::localProxyDown()
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::disableAllTraffic";
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::localProxyDown";
 #endif
 
-    return KillSwitch::instance()->disableAllTraffic();
+    return m_xtunController.stopLocalProxy();
 }
 
-bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
+bool IpcServer::isLocalProxyRunning()
 {
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::enableKillSwitch";
-#endif
-
-    return KillSwitch::instance()->enableKillSwitch(configStr, vpnAdapterIndex);
-}
-
-bool IpcServer::disableKillSwitch()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::disableKillSwitch";
-#endif
-
-    return KillSwitch::instance()->disableKillSwitch();
-}
-
-bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::enablePeerTraffic";
-#endif
-
-    return KillSwitch::instance()->enablePeerTraffic(configStr);
-}
-
-bool IpcServer::refreshKillSwitch(bool enabled)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::refreshKillSwitch";
-#endif
-
-    return KillSwitch::instance()->refresh(enabled);
-}
-
-bool IpcServer::xrayStart(const QString& cfg)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStart";
-#endif
-
-    return Xray::getInstance().start(cfg) != 0;
-}
-
-bool IpcServer::xrayStop()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStop";
-#endif
-
-    return Xray::getInstance().stopAny();
-}
-
-qint64 IpcServer::xrayStartOwned(const QString& cfg)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStartOwned";
-#endif
-
-    return Xray::getInstance().start(cfg);
-}
-
-bool IpcServer::xrayStopOwned(qint64 token)
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStopOwned";
-#endif
-
-    return Xray::getInstance().stop(token);
-}
-
-qint64 IpcServer::xrayCurrentToken()
-{
-#ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayCurrentToken";
-#endif
-
-    return Xray::getInstance().currentToken();
+    return m_xtunController.isLocalProxyRunning();
 }

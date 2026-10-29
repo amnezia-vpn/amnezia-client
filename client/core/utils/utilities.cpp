@@ -12,30 +12,6 @@
 #include "core/utils/utilities.h"
 
 #ifdef Q_OS_WINDOWS
-QString printErrorMessage(DWORD errorCode) {
-    LPVOID lpMsgBuf;
-
-    DWORD dwFlags = FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                    FORMAT_MESSAGE_FROM_SYSTEM |
-                    FORMAT_MESSAGE_IGNORE_INSERTS;
-
-    DWORD dwLanguageId = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-
-    FormatMessageW(
-        dwFlags,
-        NULL,
-        errorCode,
-        dwLanguageId,
-        (LPWSTR)&lpMsgBuf,
-        0,
-        NULL
-        );
-
-    QString errorMsg = QString::fromWCharArray((LPCWSTR)lpMsgBuf);
-    LocalFree(lpMsgBuf);
-    return errorMsg.trimmed();
-}
-
 QString Utils::getNextDriverLetter()
 {
     DWORD drivesBitmask = GetLogicalDrives();
@@ -211,83 +187,6 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     }
     return false;
 #endif
-}
-
-bool Utils::killProcessByName(const QString &name)
-{
-    qDebug().noquote() << "Kill process" << name;
-#ifdef Q_OS_WIN
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (hSnapshot == INVALID_HANDLE_VALUE)
-        return false;
-
-    PROCESSENTRY32W pe32;
-    pe32.dwSize = sizeof(PROCESSENTRY32W);
-
-    bool success = false;
-
-    if (Process32FirstW(hSnapshot, &pe32)) {
-        do {
-            QString exeFile = QString::fromWCharArray(pe32.szExeFile);
-
-            if (exeFile.compare(name, Qt::CaseInsensitive) == 0) {
-                HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
-                if (hProcess != NULL) {
-                    if (TerminateProcess(hProcess, 0)) {
-                        success = true;
-                    } else {
-                        DWORD error = GetLastError();
-                        qCritical() << "Can't terminate process" << exeFile << "(PID:" << pe32.th32ProcessID << "). Error:" << printErrorMessage(error);
-                    }
-                    CloseHandle(hProcess);
-                } else {
-                    DWORD error = GetLastError();
-                    qCritical() << "Can't open process for termination" << exeFile << "(PID:" << pe32.th32ProcessID << "). Error:" << printErrorMessage(error);
-                }
-            }
-        } while (Process32NextW(hSnapshot, &pe32));
-    }
-
-    CloseHandle(hSnapshot);
-    return success;
-#elif defined Q_OS_IOS || defined(Q_OS_ANDROID)
-    return false;
-#else
-    return QProcess::execute("pkill", { name }) == 0;
-#endif
-}
-
-QString Utils::openVpnExecPath()
-{
-    return Utils::executable("openvpn", true);
-}
-
-QString Utils::wireguardExecPath()
-{
-#ifdef Q_OS_WIN
-    return Utils::executable("wireguard/wireguard-service", true);
-#elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg-quick");
-#elif defined Q_OS_MAC
-    return Utils::executable("/wireguard", true);
-#else
-    return {};
-#endif
-}
-
-QString Utils::certUtilPath()
-{
-#ifdef Q_OS_WIN
-    QString winPath = QString::fromUtf8(qgetenv("windir"));
-    return winPath + "\\system32\\certutil.exe";
-#else
-    return "";
-#endif
-}
-
-QString Utils::tun2socksPath()
-{
-    return Utils::executable("tun2socks", true);
 }
 
 #ifdef Q_OS_WIN

@@ -1,0 +1,29 @@
+@startuml
+participant AmneziaVPN
+participant "VPN Backend\n(Gateway API)" as Backend
+participant Worker
+
+AmneziaVPN -> AmneziaVPN : Нажатие кнопки «Подключить»
+activate AmneziaVPN
+
+AmneziaVPN -> AmneziaVPN : Проверка наличия вторичного\nконфига 
+
+alt Конфиг отсутствует
+    AmneziaVPN -> Backend : POST v1/config\n(запрос вторичного конфига)
+    Backend --> AmneziaVPN : Конфиг сервера
+    AmneziaVPN -> AmneziaVPN : Сохранение конфига
+else Конфиг есть, но срок жизни истёк (expires_at)
+    AmneziaVPN -> Backend : POST v1/config\n(обновление конфига)
+    Backend --> AmneziaVPN : Новый конфиг сервера
+    AmneziaVPN -> AmneziaVPN : Обновление конфига
+else Конфиг актуален
+    note right : Пропуск запроса к бекенду
+end
+
+AmneziaVPN -> Worker : Подключение по VPN протоколу
+activate Worker
+Worker --> AmneziaVPN : Туннель установлен
+deactivate Worker
+
+deactivate AmneziaVPN
+@enduml

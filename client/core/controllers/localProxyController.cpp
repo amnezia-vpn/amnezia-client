@@ -438,58 +438,55 @@ bool LocalProxyController::startXrayEngine(const QString &config)
         return false;
     }
 
-    const qint64 token = IpcClient::withInterface(
-            [&](QSharedPointer<IpcInterfaceReplica> iface) -> qint64 {
-                auto xrayStart = iface->xrayStartOwned(config);
-                if (!xrayStart.waitForFinished()) {
-                    return 0;
-                }
-                return xrayStart.returnValue();
+    const bool started = IpcClient::withInterface(
+            [&](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto localProxyUp = iface->localProxyUp(config);
+                return localProxyUp.waitForFinished() && localProxyUp.returnValue();
             },
-            []() -> qint64 { return 0; });
+            []() { return false; });
 
-    if (token == 0) {
-        qWarning() << "Failed to start Xray via IPC";
+    if (!started) {
+        qWarning() << "Failed to start local proxy via IPC";
         return false;
     }
 
-    m_xrayToken = token;
+    m_isXrayEngineStarted = true;
     return true;
 }
 
 bool LocalProxyController::stopXrayEngine()
 {
-    if (m_xrayToken == 0) {
+    if (!m_isXrayEngineStarted) {
         return true;
     }
 
     const bool stopped = IpcClient::withInterface(
-            [this](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStop = iface->xrayStopOwned(m_xrayToken);
-                return xrayStop.waitForFinished() && xrayStop.returnValue();
+            [](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto localProxyDown = iface->localProxyDown();
+                return localProxyDown.waitForFinished() && localProxyDown.returnValue();
             },
             []() { return false; });
 
     if (!stopped) {
-        qWarning() << "Failed to stop Xray via IPC";
+        qWarning() << "Failed to stop local proxy via IPC";
         return false;
     }
 
-    m_xrayToken = 0;
-    qDebug() << "Xray stopped";
+    m_isXrayEngineStarted = false;
+    qDebug() << "Local proxy stopped";
     return true;
 }
 
 bool LocalProxyController::isXrayEngineRunning() const
 {
-    if (m_xrayToken == 0) {
+    if (!m_isXrayEngineStarted) {
         return false;
     }
 
     return IpcClient::withInterface(
-            [this](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto currentToken = iface->xrayCurrentToken();
-                return currentToken.waitForFinished() && currentToken.returnValue() == m_xrayToken;
+            [](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto isRunning = iface->isLocalProxyRunning();
+                return isRunning.waitForFinished() && isRunning.returnValue();
             },
             []() { return false; });
 }

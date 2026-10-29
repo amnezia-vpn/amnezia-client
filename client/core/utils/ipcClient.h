@@ -5,7 +5,6 @@
 #include <QObject>
 
 #include "rep_ipc_interface_replica.h"
-#include "rep_ipc_process_interface_replica.h"
 
 class IpcClient : public QObject
 {
@@ -16,7 +15,6 @@ public:
     static IpcClient& Instance();
 
     static QSharedPointer<IpcInterfaceReplica> Interface();
-    static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
 
     template <typename Func>
     static auto withInterface(Func func)

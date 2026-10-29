@@ -222,9 +222,10 @@ void GatewayController::prepareRequest()
         return;
     }
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(ips);
+        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRanges(ips);
         if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-            qWarning() << "GatewayController::prepareRequest(): Failed to execute remote addKillSwitchAllowedRange call";
+            qWarning()
+                    << "GatewayController::prepareRequest(): Failed to execute remote addKillSwitchAllowedRanges call";
         }
     });
 #endif

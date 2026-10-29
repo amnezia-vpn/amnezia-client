@@ -1,53 +1,22 @@
 #include <QtCore>
 #include <QString>
-#include <QJsonObject>
-#include <QHostAddress>
-#include "../client/daemon/interfaceconfig.h"
+#include <QStringList>
+
+POD TunnelConfig(int proto, QString config, QStringList dnsServers, int killSwitchMode, QStringList allowedDnsServers, int sitesRouteMode, QStringList sites, int appsRouteMode, QStringList apps, int mtu)
 
 class IpcInterface
 {
-    SLOT( int createPrivilegedProcess() ); // return local pid
-
-    // Route functions
-    SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
-    SLOT( bool clearSavedRoutes() );
-    SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
-    SLOT( bool flushDns() );
-    SLOT( void resetIpStack() );
-
-    SLOT( bool checkAndInstallDriver() );
-    SLOT( QStringList getTapList() );
-
-    SLOT( void cleanUp() );
     SLOT( void setLogsEnabled(bool enabled) );
     SLOT( void clearLogs() );
 
-    SLOT( bool createTun(const QString &dev, const QString &subnet) );
-    SLOT( bool deleteTun(const QString &dev) );
+    SLOT( int tunnelUp(const TunnelConfig &config) );
+    SLOT( bool tunnelDown() );
+    SLOT( bool setKillSwitchMode(int mode) );
+    SLOT( bool addKillSwitchAllowedRanges(const QStringList &ranges) );
 
-    SLOT( bool StartRoutingIpv6() );
-    SLOT( bool StopRoutingIpv6() );
+    SLOT( bool localProxyUp(const QString &config) );
+    SLOT( bool localProxyDown() );
+    SLOT( bool isLocalProxyRunning() );
 
-    SLOT( bool disableKillSwitch() );
-    SLOT( bool disableAllTraffic() );
-    SLOT( bool refreshKillSwitch( bool enabled ) );
-    SLOT( bool addKillSwitchAllowedRange( const QStringList ranges ) );
-    SLOT( bool resetKillSwitchAllowedRange( const QStringList ranges ) );
-    SLOT( bool enablePeerTraffic( const QJsonObject &configStr) );
-    SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );
-    SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
-    SLOT( bool restoreResolvers() );
-
-    SLOT(bool xrayStart(const QString &config));
-    SLOT(bool xrayStop());
-    SLOT(qint64 xrayStartOwned(const QString &config));
-    SLOT(bool xrayStopOwned(qint64 token));
-    SLOT(qint64 xrayCurrentToken());
-
-    SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
-    SLOT( bool stopNetworkCheck() );
-
-    SIGNAL( connectionLose() );
-    SIGNAL( wakeup() );
-    SIGNAL( networkChanged() );
+    SIGNAL( tunnelStatusChanged(int status) );
 };

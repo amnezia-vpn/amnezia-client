@@ -76,16 +76,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
-    ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
-    ${CLIENT_ROOT_DIR}/core/utils/constants.h
-)
-
-# Mozilla headres
-set(HEADERS ${HEADERS}
-    ${CLIENT_ROOT_DIR}/mozilla/models/server.h
-    ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.h
-    ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.h
-    ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -167,14 +157,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
     ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/managementServer.cpp
-)
-
-# Mozilla sources
-set(SOURCES ${SOURCES}
-    ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -206,13 +188,11 @@ endif()
 set(COMMON_FILES_H
     ${CLIENT_ROOT_DIR}/amneziaApplication.h
     ${CLIENT_ROOT_DIR}/secureQSettings.h
-    ${CLIENT_ROOT_DIR}/vpnConnection.h
 )
 
 set(COMMON_FILES_CPP
     ${CLIENT_ROOT_DIR}/amneziaApplication.cpp
     ${CLIENT_ROOT_DIR}/secureQSettings.cpp
-    ${CLIENT_ROOT_DIR}/vpnConnection.cpp
 )
 
 file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.h)
@@ -270,14 +250,6 @@ set(SOURCES ${SOURCES}
 )
 
 if(WIN32)
-    set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
-    )
-
     set(RESOURCES ${RESOURCES}
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
@@ -290,21 +262,21 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.h
-        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
+        ${CLIENT_ROOT_DIR}/xtunVpnConnection.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
-        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
+        ${CLIENT_ROOT_DIR}/xtunVpnConnection.cpp
+    )
+else()
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/vpnConnection.h
+    )
+
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/vpnConnection.cpp
     )
 endif()
 

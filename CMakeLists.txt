@@ -39,42 +39,7 @@ if(DEFINED APP_ANDROID_VERSION_CODE_OFFSET)
     math(EXPR APP_ANDROID_VERSION_CODE "${APP_ANDROID_VERSION_CODE} + ${APP_ANDROID_VERSION_CODE_OFFSET}")
 endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(MZ_PLATFORM_NAME "linux")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(MZ_PLATFORM_NAME "windows")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(MZ_PLATFORM_NAME "macos")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-    set(MZ_PLATFORM_NAME "android")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    set(MZ_PLATFORM_NAME "ios")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    set(MZ_PLATFORM_NAME "wasm")
-endif()
-
 set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
-
-if(APPLE AND NOT IOS)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(AMN_PF_RULE_IDENTITY "user { root }")
-    else()
-        set(AMN_PF_RULE_IDENTITY "group { amnvpn }")
-    endif()
-
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        @ONLY
-    )
-
-    file(COPY_FILE
-        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
-        ONLY_IF_DIFFERENT
-    )
-endif()
-
 
 add_subdirectory(client)
 

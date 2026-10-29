@@ -1,0 +1,90 @@
+@startuml
+start
+
+partition "**1. Request payload formation for Gateway**" {
+    :Generate session keys for AES encryption (key, iv, salt);
+    :Encrypt request data with AES;
+    :Encrypt session keys with Gateway public key (RSA);
+    :Assemble request payload:\nencrypted keys + encrypted data;
+}
+
+:Send HTTP POST to Gateway;
+
+if (Response successful?) then (yes)
+    :Decode response using session keys;
+    :Return data to caller;
+    stop
+else (error)
+    :Decode response body;
+    
+    partition "**2. Error analysis**" {
+        note right
+            Response body (when decrypted successfully)
+            contains http_status and error message.
+            
+            **Handled errors**:
+            • 404 + "No active configuration found for"
+            • 404 + "No non-revoked public key found for"
+            • 404 + "Account not found."
+            • 501 + "client version update is required"
+            • 409 Conflict
+        end note
+        
+        if (Handled error?) then (no)
+        else (yes)
+            :Return error to user;
+            stop
+        endif
+    }
+    
+    partition "**3. Obtaining proxy list**" {
+        :Build proxy storage list;
+        note right
+            **Storage list formation:**
+            For each baseUrl:
+            • baseUrl + base64url("endpoints-{service_type}-{user_country_code}") + ".json"
+            • baseUrl + "endpoints.json" (generic list)
+            Specific first, then generic.
+        end note
+        while (Proxy list obtained?) is (no)
+            :HTTPS GET to storage;
+            if (Encrypted list received?) then (yes)
+                note right
+                    **Proxy list decryption:**
+                    Data encrypted with AES.
+                    Key and IV derived from hash
+                    of Gateway public key (SHA512):
+                    first 64 hex chars — key, next 32 — IV.
+                end note
+                :Decrypt AES proxy list;
+            else (no)
+                if (All storages exhausted) then (no)
+                    :Next storage;
+                else (yes)
+                    :Return original error to user;
+                    stop
+                endif
+            endif
+        endwhile (yes)
+    }
+    
+    partition "**4. Bypass via proxy**" {
+        while (Proxy in list) is (yes)
+            :Check proxy availability (/lmbd-health);
+            if (Proxy responds?) then (yes)
+                :Send request via proxy\n(same payload);
+                :Decode response;
+                if (Response successful) then (yes)
+                    :Return data to caller;
+                    stop
+                endif
+            endif
+            :Next proxy;
+        endwhile (all exhausted)
+    }
+    
+    :Return error with last failed request to user;
+    stop
+endif
+
+@enduml
