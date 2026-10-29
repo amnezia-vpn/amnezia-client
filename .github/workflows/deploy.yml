@@ -1062,6 +1062,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - EndpointWatchdogTest
 
     runs-on: ubuntu-22.04
 
@@ -1279,6 +1280,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - EndpointWatchdogTest
 
     runs-on: windows-latest
 
@@ -1398,6 +1400,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - EndpointWatchdogTest
 
     runs-on: macos-15
 
