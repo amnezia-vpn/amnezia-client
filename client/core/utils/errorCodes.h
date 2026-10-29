@@ -120,6 +120,10 @@ namespace amnezia
         ApiRateLimitError = 1120,
         ApiNoPurchasesToRestore = 1121,
         ApiPurchasePendingError = 1122,
+        ApiEmailCodeSendError = 1124,
+        ApiEmailCodeInvalidError = 1125,
+        ApiAccountSessionError = 1126,
+        ApiEmailSignInRequiredError = 1127,
 
         // QFile errors
         OpenError = 1200,

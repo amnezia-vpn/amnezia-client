@@ -164,6 +164,10 @@ void CoreSignalHandlers::initExportControllerHandler()
 
 void CoreSignalHandlers::initImportControllerHandler()
 {
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::freeAccountLoginRequired, this, [this]() {
+        emit m_coreController->m_pageController->goToPage(PageLoader::PageEnum::PageSetupWizardApiFreeEmail);
+    });
+
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
         if (m_coreController->m_connectionUiController->isConnected()) {
             return;
