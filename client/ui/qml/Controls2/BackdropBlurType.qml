@@ -1,5 +1,5 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import Style 1.0
 
@@ -17,8 +17,11 @@ Item {
         anchors.fill: parent
 
         layer.enabled: true
-        layer.effect: OpacityMask {
+        layer.effect: MultiEffect {
+            maskEnabled: true
             maskSource: backdropMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1.0
         }
 
         Item {
@@ -43,10 +46,14 @@ Item {
                 visible: false
             }
 
-            FastBlur {
+            MultiEffect {
                 anchors.fill: parent
                 source: backdrop
-                radius: root.blurRadius
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blurMax: 64
+                blur: root.blurRadius <= 20 ? 0.73 : 0.9
+                blurMultiplier: root.blurRadius <= 20 ? 0 : 0.5
             }
         }
     }
@@ -57,6 +64,7 @@ Item {
         anchors.fill: parent
         radius: root.radius
         visible: false
+        layer.enabled: true
     }
 
     Rectangle {

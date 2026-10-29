@@ -18,7 +18,7 @@ Item {
     signal moreClicked()
 
     implicitWidth: 360
-    implicitHeight: content.implicitHeight + 24 + PageController.safeAreaBottomMargin
+    implicitHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
 
     Rectangle {
         anchors.fill: parent
@@ -31,7 +31,7 @@ Item {
         id: content
 
         anchors.fill: parent
-        anchors.topMargin: 16
+        anchors.topMargin: 24
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
@@ -54,28 +54,19 @@ Item {
             }
         }
 
-        Rectangle {
-            Layout.preferredWidth: 44
-            Layout.preferredHeight: 44
+        IconButtonType {
+            id: moreButton
+
+            Layout.preferredWidth: 56
+            Layout.preferredHeight: 56
             Layout.alignment: Qt.AlignVCenter
 
             visible: root.moreButtonVisible
 
-            radius: 16
-            color: AmneziaStyle.color.bgSurfaceAlt
+            icon.source: "qrc:/images/controls/more-vertical.svg"
+            Accessible.name: root.moreButtonAccessibleName
 
-            IconButtonType {
-                id: moreButton
-
-                anchors.fill: parent
-
-                icon.source: "qrc:/images/controls/more-vertical.svg"
-                icon.width: 20
-                icon.height: 20
-                Accessible.name: root.moreButtonAccessibleName
-
-                onClicked: root.moreClicked()
-            }
+            onClicked: root.moreClicked()
         }
     }
 }

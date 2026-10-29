@@ -49,7 +49,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -65,15 +64,12 @@ PageType {
     }
 
     ColumnLayout {
-        objectName: "mainLayout"
-
         anchors.fill: parent
 
         spacing: 0
 
         NavigationBarType {
             id: headerContent
-            objectName: "headerContent"
 
             Layout.fillWidth: true
 
@@ -93,9 +89,7 @@ PageType {
 
             IconButtonType {
                 id: editButton
-                objectName: "editButton"
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/edit-3.svg"
 
                 onClicked: serverNameEditDrawer.open()
@@ -114,7 +108,6 @@ PageType {
             id: tabBar
 
             Layout.fillWidth: true
-            Layout.topMargin: 16
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
@@ -124,15 +117,13 @@ PageType {
 
             TabButtonType {
                 id: protocolsTab
-                visible: protocolsPage.installedProtocolsCount
-                width: protocolsPage.installedProtocolsCount ? undefined : 0
+                visible: protocolsPage.installedProtocolsCount > 0
                 text: qsTr("Protocols")
             }
 
             TabButtonType {
                 id: servicesTab
-                visible: servicesPage.installedServicesCount
-                width: servicesPage.installedServicesCount ? undefined : 0
+                visible: servicesPage.installedServicesCount > 0
                 text: qsTr("Services")
             }
 

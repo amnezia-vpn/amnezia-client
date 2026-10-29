@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QPair>
 #include <QString>
+#include <QStringList>
 
 #include "core/utils/errorCodes.h"
 
@@ -28,13 +29,14 @@ public:
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
-    static void onBeforeRequest(const char *host, void *userData);
-    void handleBeforeRequest(const QString &host);
+    void prepareRequest();
+    QStringList requestHosts() const;
 
     QPair<amnezia::ErrorCode, QByteArray> executePost(const QString &endpoint, const QJsonObject &apiPayload);
     static amnezia::ErrorCode mapResultCode(const int code, const QByteArray &responseBody);
     void persistState();
 
+    QString m_gatewayEndpoint;
     bool m_isStrictKillSwitchEnabled = false;
     SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
 

@@ -49,6 +49,8 @@ public:
                                            const QString &captchaSolution, CaptchaInfo &captchaInfo,
                                            const QString &bindServerId);
 
+    ErrorCode fetchServiceConfig(const QString &serverId, const QString &serviceProtocol, QJsonObject &serverConfigJson);
+
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
 

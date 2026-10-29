@@ -68,7 +68,6 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -122,7 +121,6 @@ PageType {
 
                 CheckBoxType {
                     id: cloakingCheckBox
-                    objectName: "cloakingCheckBox"
 
                     Layout.fillWidth: true
 
@@ -149,6 +147,7 @@ PageType {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
 
                     implicitHeight: configContent.implicitHeight + 32
 

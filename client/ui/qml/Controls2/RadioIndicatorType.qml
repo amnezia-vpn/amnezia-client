@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 
 import Style 1.0
 
@@ -25,15 +24,12 @@ Item {
         }
     }
 
-    MultiEffect {
-        anchors.fill: dot
+    SelectionGlowType {
+        anchors.fill: parent
+
         source: dot
         visible: root.checked
-        shadowEnabled: true
-        shadowColor: AmneziaStyle.color.accentLight
-        shadowBlur: 0.6
-        shadowHorizontalOffset: 0
-        shadowVerticalOffset: 0
+        color: AmneziaStyle.color.accentLight
     }
 
     Rectangle {

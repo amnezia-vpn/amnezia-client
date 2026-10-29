@@ -20,10 +20,6 @@ SheetType {
         anchors.right: parent.right
         spacing: 0
 
-        ButtonGroup {
-            id: sortModeGroup
-        }
-
         SectionHeaderType {
             Layout.fillWidth: true
             Layout.topMargin: 18
@@ -41,10 +37,8 @@ SheetType {
             Layout.rightMargin: 16
             Layout.preferredHeight: 80
 
-            leftPadding: 16 + 48 + spacing
             text: qsTr("By region")
 
-            ButtonGroup.group: sortModeGroup
             checked: root.listModel !== null && root.listModel.sortMode === 0
 
             onClicked: {
@@ -59,10 +53,8 @@ SheetType {
             Layout.rightMargin: 16
             Layout.preferredHeight: 80
 
-            leftPadding: 16 + 48 + spacing
             text: qsTr("Alphabetically")
 
-            ButtonGroup.group: sortModeGroup
             checked: root.listModel !== null && root.listModel.sortMode === 1
 
             onClicked: {

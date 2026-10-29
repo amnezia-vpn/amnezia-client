@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import PageEnum 1.0
 import UpdateState 1.0
@@ -48,7 +48,6 @@ PageType {
         IconButtonType {
             id: supportButton
 
-            size: IconButtonType.Small
             icon.source: "qrc:/images/controls/headphones.svg"
 
             onClicked: supportDrawer.open()
@@ -60,7 +59,7 @@ PageType {
 
         anchors.top: navigationBar.bottom
         anchors.bottom: bottomBar.top
-        contentHeight: content.implicitHeight + 16 + 32
+        contentHeight: content.implicitHeight + 24
 
         ColumnLayout {
             id: content
@@ -68,7 +67,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 24
@@ -86,8 +84,11 @@ PageType {
                     Layout.preferredHeight: 98
 
                     layer.enabled: true
-                    layer.effect: OpacityMask {
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
                         maskSource: imageBlockMask
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
                     }
 
                     Image {
@@ -108,6 +109,7 @@ PageType {
                         anchors.fill: parent
                         radius: 16
                         visible: false
+                        layer.enabled: true
                     }
 
                     BackdropBlurType {

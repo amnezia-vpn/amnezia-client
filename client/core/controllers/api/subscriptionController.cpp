@@ -462,6 +462,33 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
 }
 
+ErrorCode SubscriptionController::fetchServiceConfig(const QString &serverId, const QString &serviceProtocol,
+                                                     QJsonObject &serverConfigJson)
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        return ErrorCode::InternalError;
+    }
+
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
+
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, apiV2->apiConfig.userCountryCode)
+                                     .addField(apiDefs::key::serviceType, apiV2->serviceType())
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
+                                     .addField(apiDefs::key::authData, apiV2->authData.toJson())
+                                     .build();
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, apiV2->apiConfig.isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    return extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+}
+
 void SubscriptionController::markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2)
 {
     ApiV2ServerConfig expiredApiV2 = apiV2;

@@ -12,11 +12,13 @@ RadioDelegate {
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
     leftPadding: 16
+    verticalPadding: 14
 
+    checkable: false
     hoverEnabled: true
     focusPolicy: Qt.StrongFocus
     opacity: enabled ? 1.0 : 0.4
@@ -31,13 +33,13 @@ RadioDelegate {
 
     background: Item {
         implicitWidth: 358
-        implicitHeight: 72
+        implicitHeight: 56
 
         Rectangle {
             anchors.fill: parent
 
             radius: 16
-            color: root.enabled && !root.checked && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer
+            color: root.enabled && !root.checked && (root.hovered || root.down) ? (root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer)
                                                                                 : AmneziaStyle.color.transparent
             border.width: root.checked || root.down ? 1 : 0
             border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderBold

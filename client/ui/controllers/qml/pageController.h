@@ -1,6 +1,7 @@
 #ifndef PAGECONTROLLER_H
 #define PAGECONTROLLER_H
 
+#include <QMargins>
 #include <QObject>
 #include <QQmlEngine>
 
@@ -28,7 +29,6 @@ public slots:
 
     void closeWindow();
     void hideWindow();
-    void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);
@@ -47,6 +47,8 @@ public slots:
     int getSafeAreaTopMargin();
     int getSafeAreaBottomMargin();
     int getImeHeight();
+
+    void setSafeAreaMargins(const QMargins &margins);
 
 private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
@@ -98,6 +100,8 @@ private:
     mutable int m_cachedNavigationBarHeight = -1;
     mutable bool m_cachedEdgeToEdgeEnabled = false;
     mutable bool m_edgeToEdgeCached = false;
+
+    QMargins m_safeAreaMargins;
     int m_imeHeight = 0;
 };
 

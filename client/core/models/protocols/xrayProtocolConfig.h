@@ -187,6 +187,7 @@ namespace xrayEffective
 
     QString security(const XrayServerConfig &srv);
     QString clientFlow(const XrayServerConfig &srv);
+    QString serverFlow(const XrayServerConfig &srv);
     QString network(const XrayServerConfig &srv);
     QString xhttpModeSent(const XrayServerConfig &srv);
 }

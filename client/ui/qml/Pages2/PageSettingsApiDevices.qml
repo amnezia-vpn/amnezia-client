@@ -29,6 +29,8 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
+            z: 2
+
             spacing: 0
 
             NavigationBarType {
@@ -40,7 +42,6 @@ PageType {
 
             NotificationType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.bottomMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -67,11 +68,18 @@ PageType {
 
                 text: osVersion + (isCurrentDevice ? qsTr(" (current device)") : "")
                 subtitle: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
+                maximumLineCount: 3
                 trailingIconSource: "qrc:/images/controls/trash.svg"
 
                 onClicked: {
                     if (isCurrentDevice && ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        return
+                    }
+
+                    if (isCurrentDevice && LocalProxyController.isEnabled
+                            && LocalProxyController.ownerId === ServersUiController.processedServerId) {
+                        PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         return
                     }
 
@@ -87,7 +95,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
         }

@@ -17,6 +17,7 @@ Item {
     property bool passwordToggle: false
     property bool passwordRevealed: false
     property bool clearable: false
+    property string trailingIconSource
 
     property string buttonText
     property string buttonImageSource
@@ -28,6 +29,8 @@ Item {
     property alias placeholderText: textField.placeholderText
 
     readonly property bool hasError: root.errorText !== ""
+
+    signal trailingClicked()
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -54,12 +57,12 @@ Item {
                 id: textField
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: 64
+                Layout.preferredHeight: root.headerText !== "" ? 64 : 56
 
                 leftPadding: 16
                 rightPadding: actions.visible ? actions.width + 16 : 16
-                topPadding: root.headerText !== "" ? 28 : 20
-                bottomPadding: root.headerText !== "" ? 12 : 20
+                topPadding: root.headerText !== "" ? 28 : 16
+                bottomPadding: root.headerText !== "" ? 12 : 16
                 verticalAlignment: TextInput.AlignVCenter
 
                 color: AmneziaStyle.color.textPrimary
@@ -81,7 +84,7 @@ Item {
                     topRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
                     bottomRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
 
-                    color: AmneziaStyle.color.bgSurfaceAlt
+                    color: root.headerText !== "" ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgSurface
                     border.width: textField.activeFocus ? 2 : 1
                     border.color: {
                         if (root.hasError) {
@@ -118,9 +121,8 @@ Item {
                     }
                 }
 
-                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
                 ContextMenu.onRequested: function(position) {
-                    contextMenu.requestNative(position)
+                    contextMenu.request(position)
                 }
 
                 TapHandler {
@@ -139,56 +141,76 @@ Item {
                     textObj: textField
                 }
 
-                Row {
+                Loader {
                     id: actions
 
                     anchors.right: parent.right
-                    anchors.rightMargin: 12
+                    anchors.rightMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
 
-                    visible: clearButton.visible || eyeButton.visible
+                    active: root.clearable || root.passwordToggle || root.trailingIconSource !== ""
+                    visible: active
 
-                    IconButtonType {
-                        id: clearButton
+                    sourceComponent: Row {
+                        IconButtonType {
+                            id: clearButton
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                            implicitWidth: 40
+                            implicitHeight: 40
 
-                        visible: root.clearable && textField.text !== "" && !textField.readOnly
-                        icon.source: "qrc:/images/controls/x-circle.svg"
+                            visible: root.clearable && textField.text !== "" && !textField.readOnly
+                            icon.source: "qrc:/images/controls/x-circle.svg"
 
-                        onClicked: {
-                            textField.clear()
-                            textField.forceActiveFocus()
+                            onClicked: {
+                                textField.clear()
+                                textField.forceActiveFocus()
+                            }
                         }
-                    }
 
-                    IconButtonType {
-                        id: eyeButton
+                        IconButtonType {
+                            id: eyeButton
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                            implicitWidth: 40
+                            implicitHeight: 40
 
-                        visible: root.passwordToggle
-                        icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
+                            visible: root.passwordToggle
+                            icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
 
-                        onClicked: root.passwordRevealed = !root.passwordRevealed
+                            onClicked: root.passwordRevealed = !root.passwordRevealed
+                        }
+
+                        IconButtonType {
+                            id: trailingButton
+
+                            implicitWidth: 40
+                            implicitHeight: 40
+
+                            visible: root.trailingIconSource !== ""
+                            icon.source: root.trailingIconSource
+
+                            onClicked: root.trailingClicked()
+                        }
                     }
                 }
             }
 
-            InputButtonType {
+            Loader {
                 id: attachedButton
 
                 Layout.preferredHeight: textField.height
+                Layout.maximumWidth: Math.max(83, root.width * 0.4)
 
-                visible: root.buttonText !== "" || root.buttonImageSource !== ""
-                joined: root.buttonJoined
+                active: root.buttonText !== "" || root.buttonImageSource !== ""
+                visible: active
 
-                text: root.buttonText
-                imageSource: root.buttonImageSource
+                sourceComponent: InputButtonType {
+                    joined: root.buttonJoined
 
-                onClicked: root.runClickedFunc()
+                    text: root.buttonText
+                    imageSource: root.buttonImageSource
+
+                    onClicked: root.runClickedFunc()
+                }
             }
         }
 

@@ -34,13 +34,15 @@ Button {
         id: d
 
         readonly property bool small: root.size === ButtonType.Small
+        readonly property bool textVariant: root.variant === ButtonType.Text
         readonly property bool outlined: root.variant === ButtonType.Secondary || root.variant === ButtonType.Destructive
         readonly property bool active: root.down || root.hovered
+        readonly property bool pressedRing: root.down && root.variant === ButtonType.Primary && root.size === ButtonType.Large
 
         readonly property int height: root.size === ButtonType.Large ? 48 : (root.size === ButtonType.Medium ? 40 : 36)
-        readonly property int radius: root.size === ButtonType.Large ? 16 : (root.size === ButtonType.Medium ? 14 : 12)
-        readonly property int iconSize: small ? 20 : 24
-        readonly property int gap: root.size === ButtonType.Large ? 4 : 2
+        readonly property int radius: small && !textVariant ? 12 : (root.size === ButtonType.Medium && !textVariant ? 14 : 16)
+        readonly property int iconSize: small || (textVariant && root.size === ButtonType.Medium) ? 20 : 24
+        readonly property int gap: root.size === ButtonType.Large || textVariant ? 4 : 2
 
         readonly property color backgroundColor: {
             switch (root.variant) {
@@ -64,9 +66,6 @@ Button {
         readonly property color borderColor: {
             if (outlined) {
                 return active || root.loading ? AmneziaStyle.color.borderBold : AmneziaStyle.color.borderSoft
-            }
-            if (root.variant === ButtonType.Text && root.down) {
-                return AmneziaStyle.color.borderEmphasis
             }
             return AmneziaStyle.color.transparent
         }
@@ -99,10 +98,10 @@ Button {
     background: Rectangle {
         implicitHeight: Math.max(d.height, implicitContentHeight + topPadding + bottomPadding)
 
-        radius: d.radius
-        color: d.backgroundColor
-        border.width: d.borderColor.a > 0 ? 1 : 0
-        border.color: d.borderColor
+        radius: d.pressedRing ? d.radius + 2 : d.radius
+        color: d.pressedRing ? AmneziaStyle.color.transparent : d.backgroundColor
+        border.width: d.pressedRing || d.borderColor.a > 0 ? 1 : 0
+        border.color: d.pressedRing ? AmneziaStyle.color.borderEmphasis : d.borderColor
 
         Behavior on color {
             ColorAnimation { duration: 150 }
@@ -110,9 +109,18 @@ Button {
 
         Rectangle {
             anchors.fill: parent
+            anchors.margins: 2
+
+            visible: d.pressedRing
+            radius: d.radius
+            color: d.backgroundColor
+        }
+
+        Rectangle {
+            anchors.fill: parent
 
             radius: parent.radius
-            color: AmneziaStyle.color.bgStateLayer
+            color: root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer
             visible: d.stateLayerVisible
         }
 

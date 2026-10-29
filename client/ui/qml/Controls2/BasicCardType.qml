@@ -59,7 +59,7 @@ AbstractButton {
             anchors.fill: parent
 
             radius: 16
-            color: !root.muted && root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer
+            color: !root.muted && root.enabled && (root.hovered || root.down) ? (root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer)
                                                                              : AmneziaStyle.color.transparent
 
             Behavior on color {
@@ -95,67 +95,73 @@ AbstractButton {
     }
 
     contentItem: RowLayout {
-        spacing: root.spacing
+        spacing: 0
 
-        IconImage {
-            Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: root.icon.width
-            Layout.preferredHeight: root.icon.height
-
-            visible: root.icon.source.toString() !== ""
-            source: root.icon.source
-            sourceSize: Qt.size(root.icon.width, root.icon.height)
-            color: root.icon.color
-        }
-
-        ColumnLayout {
+        RowLayout {
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignTop
+            Layout.alignment: root.subtitle !== "" || root.footnote !== "" ? Qt.AlignTop : Qt.AlignVCenter
 
-            spacing: 4
+            spacing: root.spacing
 
-            H3TextType {
-                Layout.fillWidth: true
+            IconImage {
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredWidth: root.icon.width
+                Layout.preferredHeight: root.icon.height
 
-                visible: text !== ""
-                text: root.text
-                color: root.muted ? AmneziaStyle.color.textTertiary : AmneziaStyle.color.textPrimary
+                visible: root.icon.source.toString() !== ""
+                source: root.icon.source
+                sourceSize: Qt.size(root.icon.width, root.icon.height)
+                color: root.icon.color
             }
 
-            SmallTextType {
+            ColumnLayout {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
 
-                visible: text !== "" && !root.muted
-                text: root.subtitle
-                textFormat: Text.RichText
+                spacing: 4
 
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
+                H3TextType {
+                    Layout.fillWidth: true
+
+                    visible: text !== ""
+                    text: root.text
+                    color: root.muted ? AmneziaStyle.color.textTertiary : AmneziaStyle.color.textPrimary
                 }
-            }
 
-            CaptionTextType {
-                Layout.fillWidth: true
+                SmallTextType {
+                    Layout.fillWidth: true
 
-                visible: text !== "" && root.muted
-                text: root.subtitle
-                textFormat: Text.RichText
-                color: AmneziaStyle.color.textQuaternary
-            }
+                    visible: text !== "" && !root.muted
+                    text: root.subtitle
+                    textFormat: Text.RichText
 
-            SmallTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 8
+                    onLinkActivated: function(link) {
+                        Qt.openUrlExternally(link)
+                    }
+                }
 
-                visible: text !== ""
-                text: root.footnote
-                color: root.muted ? AmneziaStyle.color.textQuaternary : AmneziaStyle.color.textTertiary
+                CaptionTextType {
+                    Layout.fillWidth: true
+
+                    visible: text !== "" && root.muted
+                    text: root.subtitle
+                    textFormat: Text.RichText
+                    color: AmneziaStyle.color.textQuaternary
+                }
+
+                SmallTextType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 8
+
+                    visible: text !== ""
+                    text: root.footnote
+                    color: root.muted ? AmneziaStyle.color.textQuaternary : AmneziaStyle.color.textTertiary
+                }
             }
         }
 
         IconButtonType {
             Layout.alignment: Qt.AlignTop
-            Layout.leftMargin: -root.spacing
 
             icon.source: "qrc:/images/controls/chevron-right.svg"
             icon.color: AmneziaStyle.color.iconDefault

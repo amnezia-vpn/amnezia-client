@@ -8,8 +8,9 @@ Pane {
     id: root
 
     property var benefitsModel: null
+    property int benefitsCount: 0
 
-    visible: root.benefitsModel && root.benefitsModel.rowCount() > 0
+    visible: root.benefitsCount > 0
 
     padding: 16
 
@@ -22,7 +23,11 @@ Pane {
         spacing: 16
 
         Repeater {
+            id: benefitsRepeater
+
             model: root.benefitsModel
+
+            onCountChanged: root.benefitsCount = count
 
             delegate: BenefitRow {
                 Layout.fillWidth: true

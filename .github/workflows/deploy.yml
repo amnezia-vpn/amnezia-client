@@ -88,7 +88,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'linux_gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -209,7 +209,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2022_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -324,7 +324,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-iOS
     if: ${{ always() }}
@@ -472,7 +472,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-15
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -528,7 +528,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -671,7 +671,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
@@ -1049,11 +1049,16 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1105,7 +1110,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1131,6 +1136,17 @@ jobs:
             -type f \
             -name "test_*" \
             -exec chmod +x {} \;
+
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
 
       - name: Run tests
         env:
@@ -1181,7 +1197,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1208,6 +1224,16 @@ jobs:
             -name "test_*" \
             -exec chmod +x {} \;
 
+      - name: Download Xray core
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
+
       - name: Run tests
         shell: bash
         run: |
@@ -1217,7 +1243,8 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
 
           ctest --test-dir deploy/build/client/tests --output-on-failure -VV \
-            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest)$"
+            --timeout 3600 \
+            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest|XrayVpsMatrixTest)$"
 
 # ------------------------------------------------------
 
@@ -1239,11 +1266,16 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1303,7 +1335,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2022_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 
@@ -1311,6 +1343,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: pwsh
+        run: |
+          $release = (Select-String -Path client/server_scripts/xray/Dockerfile -Pattern '^ARG XRAY_RELEASE="(.*)"').Matches[0].Groups[1].Value
+          $zip = Join-Path $env:RUNNER_TEMP "xray.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "xray"
+          Invoke-WebRequest -Uri "https://github.com/XTLS/Xray-core/releases/download/$release/Xray-windows-64.zip" -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          "XRAY_BIN=$(Join-Path $dir 'xray.exe')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Run tests
         env:
@@ -1351,6 +1394,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1413,7 +1457,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 

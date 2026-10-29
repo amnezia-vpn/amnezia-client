@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import Style 1.0
 
@@ -10,10 +10,7 @@ import "TextTypes"
 Popup {
     id: root
 
-    enum Variant { Default, Destructive }
-
     property string text
-    property int variant: SnackbarType.Default
     property string actionText
     property bool closable: false
     property int duration: 4000
@@ -81,22 +78,33 @@ Popup {
             visible: false
         }
 
-        DropShadow {
-            anchors.fill: shadowSource
-            source: shadowSource
-            verticalOffset: 4
-            radius: 8
-            samples: 17
-            spread: 0.3
+        Rectangle {
+            id: spreadShadowSource
+
+            x: -3
+            y: -3 + 4
+            width: parent.width + 6
+            height: parent.height + 6
+
+            radius: 15
             color: AmneziaStyle.color.shadowLayer1
+            visible: false
         }
 
-        DropShadow {
+        MultiEffect {
+            anchors.fill: spreadShadowSource
+
+            source: spreadShadowSource
+            blurEnabled: true
+            blurMax: 48
+            blur: 0.5
+        }
+
+        ShadowType {
             anchors.fill: shadowSource
             source: shadowSource
             verticalOffset: 1
-            radius: 3
-            samples: 7
+            blur: 3
             color: AmneziaStyle.color.shadowLayer2
         }
 
@@ -116,7 +124,7 @@ Popup {
         property real offsetX: 0
         property real offsetY: 0
 
-        implicitHeight: Math.max(content.implicitHeight, actionButton.visible ? 48 : 0)
+        implicitHeight: Math.max(content.implicitHeight, actionButton.visible ? 40 : 0)
 
         transform: Translate {
             x: swipe.offsetX
@@ -167,9 +175,9 @@ Popup {
             SmallTextType {
                 Layout.fillWidth: true
 
-                text: root.text
-                color: root.variant === SnackbarType.Destructive ? AmneziaStyle.color.statusDestructive
-                                                                  : AmneziaStyle.color.textInverted
+                text: root.text.replace(/\n/g, "<br>").replace(/<a /g, "<a style=\"color: " + AmneziaStyle.color.textInfoInverse + "; text-decoration: none\" ")
+                textFormat: Text.RichText
+                color: AmneziaStyle.color.textInverted
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
@@ -184,11 +192,12 @@ Popup {
                 id: actionButton
 
                 Layout.alignment: Qt.AlignVCenter
+                Layout.maximumWidth: content.width / 2
 
                 visible: root.actionText !== "" || root.closable
 
                 implicitWidth: actionLabel.implicitWidth + 28
-                implicitHeight: 48
+                implicitHeight: 40
 
                 hoverEnabled: true
 
@@ -222,6 +231,7 @@ Popup {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     wrapMode: Text.NoWrap
+                    elide: Text.ElideRight
                 }
 
                 HoverHandler {

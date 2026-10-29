@@ -13,7 +13,7 @@ import shlex
 
 class Libagw(ConanFile):
     name = "libagw"
-    version = "1.0.6"
+    version = "1.0.8"
     settings = "os", "arch", "compiler"
 
     _headers = ("agw.h", "agw_types.h")
@@ -71,7 +71,7 @@ class Libagw(ConanFile):
         basic_layout(self)
 
     def build_requirements(self):
-        self.tool_requires("go/1.23.12")
+        self.tool_requires("go/1.27.1")
         if self._is_windows:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -91,7 +91,7 @@ class Libagw(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/libagw/archive/refs/tags/v{self.version}.zip",
-            sha256="148f421e20e31b53c7686a29a368e03720c41776facce457c55748d8b2974ddb", strip_root=True
+            sha256="ad36125be7ff4a77603107a0bc2194da6778d5612e649f53c9d954c742bb70db", strip_root=True
         )
 
     def generate(self):
@@ -140,7 +140,9 @@ class Libagw(ConanFile):
                     self._go_build(os.path.join(build_dir, self._shared_lib), "c-shared", goarch, cflags, ldflags,
                                    goldflags=f"-extldflags=-Wl,-soname,{self._shared_lib}")
                 else:
-                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags)
+                    goldflags = "-X=runtime.godebugDefault=asyncpreemptoff=1" if is_apple_os(self) else ""
+                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags,
+                                   goldflags=goldflags)
 
             if is_apple_os(self) and self._is_multiarch:
                 lipo = XCRun(self).find("lipo")

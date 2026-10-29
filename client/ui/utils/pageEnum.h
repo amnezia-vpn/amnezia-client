@@ -41,6 +41,7 @@ namespace PageLoader
         PageSettingsApiDevices,
         PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
+        PageSettingsLocalProxy,
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
