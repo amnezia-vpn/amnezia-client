@@ -14,7 +14,7 @@ import "../Components"
 PageType {
     id: root
 
-    enableTimer: false
+    initialFocusItem: codeField.textField
 
     property string email: ""
     property int resendCooldownSec: 0

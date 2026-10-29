@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    initialFocusItem: emailField.textField
+
     property string email: ""
 
     function isValidEmail(value) {
