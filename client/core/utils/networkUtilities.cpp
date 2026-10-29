@@ -291,16 +291,16 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 8192;
-    int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
-    int     sock = -1, msgseq = 0;
-    struct  nlmsghdr *nlh, *nlmsg;
-    struct  rtmsg *route_entry;
-    // This struct contain route attributes (route type)
-    struct  rtattr *route_attribute;
-    char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[100], buffer[BUFFER_SIZE];
-    char    *ptr = buffer;
+    constexpr int BUFFER_SIZE = 65536;
+    int received_bytes = 0, msg_len = 0, route_attribute_len = 0;
+    int sock = -1;
+    constexpr int msgseq = 1;
+    struct nlmsghdr *nlh, *nlmsg;
+    struct rtmsg *route_entry;
+    struct rtattr *route_attribute;
+    char gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
+    char msgbuf[100], buffer[BUFFER_SIZE];
+    char *ptr = buffer;
     struct timeval tv;
 
     if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
@@ -313,82 +313,89 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     memset(interface, 0, sizeof(interface));
     memset(buffer, 0, sizeof(buffer));
 
-    /* point the header and the msg structure pointers into the buffer */
     nlmsg = (struct nlmsghdr *)msgbuf;
-
-    /* Fill in the nlmsg header*/
     nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-    nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
-    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
-    nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
+    nlmsg->nlmsg_type = RTM_GETROUTE;
+    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
+    nlmsg->nlmsg_seq = msgseq;
+    nlmsg->nlmsg_pid = getpid();
 
-    /* 1 Sec Timeout to avoid stall */
     tv.tv_sec = 1;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval));
-    /* send msg */
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
         perror("send failed");
+        close(sock);
         return {};
     }
 
-    /* receive response */
-    do
-    {
+    for (;;) {
+        if (msg_len >= BUFFER_SIZE) {
+            qWarning() << "Route dump exceeded receive buffer";
+            close(sock);
+            return {};
+        }
+
         received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
-        if (received_bytes < 0) {
+        if (received_bytes <= 0) {
             perror("Error in recv");
+            close(sock);
             return {};
         }
 
-        nlh = (struct nlmsghdr *) ptr;
-
-        /* Check if the header is valid */
-        if((NLMSG_OK(nlh, received_bytes) == 0) ||
-            (nlh->nlmsg_type == NLMSG_ERROR))
-        {
-            perror("Error in received packet");
-            return {};
+        bool done = false;
+        int packet_remaining = received_bytes;
+        nlh = reinterpret_cast<struct nlmsghdr *>(ptr);
+        for (; NLMSG_OK(nlh, packet_remaining);
+             nlh = NLMSG_NEXT(nlh, packet_remaining)) {
+            if (nlh->nlmsg_seq != msgseq) {
+                continue;
+            }
+            if (nlh->nlmsg_type == NLMSG_DONE) {
+                done = true;
+                break;
+            }
+            if (nlh->nlmsg_type == NLMSG_ERROR) {
+                const auto* error = reinterpret_cast<struct nlmsgerr *>(
+                    NLMSG_DATA(nlh));
+                if (error->error != 0) {
+                    qWarning() << "Error in received packet:"
+                               << strerror(-error->error);
+                    close(sock);
+                    return {};
+                }
+            }
         }
 
-        /* If we received all data break */
-        if (nlh->nlmsg_type == NLMSG_DONE)
-            break;
-        else {
-            ptr += received_bytes;
-            msg_len += received_bytes;
-        }
-
-        /* Break if its not a multi part message */
-        if ((nlh->nlmsg_flags & NLM_F_MULTI) == 0)
+        ptr += received_bytes;
+        msg_len += received_bytes;
+        if (done)
             break;
     }
-    while ((nlh->nlmsg_seq != msgseq) || (nlh->nlmsg_pid != getpid()));
 
-    /* parse response */
-    int remaining = msg_len + received_bytes;
-    nlh = (struct nlmsghdr *) buffer;
-    for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
-    {
-        /* Get the route data */
-        route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
-
-        /* We are just interested in main routing table */
-        if (route_entry->rtm_table != RT_TABLE_MAIN)
+    int remaining = msg_len;
+    nlh = (struct nlmsghdr *)buffer;
+    for (; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining)) {
+        if (nlh->nlmsg_type != RTM_NEWROUTE ||
+            nlh->nlmsg_seq != msgseq) {
             continue;
+        }
 
-        /* Reset per-route to avoid cross-route state pollution */
+        route_entry = (struct rtmsg *)NLMSG_DATA(nlh);
+        if (route_entry->rtm_family != AF_INET ||
+            route_entry->rtm_dst_len != 0 ||
+            route_entry->rtm_table != RT_TABLE_MAIN) {
+            continue;
+        }
+
         memset(gateway_address, 0, sizeof(gateway_address));
         memset(interface, 0, sizeof(interface));
-
-        route_attribute = (struct rtattr *) RTM_RTA(route_entry);
+        route_attribute = (struct rtattr *)RTM_RTA(route_entry);
         route_attribute_len = RTM_PAYLOAD(nlh);
 
-        /* Loop through all attributes */
-        for ( ; RTA_OK(route_attribute, route_attribute_len);
-             route_attribute = RTA_NEXT(route_attribute, route_attribute_len))
-        {
-            switch(route_attribute->rta_type) {
+        for (; RTA_OK(route_attribute, route_attribute_len);
+             route_attribute = RTA_NEXT(route_attribute, route_attribute_len)) {
+            switch (route_attribute->rta_type) {
             case RTA_OIF:
                 if_indextoname(*(int *)RTA_DATA(route_attribute), interface);
                 break;
@@ -402,10 +409,12 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         }
 
         if ((*gateway_address) && (*interface)) {
-            qDebug() << "Gateway " << gateway_address << " for interface " << interface;
+            qDebug() << "Gateway " << gateway_address
+                     << " for interface " << interface;
             break;
         }
     }
+
     if (!(*gateway_address) || !(*interface))
         qDebug() << "getGatewayAndIface: no gateway found";
     close(sock);
