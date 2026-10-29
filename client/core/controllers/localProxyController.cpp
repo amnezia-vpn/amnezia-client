@@ -76,7 +76,6 @@ bool LocalProxyController::setPort(int port)
     const bool isPortChanged = m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port);
     if (isPortChanged) {
         m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
-        m_lastProxyPort = 0;
     }
     m_appSettingsRepository->setLocalProxyPortUserDefined(true);
     emit stateChanged();
@@ -89,7 +88,7 @@ bool LocalProxyController::setPort(int port)
 
 bool LocalProxyController::isPortBusy(int port) const
 {
-    return !portUtils::isPortAvailable(port);
+    return !isPortAvailable(port);
 }
 
 bool LocalProxyController::enable(const QString &ownerId, int port)
@@ -102,7 +101,7 @@ bool LocalProxyController::enable(const QString &ownerId, int port)
         return false;
     }
 
-    if (!portUtils::isPortAvailable(port) && m_appSettingsRepository->isLocalProxyPortUserDefined()) {
+    if (!isPortAvailable(port) && m_appSettingsRepository->isLocalProxyPortUserDefined()) {
         return false;
     }
 
@@ -226,7 +225,6 @@ bool LocalProxyController::startXray()
     }
 
     qDebug() << "Xray started on port" << config->proxyPort;
-    m_lastProxyPort = config->proxyPort;
     setActivePort(config->proxyPort);
     return true;
 }
@@ -327,35 +325,35 @@ std::optional<LocalProxyController::XrayConfig> LocalProxyController::buildXrayC
 
 std::optional<int> LocalProxyController::selectProxyPort() const
 {
-    int basePort = m_appSettingsRepository->localProxyPort();
-    if (basePort < localProxy::proxyPortMin || basePort > localProxy::proxyPortMax) {
-        basePort = localProxy::defaultProxyPort;
+    int port = m_appSettingsRepository->localProxyPort();
+    if (port < localProxy::proxyPortMin || port > localProxy::proxyPortMax) {
+        port = localProxy::defaultProxyPort;
     }
 
-    if (m_lastProxyPort == 0) {
-        if (portUtils::waitForPort(basePort, localProxy::portReleaseWaitMs)) {
-            return basePort;
-        }
-
-        if (m_appSettingsRepository->isLocalProxyPortUserDefined()) {
-            qWarning() << "Local proxy port" << basePort << "is already in use";
-            return std::nullopt;
-        }
+    const auto isAvailable = [this](int p) { return isPortAvailable(p); };
+    if (portUtils::waitForPort(port, localProxy::portReleaseWaitMs, isAvailable)) {
+        return port;
     }
 
-    // Every restart moves to a new port so that clients notice the change and reconnect.
-    const int from = (m_lastProxyPort > 0 ? m_lastProxyPort : basePort) + 1;
-    auto freePort = portUtils::findFirstAvailablePort(from, localProxy::proxyPortMax);
-    if (!freePort && from > basePort + 1) {
-        freePort = portUtils::findFirstAvailablePort(basePort, from - 2);
-    }
-
-    if (!freePort) {
-        qWarning() << "No available local proxy port in range" << basePort << "-" << localProxy::proxyPortMax;
+    if (m_appSettingsRepository->isLocalProxyPortUserDefined()) {
+        qWarning() << "Local proxy port" << port << "is already in use";
         return std::nullopt;
     }
 
-    qDebug() << "Local proxy port selected:" << *freePort << "(previous" << m_lastProxyPort << ")";
+    std::optional<int> freePort;
+    if (port != localProxy::defaultProxyPort && isPortAvailable(localProxy::defaultProxyPort)) {
+        freePort = localProxy::defaultProxyPort;
+    } else {
+        freePort = portUtils::findFirstAvailablePort(localProxy::defaultProxyPort + 1, localProxy::proxyPortMax, isAvailable);
+    }
+
+    if (!freePort) {
+        qWarning() << "No available local proxy port in range" << localProxy::defaultProxyPort + 1 << "-"
+                   << localProxy::proxyPortMax;
+        return std::nullopt;
+    }
+
+    qDebug() << "Local proxy port" << port << "is busy, using" << *freePort;
     return freePort;
 }
 
@@ -494,6 +492,20 @@ bool LocalProxyController::isXrayEngineRunning() const
             []() { return false; });
 }
 
+bool LocalProxyController::isPortAvailable(int port) const
+{
+    if (port < localProxy::proxyPortMin || port > localProxy::proxyPortMax) {
+        return false;
+    }
+
+    return IpcClient::withInterface(
+            [port](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto reply = iface->isTcpPortAvailable(port);
+                return reply.waitForFinished() && reply.returnValue();
+            },
+            [port]() { return portUtils::isPortAvailable(port); });
+}
+
 #else
 
 bool LocalProxyController::isSupported() const
@@ -523,6 +535,11 @@ bool LocalProxyController::stopXrayEngine()
 bool LocalProxyController::isXrayEngineRunning() const
 {
     return false;
+}
+
+bool LocalProxyController::isPortAvailable(int port) const
+{
+    return portUtils::isPortAvailable(port);
 }
 
 #endif

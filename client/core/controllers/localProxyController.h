@@ -68,6 +68,7 @@ private:
     bool startXrayEngine(const QString &config);
     bool stopXrayEngine();
     bool isXrayEngineRunning() const;
+    bool isPortAvailable(int port) const;
 
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;
@@ -79,7 +80,6 @@ private:
     qint64 m_xrayToken = 0;
     quint16 m_appliedProxyPort = 0;
     int m_activePort = 0;
-    int m_lastProxyPort = 0;
 };
 
 #endif // LOCALPROXYCONTROLLER_H

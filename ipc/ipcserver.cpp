@@ -12,6 +12,7 @@
 #include <QRemoteObjectNode>
 #include <QString>
 #include <QStringList>
+#include <QTcpServer>
 
 #include "logger.h"
 #include "router.h"
@@ -347,4 +348,20 @@ qint64 IpcServer::xrayCurrentToken()
 #endif
 
     return Xray::getInstance().currentToken();
+}
+
+bool IpcServer::isTcpPortAvailable(int port)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::isTcpPortAvailable" << port;
+#endif
+
+    if (port < 1 || port > 65535) {
+        return false;
+    }
+
+    QTcpServer server;
+    const bool available = server.listen(QHostAddress::LocalHost, static_cast<quint16>(port));
+    server.close();
+    return available;
 }
