@@ -4,15 +4,11 @@
 
 #include "dummyapplistprovider.h"
 
-#include "leakdetector.h"
-
 DummyAppListProvider::DummyAppListProvider(QObject* parent)
     : AppListProvider(parent) {
-  MZ_COUNT_CTOR(DummyAppListProvider);
 }
 
 DummyAppListProvider::~DummyAppListProvider() {
-  MZ_COUNT_DTOR(DummyAppListProvider);
 }
 
 void DummyAppListProvider::getApplicationList() {

@@ -76,7 +76,7 @@ private:
     bool m_isEnabled = false;
     QHttpServer *m_httpServer = nullptr;
     quint16 m_apiPort = 0;
-    qint64 m_xrayToken = 0;
+    bool m_isXrayEngineStarted = false;
     quint16 m_appliedProxyPort = 0;
     int m_activePort = 0;
     int m_lastProxyPort = 0;

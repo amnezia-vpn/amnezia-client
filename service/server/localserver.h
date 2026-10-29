@@ -2,32 +2,12 @@
 #define LOCALSERVER_H
 
 #include <QObject>
-#include <QPointer>
-#include <QProcess>
+#include <QRemoteObjectHost>
 #include <QSharedPointer>
-#include <QStringList>
-#include <QVector>
 
 #include "ipcserver.h"
 
-#include "../../client/daemon/daemonlocalserver.h"
-#include "../../client/mozilla/networkwatcher.h"
-
-#ifdef Q_OS_WIN
-#include "windows/daemon/windowsdaemon.h"
-#endif
-
-#ifdef Q_OS_LINUX
-#include "linux/daemon/linuxdaemon.h"
-#endif
-
-#ifdef Q_OS_MAC
-#include "macos/daemon/macosdaemon.h"
-#endif
-
 class QLocalServer;
-class QLocalSocket;
-class QProcess;
 
 class LocalServer : public QObject
 {
@@ -40,20 +20,6 @@ public:
     IpcServer m_ipcServer;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
-
-    NetworkWatcher m_networkWatcher;
-#ifdef Q_OS_LINUX
-    DaemonLocalServer server{qApp};
-    LinuxDaemon daemon;
-#endif
-#ifdef Q_OS_WIN
-    DaemonLocalServer server{qApp};
-    WindowsDaemon daemon;
-#endif
-#ifdef Q_OS_MAC
-    DaemonLocalServer server{qApp};
-    MacOSDaemon daemon;
-#endif
 };
 
 #endif // LOCALSERVER_H

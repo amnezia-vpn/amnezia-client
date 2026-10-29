@@ -45,7 +45,6 @@ add_library(test_common OBJECT
 
 qt_add_repc_replicas(test_common
     ../../ipc/ipc_interface.rep
-    ../../ipc/ipc_process_interface.rep
 )
 
 target_link_libraries(test_common PUBLIC

@@ -1,25 +1,11 @@
 #include "localserver.h"
 
-#include <QCoreApplication>
 #include <QDebug>
-#include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
-#include <QObject>
-#include <QSharedPointer>
 #include <QString>
 
 #include "ipc.h"
-#include "killswitch.h"
-#include "logger.h"
-
-#ifdef Q_OS_WIN
-    #include "tapcontroller_win.h"
-#endif
-
-namespace {
-Logger logger("WgDaemonServer");
-}
 
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_ipcServer(this)
@@ -42,39 +28,9 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
             m_serverNode.enableRemoting(&m_ipcServer);
         }
     });
-
-    // Init Mozilla Wireguard Daemon
-    if (!server.initialize()) {
-        logger.error() << "Failed to initialize the server";
-        return;
-    }
-
-    m_networkWatcher.initialize();
-    connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
-    connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
-    KillSwitch::instance()->init();
-
-#ifdef Q_OS_LINUX
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_MAC
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_WIN
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { WindowsDaemon::instance()->deactivate(); });
-#endif
 }
 
 LocalServer::~LocalServer()
 {
     qDebug() << "Local server stopped";
 }
-

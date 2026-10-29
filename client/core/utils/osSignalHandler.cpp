@@ -4,7 +4,7 @@
 #include <QMetaObject>
 #include <QSocketNotifier>
 
-#include "../amneziaApplication.h"
+#include "amneziaApplication.h"
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <pthread.h>

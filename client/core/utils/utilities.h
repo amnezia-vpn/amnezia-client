@@ -28,12 +28,6 @@ public:
     static bool initializePath(const QString &path);
 
     static bool processIsRunning(const QString &fileName, const bool fullFlag = false);
-    static bool killProcessByName(const QString &name);
-
-    static QString openVpnExecPath();
-    static QString wireguardExecPath();
-    static QString certUtilPath();
-    static QString tun2socksPath();
 
     static void logException(const std::exception &e);
     static void logException(const std::exception_ptr &eptr = std::current_exception());

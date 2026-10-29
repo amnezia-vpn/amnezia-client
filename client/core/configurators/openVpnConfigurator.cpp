@@ -129,7 +129,7 @@ ProtocolConfig OpenVpnConfigurator::createConfig(const ServerCredentials &creden
         config.replace("</tls-auth>", "");
     }
 
-#ifndef MZ_WINDOWS
+#ifndef Q_OS_WIN
     config.replace("block-outside-dns", "");
 #endif
 
@@ -177,15 +177,8 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
         }
     }
 
-#ifndef MZ_WINDOWS
+#ifndef Q_OS_WIN
     config.replace("block-outside-dns", "");
-#endif
-
-#if (defined(MZ_MACOS) || defined(MZ_LINUX))
-    config.append(QString("\nscript-security 2\n"
-                         "up %1/update-resolv-conf.sh\n"
-                         "down %1/update-resolv-conf.sh\n")
-                  .arg(qApp->applicationDirPath()));
 #endif
 
     protocolConfig.setNativeConfig(config);

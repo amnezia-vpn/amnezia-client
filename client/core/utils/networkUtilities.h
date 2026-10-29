@@ -6,7 +6,6 @@
 #include <QString>
 #include <QHostAddress>
 #include <QNetworkReply>
-#include <QtNetwork/qnetworkinterface.h>
 
 class NetworkUtilities : public QObject
 {
@@ -17,9 +16,6 @@ public:
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
     static bool checkIpv6Enabled();
-    static QPair<QString, QNetworkInterface> getGatewayAndIface();
-    // Returns the Interface Index that could Route to dst
-    static int AdapterIndexTo(const QHostAddress& dst);
 
     static QRegularExpression ipAddressRegExp();
     static QRegExp ipAddressWithSubnetRegExp();
@@ -27,8 +23,6 @@ public:
     static QRegExp ipPortRegExp();
     static QRegExp domainRegExp();
 
-    static QString netMaskFromIpWithSubnet(const QString ip);
-    static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
 };
 

@@ -4,8 +4,6 @@
 #include <QObject>
 
 // Exposes QNetworkInformation to QML for UI that must not run remote operations offline.
-// Note: mozilla/networkwatcher.h has NetworkWatcher::getReachability() using the same API,
-// but networkwatcher.cpp is not linked into the desktop client (only the service process).
 
 class NetworkReachabilityController final : public QObject {
 Q_OBJECT

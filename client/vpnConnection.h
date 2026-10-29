@@ -1,6 +1,14 @@
 #ifndef VPNCONNECTION_H
 #define VPNCONNECTION_H
 
+#ifdef AMNEZIA_DESKTOP
+
+#include "xtunVpnConnection.h"
+
+using VpnConnection = XtunVpnConnection;
+
+#else
+
 #include <QObject>
 #include <QMetaObject>
 #include <QString>
@@ -14,10 +22,6 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-
-#ifdef AMNEZIA_DESKTOP
-#include "core/utils/ipcClient.h"
-#endif
 
 #ifdef Q_OS_ANDROID
 #include "core/protocols/androidVpnProtocol.h"
@@ -39,9 +43,6 @@ public:
     Vpn::ConnectionState connectionState() const;
 
     QSharedPointer<VpnProtocol> vpnProtocol() const;
-
-    const QString &remoteAddress() const;
-    void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
 
 #ifdef Q_OS_ANDROID
     void restoreConnection();
@@ -78,7 +79,6 @@ private:
 
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
-    QString m_remoteAddress;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -95,7 +95,8 @@ private:
    void createProtocolConnections();
 
    void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
 };
+
+#endif
 
 #endif // VPNCONNECTION_H

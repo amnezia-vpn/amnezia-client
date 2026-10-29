@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QLocalSocket>
 #include <QTimer>
 #include <libssh/libssh.h>
 #include <openssl/ssl.h>
