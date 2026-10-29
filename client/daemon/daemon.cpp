@@ -132,9 +132,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // Configure routing for excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(toPrefixes(config.m_excludedAddresses));
 
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
@@ -147,11 +145,9 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // set routing
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    if (!wgutils()->updateRoutePrefix(ip)) {
-      logger.debug() << "Routing configuration failed for" << ip.toString();
-      return false;
-    }
+  if (!wgutils()->updateRoutePrefixes(config.m_allowedIPAddressRanges)) {
+    logger.debug() << "Routing configuration failed for one or more prefixes";
+    return false;
   }
 
   bool status = run(Up, config);
@@ -229,6 +225,61 @@ bool Daemon::delExclusionRoute(const IPAddress& prefix) {
   }
   m_excludedAddrSet.remove(prefix);
   return wgutils()->deleteExclusionRoute(prefix);
+}
+
+// static
+QList<IPAddress> Daemon::toPrefixes(const QStringList& addresses) {
+  QList<IPAddress> prefixes;
+  prefixes.reserve(addresses.size());
+  for (const QString& i : addresses) {
+    prefixes.append(IPAddress(i));
+  }
+  return prefixes;
+}
+
+bool Daemon::delExclusionRoutes(const QList<IPAddress>& prefixes) {
+  QList<IPAddress> releasedPrefixes;
+  for (const IPAddress& prefix : prefixes) {
+    auto it = m_excludedAddrSet.find(prefix);
+    if (it == m_excludedAddrSet.end()) {
+      continue;
+    }
+    if (it.value() > 1) {
+      it.value()--;
+      continue;
+    }
+    m_excludedAddrSet.erase(it);
+    releasedPrefixes.append(prefix);
+  }
+
+  if (releasedPrefixes.isEmpty()) {
+    return true;
+  }
+  return wgutils()->deleteExclusionRoutes(releasedPrefixes);
+}
+
+bool Daemon::addExclusionRoutes(const QList<IPAddress>& prefixes) {
+  if (prefixes.isEmpty()) {
+    return true;
+  }
+
+  QList<IPAddress> freshPrefixes;
+  freshPrefixes.reserve(prefixes.size());
+  for (const IPAddress& prefix : prefixes) {
+    auto it = m_excludedAddrSet.find(prefix);
+    if (it != m_excludedAddrSet.end()) {
+      it.value()++;
+      continue;
+    }
+    freshPrefixes.append(prefix);
+    m_excludedAddrSet[prefix] = 1;
+  }
+
+  if (freshPrefixes.isEmpty()) {
+    return true;
+  }
+
+  return wgutils()->addExclusionRoutes(freshPrefixes);
 }
 
 // static
@@ -498,17 +549,12 @@ bool Daemon::deactivate(bool emitSignals) {
   for (const ConnectionState& state : m_connections) {
     const InterfaceConfig& config = state.m_config;
     logger.debug() << "Deleting routes for" << config.m_hopType;
-    for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-      wgutils()->deleteRoutePrefix(ip);
-    }
+    wgutils()->deleteRoutePrefixes(config.m_allowedIPAddressRanges);
     wgutils()->deletePeer(config);
   }
 
   // Cleanup routing for excluded addresses.
-  for (auto iterator = m_excludedAddrSet.constBegin();
-       iterator != m_excludedAddrSet.constEnd(); ++iterator) {
-    wgutils()->deleteExclusionRoute(iterator.key());
-  }
+  wgutils()->deleteExclusionRoutes(m_excludedAddrSet.keys());
   m_excludedAddrSet.clear();
 
   m_connections.clear();
@@ -546,30 +592,27 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
       m_connections.value(config.m_hopType).m_config;
 
   // Configure routing for new excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(toPrefixes(config.m_excludedAddresses));
 
   // Activate the new peer and its routes.
   if (!wgutils()->updatePeer(config)) {
     logger.error() << "Server switch failed to update the wireguard interface";
     return false;
   }
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    if (!wgutils()->updateRoutePrefix(ip)) {
-      logger.error() << "Server switch failed to update the routing table";
-      break;
-    }
+  if (!wgutils()->updateRoutePrefixes(config.m_allowedIPAddressRanges)) {
+    logger.error() << "Server switch failed to update the routing table";
   }
 
   // Remove routing entries for the old peer.
-  for (const QString& i : lastConfig.m_excludedAddresses) {
-    delExclusionRoute(QHostAddress(i));
-  }
-  for (const IPAddress& ip : lastConfig.m_allowedIPAddressRanges) {
-    if (!config.m_allowedIPAddressRanges.contains(ip)) {
-      wgutils()->deleteRoutePrefix(ip);
+  delExclusionRoutes(toPrefixes(lastConfig.m_excludedAddresses));
+  {
+    QList<IPAddress> stalePrefixes;
+    for (const IPAddress& ip : lastConfig.m_allowedIPAddressRanges) {
+      if (!config.m_allowedIPAddressRanges.contains(ip)) {
+        stalePrefixes.append(ip);
+      }
     }
+    wgutils()->deleteRoutePrefixes(stalePrefixes);
   }
 
   // Remove the old peer if it is no longer necessary.
