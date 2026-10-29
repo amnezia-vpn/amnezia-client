@@ -13,7 +13,8 @@ import shlex
 
 class AmneziaXrayBindings(ConanFile):
     name = "amnezia-xray-bindings"
-    version = "1.4.0"
+    version = "1.4.0-7a0ea68"
+    _commit = "7a0ea680bb2ca79aa844e73ccbe6c06e4dee2b8f"
     settings = "os", "arch", "compiler"
 
     _arch_map = {
@@ -76,8 +77,8 @@ class AmneziaXrayBindings(ConanFile):
             )
 
     def source(self):
-        get(self, f"https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/refs/tags/v{self.version}.zip",
-            sha256="8977896bba99f1a3bad61d734b2929ec3d01c3ca0e206ee8ce5eb013d38ab118", strip_root=True)
+        get(self, f"https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/{self._commit}.zip",
+            sha256="fccb1b9f7bcdbbc546365fb8787f4fa9aec291dd1464888eca5134fccb73d8bc", strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
