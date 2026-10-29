@@ -2,6 +2,12 @@
 
 #include "ui/models/languageModel.h"
 
+class TestableLanguageModel : public LanguageModel
+{
+public:
+    using LanguageModel::roleNames;
+};
+
 class LanguageModelTest : public QObject
 {
     Q_OBJECT
@@ -89,12 +95,12 @@ void LanguageModelTest::data_returnsInvalidVariantForUnsupportedRole()
 
 void LanguageModelTest::roleNames_returnsExpectedNames()
 {
-    LanguageModel model;
+    TestableLanguageModel model;
 
     const auto roles = model.roleNames();
 
-    QCOMPARE(roles.value(LanguageModel::NameRole), QByteArray("languageName"));
-    QCOMPARE(roles.value(LanguageModel::IndexRole), QByteArray("languageIndex"));
+    QCOMPARE(roles.value(TestableLanguageModel::NameRole), QByteArray("languageName"));
+    QCOMPARE(roles.value(TestableLanguageModel::IndexRole), QByteArray("languageIndex"));
 }
 
 QTEST_GUILESS_MAIN(LanguageModelTest)
