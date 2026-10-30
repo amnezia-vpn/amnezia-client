@@ -105,6 +105,7 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fr_FR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_th_TH.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_id_ID.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_vi_VN.ts
     )
 endif()
 
