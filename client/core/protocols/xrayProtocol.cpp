@@ -10,10 +10,12 @@
 #include "ipc.h"
 
 #include <QCryptographicHash>
+#include <QHostAddress>
+#include <QJsonArray>
 #include <QJsonDocument>
-#include <QTimer>
 #include <QJsonObject>
 #include <QNetworkInterface>
+#include <QTimer>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
@@ -25,6 +27,71 @@ static const QString tunName = "utun22";
 #else
 static const QString tunName = "tun2";
 #endif
+
+namespace
+{
+    // System DNS goes through the tunnel once it is up, so xray must not resolve the server host itself.
+    int pinServerAddress(QJsonObject &config, const QString &hostName, const QString &resolvedAddress)
+    {
+        namespace xray = amnezia::protocols::xray;
+
+        if (hostName.isEmpty() || QHostAddress(resolvedAddress).isNull() || !QHostAddress(hostName).isNull()) {
+            return 0;
+        }
+
+        QJsonArray outbounds = config.value(xray::outbounds).toArray();
+        int pinned = 0;
+
+        for (qsizetype i = 0; i < outbounds.size(); ++i) {
+            QJsonObject outbound = outbounds.at(i).toObject();
+            QJsonObject settings = outbound.value(xray::settings).toObject();
+            bool changed = false;
+
+            for (const char *listKey : { xray::vnext, xray::servers }) {
+                QJsonArray endpoints = settings.value(listKey).toArray();
+                for (qsizetype j = 0; j < endpoints.size(); ++j) {
+                    QJsonObject endpoint = endpoints.at(j).toObject();
+                    if (endpoint.value(xray::address).toString().compare(hostName, Qt::CaseInsensitive) != 0) {
+                        continue;
+                    }
+                    endpoint[xray::address] = resolvedAddress;
+                    endpoints.replace(j, endpoint);
+                    changed = true;
+                }
+                if (changed && !endpoints.isEmpty()) {
+                    settings[listKey] = endpoints;
+                }
+            }
+
+            if (!changed) {
+                continue;
+            }
+            outbound[xray::settings] = settings;
+
+            QJsonObject stream = outbound.value(xray::streamSettings).toObject();
+            const QString security = stream.value(xray::security).toString();
+            const char *securityKey = security == QLatin1String("tls") ? xray::tlsSettings
+                    : security == QLatin1String("reality")             ? xray::realitySettings
+                                                                       : nullptr;
+            if (securityKey) {
+                QJsonObject securitySettings = stream.value(securityKey).toObject();
+                if (securitySettings.value(xray::serverName).toString().isEmpty()) {
+                    securitySettings[xray::serverName] = hostName;
+                    stream[securityKey] = securitySettings;
+                    outbound[xray::streamSettings] = stream;
+                }
+            }
+
+            outbounds.replace(i, outbound);
+            ++pinned;
+        }
+
+        if (pinned > 0) {
+            config[xray::outbounds] = outbounds;
+        }
+        return pinned;
+    }
+} // namespace
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -84,7 +151,13 @@ ErrorCode XrayProtocol::start()
     m_socksPassword = creds.password;
     m_socksPort = creds.port;
 
-    QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
+    QJsonObject runtimeConfig = m_xrayConfig;
+    const QString hostName = m_rawConfig.value(amnezia::configKey::hostName).toString();
+    if (const int pinned = pinServerAddress(runtimeConfig, hostName, m_remoteAddress); pinned > 0) {
+        qDebug() << "XrayProtocol: pinned" << pinned << "outbound(s) to the pre-resolved server address";
+    }
+
+    QString xrayConfigStr = QJsonDocument(runtimeConfig).toJson(QJsonDocument::Compact);
     if (xrayConfigStr.isEmpty()) {
         qCritical() << "Xray config is empty";
         return ErrorCode::XrayExecutableCrashed;
