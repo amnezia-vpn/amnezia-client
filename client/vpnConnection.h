@@ -8,12 +8,13 @@
 #include <QRemoteObjectNode>
 #include <QTimer>
 
+#include "core/controllers/splitTunnelingUpdateController.h"
 #include "core/protocols/vpnProtocol.h"
+#include "core/repositories/secureAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/utils/commonStructs.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
-#include "core/repositories/secureServersRepository.h"
-#include "core/repositories/secureAppSettingsRepository.h"
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/utils/ipcClient.h"
@@ -64,6 +65,8 @@ signals:
     void vpnProtocolError(amnezia::ErrorCode error);
 
     void serviceIsNotReady();
+    void splitTunnelingUpdateFailed(SplitTunnelingUpdateResult result);
+    void liveSplitTunnelingUpdatesAvailableChanged(bool available);
 
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -94,7 +97,13 @@ private:
 
    void createProtocolConnections();
 
-   void appendSplitTunnelingConfig();
+   void appendSplitTunnelingConfig(QJsonObject &configuration);
+   void requestSplitTunnelingUpdate();
+   void updateSplitTunnelingAvailability();
+
+   SplitTunnelingUpdateController *m_splitTunnelingUpdater;
+   bool m_appSplitTunnelingSupported = true;
+   bool m_liveSplitTunnelingUpdatesAvailable = false;
    void appendKillSwitchConfig();
 };
 

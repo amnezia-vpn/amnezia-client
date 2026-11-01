@@ -49,6 +49,7 @@ public:
     ErrorCode lastConnectionError() const;
 
     bool isConnected() const;
+    bool liveSplitTunnelingUpdatesAvailable() const;
     void setConnectionState(Vpn::ConnectionState state);
 
     QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns,
@@ -64,6 +65,7 @@ public:
     bool isContainerSupported(DockerContainer container) const;
 
 signals:
+    void liveSplitTunnelingUpdatesAvailableChanged();
     void connectionStateChanged(Vpn::ConnectionState state);
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
@@ -79,6 +81,7 @@ private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;
+    bool m_liveSplitTunnelingUpdatesAvailable = false;
 };
 
 #endif

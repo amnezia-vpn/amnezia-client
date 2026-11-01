@@ -2,6 +2,12 @@ import Foundation
 import NetworkExtension
 
 extension PacketTunnelProvider {
+    private enum SplitTunnelingUpdateResult: Int {
+        case applied = 1
+        case notApplied = 2
+        case stateUnknown = 0
+    }
+
     func startWireguard(activationAttemptId: String?,
                         errorNotifier: ErrorNotifier,
                         completionHandler: @escaping (Error?) -> Void) {
@@ -17,38 +23,11 @@ extension PacketTunnelProvider {
             let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
             let wgConfigStr = wgConfig.str
 
-            let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
-
-            if tunnelConfiguration.peers.first!.allowedIPs
-                .map({ $0.stringRepresentation })
-                .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
-                if wgConfig.splitTunnelType == 1 {
-                    for index in tunnelConfiguration.peers.indices {
-                        tunnelConfiguration.peers[index].allowedIPs.removeAll()
-                        var allowedIPs = [IPAddressRange]()
-
-                        for allowedIPString in wgConfig.splitTunnelSites {
-                            if let allowedIP = IPAddressRange(from: allowedIPString) {
-                                allowedIPs.append(allowedIP)
-                            }
-                        }
-
-                        tunnelConfiguration.peers[index].allowedIPs = allowedIPs
-                    }
-                } else if wgConfig.splitTunnelType == 2 {
-                    for index in tunnelConfiguration.peers.indices {
-                        var excludeIPs = [IPAddressRange]()
-
-                        for excludeIPString in wgConfig.splitTunnelSites {
-                            if let excludeIP = IPAddressRange(from: excludeIPString) {
-                                excludeIPs.append(excludeIP)
-                            }
-                        }
-
-                        tunnelConfiguration.peers[index].excludeIPs = excludeIPs
-                    }
-                }
-            }
+            let tunnelConfiguration = try wireguardConfiguration(wgConfigStr,
+                                                                  routeMode: wgConfig.splitTunnelType,
+                                                                  sites: wgConfig.splitTunnelSites)
+            wireguardConfigurationString = wgConfigStr
+            wireguardSplitTunnelSessionId = wgConfig.splitTunnelSessionId
 
             wg_log(.info, message: "Starting tunnel from the " +
                    (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
@@ -96,6 +75,76 @@ extension PacketTunnelProvider {
             errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             return
+        }
+    }
+
+    private func wireguardConfiguration(_ config: String, routeMode: Int, sites: [String]) throws -> TunnelConfiguration {
+        let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: config)
+        guard let firstPeer = tunnelConfiguration.peers.first else {
+            throw PacketTunnelProviderError.savedProtocolConfigurationIsInvalid
+        }
+        if firstPeer.allowedIPs
+            .map({ $0.stringRepresentation })
+            .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
+            if routeMode == 1 {
+                for index in tunnelConfiguration.peers.indices {
+                    tunnelConfiguration.peers[index].allowedIPs.removeAll()
+                    var allowedIPs = [IPAddressRange]()
+
+                    for allowedIPString in sites {
+                        if let allowedIP = IPAddressRange(from: allowedIPString) {
+                            allowedIPs.append(allowedIP)
+                        }
+                    }
+
+                    tunnelConfiguration.peers[index].allowedIPs = allowedIPs
+                }
+            } else if routeMode == 2 {
+                for index in tunnelConfiguration.peers.indices {
+                    var excludeIPs = [IPAddressRange]()
+
+                    for excludeIPString in sites {
+                        if let excludeIP = IPAddressRange(from: excludeIPString) {
+                            excludeIPs.append(excludeIP)
+                        }
+                    }
+
+                    tunnelConfiguration.peers[index].excludeIPs = excludeIPs
+                }
+            }
+        }
+
+        return tunnelConfiguration
+    }
+
+    func updateWireguardSplitTunneling(_ message: [String: Any], completionHandler: @escaping (Data?) -> Void) {
+        let reply: (SplitTunnelingUpdateResult) -> Void = { result in
+            completionHandler(try? JSONSerialization.data(withJSONObject: ["result": result.rawValue]))
+        }
+        guard protoType == .wireguard,
+              let config = wireguardConfigurationString,
+              let sessionId = message["splitTunnelSessionId"] as? String,
+              !sessionId.isEmpty, sessionId == wireguardSplitTunnelSessionId,
+              let routeMode = message["splitTunnelType"] as? Int,
+              let sites = message["splitTunnelSites"] as? [String],
+              let publicKey = message["publicKey"] as? String,
+              let adapter = wgAdapter,
+              (0...2).contains(routeMode),
+              sites.allSatisfy({ IPAddressRange(from: $0) != nil }) else {
+            reply(.notApplied)
+            return
+        }
+        do {
+            let updated = try wireguardConfiguration(config, routeMode: routeMode, sites: sites)
+            guard updated.peers.contains(where: { $0.publicKey.base64Key == publicKey }) else {
+                reply(.notApplied)
+                return
+            }
+            adapter.update(tunnelConfiguration: updated) { error in
+                reply(error == nil ? .applied : .stateUnknown)
+            }
+        } catch {
+            reply(.notApplied)
         }
     }
 

@@ -28,6 +28,10 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
       m_appSettingsRepository(appSettingsRepository),
       m_vpnConnection(vpnConnection)
 {
+    connect(m_vpnConnection, &VpnConnection::liveSplitTunnelingUpdatesAvailableChanged, this, [this](bool available) {
+        m_liveSplitTunnelingUpdatesAvailable = available;
+        emit liveSplitTunnelingUpdatesAvailableChanged();
+    });
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
@@ -40,6 +44,11 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
 bool ConnectionController::isConnected() const
 {
     return m_vpnConnection && m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected;
+}
+
+bool ConnectionController::liveSplitTunnelingUpdatesAvailable() const
+{
+    return m_liveSplitTunnelingUpdatesAvailable;
 }
 
 void ConnectionController::setConnectionState(Vpn::ConnectionState state)

@@ -10,6 +10,7 @@
 #include <QHostAddress>
 #include <QObject>
 #include <QPointer>
+#include <optional>
 
 #include "daemon/wireguardutils.h"
 #include "windowsroutemonitor.h"
@@ -35,6 +36,8 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool deleteInterface() override;
 
   bool updatePeer(const InterfaceConfig& config) override;
+  SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config) override;
+  SplitTunnelingUpdateResult restoreSplitTunneling(const InterfaceConfig &config) override;
   bool deletePeer(const InterfaceConfig& config) override;
   QList<PeerStatus> getPeerStatus() override;
 
@@ -51,6 +54,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
 
  private:
   WireguardUtilsWindows(QObject* parent, WindowsFirewall* fw);
+  std::optional<QString> sendPeerConfiguration(const InterfaceConfig &config);
   void buildMibForwardRow(const IPAddress& prefix, void* row);
 
   quint64 m_luid = 0;

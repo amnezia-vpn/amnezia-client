@@ -176,31 +176,36 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
   } else {
-    if (config.m_killSwitchEnabled) {
-      FirewallParams params { };
-      params.dnsServers.append(config.m_primaryDnsServer);
-      if (!config.m_secondaryDnsServer.isEmpty()) {
-          params.dnsServers.append(config.m_secondaryDnsServer);
-      }
-
-      if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-          params.blockAll = true;
-          if (config.m_excludedAddresses.size()) {
-              params.allowNets = true;
-              foreach (auto net, config.m_excludedAddresses) {
-                  params.allowAddrs.append(net.toUtf8());
-              }
-          }
-      } else {
-          params.blockNets = true;
-          foreach (auto net, config.m_allowedIPAddressRanges) {
-              params.blockAddrs.append(net.toString());
-          }
-      }
-      applyFirewallRules(params);
-    }
+      updateFirewall(config);
   }
   return (err == 0);
+}
+
+void WireguardUtilsMacos::updateFirewall(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        FirewallParams params { };
+        params.dnsServers.append(config.m_primaryDnsServer);
+        if (!config.m_secondaryDnsServer.isEmpty()) {
+            params.dnsServers.append(config.m_secondaryDnsServer);
+        }
+
+        if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
+            params.blockAll = true;
+            if (config.m_excludedAddresses.size()) {
+                params.allowNets = true;
+                foreach (auto net, config.m_excludedAddresses) {
+                    params.allowAddrs.append(net.toUtf8());
+                }
+            }
+        } else {
+            params.blockNets = true;
+            foreach (auto net, config.m_allowedIPAddressRanges) {
+                params.blockAddrs.append(net.toString());
+            }
+        }
+        applyFirewallRules(params);
+    }
 }
 
 bool WireguardUtilsMacos::deleteInterface() {
@@ -276,6 +281,9 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {
     logger.error() << "Peer configuration failed:" << strerror(err);
+  }
+  if (err == 0) {
+      updateFirewall(config);
   }
   return (err == 0);
 }

@@ -57,6 +57,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/iputils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardutils.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/splitTunneling/splitTunnelingUpdateResult.h
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.h
 
@@ -133,6 +134,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewall.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewallpeertransaction.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowscommons.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsservicemanager.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/dnsutilswindows.h
@@ -154,6 +156,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewall.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewallpeertransaction.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowscommons.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsservicemanager.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/dnsutilswindows.cpp

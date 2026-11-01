@@ -13,6 +13,7 @@
 #include <QStringList>
 
 #include "interfaceconfig.h"
+#include "core/splitTunneling/splitTunnelingUpdateResult.h"
 
 constexpr const char* WG_INTERFACE = "amn0";
 
@@ -38,6 +39,17 @@ class WireguardUtils : public QObject {
   virtual bool deleteInterface() = 0;
 
   virtual bool updatePeer(const InterfaceConfig& config) = 0;
+    virtual SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config)
+    {
+        return updatePeer(config) ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::StateUnknown;
+    }
+    virtual SplitTunnelingUpdateResult restoreSplitTunneling(const InterfaceConfig &config)
+    {
+        const auto result = updateSplitTunneling(config);
+        return result == SplitTunnelingUpdateResult::Applied && !config.m_killSwitchEnabled
+                ? SplitTunnelingUpdateResult::Applied
+                : SplitTunnelingUpdateResult::StateUnknown;
+    }
   virtual bool deletePeer(const InterfaceConfig& config) = 0;
   virtual QList<PeerStatus> getPeerStatus() = 0;
 

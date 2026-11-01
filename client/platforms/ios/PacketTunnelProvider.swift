@@ -38,6 +38,8 @@ struct Constants {
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
     var wgAdapter: WireGuardAdapter?
+    var wireguardConfigurationString: String?
+    var wireguardSplitTunnelSessionId: String?
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
     private let pathMonitorQueue = DispatchQueue(label: Constants.processQueueName + ".path-monitor")
@@ -189,6 +191,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
       if action != Constants.kActionStatus {
           neLog(.info, title: "App said: ", message: "action=\(action)")
+      }
+
+      if action == "updateSplitTunneling" {
+          updateWireguardSplitTunneling(message, completionHandler: completionHandler)
+          return
       }
 
       if action == Constants.kActionStatus {

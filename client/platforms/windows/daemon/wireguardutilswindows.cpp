@@ -148,54 +148,74 @@ bool WireguardUtilsWindows::deleteInterface() {
   return true;
 }
 
-bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
-  QByteArray publicKey =
-      QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-  QByteArray pskKey =
-      QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
+bool WireguardUtilsWindows::updatePeer(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        m_firewall->enablePeerTraffic(config);
+    }
+    return sendPeerConfiguration(config).has_value();
+}
 
-  if (config.m_killSwitchEnabled) {
-    // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
-  }
-  logger.debug() << "Configuring peer" << publicKey.toHex()
-                 << "via" << config.m_serverIpv4AddrIn;
+SplitTunnelingUpdateResult WireguardUtilsWindows::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        const auto result = m_firewall->replacePeerTraffic(config);
+        if (result != SplitTunnelingUpdateResult::Applied) {
+            return result;
+        }
+    }
+    const auto reply = sendPeerConfiguration(config);
+    return reply && reply->trimmed() == QStringLiteral("errno=0") ? SplitTunnelingUpdateResult::Applied
+                                                                  : SplitTunnelingUpdateResult::StateUnknown;
+}
 
-  // Update/create the peer config
-  QString message;
-  QTextStream out(&message);
-  out << "set=1\n";
-  out << "public_key=" << QString(publicKey.toHex()) << "\n";
-  if (!config.m_serverPskKey.isNull()) {
-    out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
-  }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
-    out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
-    out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
-  } else {
-    logger.warning() << "Failed to create peer with no endpoints";
-    return false;
-  }
-  out << config.m_serverPort << "\n";
+SplitTunnelingUpdateResult WireguardUtilsWindows::restoreSplitTunneling(const InterfaceConfig &config)
+{
+    return updateSplitTunneling(config);
+}
 
-  out << "replace_allowed_ips=true\n";
-  if (!config.m_persistentKeepalive.isEmpty()) {
-    out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
-  }
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    out << "allowed_ip=" << ip.toString() << "\n";
-  }
+std::optional<QString> WireguardUtilsWindows::sendPeerConfiguration(const InterfaceConfig &config)
+{
+    QByteArray publicKey = QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
+    QByteArray pskKey = QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
-  // Exclude the server address, except for multihop exit servers.
-  if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
+    logger.debug() << "Configuring peer" << publicKey.toHex() << "via" << config.m_serverIpv4AddrIn;
 
-  QString reply = m_tunnel.uapiCommand(message);
-  logger.debug() << "DATA:" << reply;
-  return true;
+    // Update/create the peer config
+    QString message;
+    QTextStream out(&message);
+    out << "set=1\n";
+    out << "public_key=" << QString(publicKey.toHex()) << "\n";
+    if (!config.m_serverPskKey.isNull()) {
+        out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
+    }
+    if (!config.m_serverIpv4AddrIn.isNull()) {
+        out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
+    } else if (!config.m_serverIpv6AddrIn.isNull()) {
+        out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
+    } else {
+        logger.warning() << "Failed to create peer with no endpoints";
+        return std::nullopt;
+    }
+    out << config.m_serverPort << "\n";
+
+    out << "replace_allowed_ips=true\n";
+    if (!config.m_persistentKeepalive.isEmpty()) {
+        out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
+    }
+    for (const IPAddress &ip : config.m_allowedIPAddressRanges) {
+        out << "allowed_ip=" << ip.toString() << "\n";
+    }
+
+    // Exclude the server address, except for multihop exit servers.
+    if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
+        m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
+
+    QString reply = m_tunnel.uapiCommand(message);
+    logger.debug() << "DATA:" << reply;
+    return reply;
 }
 
 bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {

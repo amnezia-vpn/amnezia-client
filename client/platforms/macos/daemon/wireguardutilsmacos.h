@@ -48,6 +48,7 @@ class WireguardUtilsMacos final : public WireguardUtils {
   void tunnelErrorOccurred(QProcess::ProcessError error);
 
  private:
+  void updateFirewall(const InterfaceConfig& config);
   QString uapiCommand(const QString& command);
   static int uapiErrno(const QString& command);
   QString waitForTunnelName(const QString& filename);
