@@ -4,11 +4,13 @@
 
 #include "linuxroutemonitor.h"
 
-#include <QNetworkInterface>
 #include <QCoreApplication>
+#include <QElapsedTimer>
+#include <QNetworkInterface>
 #include <QProcess>
 #include <QScopeGuard>
 #include <QTimer>
+#include <poll.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -39,8 +41,6 @@ typedef struct wg_allowedip {
     struct wg_allowedip *next_allowedip;
 } wg_allowedip;
 
-constexpr const char* WG_INTERFACE = "amn0";
-
 static void nlmsg_append_attr(struct nlmsghdr* nlmsg, size_t maxlen,
                               int attrtype, const void* attrdata,
                               size_t attrlen);
@@ -54,30 +54,10 @@ LinuxRouteMonitor::LinuxRouteMonitor(const QString& ifname, QObject* parent)
     : QObject(parent), m_ifname(ifname) {
   MZ_COUNT_CTOR(LinuxRouteMonitor);
   logger.debug() << "LinuxRouteMonitor created.";
-
-  m_nlsock = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-  if (m_nlsock < 0) {
-      logger.warning() << "Failed to create netlink socket:" << strerror(errno);
-  }
-
-  struct sockaddr_nl nladdr;
-  memset(&nladdr, 0, sizeof(nladdr));
-  nladdr.nl_family = AF_NETLINK;
-  nladdr.nl_pid = getpid();
-  if (bind(m_nlsock, (struct sockaddr*)&nladdr, sizeof(nladdr)) != 0) {
-      logger.warning() << "Failed to bind netlink socket:" << strerror(errno);
-  }
-
-  m_notifier = new QSocketNotifier(m_nlsock, QSocketNotifier::Read, this);
-  connect(m_notifier, &QSocketNotifier::activated, this,
-          &LinuxRouteMonitor::nlsockReady);
 }
 
 LinuxRouteMonitor::~LinuxRouteMonitor() {
   MZ_COUNT_DTOR(LinuxRouteMonitor);
-  if (m_nlsock >= 0) {
-      close(m_nlsock);
-  }
   logger.debug() << "WireguardUtilsLinux destroyed.";
 }
 
@@ -118,26 +98,48 @@ bool LinuxRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
     return rtmSendRoute(RTM_DELROUTE, flags, RTN_THROW, prefix);
 }
 
-bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
-                                       const IPAddress& prefix) {
-    constexpr size_t rtm_max_size = sizeof(struct rtmsg) +
-                                    2 * RTA_SPACE(sizeof(uint32_t)) +
-                                    RTA_SPACE(sizeof(struct in6_addr));
+bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type, const IPAddress &prefix)
+{
+    return routeMutationSucceeded(rtmSendRouteWithResult(action, flags, type, prefix));
+}
+
+RouteMutationResult LinuxRouteMonitor::createRoute(const IPAddress &prefix)
+{
+    return rtmSendRouteWithResult(RTM_NEWROUTE, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK, RTN_UNICAST,
+                                  prefix);
+}
+
+RouteCreationResult LinuxRouteMonitor::createExclusionRoute(const IPAddress &prefix)
+{
+    const auto result = rtmSendRouteWithResult(RTM_NEWROUTE, NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK,
+                                               RTN_THROW, prefix);
+    if (result == RouteMutationResult::Applied) {
+        return { SplitTunnelingUpdateResult::Applied, { prefix } };
+    }
+    return { result == RouteMutationResult::StateUnknown ? SplitTunnelingUpdateResult::StateUnknown
+                                                         : SplitTunnelingUpdateResult::NotApplied,
+             { } };
+}
+
+RouteMutationResult LinuxRouteMonitor::rtmSendRouteWithResult(int action, int flags, int type, const IPAddress &prefix)
+{
+    constexpr size_t rtm_max_size =
+            sizeof(struct rtmsg) + 2 * RTA_SPACE(sizeof(uint32_t)) + RTA_SPACE(sizeof(struct in6_addr));
     wg_allowedip ip;
     if (!buildAllowedIp(&ip, prefix)) {
-    logger.warning() << "Invalid destination prefix";
-    return false;
+        logger.warning() << "Invalid destination prefix";
+        return RouteMutationResult::NotApplied;
     }
 
     char buf[NLMSG_SPACE(rtm_max_size)];
-    struct nlmsghdr* nlmsg = reinterpret_cast<struct nlmsghdr*>(buf);
-    struct rtmsg* rtm = static_cast<struct rtmsg*>(NLMSG_DATA(nlmsg));
+    struct nlmsghdr *nlmsg = reinterpret_cast<struct nlmsghdr *>(buf);
+    struct rtmsg *rtm = static_cast<struct rtmsg *>(NLMSG_DATA(nlmsg));
 
     memset(buf, 0, sizeof(buf));
     nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
     nlmsg->nlmsg_type = action;
     nlmsg->nlmsg_flags = flags;
-    nlmsg->nlmsg_pid = getpid();
+    nlmsg->nlmsg_pid = 0;
     nlmsg->nlmsg_seq = m_nlseq++;
     rtm->rtm_dst_len = ip.cidr;
     rtm->rtm_family = ip.family;
@@ -147,42 +149,109 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     rtm->rtm_scope = RT_SCOPE_UNIVERSE;
 
     if (rtm->rtm_family == AF_INET6) {
-    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_DST, &ip.ip6, sizeof(ip.ip6));
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_DST, &ip.ip6, sizeof(ip.ip6));
     } else {
-    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_DST, &ip.ip4, sizeof(ip.ip4));
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_DST, &ip.ip4, sizeof(ip.ip4));
     }
 
     if (rtm->rtm_type == RTN_UNICAST) {
-    int index = if_nametoindex(WG_INTERFACE);
+        int index = if_nametoindex(qPrintable(m_ifname));
 
-    if (index <= 0) {
-        logger.error() << "if_nametoindex() failed:" << strerror(errno);
-        return false;
-    }
-    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_OIF, index);
-    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 1);
-    }
-
-    if (rtm->rtm_type == RTN_THROW) {
-    QString gateway = NetworkUtilities::getGatewayAndIface().first;
-    if (gateway.isEmpty()) {
-        logger.warning() << "No default gateway available, skipping exclusion route";
-        return false;
-    }
-    struct in_addr ip4;
-    inet_pton(AF_INET, gateway.toUtf8(), &ip4);
-    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
-    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
-    rtm->rtm_type = RTN_UNICAST;
+        if (index <= 0) {
+            logger.error() << "if_nametoindex() failed:" << strerror(errno);
+            return RouteMutationResult::NotApplied;
+        }
+        nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_OIF, index);
+        nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 1);
     }
 
-    struct sockaddr_nl nladdr;
-    memset(&nladdr, 0, sizeof(nladdr));
-    nladdr.nl_family = AF_NETLINK;
-    size_t result = sendto(m_nlsock, buf, nlmsg->nlmsg_len, 0,
-                           (struct sockaddr*)&nladdr, sizeof(nladdr));
+    const bool exclusion = rtm->rtm_type == RTN_THROW;
+    QString gateway;
+    if (exclusion) {
+        if (action == RTM_DELROUTE && !m_exclusionGateways.contains(prefix))
+            return RouteMutationResult::Unchanged;
+        gateway = action == RTM_DELROUTE ? m_exclusionGateways.value(prefix)
+                                         : NetworkUtilities::getGatewayAndIface().first;
+        if (gateway.isEmpty()) {
+            logger.warning() << "No default gateway available, skipping exclusion route";
+            return RouteMutationResult::NotApplied;
+        }
+        struct in_addr ip4;
+        if (inet_pton(AF_INET, gateway.toUtf8().constData(), &ip4) != 1)
+            return RouteMutationResult::NotApplied;
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
+        nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
+        rtm->rtm_type = RTN_UNICAST;
+    }
 
-    return (result == nlmsg->nlmsg_len);
+    const int socketFd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
+    if (socketFd < 0) {
+        return RouteMutationResult::NotApplied;
+    }
+    const auto closeSocket = qScopeGuard([&] { close(socketFd); });
+    struct sockaddr_nl kernel { };
+    kernel.nl_family = AF_NETLINK;
+    const auto sent =
+            sendto(socketFd, buf, nlmsg->nlmsg_len, 0, reinterpret_cast<struct sockaddr *>(&kernel), sizeof(kernel));
+    if (sent < 0) {
+        return RouteMutationResult::NotApplied;
+    }
+    if (sent != nlmsg->nlmsg_len) {
+        return RouteMutationResult::StateUnknown;
+    }
+    QElapsedTimer elapsed;
+    elapsed.start();
+    while (elapsed.elapsed() < 1000) {
+        struct pollfd descriptor { socketFd, POLLIN, 0 };
+        const int ready = poll(&descriptor, 1, 1000 - elapsed.elapsed());
+        if (ready < 0 && errno == EINTR) {
+            continue;
+        }
+        if (ready <= 0 || !(descriptor.revents & POLLIN)) {
+            return RouteMutationResult::StateUnknown;
+        }
+        char reply[8192];
+        struct sockaddr_nl sender { };
+        socklen_t senderLength = sizeof(sender);
+        auto length = recvfrom(socketFd, reply, sizeof(reply), MSG_DONTWAIT,
+                               reinterpret_cast<struct sockaddr *>(&sender), &senderLength);
+        if (length < 0 && (errno == EINTR || errno == EAGAIN)) {
+            continue;
+        }
+        if (length <= 0 || sender.nl_pid != 0) {
+            return RouteMutationResult::StateUnknown;
+        }
+        auto *message = reinterpret_cast<struct nlmsghdr *>(reply);
+        for (; NLMSG_OK(message, length); message = NLMSG_NEXT(message, length)) {
+            if (message->nlmsg_seq != nlmsg->nlmsg_seq) {
+                continue;
+            }
+            if (message->nlmsg_type != NLMSG_ERROR || message->nlmsg_len < NLMSG_LENGTH(sizeof(struct nlmsgerr))) {
+                return RouteMutationResult::StateUnknown;
+            }
+            const auto *error = static_cast<const struct nlmsgerr *>(NLMSG_DATA(message));
+            if (error->error == 0) {
+                if (exclusion) {
+                    if (action == RTM_NEWROUTE)
+                        m_exclusionGateways.insert(prefix, gateway);
+                    else
+                        m_exclusionGateways.remove(prefix);
+                }
+                return RouteMutationResult::Applied;
+            }
+            if (action == RTM_NEWROUTE && error->error == -EEXIST) {
+                return RouteMutationResult::Unchanged;
+            }
+            if (action == RTM_DELROUTE && (error->error == -ESRCH || error->error == -ENOENT)) {
+                if (exclusion)
+                    m_exclusionGateways.remove(prefix);
+                return RouteMutationResult::Unchanged;
+            }
+            logger.warning() << "Route request rejected:" << strerror(-error->error);
+            return RouteMutationResult::NotApplied;
+        }
+    }
+    return RouteMutationResult::StateUnknown;
 }
 
 static void nlmsg_append_attr(struct nlmsghdr* nlmsg, size_t maxlen,
@@ -204,42 +273,19 @@ static void nlmsg_append_attr32(struct nlmsghdr* nlmsg, size_t maxlen,
     nlmsg_append_attr(nlmsg, maxlen, attrtype, &value, sizeof(value));
 }
 
-void LinuxRouteMonitor::nlsockReady() {
-    char buf[1024];
-    ssize_t len = recv(m_nlsock, buf, sizeof(buf), MSG_DONTWAIT);
-    if (len <= 0) {
-    return;
-    }
-
-    struct nlmsghdr* nlmsg = (struct nlmsghdr*)buf;
-    while (NLMSG_OK(nlmsg, len)) {
-    if (nlmsg->nlmsg_type == NLMSG_DONE) {
-        return;
-    }
-    if (nlmsg->nlmsg_type != NLMSG_ERROR) {
-        nlmsg = NLMSG_NEXT(nlmsg, len);
-        continue;
-    }
-    struct nlmsgerr* err = static_cast<struct nlmsgerr*>(NLMSG_DATA(nlmsg));
-    if (err->error != 0) {
-        logger.debug() << "Netlink request failed:" << strerror(-err->error);
-    }
-    nlmsg = NLMSG_NEXT(nlmsg, len);
-    }
-}
-
-static bool buildAllowedIp(wg_allowedip* ip,
-                                         const IPAddress& prefix) {
-    const char* addrString = qPrintable(prefix.address().toString());
+static bool buildAllowedIp(wg_allowedip *ip, const IPAddress &prefix)
+{
+    const QByteArray address = prefix.address().toString().toUtf8();
+    const char *addrString = address.constData();
     if (prefix.type() == QAbstractSocket::IPv4Protocol) {
-    ip->family = AF_INET;
-    ip->cidr = prefix.prefixLength();
-    return inet_pton(AF_INET, addrString, &ip->ip4) == 1;
+        ip->family = AF_INET;
+        ip->cidr = prefix.prefixLength();
+        return inet_pton(AF_INET, addrString, &ip->ip4) == 1;
     }
     if (prefix.type() == QAbstractSocket::IPv6Protocol) {
-    ip->family = AF_INET6;
-    ip->cidr = prefix.prefixLength();
-    return inet_pton(AF_INET6, addrString, &ip->ip6) == 1;
+        ip->family = AF_INET6;
+        ip->cidr = prefix.prefixLength();
+        return inet_pton(AF_INET6, addrString, &ip->ip6) == 1;
     }
     return false;
 }

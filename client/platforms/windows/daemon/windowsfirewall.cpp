@@ -331,6 +331,7 @@ WindowsFirewallPeerTransaction::Operations WindowsFirewall::peerTransactionOpera
         const auto result = FwpmTransactionAbort0(m_sessionHandle);
         if (result != ERROR_SUCCESS) {
             logger.error() << "FwpmTransactionAbort0 failed with error:" << result;
+            m_peerRulesSynchronized = false;
         }
         return result == ERROR_SUCCESS;
     };
@@ -340,6 +341,14 @@ WindowsFirewallPeerTransaction::Operations WindowsFirewall::peerTransactionOpera
             logger.error() << "FwpmFilterDeleteById0 failed with error:" << result;
         }
         return result == ERROR_SUCCESS;
+    };
+    operations.resetTransaction = [this]() {
+        const auto result = FwpmTransactionAbort0(m_sessionHandle);
+        return result == ERROR_SUCCESS || result == FWP_E_NO_TXN_IN_PROGRESS;
+    };
+    operations.removeFilterIfPresent = [this](quint64 filterId) {
+        const auto result = FwpmFilterDeleteById0(m_sessionHandle, filterId);
+        return result == ERROR_SUCCESS || result == FWP_E_FILTER_NOT_FOUND;
     };
     operations.disableKillSwitch = [this]() { disableKillSwitch(); };
     return operations;
@@ -404,71 +413,25 @@ bool WindowsFirewall::writePeerFilters(const InterfaceConfig &config)
     return true;
 }
 
-bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-  auto cleanup = qScopeGuard([&] {
-    if (result != ERROR_SUCCESS) {
-      FwpmTransactionAbort0(m_sessionHandle);
-    }
-  });
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-
-  logger.info() << "Disabling traffic for peer" << pubkey;
-  for (const auto& filterID : m_peerRules.values(pubkey)) {
-    FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    m_peerRules.remove(pubkey, filterID);
-  }
-
-  // Commit!
-  result = FwpmTransactionCommit0(m_sessionHandle);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-  return true;
+bool WindowsFirewall::disablePeerTraffic(const QString &pubkey)
+{
+    InterfaceConfig config;
+    config.m_serverPublicKey = pubkey;
+    const auto result = WindowsFirewallPeerTransaction::remove(pubkey, m_peerRules, peerTransactionOperations(config));
+    if (result == WindowsFirewallPeerTransaction::Result::RollbackFailed)
+        m_peerRulesSynchronized = false;
+    return result == WindowsFirewallPeerTransaction::Result::Committed;
 }
 
 bool WindowsFirewall::disableKillSwitch() {
   return KillSwitch::instance()->disableKillSwitch();
 }
 
-bool WindowsFirewall::allowAllTraffic() {
-    auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-    auto cleanup = qScopeGuard([&] {
-        if (result != ERROR_SUCCESS) {
-            FwpmTransactionAbort0(m_sessionHandle);
-        }
-    });
-    if (result != ERROR_SUCCESS) {
-      logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                     << result;
-      return false;
-    }
-
-    for (const auto& filterID : m_peerRules.values()) {
-      FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    }
-
-    for (const auto& filterID : qAsConst(m_activeRules)) {
-      FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    }
-
-           // Commit!
-    result = FwpmTransactionCommit0(m_sessionHandle);
-    if (result != ERROR_SUCCESS) {
-      logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                     << result;
-      return false;
-    }
-    m_peerRules.clear();
-    m_activeRules.clear();
-    logger.debug() << "Firewall Disabled!";
-    return true;
+bool WindowsFirewall::allowAllTraffic()
+{
+    InterfaceConfig config;
+    return WindowsFirewallPeerTransaction::clear(m_peerRules, m_activeRules, m_peerRulesSynchronized,
+                                                 peerTransactionOperations(config));
 }
 
 bool WindowsFirewall::allowTrafficForAppOnAll(const QString& exePath,

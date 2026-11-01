@@ -62,6 +62,41 @@ target_include_directories(test_common PUBLIC
 )
 
 if(NOT ANDROID)
+    if(WIN32)
+        add_executable(test_windows_route_monitor
+            testWindowsRouteMonitor.cpp
+            ../platforms/windows/daemon/windowsroutemonitor.cpp
+            ../platforms/windows/daemon/windowsroutemonitor.h
+        )
+        target_include_directories(test_windows_route_monitor PRIVATE .. ../mozilla/shared ../../common/logger)
+        target_link_libraries(test_windows_route_monitor PRIVATE Qt6::Test test_common Iphlpapi Ws2_32)
+    endif()
+
+    add_executable(test_split_tunneling_unsupported_backend
+        testSplitTunnelingUnsupportedBackend.cpp
+        ../core/controllers/splitTunnelingUpdateController.cpp
+        ../core/splitTunneling/splitTunnelingUpdateBackend.cpp
+        ../core/splitTunneling/splitTunnelingUpdateBackendFactory.cpp
+        ../core/protocols/protocolUtils.cpp
+        ../core/utils/protocolEnum.h
+    )
+    target_include_directories(test_split_tunneling_unsupported_backend PRIVATE ..)
+    target_compile_definitions(test_split_tunneling_unsupported_backend PRIVATE MACOS_NE)
+    if(MSVC)
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE /UAMNEZIA_DESKTOP)
+    else()
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE -UAMNEZIA_DESKTOP)
+    endif()
+    target_link_libraries(test_split_tunneling_unsupported_backend PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+
+    add_executable(test_split_tunneling_firewall
+        testSplitTunnelingFirewall.cpp
+        ../daemon/splitTunnelingFirewall.cpp
+        ../mozilla/shared/ipaddress.cpp
+    )
+    target_include_directories(test_split_tunneling_firewall PRIVATE .. ../mozilla/shared)
+    target_link_libraries(test_split_tunneling_firewall PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+
     add_executable(test_windows_firewall_peer_transaction
         testWindowsFirewallPeerTransaction.cpp
         ../platforms/windows/daemon/windowsfirewallpeertransaction.cpp
@@ -500,6 +535,11 @@ endif()
 enable_testing()
 
 if(NOT ANDROID)
+    if(WIN32)
+        add_test(NAME WindowsRouteMonitorTest COMMAND test_windows_route_monitor)
+    endif()
+    add_test(NAME SplitTunnelingUnsupportedBackendTest COMMAND test_split_tunneling_unsupported_backend)
+    add_test(NAME SplitTunnelingFirewallTest COMMAND test_split_tunneling_firewall)
     add_test(NAME WindowsFirewallPeerTransactionTest COMMAND test_windows_firewall_peer_transaction)
     add_test(NAME SplitTunnelingUpdatesTest COMMAND test_split_tunneling_updates)
     add_test(NAME SplitTunnelingDaemonTest COMMAND test_split_tunneling_daemon)

@@ -89,6 +89,12 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsWindows::getPeerStatus() {
 }
 
 bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
+    if (m_routeMonitor) {
+        if (!m_routeMonitor->flushExclusionRoutes())
+            return false;
+        m_routeMonitor->deleteLater();
+        m_routeMonitor = nullptr;
+    }
   QStringList addresses;
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     addresses.append(ip.toString());
@@ -129,9 +135,10 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall
     NET_IFINDEX ifindex;
-    ConvertInterfaceLuidToIndex(&luid, &ifindex);
-    m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
+    if (ConvertInterfaceLuidToIndex(&luid, &ifindex) != NO_ERROR || !m_firewall->allowAllTraffic()
+        || !m_firewall->enableInterface(ifindex)) {
+        return false;
+    }
   }
 
   logger.debug() << "Registration completed";
@@ -140,7 +147,12 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
 
 bool WireguardUtilsWindows::deleteInterface() {
   if (m_routeMonitor) {
+      if (!m_routeMonitor->flushExclusionRoutes()) {
+          m_tunnel.stop();
+          return false;
+      }
     m_routeMonitor->deleteLater();
+    m_routeMonitor = nullptr;
   }
 
   m_firewall->disableKillSwitch();
@@ -150,9 +162,8 @@ bool WireguardUtilsWindows::deleteInterface() {
 
 bool WireguardUtilsWindows::updatePeer(const InterfaceConfig &config)
 {
-    if (config.m_killSwitchEnabled) {
-        m_firewall->enablePeerTraffic(config);
-    }
+    if (config.m_killSwitchEnabled && !m_firewall->enablePeerTraffic(config))
+        return false;
     return sendPeerConfiguration(config).has_value();
 }
 
@@ -274,11 +285,33 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
   entry->Age = 0;
 }
 
+RouteCreationResult WireguardUtilsWindows::createRoutePrefix(const IPAddress &prefix)
+{
+    if (!m_routeMonitor || !m_routeMonitor->routesSynchronized()) {
+        return { SplitTunnelingUpdateResult::StateUnknown, { } };
+    }
+    MIB_IPFORWARD_ROW2 entry;
+    buildMibForwardRow(prefix, &entry);
+    const auto result = CreateIpForwardEntry2(&entry);
+    if (result != NO_ERROR)
+        return { };
+    if (prefix.prefixLength() == 0 && !m_routeMonitor->setDetaultRouteCapture(true)) {
+        return { SplitTunnelingUpdateResult::StateUnknown, { prefix } };
+    }
+    return { SplitTunnelingUpdateResult::Applied, { prefix } };
+}
+
+RouteCreationResult WireguardUtilsWindows::createExclusionRoute(const IPAddress &prefix)
+{
+    return m_routeMonitor ? m_routeMonitor->createExclusionRoute(prefix) : RouteCreationResult { };
+}
+
 bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
   if (m_routeMonitor && (prefix.prefixLength() == 0)) {
     // If we are setting up a default route, instruct the route monitor to
     // capture traffic to all non-excluded destinations
-    m_routeMonitor->setDetaultRouteCapture(true);
+    if (!m_routeMonitor->setDetaultRouteCapture(true))
+        return false;
   }
   // Build the route
   
@@ -308,7 +341,8 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
 bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
   if (m_routeMonitor && (prefix.prefixLength() == 0)) {
     // Deactivate the route capture feature.
-    m_routeMonitor->setDetaultRouteCapture(false);
+    if (!m_routeMonitor->setDetaultRouteCapture(false))
+        return false;
   }
   // Build the route
   

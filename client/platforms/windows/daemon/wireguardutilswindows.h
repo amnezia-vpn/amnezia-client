@@ -41,6 +41,8 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool deletePeer(const InterfaceConfig& config) override;
   QList<PeerStatus> getPeerStatus() override;
 
+  RouteCreationResult createRoutePrefix(const IPAddress &prefix) override;
+  RouteCreationResult createExclusionRoute(const IPAddress &prefix) override;
   bool updateRoutePrefix(const IPAddress& prefix) override;
   bool deleteRoutePrefix(const IPAddress& prefix) override;
 

@@ -56,6 +56,8 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/dnsutils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/iputils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/splitTunnelingFirewall.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/routemutation.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardutils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/splitTunneling/splitTunnelingUpdateResult.h
 
@@ -87,6 +89,7 @@ set(SOURCES ${SOURCES}
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.cpp
     
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/splitTunnelingFirewall.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.cpp

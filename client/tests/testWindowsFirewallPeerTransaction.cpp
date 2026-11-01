@@ -17,6 +17,7 @@ public:
     int removalCalls = 0;
     int abortCalls = 0;
     int disableCalls = 0;
+    int resetCalls = 0;
 
     Transaction::Operations operations()
     {
@@ -62,6 +63,11 @@ public:
             pendingFilters.clear();
             return true;
         };
+        operations.resetTransaction = [this]() {
+            ++resetCalls;
+            return failure != "reset";
+        };
+        operations.removeFilterIfPresent = operations.removeFilter;
         operations.disableKillSwitch = [this]() {
             ++disableCalls;
             activeFilters.clear();
@@ -205,6 +211,69 @@ private slots:
         QCOMPARE(firewall.rules, initialRules);
         QCOMPARE(firewall.beginCalls, 0);
         QCOMPARE(firewall.disableCalls, 0);
+    }
+    void verifiedCleanupRestoresHotUpdatesAfterFailedAbort()
+    {
+        TestFirewallOperations firewall;
+        firewall.failure = "write";
+        firewall.failAbort = true;
+        QCOMPARE(Transaction::replace("peer", firewall.rules, firewall.operations()),
+                 Transaction::Result::RollbackFailed);
+        bool synchronized = false;
+        QList<quint64> activeRules { 90 };
+        firewall.activeFilters.insert(90);
+        firewall.failure.clear();
+        firewall.failAbort = false;
+        QVERIFY(Transaction::clear(firewall.rules, activeRules, synchronized, firewall.operations()));
+        QVERIFY(synchronized);
+        QVERIFY(firewall.rules.isEmpty());
+        QVERIFY(firewall.activeFilters.isEmpty());
+        QVERIFY(activeRules.isEmpty());
+        QCOMPARE(firewall.disableCalls, 0);
+        QVERIFY(Transaction::enable(firewall.operations()));
+        QCOMPARE(Transaction::replace("peer", firewall.rules, firewall.operations()), Transaction::Result::Committed);
+    }
+
+    void failedCleanupNeverUnlocksHotUpdates_data()
+    {
+        QTest::addColumn<QString>("failure");
+        for (const auto &failure : { "reset", "begin", "delete", "commit" }) {
+            QTest::newRow(failure) << QString::fromLatin1(failure);
+        }
+    }
+
+    void failedCleanupNeverUnlocksHotUpdates()
+    {
+        QFETCH(QString, failure);
+        TestFirewallOperations firewall;
+        bool synchronized = false;
+        QList<quint64> activeRules { 90 };
+        firewall.activeFilters.insert(90);
+        const auto before = firewall.rules;
+        const auto beforeActive = activeRules;
+        firewall.failure = failure;
+        QVERIFY(!Transaction::clear(firewall.rules, activeRules, synchronized, firewall.operations()));
+        QVERIFY(!synchronized);
+        QCOMPARE(firewall.rules, before);
+        QCOMPARE(activeRules, beforeActive);
+        QCOMPARE(firewall.disableCalls, 0);
+        firewall.failure.clear();
+        QVERIFY(Transaction::clear(firewall.rules, activeRules, synchronized, firewall.operations()));
+        QVERIFY(synchronized);
+    }
+
+    void failedPeerRemovalRetainsFilterLedger()
+    {
+        TestFirewallOperations firewall;
+        const auto before = firewall.rules;
+        firewall.failure = "commit";
+        QCOMPARE(Transaction::remove("peer", firewall.rules, firewall.operations()), Transaction::Result::Failed);
+        QCOMPARE(firewall.rules, before);
+        QCOMPARE(firewall.disableCalls, 0);
+        firewall.failure.clear();
+        QCOMPARE(Transaction::remove("peer", firewall.rules, firewall.operations()), Transaction::Result::Committed);
+        QVERIFY(!firewall.rules.contains("peer"));
+        QVERIFY(firewall.rules.contains("other-peer"));
     }
 };
 

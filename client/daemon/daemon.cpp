@@ -228,7 +228,8 @@ SplitTunnelingUpdateResult Daemon::updateSplitTunneling(int routeMode, const QSt
 
     QList<IPAddress> addedRoutes;
     QList<IPAddress> removedRoutes;
-    QStringList addedExclusions;
+    QList<IPAddress> createdExclusions;
+    QList<IPAddress> addedExclusionReferences;
     QStringList removedExclusions;
     bool peerMayHaveChanged = false;
     const auto rollback = [&](bool restored = true) {
@@ -244,8 +245,15 @@ SplitTunnelingUpdateResult Daemon::updateSplitTunneling(int routeMode, const QSt
         for (const IPAddress &address : addedRoutes) {
             restored = wgutils()->deleteRoutePrefix(address) && restored;
         }
-        for (const QString &address : addedExclusions) {
-            restored = delExclusionRoute(IPAddress(address)) && restored;
+        for (const auto &address : addedExclusionReferences) {
+            if (m_excludedAddrSet.value(address) > 1) {
+                --m_excludedAddrSet[address];
+            } else {
+                m_excludedAddrSet.remove(address);
+            }
+        }
+        for (const auto &address : createdExclusions) {
+            restored = wgutils()->deleteExclusionRoute(address) && restored;
         }
         if (!restored) {
             state.m_splitTunnelingStateKnown = false;
@@ -263,18 +271,25 @@ SplitTunnelingUpdateResult Daemon::updateSplitTunneling(int routeMode, const QSt
 
     for (const IPAddress &address : updated.m_allowedIPAddressRanges) {
         if (!previous.m_allowedIPAddressRanges.contains(address)) {
-            addedRoutes.append(address);
-            if (!wgutils()->updateRoutePrefix(address)) {
-                return fail();
+            const auto changes = wgutils()->createRoutePrefix(address);
+            addedRoutes.append(changes.created);
+            if (changes.result != SplitTunnelingUpdateResult::Applied) {
+                return fail(changes.result != SplitTunnelingUpdateResult::StateUnknown);
             }
         }
     }
     for (const QString &address : updated.m_excludedAddresses) {
         if (!previous.m_excludedAddresses.contains(address)) {
-            if (!addExclusionRoute(IPAddress(address))) {
-                return fail(wgutils()->deleteExclusionRoute(IPAddress(address)));
+            const IPAddress prefix(address);
+            if (!m_excludedAddrSet.contains(prefix)) {
+                const auto changes = wgutils()->createExclusionRoute(prefix);
+                createdExclusions.append(changes.created);
+                if (changes.result != SplitTunnelingUpdateResult::Applied) {
+                    return fail(changes.result != SplitTunnelingUpdateResult::StateUnknown);
+                }
             }
-            addedExclusions.append(address);
+            ++m_excludedAddrSet[prefix];
+            addedExclusionReferences.append(prefix);
         }
     }
     peerMayHaveChanged = true;

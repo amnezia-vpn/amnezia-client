@@ -16,6 +16,8 @@ public:
     InterfaceConfig peer;
     QString failingRoute;
     bool partialRouteFailure = false;
+    bool unknownRouteCreation = false;
+    bool expandDefaultRoutes = false;
     QString failingRemoval;
     bool failNextPeerUpdate = false;
     bool rejectNextPeerUpdate = false;
@@ -80,6 +82,33 @@ public:
     QList<PeerStatus> getPeerStatus() override
     {
         return { };
+    }
+    RouteCreationResult createRoutePrefix(const IPAddress &prefix) override
+    {
+        if (unknownRouteCreation) {
+            return { SplitTunnelingUpdateResult::StateUnknown, { } };
+        }
+        if (expandDefaultRoutes && prefix.prefixLength() == 0) {
+            return createTunnelRoutes(prefix, [&](const auto &route) {
+                if (routes.contains(route))
+                    return RouteMutationResult::Unchanged;
+                routes.insert(route);
+                return RouteMutationResult::Applied;
+            });
+        }
+        if (routes.contains(prefix)) {
+            return { };
+        }
+        const bool result = updateRoutePrefix(prefix);
+        return { result ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::NotApplied,
+                 routes.contains(prefix) ? QList<IPAddress> { prefix } : QList<IPAddress> { } };
+    }
+    RouteCreationResult createExclusionRoute(const IPAddress &prefix) override
+    {
+        if (exclusions.contains(prefix))
+            return { };
+        const bool result = addExclusionRoute(prefix);
+        return { result ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::NotApplied, { prefix } };
     }
     bool updateRoutePrefix(const IPAddress &prefix) override
     {
@@ -391,6 +420,57 @@ private slots:
                  SplitTunnelingUpdateResult::NotApplied);
         QCOMPARE(daemon.backend.routes, routes);
         QCOMPARE(daemon.backend.peer.m_allowedIPAddressRanges, initial.m_allowedIPAddressRanges);
+    }
+    void failedAdditionPreservesPreexistingRoute()
+    {
+        TestSplitTunnelDaemon daemon;
+        daemon.seed(initialConfiguration());
+        daemon.backend.routes.insert(IPAddress("198.51.100.9/32"));
+        daemon.backend.rejectNextPeerUpdate = true;
+        const auto before = daemon.backend.routes;
+        QCOMPARE(daemon.updateSplitTunneling(1, { "192.0.2.1", "198.51.100.9" }, "test-peer", "test-session"),
+                 SplitTunnelingUpdateResult::NotApplied);
+        QCOMPARE(daemon.backend.routes, before);
+        QCOMPARE(daemon.backend.livePeerUpdates, 0);
+    }
+
+    void defaultRouteCollisionOnlyRollsBackCreatedHalf()
+    {
+        TestSplitTunnelDaemon daemon;
+        daemon.seed(initialConfiguration());
+        daemon.backend.routes.insert(IPAddress("128.0.0.0/1"));
+        const auto before = daemon.backend.routes;
+        daemon.backend.expandDefaultRoutes = true;
+        QCOMPARE(daemon.updateSplitTunneling(0, { }, "test-peer", "test-session"),
+                 SplitTunnelingUpdateResult::NotApplied);
+        QCOMPARE(daemon.backend.routes, before);
+    }
+
+    void preexistingExclusionIsNeverDeletedOnRejectedAddition()
+    {
+        TestSplitTunnelDaemon daemon;
+        auto config = initialConfiguration();
+        config.m_allowedIPAddressRanges = { IPAddress("0.0.0.0/0"), IPAddress("::/0") };
+        daemon.seed(config);
+        daemon.backend.exclusions.insert(IPAddress("198.51.100.9/32"));
+        daemon.backend.rejectNextPeerUpdate = true;
+        const auto before = daemon.backend.exclusions;
+        QCOMPARE(daemon.updateSplitTunneling(2, { "198.51.100.9" }, "test-peer", "test-session"),
+                 SplitTunnelingUpdateResult::NotApplied);
+        QCOMPARE(daemon.backend.exclusions, before);
+    }
+
+    void missingRouteAcknowledgmentBlocksFurtherUpdates()
+    {
+        TestSplitTunnelDaemon daemon;
+        daemon.seed(initialConfiguration());
+        daemon.backend.unknownRouteCreation = true;
+        QCOMPARE(daemon.updateSplitTunneling(1, { "192.0.2.1", "198.51.100.9" }, "test-peer", "test-session"),
+                 SplitTunnelingUpdateResult::StateUnknown);
+        daemon.backend.unknownRouteCreation = false;
+        QCOMPARE(daemon.updateSplitTunneling(1, { "192.0.2.1", "198.51.100.10" }, "test-peer", "test-session"),
+                 SplitTunnelingUpdateResult::StateUnknown);
+        QCOMPARE(daemon.backend.livePeerUpdates, 0);
     }
 };
 

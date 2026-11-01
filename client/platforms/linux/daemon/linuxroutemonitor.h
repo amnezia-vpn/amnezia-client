@@ -6,13 +6,13 @@
 #define LINUXROUTEMONITOR_H
 
 #include <QByteArray>
+#include <QHash>
 #include <QHostAddress>
 #include <QList>
 #include <QObject>
-#include <QSocketNotifier>
 
+#include "daemon/routemutation.h"
 #include "ipaddress.h"
-
 
 class LinuxRouteMonitor final : public QObject {
   Q_OBJECT
@@ -22,6 +22,8 @@ class LinuxRouteMonitor final : public QObject {
   ~LinuxRouteMonitor();
 
   bool insertRoute(const IPAddress& prefix);
+  RouteMutationResult createRoute(const IPAddress &prefix);
+  RouteCreationResult createExclusionRoute(const IPAddress &prefix);
   bool deleteRoute(const IPAddress& prefix);
 
   bool addExclusionRoute(const IPAddress& prefix);
@@ -29,17 +31,13 @@ class LinuxRouteMonitor final : public QObject {
  private:
   static QString addrToString(const struct sockaddr* sa);
   static QString addrToString(const QByteArray& data);
+  RouteMutationResult rtmSendRouteWithResult(int action, int flags, int type, const IPAddress &prefix);
   bool rtmSendRoute(int action, int flags, int type,
                     const IPAddress& prefix);
+  QHash<IPAddress, QString> m_exclusionGateways;
   QString m_ifname;
   unsigned int m_ifindex = 0;
-  int m_nlsock = -1;
   int m_nlseq = 0;
-  QSocketNotifier* m_notifier = nullptr;
-
- private slots:
-    void nlsockReady();
-
 };
 
 #endif  // LINUXROUTEMONITOR_H

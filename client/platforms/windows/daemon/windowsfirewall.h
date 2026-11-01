@@ -55,7 +55,7 @@ class WindowsFirewall final : public QObject {
   WindowsFirewall(HANDLE session, QObject* parent);
   HANDLE m_sessionHandle;
   bool m_init = false;
-  QList<uint64_t> m_activeRules;
+  QList<quint64> m_activeRules;
   WindowsFirewallPeerTransaction::PeerRules m_peerRules;
   bool m_peerRulesSynchronized = true;
 

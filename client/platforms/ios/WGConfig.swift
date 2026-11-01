@@ -20,7 +20,6 @@ struct WGConfig: Decodable {
   let presharedKey: String?
   var allowedIPs: [String]
   var persistentKeepAlive: String?
-  let splitTunnelSessionId: String?
   let splitTunnelType: Int
   let splitTunnelSites: [String]
 
@@ -47,7 +46,6 @@ struct WGConfig: Decodable {
     case presharedKey = "psk_key"
     case allowedIPs = "allowed_ips"
     case persistentKeepAlive = "persistent_keep_alive"
-    case splitTunnelSessionId
     case splitTunnelType
     case splitTunnelSites
   }

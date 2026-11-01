@@ -237,7 +237,33 @@ bool WireguardUtilsLinux::deleteInterface() {
 }
 
 // dummy implementations for now
-bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
+bool WireguardUtilsLinux::updatePeer(const InterfaceConfig &config)
+{
+    if (!configurePeer(config)) {
+        return false;
+    }
+    updateFirewall(config);
+    return true;
+}
+
+SplitTunnelingUpdateResult WireguardUtilsLinux::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        const auto result = LinuxFirewall::updateSplitTunneling(config);
+        if (result != SplitTunnelingUpdateResult::Applied) {
+            return result;
+        }
+    }
+    return configurePeer(config) ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::StateUnknown;
+}
+
+SplitTunnelingUpdateResult WireguardUtilsLinux::restoreSplitTunneling(const InterfaceConfig &config)
+{
+    return updateSplitTunneling(config);
+}
+
+bool WireguardUtilsLinux::configurePeer(const InterfaceConfig &config)
+{
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
@@ -282,9 +308,7 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     if (err != 0) {
         logger.error() << "Peer configuration failed:" << strerror(err);
     }
-    if (err == 0) {
-        updateFirewall(config);
-    }
+
     return (err == 0);
 }
 
@@ -350,6 +374,18 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsLinux::getPeerStatus() {
     }
 
     return peerList;
+}
+
+RouteCreationResult WireguardUtilsLinux::createRoutePrefix(const IPAddress &prefix)
+{
+    if (!m_rtmonitor)
+        return { };
+    return createTunnelRoutes(prefix, [this](const auto &route) { return m_rtmonitor->createRoute(route); });
+}
+
+RouteCreationResult WireguardUtilsLinux::createExclusionRoute(const IPAddress &prefix)
+{
+    return m_rtmonitor ? m_rtmonitor->createExclusionRoute(prefix) : RouteCreationResult { };
 }
 
 bool WireguardUtilsLinux::updateRoutePrefix(const IPAddress& prefix) {
