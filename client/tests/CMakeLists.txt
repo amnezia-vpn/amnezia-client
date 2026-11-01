@@ -83,9 +83,9 @@ if(NOT ANDROID)
     target_include_directories(test_split_tunneling_unsupported_backend PRIVATE ..)
     target_compile_definitions(test_split_tunneling_unsupported_backend PRIVATE MACOS_NE)
     if(MSVC)
-        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE /UAMNEZIA_DESKTOP)
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE /UAMNEZIA_DESKTOP /UAMNEZIA_APPLE_LIVE_ROUTING)
     else()
-        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE -UAMNEZIA_DESKTOP)
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE -UAMNEZIA_DESKTOP -UAMNEZIA_APPLE_LIVE_ROUTING)
     endif()
     target_link_libraries(test_split_tunneling_unsupported_backend PRIVATE Qt6::Core Qt6::Network Qt6::Test)
 
@@ -576,3 +576,20 @@ endif()
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
 
 amnezia_copy_runtime_dlls()
+
+if(APPLE AND NOT IOS AND AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
+    find_program(SWIFT_EXECUTABLE swift REQUIRED)
+    get_filename_component(AMNEZIA_WG_APPLE_CHECKOUT "${AMNEZIA_WG_APPLE_SOURCE_DIR}" DIRECTORY)
+    get_filename_component(_apple_go_library_dir "${AMNEZIA_WG_APPLE_GO_LIBRARY}" DIRECTORY)
+    set(_apple_routing_tests "${CMAKE_CURRENT_BINARY_DIR}/apple-routing-session")
+    configure_file(appleRoutingSession/Package.swift.in "${_apple_routing_tests}/Package.swift" @ONLY)
+    configure_file(../platforms/ios/WireguardRoutingSession.swift
+        "${_apple_routing_tests}/Sources/AppleRoutingIntegration/WireguardRoutingSession.swift" COPYONLY)
+    configure_file(appleRoutingSession/RoutingSessionTests.swift
+        "${_apple_routing_tests}/Tests/AppleRoutingIntegrationTests/RoutingSessionTests.swift" COPYONLY)
+    add_test(NAME AppleRoutingSessionTest COMMAND "${CMAKE_COMMAND}" -E env
+        "CLANG_MODULE_CACHE_PATH=${_apple_routing_tests}/modules"
+        "${SWIFT_EXECUTABLE}" test --disable-sandbox
+        --package-path "${_apple_routing_tests}" --cache-path "${_apple_routing_tests}/cache"
+        -Xlinker "-L${_apple_go_library_dir}")
+endif()

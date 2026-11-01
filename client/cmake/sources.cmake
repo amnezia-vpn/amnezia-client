@@ -327,7 +327,7 @@ if(APPLE AND MACOS_NE)
     )
 endif()
 
-if(IOS OR MACOS_NE)
+if((IOS OR MACOS_NE) AND AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
     list(APPEND HEADERS ${CLIENT_ROOT_DIR}/core/splitTunneling/appleSplitTunnelingUpdateBackend.h)
     list(APPEND SOURCES ${CLIENT_ROOT_DIR}/core/splitTunneling/appleSplitTunnelingUpdateBackend.cpp)
 endif()
