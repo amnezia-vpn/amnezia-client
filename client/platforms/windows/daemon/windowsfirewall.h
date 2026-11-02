@@ -38,7 +38,11 @@ class WindowsFirewall final : public QObject {
   static WindowsFirewall* create(QObject* parent);
   ~WindowsFirewall() override;
 
-  bool enableInterface(int vpnAdapterIndex);
+  /// <summary>Разрешает трафик выбранного VPN-интерфейса в аварийном фильтре.</summary>
+  /// <param name="vpnAdapterIndex">Индекс VPN-интерфейса либо отрицательное значение для блокировки.</param>
+  /// <param name="allowDnsOnInterface">Пропускать DNS внутри интерфейса с локальным DNS-обработчиком.</param>
+  /// <returns>Признак успешного применения фильтров.</returns>
+  bool enableInterface(int vpnAdapterIndex, bool allowDnsOnInterface = false);
   bool enableLanBypass(const QList<IPAddress>& ranges);
   bool enablePeerTraffic(const InterfaceConfig& config);
   bool disablePeerTraffic(const QString& pubkey);

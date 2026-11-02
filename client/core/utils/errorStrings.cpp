@@ -96,6 +96,18 @@ QString errorString(ErrorCode code) {
     // Distro errors
     case (ErrorCode::OpenVpnExecutableMissing): errorMessage = QObject::tr("OpenVPN executable missing"); break;
     case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("Amnezia helper service error"); break;
+    case (ErrorCode::DomainRoutingUnavailable):
+        errorMessage = QObject::tr("Enable dynamic domains for wildcard rules. Dynamic domains require WireGuard or "
+                                   "AmneziaWG on Windows.");
+        break;
+    case (ErrorCode::DomainRoutingConfigInvalid):
+        errorMessage = QObject::tr("Cannot prepare domain routing. Check the IPv4 tunnel address, endpoint, MTU and "
+                                   "DNS settings, and the physical network connection.");
+        break;
+    case (ErrorCode::DomainRoutingEngineBusy):
+        errorMessage = QObject::tr("The local traffic engine or domain-routing interface is already in use. Stop the "
+                                  "local proxy or the other domain-routing connection before reconnecting.");
+        break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
 
     // VPN errors

@@ -91,6 +91,12 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
+    if (config.m_domainRoutingEnabled) {
+        if (m_splitTunnelManager) {
+            m_splitTunnelManager->stop();
+        }
+        return true;
+    }
   if (!m_splitTunnelManager) {
     if (config.m_vpnDisabledApps.length() > 0) {
       // The Client has sent us a list of disabled apps, but we failed

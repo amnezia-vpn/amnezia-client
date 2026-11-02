@@ -47,6 +47,12 @@ public:
     virtual qint64 xrayStartOwned(const QString& cfg) override;
     virtual bool xrayStopOwned(qint64 token) override;
     virtual qint64 xrayCurrentToken() override;
+    /// <inheritdoc/>
+    bool supportsDomainRouting() override;
+    /// <inheritdoc/>
+    qint64 xrayStartExclusive(const QString &cfg) override;
+    /// <inheritdoc/>
+    bool xrayKeepAliveOwned(qint64 token) override;
     virtual bool isTcpPortAvailable(int port) override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;

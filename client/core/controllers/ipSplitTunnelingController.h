@@ -35,6 +35,13 @@ public:
     RouteMode getRouteMode() const;
     bool isSplitTunnelingEnabled() const;
 
+    /// <summary>Возвращает состояние обработки динамических доменов.</summary>
+    /// <returns>Признак включения доменной маршрутизации.</returns>
+    bool isDynamicDomainRoutingEnabled() const;
+    /// <summary>Меняет состояние обработки динамических доменов.</summary>
+    /// <param name="enabled">Новое состояние настройки.</param>
+    void setDynamicDomainRoutingEnabled(bool enabled);
+
     QVector<QPair<QString, QStringList>> getCurrentSites() const;
 
     bool importSitesFromJson(const QByteArray& jsonData, bool replaceExisting, QString &errorMessage);

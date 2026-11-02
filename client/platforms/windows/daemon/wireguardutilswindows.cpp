@@ -124,7 +124,21 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     return false;
   }
   m_luid = luid.Value;
-  m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
+  m_domainRoutingEnabled = config.m_domainRoutingEnabled;
+  m_routeMonitor = new WindowsRouteMonitor(
+      luid.Value, this,
+      m_domainRoutingEnabled ? QStringLiteral("AmneziaDomains") : QString());
+  if (m_domainRoutingEnabled) {
+      MIB_IPFORWARD_ROW2 route;
+      buildMibForwardRow(IPAddress(QHostAddress("0.0.0.0"), 0), &route);
+      route.Metric = 65535;
+      DWORD routeResult = CreateIpForwardEntry2(&route);
+      if (routeResult != NO_ERROR) {
+          logger.error() << "Не удалось создать маршрут исходящего туннеля:" << routeResult;
+          deleteInterface();
+          return false;
+      }
+  }
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall
@@ -139,6 +153,13 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
 }
 
 bool WireguardUtilsWindows::deleteInterface() {
+    if (m_domainRoutingEnabled) {
+        MIB_IPFORWARD_ROW2 route;
+        buildMibForwardRow(IPAddress(QHostAddress("0.0.0.0"), 0), &route);
+        route.Metric = 65535;
+        DeleteIpForwardEntry2(&route);
+        m_domainRoutingEnabled = false;
+    }
   if (m_routeMonitor) {
     m_routeMonitor->deleteLater();
   }
@@ -255,6 +276,9 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
 }
 
 bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
+    if (m_domainRoutingEnabled) {
+        return true;
+    }
   if (m_routeMonitor && (prefix.prefixLength() == 0)) {
     // If we are setting up a default route, instruct the route monitor to
     // capture traffic to all non-excluded destinations
@@ -286,6 +310,9 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
 }
 
 bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
+    if (m_domainRoutingEnabled) {
+        return true;
+    }
   if (m_routeMonitor && (prefix.prefixLength() == 0)) {
     // Deactivate the route capture feature.
     m_routeMonitor->setDetaultRouteCapture(false);

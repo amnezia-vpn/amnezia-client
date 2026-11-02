@@ -1,4 +1,5 @@
 #include "vpnConnection.h"
+#include "core/utils/domainRouting.h"
 
 #include <QDebug>
 #include <QEventLoop>
@@ -367,6 +368,28 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_vpnConfiguration = vpnConfiguration;
     m_currentContainer = container;
 
+    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
+        const QVariantMap sites = m_appSettingsRepository->vpnSites(m_appSettingsRepository->routeMode());
+        bool hasWildcard = false;
+        bool hasDomain = false;
+        for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+            const auto rule = domainRouting::parseRule(i.key());
+            hasWildcard = hasWildcard || (rule && rule->kind == domainRouting::RuleKind::Subdomains);
+            hasDomain = hasDomain || (rule && rule->kind != domainRouting::RuleKind::Network);
+        }
+
+        bool supported = false;
+#ifdef Q_OS_WIN
+        supported = ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard;
+#endif
+        const bool enabled = m_appSettingsRepository->isDynamicDomainRoutingEnabled();
+        if ((hasWildcard && (!enabled || !supported)) || (enabled && hasDomain && !supported)) {
+            setConnectionState(Vpn::ConnectionState::Error);
+            emit vpnProtocolError(ErrorCode::DomainRoutingUnavailable);
+            return;
+        }
+    }
+
 #ifdef AMNEZIA_DESKTOP
     if (prepareSplitTunnelingSites(container)) {
         return;
@@ -430,6 +453,16 @@ bool VpnConnection::prepareSplitTunnelingSites(DockerContainer container)
     }
 
     const QVariantMap sites = m_appSettingsRepository->vpnSites(routeMode);
+    #ifdef Q_OS_WIN
+    if (m_appSettingsRepository->isDynamicDomainRoutingEnabled()) {
+        for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+            const auto rule = domainRouting::parseRule(i.key());
+            if (rule && rule->kind != domainRouting::RuleKind::Network) {
+                return false;
+            }
+        }
+    }
+    #endif
     for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
         const QString site = i.key().trimmed();
         if (!site.isEmpty() && !NetworkUtilities::checkIpSubnetFormat(site)) {
@@ -570,6 +603,31 @@ void VpnConnection::appendSplitTunnelingConfig()
     }
 
     bool allowSiteBasedSplitTunneling = true;
+    bool useDomainRouting = false;
+    QJsonArray domainRules;
+#ifdef Q_OS_WIN
+    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()
+        && m_appSettingsRepository->isDynamicDomainRoutingEnabled()
+        && m_appSettingsRepository->routeMode() != RouteMode::VpnAllSites
+        && (ContainerUtils::isAwgContainer(m_currentContainer) || m_currentContainer == DockerContainer::WireGuard)) {
+        const QVariantMap sites = m_appSettingsRepository->vpnSites(m_appSettingsRepository->routeMode());
+        for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+            const auto rule = domainRouting::parseRule(i.key());
+            if (rule) {
+                domainRules.append(rule->value);
+                useDomainRouting = useDomainRouting || rule->kind != domainRouting::RuleKind::Network;
+            } else {
+                for (const QString &address : SecureAppSettingsRepository::siteIpList(i.value())) {
+                    if (NetworkUtilities::checkIpSubnetFormat(address)) {
+                        domainRules.append(address);
+                    }
+                }
+            }
+        }
+    }
+#endif
+    m_vpnConfiguration.insert(configKey::domainRoutingEnabled, useDomainRouting);
+    m_vpnConfiguration.insert(configKey::domainRoutingRules, useDomainRouting ? domainRules : QJsonArray());
 
     // this block is for old native configs and for old self-hosted configs
     auto protocolName = m_vpnConfiguration.value(configKey::vpnProto).toString();
@@ -644,7 +702,7 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(site);
             }
 
-            if (sitesJsonArray.isEmpty()) {
+            if (sitesJsonArray.isEmpty() && !useDomainRouting) {
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS

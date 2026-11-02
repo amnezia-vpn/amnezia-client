@@ -1,4 +1,5 @@
 #include "ipSplitTunnelingController.h"
+#include "core/utils/domainRouting.h"
 #include "core/utils/networkUtilities.h"
 #include <QDebug>
 #include <QJsonObject>
@@ -83,7 +84,13 @@ bool IpSplitTunnelingController::addSite(const QString &hostname)
     if (!validateHostname(normalizedHostname)) {
         return false;
     }
-    
+
+#ifdef Q_OS_WIN
+    if (normalizedHostname.startsWith(QStringLiteral("*."))) {
+        return addSiteInternal(normalizedHostname, { });
+    }
+#endif
+
     if (validateIpv4Cidr(normalizedHostname)) {
         processSite(normalizedHostname, {});
         return true;
@@ -152,6 +159,16 @@ bool IpSplitTunnelingController::isSplitTunnelingEnabled() const
     return m_appSettingsRepository->isSitesSplitTunnelingEnabled();
 }
 
+bool IpSplitTunnelingController::isDynamicDomainRoutingEnabled() const
+{
+    return m_appSettingsRepository->isDynamicDomainRoutingEnabled();
+}
+
+void IpSplitTunnelingController::setDynamicDomainRoutingEnabled(bool enabled)
+{
+    m_appSettingsRepository->setDynamicDomainRoutingEnabled(enabled);
+}
+
 QVector<QPair<QString, QStringList>> IpSplitTunnelingController::getCurrentSites() const
 {
     return m_sites;
@@ -168,6 +185,10 @@ void IpSplitTunnelingController::fillSites()
 
 QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) const
 {
+#ifdef Q_OS_WIN
+    const auto rule = domainRouting::parseRule(hostname);
+    return rule ? rule->value : QString();
+#else
     const QString candidate = hostname.trimmed();
     if (candidate.isEmpty()) {
         return {};
@@ -193,10 +214,15 @@ QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) c
         normalized.chop(1);
     }
     return normalized;
+#endif
 }
 
 bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
 {
+#ifdef Q_OS_WIN
+    const auto rule = domainRouting::parseRule(hostname);
+    return rule && (rule->kind != domainRouting::RuleKind::Network || validateIpv4Cidr(rule->value));
+#else
     if (validateIpv4Cidr(hostname)) {
         return true;
     }
@@ -223,6 +249,7 @@ bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
     return std::any_of(labels.constLast().cbegin(), labels.constLast().cend(), [](QChar character) {
         return character.isLetter();
     });
+#endif
 }
 
 bool IpSplitTunnelingController::validateIpv4Cidr(const QString &value) const
@@ -329,6 +356,9 @@ bool IpSplitTunnelingController::importSitesFromJson(const QByteArray& jsonData,
         }
         ips.removeDuplicates();
         ips.sort();
+        if (normalizedHostname.startsWith(QStringLiteral("*."))) {
+            ips.clear();
+        }
 
         QStringList mergedIps = sites.value(normalizedHostname);
         for (const QString &ip : ips) {

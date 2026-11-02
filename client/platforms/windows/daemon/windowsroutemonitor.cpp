@@ -58,8 +58,9 @@ static int prefixcmp(const void* a, const void* b, size_t bits) {
   return 0;
 }
 
-WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
-    : QObject(parent), m_luid(luid) {
+WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent,
+                                       const QString& ignoredInterfaceName)
+    : QObject(parent), m_luid(luid), m_ignoredInterfaceName(ignoredInterfaceName) {
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
 
@@ -76,6 +77,15 @@ WindowsRouteMonitor::~WindowsRouteMonitor() {
 }
 
 void WindowsRouteMonitor::updateInterfaceMetrics(int family) {
+  NET_LUID ignoredLuid = {};
+  m_ignoredLuid = 0;
+  if (!m_ignoredInterfaceName.isEmpty() &&
+      ConvertInterfaceAliasToLuid(
+          reinterpret_cast<const wchar_t*>(m_ignoredInterfaceName.utf16()),
+          &ignoredLuid) == NO_ERROR) {
+    m_ignoredLuid = ignoredLuid.Value;
+  }
+
   PMIB_IPINTERFACE_TABLE table;
   DWORD result = GetIpInterfaceTable(family, &table);
   if (result != NO_ERROR) {
@@ -95,7 +105,8 @@ void WindowsRouteMonitor::updateInterfaceMetrics(int family) {
   // Rebuild the list of interfaces that are valid for routing.
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPINTERFACE_ROW* row = &table->Table[i];
-    if (row->InterfaceLuid.Value == m_luid) {
+    if (row->InterfaceLuid.Value == m_luid ||
+        row->InterfaceLuid.Value == m_ignoredLuid) {
       continue;
     }
     if (!row->Connected) {
@@ -127,7 +138,8 @@ void WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
     // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    if (row->InterfaceLuid.Value == m_luid ||
+        row->InterfaceLuid.Value == m_ignoredLuid) {
       continue;
     }
     if (row->DestinationPrefix.PrefixLength < bestMatch) {
@@ -273,7 +285,8 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
     // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    if (row->InterfaceLuid.Value == m_luid ||
+        row->InterfaceLuid.Value == m_ignoredLuid) {
       continue;
     }
     // Ignore the default route

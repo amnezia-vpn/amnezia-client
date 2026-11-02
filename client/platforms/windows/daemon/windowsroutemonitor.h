@@ -21,7 +21,12 @@ class WindowsRouteMonitor final : public QObject {
   Q_OBJECT
 
  public:
-  WindowsRouteMonitor(quint64 luid, QObject* parent);
+  /// <summary>Отслеживает маршруты вне интерфейсов текущего VPN-соединения.</summary>
+  /// <param name="luid">Идентификатор транспортного интерфейса VPN.</param>
+  /// <param name="parent">Владелец объекта.</param>
+  /// <param name="ignoredInterfaceName">Имя дополнительного интерфейса обработки трафика.</param>
+  WindowsRouteMonitor(quint64 luid, QObject* parent,
+                      const QString& ignoredInterfaceName = QString());
   ~WindowsRouteMonitor();
 
   void setDetaultRouteCapture(bool enable);
@@ -56,6 +61,8 @@ class WindowsRouteMonitor final : public QObject {
   QHash<IPAddress, MIB_IPFORWARD_ROW2*> m_clonedRoutes;
 
   const quint64 m_luid = 0;
+  const QString m_ignoredInterfaceName;
+  quint64 m_ignoredLuid = 0;
   HANDLE m_routeHandle = INVALID_HANDLE_VALUE;
 };
 
