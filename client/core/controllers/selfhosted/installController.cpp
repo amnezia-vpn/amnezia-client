@@ -1300,7 +1300,7 @@ ErrorCode InstallController::rebootServer(const QString &serverId)
     return sshSession.runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
-ErrorCode InstallController::updateServerPackages(const QString &serverId, bool &isRebootRequired)
+ErrorCode InstallController::updateServerPackages(const QString &serverId)
 {
     const auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
@@ -1334,7 +1334,6 @@ ErrorCode InstallController::updateServerPackages(const QString &serverId, bool 
         return ErrorCode::ServerPacketManagerError;
     }
 
-    isRebootRequired = stdOut.contains("Reboot required");
     return ErrorCode::NoError;
 }
 

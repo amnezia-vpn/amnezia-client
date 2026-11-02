@@ -45,15 +45,10 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onUpdateServerPackagesFinished(finishedMessage, isRebootRequired) {
+        function onUpdateServerPackagesFinished(finishedMessage) {
             PageController.closePage()
 
-            if (!isRebootRequired) {
-                PageController.showNotificationMessage(finishedMessage)
-                return
-            }
-
-            var descriptionText = qsTr("A reboot is required to apply the updates. Do you want to reboot the server now?")
+            var descriptionText = qsTr("Some updates, such as a new kernel, take effect only after a reboot. Do you want to reboot the server now?")
             var yesButtonText = qsTr("Reboot")
             var noButtonText = qsTr("Not now")
 

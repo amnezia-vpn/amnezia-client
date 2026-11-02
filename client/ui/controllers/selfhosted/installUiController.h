@@ -114,7 +114,7 @@ signals:
     void scanServerFinished(bool isInstalledContainerFound);
 
     void rebootServerFinished(const QString &finishedMessage);
-    void updateServerPackagesFinished(const QString &finishedMessage, bool isRebootRequired);
+    void updateServerPackagesFinished(const QString &finishedMessage);
     void removeServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);

@@ -13,14 +13,7 @@ if [ -n "$update_pkgs" ]; then $run_pm $update_pkgs; rc=$?; echo "Package index 
 if [ $rc -eq 0 ]; then \
   $run_pm $upgrade_pkgs; rc=$?;\
   if [ "$dist" = "suse" ] && [ $rc -eq 103 ]; then $run_pm $upgrade_pkgs; rc=$?; fi;\
-  if [ "$dist" = "suse" ] && [ $rc -eq 102 ]; then rc=0; reboot_required=1; fi;\
+  if [ "$dist" = "suse" ] && [ $rc -eq 102 ]; then rc=0; fi;\
   echo "Package upgrade exit code: $rc";\
 fi;\
-if [ $rc -ne 0 ]; then echo "Packages update failed"; exit 1; fi;\
-running_kernel=$(uname -r);\
-newest_kernel=$(ls -1 /boot/vmlinuz-* 2>/dev/null | sed 's#.*/vmlinuz-##' | sort -V | tail -n 1);\
-if [ -f /var/run/reboot-required ]; then reboot_required=1; fi;\
-if [ "$dist" = "archlinux" ] && [ ! -d "/usr/lib/modules/$running_kernel" ]; then reboot_required=1; fi;\
-if [ "$dist" != "archlinux" ] && [ -n "$newest_kernel" ] && [ "$newest_kernel" != "$running_kernel" ]; then reboot_required=1; fi;\
-echo "Packages update finished";\
-if [ "$reboot_required" = "1" ]; then echo "Reboot required"; fi
+if [ $rc -eq 0 ]; then echo "Packages update finished"; else echo "Packages update failed"; fi
