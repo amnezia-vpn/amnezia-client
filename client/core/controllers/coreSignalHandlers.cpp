@@ -544,7 +544,15 @@ void CoreSignalHandlers::initNotificationHandler()
 
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_coreController->m_notificationHandler);
     connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+
+    trayHandler->setSplitTunnelingEnabled(m_coreController->m_appSettingsRepository->isSitesSplitTunnelingEnabled());
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged,
+            trayHandler, &SystemTrayNotificationHandler::setSplitTunnelingEnabled);
+    connect(trayHandler, &SystemTrayNotificationHandler::splitTunnelingToggleRequested, this, [this](bool enabled) {
+        m_coreController->m_ipSplitTunnelingUiController->toggleSplitTunneling(enabled);
+        m_coreController->m_connectionUiController->reconnect();
+    });
+#endif
 }
 
 void CoreSignalHandlers::initUpdateFoundHandler()
