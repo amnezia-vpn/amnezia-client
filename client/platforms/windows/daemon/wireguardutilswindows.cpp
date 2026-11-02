@@ -88,6 +88,105 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsWindows::getPeerStatus() {
   return peerList;
 }
 
+WireguardUtilsWindows::InterfaceRoutingState&
+WireguardUtilsWindows::interfaceRoutingState(int family) {
+  Q_ASSERT((family == AF_INET) || (family == AF_INET6));
+  return family == AF_INET ? m_ipv4RoutingState : m_ipv6RoutingState;
+}
+
+bool WireguardUtilsWindows::applyFullTunnelInterfaceState(int family,
+                                                         bool& stateSaved) {
+  stateSaved = false;
+
+  MIB_IPINTERFACE_ROW row;
+  InitializeIpInterfaceEntry(&row);
+  row.InterfaceLuid.Value = m_luid;
+  row.Family = family;
+
+  DWORD result = GetIpInterfaceEntry(&row);
+  if (result != NO_ERROR) {
+    // IPv6 can legitimately be unavailable when it is disabled in Windows.
+    if (family == AF_INET6 && result == ERROR_NOT_FOUND) {
+      return true;
+    }
+    logger.error() << "Failed to read IP interface state for family" << family
+                   << "result:" << result;
+    return false;
+  }
+
+  InterfaceRoutingState& saved = interfaceRoutingState(family);
+  if (!saved.valid) {
+    saved.valid = true;
+    saved.useAutomaticMetric = row.UseAutomaticMetric;
+    saved.metric = row.Metric;
+    saved.disableDefaultRoutes = row.DisableDefaultRoutes;
+    stateSaved = true;
+  }
+
+  // Match the full-tunnel invariant normally established by
+  // amneziawg-windows when it sees a default AllowedIP during startup.
+  // Amnezia starts the tunnel with Table=off and removes [Peer], so that
+  // backend path is bypassed and must be reproduced here.
+  row.UseAutomaticMetric = FALSE;
+  row.Metric = 0;
+  row.DisableDefaultRoutes = FALSE;
+
+  result = SetIpInterfaceEntry(&row);
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to configure full-tunnel IP interface state for family"
+                   << family << "result:" << result;
+    if (stateSaved) {
+      saved = InterfaceRoutingState();
+      stateSaved = false;
+    }
+    return false;
+  }
+
+  return true;
+}
+
+bool WireguardUtilsWindows::restoreInterfaceRoutingState(int family) {
+  InterfaceRoutingState& saved = interfaceRoutingState(family);
+  if (!saved.valid) {
+    return true;
+  }
+
+  MIB_IPINTERFACE_ROW row;
+  InitializeIpInterfaceEntry(&row);
+  row.InterfaceLuid.Value = m_luid;
+  row.Family = family;
+
+  DWORD result = GetIpInterfaceEntry(&row);
+  if (result != NO_ERROR) {
+    if (family == AF_INET6 && result == ERROR_NOT_FOUND) {
+      saved = InterfaceRoutingState();
+      return true;
+    }
+    logger.error() << "Failed to read IP interface state before restore for family"
+                   << family << "result:" << result;
+    return false;
+  }
+
+  row.UseAutomaticMetric = saved.useAutomaticMetric;
+  row.Metric = saved.metric;
+  row.DisableDefaultRoutes = saved.disableDefaultRoutes;
+
+  result = SetIpInterfaceEntry(&row);
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to restore IP interface state for family" << family
+                   << "result:" << result;
+    return false;
+  }
+
+  saved = InterfaceRoutingState();
+  return true;
+}
+
+void WireguardUtilsWindows::clearInterfaceRoutingState() {
+  m_ipv4RoutingState = InterfaceRoutingState();
+  m_ipv6RoutingState = InterfaceRoutingState();
+}
+
 bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   QStringList addresses;
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
@@ -124,6 +223,7 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     return false;
   }
   m_luid = luid.Value;
+  clearInterfaceRoutingState();
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
 
   if (config.m_killSwitchEnabled) {
@@ -144,6 +244,8 @@ bool WireguardUtilsWindows::deleteInterface() {
   }
 
   m_firewall->disableKillSwitch();
+  clearInterfaceRoutingState();
+  m_luid = 0;
   m_tunnel.stop();
   return true;
 }
@@ -255,57 +357,83 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
 }
 
 bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
-    // If we are setting up a default route, instruct the route monitor to
-    // capture traffic to all non-excluded destinations
-    m_routeMonitor->setDetaultRouteCapture(true);
+  const bool isDefaultRoute = prefix.prefixLength() == 0;
+  const int family = prefix.address().protocol() == QAbstractSocket::IPv6Protocol
+                         ? AF_INET6
+                         : AF_INET;
+  bool stateSaved = false;
+
+  if (isDefaultRoute && !applyFullTunnelInterfaceState(family, stateSaved)) {
+    return false;
   }
+
   // Build the route
-  
   MIB_IPFORWARD_ROW2 entry;
   buildMibForwardRow(prefix, &entry);
 
   // Install the route
   DWORD result = CreateIpForwardEntry2(&entry);
   if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+    if (isDefaultRoute && m_routeMonitor) {
+      m_routeMonitor->setDetaultRouteCapture(true);
+    }
     return true;
   }
 
   // Case for ipv6 route with disabled ipv6
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol
-      && result == ERROR_NOT_FOUND) {
+  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol &&
+      result == ERROR_NOT_FOUND) {
+    if (stateSaved) {
+      interfaceRoutingState(family) = InterfaceRoutingState();
+    }
     return true;
   }
 
   if (result != NO_ERROR) {
-    logger.error() << "Failed to create route to"
-                   << prefix.toString()
+    logger.error() << "Failed to create route to" << prefix.toString()
                    << "result:" << result;
+    if (isDefaultRoute && stateSaved) {
+      restoreInterfaceRoutingState(family);
+    }
+    return false;
   }
-  return result == NO_ERROR;
+
+  if (isDefaultRoute && m_routeMonitor) {
+    // Enable default-route capture only after the default route is in place.
+    m_routeMonitor->setDetaultRouteCapture(true);
+  }
+  return true;
 }
 
 bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
-    // Deactivate the route capture feature.
-    m_routeMonitor->setDetaultRouteCapture(false);
-  }
+  const bool isDefaultRoute = prefix.prefixLength() == 0;
+  const int family = prefix.address().protocol() == QAbstractSocket::IPv6Protocol
+                         ? AF_INET6
+                         : AF_INET;
+
   // Build the route
-  
   MIB_IPFORWARD_ROW2 entry;
   buildMibForwardRow(prefix, &entry);
 
-  // Install the route
+  // Delete the route
   DWORD result = DeleteIpForwardEntry2(&entry);
-  if (result == ERROR_NOT_FOUND) {
-    return true;
-  }
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to delete route to"
-                   << prefix.toString()
+  if (result != NO_ERROR && result != ERROR_NOT_FOUND) {
+    logger.error() << "Failed to delete route to" << prefix.toString()
                    << "result:" << result;
+    return false;
   }
-  return result == NO_ERROR;
+
+  if (isDefaultRoute) {
+    if (m_routeMonitor) {
+      // Deactivate route capture only after the default route has gone away.
+      m_routeMonitor->setDetaultRouteCapture(false);
+    }
+    if (!restoreInterfaceRoutingState(family)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
