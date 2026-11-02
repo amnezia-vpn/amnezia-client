@@ -122,6 +122,8 @@ QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
 
 QStringList SecureAppSettingsRepository::siteIpList(const QVariant &value)
 {
+    // QVariant::toStringList() handles both a QStringList/QVariantList and a single QString
+    // (a single string is returned as a one-element list), which covers the legacy format.
     QStringList result = value.toStringList();
     if (result.isEmpty()) {
         const QString legacyValue = value.toString();

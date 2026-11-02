@@ -49,6 +49,8 @@ public:
     void removeAllVpnSites(RouteMode mode);
     QVariantMap vpnSites(RouteMode mode) const;
 
+    // Normalizes a stored vpn site value into a list of IPs.
+    // Supports both the legacy format (a single IP string) and the current one (a list of IPs).
     static QStringList siteIpList(const QVariant &value);
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);

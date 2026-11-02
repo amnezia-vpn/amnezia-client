@@ -363,6 +363,7 @@ QByteArray IpSplitTunnelingController::exportSitesToJson() const
             ipsArray.append(ip);
         }
         jsonObject["ips"] = ipsArray;
+        // Keep the legacy "ip" field (first address) for backward compatibility.
         jsonObject["ip"] = site.second.isEmpty() ? QString() : site.second.first();
         jsonArray.append(jsonObject);
     }
