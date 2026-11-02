@@ -12,7 +12,9 @@
 #include <QObject>
 #include <QStringList>
 
+#include "core/splitTunneling/splitTunnelingUpdateResult.h"
 #include "interfaceconfig.h"
+#include "routemutation.h"
 
 constexpr const char* WG_INTERFACE = "amn0";
 
@@ -38,10 +40,31 @@ class WireguardUtils : public QObject {
   virtual bool deleteInterface() = 0;
 
   virtual bool updatePeer(const InterfaceConfig& config) = 0;
+    virtual SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config)
+    {
+        return updatePeer(config) ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::StateUnknown;
+    }
+    virtual SplitTunnelingUpdateResult restoreSplitTunneling(const InterfaceConfig &config)
+    {
+        const auto result = updateSplitTunneling(config);
+        return result == SplitTunnelingUpdateResult::Applied && !config.m_killSwitchEnabled
+                ? SplitTunnelingUpdateResult::Applied
+                : SplitTunnelingUpdateResult::StateUnknown;
+    }
   virtual bool deletePeer(const InterfaceConfig& config) = 0;
   virtual QList<PeerStatus> getPeerStatus() = 0;
 
   virtual bool updateRoutePrefix(const IPAddress& prefix) = 0;
+  virtual RouteCreationResult createRoutePrefix(const IPAddress &prefix)
+  {
+      Q_UNUSED(prefix)
+      return { };
+  }
+  virtual RouteCreationResult createExclusionRoute(const IPAddress &prefix)
+  {
+      Q_UNUSED(prefix)
+      return { };
+  }
   virtual bool deleteRoutePrefix(const IPAddress& prefix) = 0;
   
   virtual bool addExclusionRoute(const IPAddress& prefix) = 0;

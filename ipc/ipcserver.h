@@ -22,6 +22,8 @@ public:
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
+    int updateSplitTunneling(int routeMode, const QStringList &sites, const QString &publicKey,
+                             const QString &sessionId) override;
     virtual bool flushDns() override;
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;

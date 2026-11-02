@@ -1,0 +1,23 @@
+option(AMNEZIA_ENABLE_APPLE_LIVE_ROUTING "Enable the Apple live-routing implementation for device validation" OFF)
+set(AMNEZIA_WG_APPLE_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../3rd/amneziawg-apple/Sources" CACHE PATH "amneziawg-apple Sources directory")
+
+set(AMNEZIA_WG_APPLE_GO_LIBRARY "" CACHE FILEPATH "Go bridge archive built from the matching amneziawg-apple revision")
+
+if(AMNEZIA_WG_APPLE_GO_LIBRARY AND NOT EXISTS "${AMNEZIA_WG_APPLE_GO_LIBRARY}")
+    message(FATAL_ERROR "The specified Apple Go bridge archive does not exist")
+endif()
+
+if(AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
+    if(NOT IOS AND NOT MACOS_NE)
+        message(FATAL_ERROR "Apple live routing requires an iOS or macOS Network Extension build")
+    endif()
+    foreach(_routing_source RoutingUpdatePlan.swift RoutingUpdateTransaction.swift)
+        if(NOT EXISTS "${AMNEZIA_WG_APPLE_SOURCE_DIR}/WireGuardKit/${_routing_source}")
+            message(FATAL_ERROR "Apple live routing requires an amneziawg-apple revision with ${_routing_source}")
+        endif()
+    endforeach()
+    if(NOT EXISTS "${AMNEZIA_WG_APPLE_GO_LIBRARY}")
+        message(FATAL_ERROR "Apple live routing requires the matching Go bridge archive")
+    endif()
+    add_compile_definitions(AMNEZIA_APPLE_LIVE_ROUTING)
+endif()

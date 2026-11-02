@@ -18,6 +18,9 @@
 #include <QObject>
 #include <QString>
 
+#include "core/splitTunneling/splitTunnelingUpdateResult.h"
+#include "windowsfirewallpeertransaction.h"
+
 #include "../client/daemon/interfaceconfig.h"
 
 class IpAdressRange;
@@ -41,6 +44,7 @@ class WindowsFirewall final : public QObject {
   bool enableInterface(int vpnAdapterIndex);
   bool enableLanBypass(const QList<IPAddress>& ranges);
   bool enablePeerTraffic(const InterfaceConfig& config);
+  SplitTunnelingUpdateResult replacePeerTraffic(const InterfaceConfig &config);
   bool disablePeerTraffic(const QString& pubkey);
   bool disableKillSwitch();
   bool allowAllTraffic();
@@ -51,8 +55,12 @@ class WindowsFirewall final : public QObject {
   WindowsFirewall(HANDLE session, QObject* parent);
   HANDLE m_sessionHandle;
   bool m_init = false;
-  QList<uint64_t> m_activeRules;
-  QMultiMap<QString, uint64_t> m_peerRules;
+  QList<quint64> m_activeRules;
+  WindowsFirewallPeerTransaction::PeerRules m_peerRules;
+  bool m_peerRulesSynchronized = true;
+
+  WindowsFirewallPeerTransaction::Operations peerTransactionOperations(const InterfaceConfig &config);
+  bool writePeerFilters(const InterfaceConfig &config);
 
   bool allowTrafficForAppOnAll(const QString& exePath, int weight,
                                const QString& title);

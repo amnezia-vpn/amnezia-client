@@ -394,6 +394,14 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
 {
+    connect(m_coreController->m_vpnConnection.get(), &VpnConnection::splitTunnelingUpdateFailed,
+            m_coreController->m_ipSplitTunnelingUiController, [this](SplitTunnelingUpdateResult result) {
+                const QString message = result == SplitTunnelingUpdateResult::NotApplied
+                        ? tr("The saved split tunneling changes could not be applied. You can continue editing the "
+                             "list.")
+                        : tr("Failed to apply split tunneling changes. Reconnect to apply the saved list.");
+                emit m_coreController->m_ipSplitTunnelingUiController->errorOccurred(message);
+            });
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::routeModeChanged, m_coreController->m_ipSplitTunnelingUiController, &IpSplitTunnelingUiController::updateModel);

@@ -178,31 +178,36 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
     } else {
-        if (config.m_killSwitchEnabled) {
-            FirewallParams params { };
-            params.dnsServers.append(config.m_primaryDnsServer);
-            if (!config.m_secondaryDnsServer.isEmpty()) {
-                params.dnsServers.append(config.m_secondaryDnsServer);
-            }
-            if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-                params.blockAll = true;
-                if (config.m_excludedAddresses.size()) {
-                    params.allowNets = true;
-                    foreach (auto net, config.m_excludedAddresses) {
-                        params.allowAddrs.append(net.toUtf8());
-                    }
-                }
-            } else {
-                params.blockNets = true;
-                foreach (auto net, config.m_allowedIPAddressRanges) {
-                    params.blockAddrs.append(net.toString());
-                }
-            }
-            applyFirewallRules(params);
-        }
+        updateFirewall(config);
     }
 
     return (err == 0);
+}
+
+void WireguardUtilsLinux::updateFirewall(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        FirewallParams params { };
+        params.dnsServers.append(config.m_primaryDnsServer);
+        if (!config.m_secondaryDnsServer.isEmpty()) {
+            params.dnsServers.append(config.m_secondaryDnsServer);
+        }
+        if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
+            params.blockAll = true;
+            if (config.m_excludedAddresses.size()) {
+                params.allowNets = true;
+                foreach (auto net, config.m_excludedAddresses) {
+                    params.allowAddrs.append(net.toUtf8());
+                }
+            }
+        } else {
+            params.blockNets = true;
+            foreach (auto net, config.m_allowedIPAddressRanges) {
+                params.blockAddrs.append(net.toString());
+            }
+        }
+        applyFirewallRules(params);
+    }
 }
 
 bool WireguardUtilsLinux::deleteInterface() {
@@ -232,7 +237,33 @@ bool WireguardUtilsLinux::deleteInterface() {
 }
 
 // dummy implementations for now
-bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
+bool WireguardUtilsLinux::updatePeer(const InterfaceConfig &config)
+{
+    if (!configurePeer(config)) {
+        return false;
+    }
+    updateFirewall(config);
+    return true;
+}
+
+SplitTunnelingUpdateResult WireguardUtilsLinux::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        const auto result = LinuxFirewall::updateSplitTunneling(config);
+        if (result != SplitTunnelingUpdateResult::Applied) {
+            return result;
+        }
+    }
+    return configurePeer(config) ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::StateUnknown;
+}
+
+SplitTunnelingUpdateResult WireguardUtilsLinux::restoreSplitTunneling(const InterfaceConfig &config)
+{
+    return updateSplitTunneling(config);
+}
+
+bool WireguardUtilsLinux::configurePeer(const InterfaceConfig &config)
+{
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
@@ -277,6 +308,7 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     if (err != 0) {
         logger.error() << "Peer configuration failed:" << strerror(err);
     }
+
     return (err == 0);
 }
 
@@ -342,6 +374,18 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsLinux::getPeerStatus() {
     }
 
     return peerList;
+}
+
+RouteCreationResult WireguardUtilsLinux::createRoutePrefix(const IPAddress &prefix)
+{
+    if (!m_rtmonitor)
+        return { };
+    return createTunnelRoutes(prefix, [this](const auto &route) { return m_rtmonitor->createRoute(route); });
+}
+
+RouteCreationResult WireguardUtilsLinux::createExclusionRoute(const IPAddress &prefix)
+{
+    return m_rtmonitor ? m_rtmonitor->createExclusionRoute(prefix) : RouteCreationResult { };
 }
 
 bool WireguardUtilsLinux::updateRoutePrefix(const IPAddress& prefix) {
