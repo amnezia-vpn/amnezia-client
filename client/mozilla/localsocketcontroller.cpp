@@ -437,6 +437,13 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     emit statusUpdated(serverIpv4Gateway.toString(),
                        deviceIpv4Address.toString(), txBytes.toDouble(),
                        rxBytes.toDouble());
+
+    // Optional: older daemons do not report it.
+    QJsonValue lastHandshake = obj.value("lastHandshake");
+    if (lastHandshake.isDouble()) {
+      emit peerStatusUpdated(static_cast<qint64>(lastHandshake.toDouble()),
+                             static_cast<quint64>(txBytes.toDouble()));
+    }
     return;
   }
 

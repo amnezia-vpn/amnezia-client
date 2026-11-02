@@ -26,12 +26,20 @@ abstract class Protocol {
     protected lateinit var context: Context
     protected lateinit var state: MutableStateFlow<ProtocolState>
     protected lateinit var onError: (String) -> Unit
+    // Asks the service to reconnect, e.g. when the server's address changed
+    protected var requestReconnect: () -> Unit = {}
     protected var isInitialized: Boolean = false
 
-    fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+    fun initialize(
+        context: Context,
+        state: MutableStateFlow<ProtocolState>,
+        onError: (String) -> Unit,
+        requestReconnect: () -> Unit = {}
+    ) {
         this.context = context
         this.state = state
         this.onError = onError
+        this.requestReconnect = requestReconnect
         internalInit()
         isInitialized = true
     }

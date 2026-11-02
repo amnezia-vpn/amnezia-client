@@ -269,6 +269,15 @@ if(NOT ANDROID)
         test_common
     )
 
+    add_executable(test_endpoint_watchdog
+        testEndpointWatchdog.cpp
+    )
+
+    target_link_libraries(test_endpoint_watchdog PRIVATE
+        Qt6::Test
+        test_common
+    )
+
     add_executable(test_openssl_library
         testOpenSSLLibrary.cpp
     )
@@ -492,6 +501,7 @@ if(NOT ANDROID)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
+    add_test(NAME EndpointWatchdogTest             COMMAND test_endpoint_watchdog)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).

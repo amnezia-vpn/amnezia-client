@@ -382,6 +382,8 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+    connect(m_vpnProtocol.data(), &VpnProtocol::reconnectRequested, this, &VpnConnection::onProtocolReconnectRequested,
+            Qt::QueuedConnection);
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
@@ -565,6 +567,26 @@ void VpnConnection::reconnectToVpn() {
     }
 
     qDebug() << "Reconnect triggered. Reconnecting to the server";
+
+    setConnectionState(Vpn::ConnectionState::Reconnecting);
+
+    m_vpnProtocol->stop();
+    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(err);
+    }
+}
+
+void VpnConnection::onProtocolReconnectRequested()
+{
+    // Unlike reconnectToVpn() this does not require the Connected state: the
+    // protocol asks only while its tunnel is up, and after an earlier
+    // reconnect to an unreachable server the state may already be different.
+    if (m_vpnProtocol.isNull()) {
+        return;
+    }
+
+    qDebug() << "Reconnect requested by the protocol: the server stopped answering";
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 
