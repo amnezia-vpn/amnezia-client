@@ -36,11 +36,12 @@
 #include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/serialization/serialization.h"
+#include "logger.h"
 #include "secureQSettings.h"
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "utils/testCoreController.h"
 #include "utils/testUtils.h"
-#include "logger.h"
+#include "utils/xrayMatrix.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
@@ -53,7 +54,6 @@ namespace
         Refused,
         RefusedAndBroken,
         RefusedButWorks,
-        Explore,
     };
 
     using ConfigCheck = std::function<QString(const QJsonObject &client, const QJsonObject &server)>;
@@ -97,15 +97,6 @@ namespace
         return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
     }
 
-    QJsonObject vlessEntry(const QJsonObject &root, const QString &list)
-    {
-        for (const QJsonValue &v : root.value(list).toArray()) {
-            if (v.toObject().value(QStringLiteral("protocol")).toString() == QLatin1String("vless"))
-                return v.toObject();
-        }
-        return {};
-    }
-
     QString settingsSummary(const XrayConfigModel &m)
     {
         return QStringLiteral("transport=%1 security=%2 flow=%3 mode=%4 fp=%5 alpn=%6 sni=%7")
@@ -116,9 +107,10 @@ namespace
     void logSaved(const QJsonObject &client, const QJsonObject &server, ErrorCode saveError, qint64 saveMs,
                   const QString &state)
     {
-        qInfo().noquote() << "client outbound:" << compactJson(vlessEntry(client, QStringLiteral("outbounds")));
+        qInfo().noquote() << "client outbound:" << compactJson(xraytest::vlessEntry(client, QStringLiteral("outbounds")));
         qInfo().noquote() << "server streamSettings:"
-                          << compactJson(vlessEntry(server, QStringLiteral("inbounds")).value(QStringLiteral("streamSettings")));
+                          << compactJson(xraytest::vlessEntry(server, QStringLiteral("inbounds"))
+                                                 .value(QStringLiteral("streamSettings")));
         qInfo().noquote() << QStringLiteral("save: error=%1 %2 ms").arg(static_cast<int>(saveError)).arg(saveMs);
         qInfo().noquote() << "server:" << state;
     }
@@ -396,7 +388,6 @@ namespace
                            m.setMkcpTti(QStringLiteral("5"));
                        }, Expect::Refused });
 
-        // Runtime rules: xray -test passes all of these, only traffic shows the effect.
         cases.append({ "rule/xhttp/tls/vision dropped", [](XrayConfigModel &m) {
                            base(m, "xhttp", "tls", "xtls-rprx-vision");
                        }, Expect::Connects, false, {}, "vision-needs-raw" });
@@ -878,9 +869,6 @@ private slots:
                 QFAIL(qPrintable(QStringLiteral("validation refuses a working combination: traffic left through ") + ip));
             return;
         }
-        if (c.expect == Expect::Explore)
-            QSKIP(qPrintable(QStringLiteral("EXPLORE %1: %2")
-                                     .arg(c.name, ip.isEmpty() ? QStringLiteral("no traffic") : QStringLiteral("traffic flows"))));
 
         if (saveError != ErrorCode::NoError)
             QFAIL(qPrintable(QStringLiteral("save failed, error %1; server: %2").arg(static_cast<int>(saveError)).arg(state)));
@@ -949,8 +937,9 @@ private slots:
         QString importError;
         const QJsonObject imported = serialization::vless::Deserialize(link, &alias, &importError);
         qInfo().noquote() << "imported outbound:"
-                          << (imported.isEmpty() ? QStringLiteral("import failed: ") + importError
-                                                 : compactJson(vlessEntry(imported, QStringLiteral("outbounds"))));
+                          << (imported.isEmpty()
+                                      ? QStringLiteral("import failed: ") + importError
+                                      : compactJson(xraytest::vlessEntry(imported, QStringLiteral("outbounds"))));
         QVERIFY2(!imported.isEmpty(), qPrintable(QStringLiteral("import failed: ") + importError));
 
         QString why;

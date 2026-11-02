@@ -21,7 +21,6 @@ namespace
 {
     using JsonEdit = std::function<void(QJsonObject &)>;
 
-    // Probe = a value written straight into the generated JSON, bypassing the app, to pin down the core limit itself.
     struct Probe
     {
         QString name;
@@ -32,7 +31,6 @@ namespace
         QString flow;
         QString mode;
         JsonEdit edit;
-        // Empty = the core must accept.
         QString rejectWith;
     };
 
@@ -70,7 +68,6 @@ namespace
         };
     }
 
-    // Client: settings.vnext[0].users[0]. Server: settings.clients[0].
     JsonEdit onUser(const JsonEdit &fn)
     {
         return onSettings([fn](QJsonObject &settings) {

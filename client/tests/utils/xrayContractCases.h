@@ -12,8 +12,6 @@
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "utils/xrayMatrix.h"
 
-// One row = one field value. The row states what the app must say (validationErrors empty or not)
-// and what xray -test must say about the configs the app generates for it.
 namespace xraytest
 {
     enum class AppVerdict {
@@ -56,11 +54,8 @@ namespace xraytest
         AppVerdict app = AppVerdict::Ok;
         CoreVerdict core = CoreVerdict::Accept;
         QString coreMessage;
-        // Required when the app blocks what the core accepts.
         QString stricterWhy;
-        // The app does not match the row yet; the row keeps the verdict it should have.
         QString knownIssue;
-        // false: the QML field cannot produce this value, it only comes from import or old settings.
         bool viaUi = true;
 
         ContractCase &rule(const QString &id) { ruleId = id; return *this; }
@@ -93,7 +88,6 @@ namespace xraytest
                  QString(), [mode](XrayConfigModel &m) { m.setXhttpMode(mode); } };
     }
 
-    // Packet-up with every key-bearing placement on Header, so session, seq and data keys are all in use.
     inline ContractCtx xhttpHeaderKeysCtx()
     {
         return { QStringLiteral("xhttp/tls/packet-up/header-placements"), QStringLiteral("xhttp"), QStringLiteral("tls"),
@@ -143,8 +137,6 @@ namespace xraytest
         return value;
     }
 
-    // Runs the model the way the settings page does: load a stored server, apply the edits, validate.
-    // outServer receives the server config that saving would hand to the generator.
     inline QStringList contractErrors(const ContractCase &c, amnezia::XrayServerConfig *outServer = nullptr)
     {
         amnezia::XrayProtocolConfig stored;
@@ -174,8 +166,6 @@ namespace xraytest
         bool viaUi;
     };
 
-    // MinMaxRowType accepts digits only, up to 2147483647, and lifts Max to Min, so the last five rows
-    // only come from import or old settings.
     inline const RangeInput (&rangeInputs())[10]
     {
         static const RangeInput inputs[10] = {
@@ -232,7 +222,6 @@ namespace xraytest
                                         xRealityOne, kcpNone, kcpTls, xhttpHeaderKeysCtx() })
             out.append(kase(ctx, QStringLiteral("baseline"), {}));
 
-        // Port. The core side is not mapped yet: the client writes port.toInt(), the server inbound too.
         for (const QString port : { QStringLiteral("1"), QStringLiteral("65535") })
             out.append(kase(rawReality, QStringLiteral("port=") + port, set(&XrayConfigModel::setPort, port)));
         for (const QString port : { QStringLiteral("0"), QStringLiteral("65536"), QString() })
@@ -242,7 +231,6 @@ namespace xraytest
             out.append(kase(rawReality, QStringLiteral("port=") + port, set(&XrayConfigModel::setPort, port))
                                .blocked().explore().rawInput());
 
-        // SNI. The core takes any serverName at build time; REALITY also turns SNI into target "<sni>:443".
         const QString longName = QString(250, QLatin1Char('a')) + QStringLiteral(".com");
         struct SniRow
         {
@@ -282,7 +270,6 @@ namespace xraytest
             out.append(ipv6);
         }
 
-        // Fingerprint.
         const QStringList tls13Fingerprints = XrayConfigModel::realityFingerprintOptions();
         const QStringList tls12Fingerprints = { QStringLiteral("android"), QStringLiteral("360") };
         struct FpCtx
@@ -326,7 +313,6 @@ namespace xraytest
                            .rule(QStringLiteral("tls-fingerprint-kcp-ignored")).blocked()
                            .stricter(QStringLiteral("mKCP does not write the fingerprint")).rawInput());
 
-        // ALPN.
         for (const ContractCtx &ctx : { rawTls, xTlsOne }) {
             for (const QString alpn : { QStringLiteral("h2"), QStringLiteral("http/1.1"), QStringLiteral("h2,http/1.1"),
                                         QStringLiteral("HTTP/2"), QString() }) {
@@ -341,7 +327,6 @@ namespace xraytest
         }
         out.append(kase(rawReality, QStringLiteral("alpn=foo"), set(&XrayConfigModel::setAlpn, QStringLiteral("foo"))).rawInput());
 
-        // XHTTP host and path.
         for (const QString host : { QString(), QStringLiteral("cdn.example.com"), QStringLiteral("203.0.113.10") })
             out.append(kase(xTlsOne, QStringLiteral("host=") + shown(host), set(&XrayConfigModel::setXhttpHost, host)));
         for (const QString host : { QStringLiteral("bad host"), QStringLiteral("a:80"),
@@ -353,7 +338,6 @@ namespace xraytest
             out.append(kase(xTlsOne, QStringLiteral("path=") + shown(path), set(&XrayConfigModel::setXhttpPath, path)));
         out.append(kase(xTlsOne, QStringLiteral("path=/a b"), set(&XrayConfigModel::setXhttpPath, QStringLiteral("/a b"))).rawInput());
 
-        // XHTTP mode.
         for (const QString security : { QStringLiteral("none"), QStringLiteral("tls"), QStringLiteral("reality") }) {
             for (const QString &mode : XrayConfigModel::xhttpModeOptions()) {
                 QString ruleId = QStringLiteral("xhttp-mode-enum");
@@ -369,7 +353,6 @@ namespace xraytest
                            .rawInput());
         out.append(kase(xTlsOne, QStringLiteral("mode=empty"), set(&XrayConfigModel::setXhttpMode, QString())).rawInput());
 
-        // Uplink HTTP method per mode.
         for (const QString &mode : XrayConfigModel::xhttpModeOptions()) {
             const ContractCtx ctx = xhttpCtx(QStringLiteral("tls"), mode);
             for (const QString &method : XrayConfigModel::xhttpUplinkMethodOptions())
@@ -385,7 +368,6 @@ namespace xraytest
         out.append(kase(xTlsPacket, QStringLiteral("method=foo"), set(&XrayConfigModel::setXhttpUplinkMethod, QStringLiteral("foo")))
                            .blocked().stricter(QStringLiteral("the core takes any HTTP method token")).rawInput());
 
-        // Session, seq and uplink data placement per mode.
         for (const QString &mode : XrayConfigModel::xhttpModeOptions()) {
             const ContractCtx ctx = xhttpCtx(QStringLiteral("tls"), mode);
             for (const QString &pl : XrayConfigModel::xhttpSessionPlacementOptions()) {
@@ -416,7 +398,6 @@ namespace xraytest
                         set(&XrayConfigModel::setXhttpUplinkDataPlacement, QStringLiteral("foo")))
                            .blocked().reject(QStringLiteral("unsupported uplink data placement")).rawInput());
 
-        // Keys. The core checks none of them at build time.
         const ContractCtx keysCtx = xhttpHeaderKeysCtx();
         const QList<QPair<QString, Setter>> keyFields = {
             { QStringLiteral("sessionKey"), &XrayConfigModel::setXhttpSessionKey },
@@ -433,7 +414,6 @@ namespace xraytest
                 out.append(kase(keysCtx, field.first + QLatin1Char('=') + key, set(field.second, key)).rawInput());
         }
 
-        // Min-max ranges, rows in rangeInputs() order.
         const char *noRange = "Invalid integer range";
         const char *disabled = "cannot be disabled";
         const RangeExpect xPaddingBytes[10] = {
@@ -527,7 +507,6 @@ namespace xraytest
                        m.setXmuxEnabled(false);
                    }).rule(QStringLiteral("xmux-empty-defaults")));
 
-        // Single numbers.
         for (const QString v : { QString(), QStringLiteral("0"), QStringLiteral("1"), QStringLiteral("65536") })
             out.append(kase(xTlsPacket, QStringLiteral("uplinkChunkSize=") + shown(v), set(&XrayConfigModel::setXhttpUplinkChunkSize, v)));
         for (const QString v : { QStringLiteral("-1"), QStringLiteral("abc"), QStringLiteral("2147483648") })
@@ -558,7 +537,6 @@ namespace xraytest
                         set(&XrayConfigModel::setXmuxHKeepAlivePeriod, QStringLiteral("30")))
                            .rule(QStringLiteral("use-keepalive-h1-none")));
 
-        // mKCP. The generator clamps mtu, tti and cwndMultiplier, so the core never sees the UI out-of-range values.
         struct KcpRow
         {
             QString field;
@@ -619,7 +597,6 @@ namespace xraytest
                                .stricter(QStringLiteral("the generator writes 0 for a non-number")).rawInput());
         }
 
-        // xPadding obfuscation.
         for (const QString &pl : XrayConfigModel::xPaddingPlacementOptions()) {
             for (const QString &method : XrayConfigModel::xPaddingMethodOptions())
                 out.append(kase(xTlsOne, QStringLiteral("xPadding=%1/%2").arg(pl, method), [pl, method](XrayConfigModel &m) {
@@ -650,7 +627,6 @@ namespace xraytest
         out.append(kase(xTlsOne, QStringLiteral("xPaddingMethod=Random"), set(&XrayConfigModel::setXPaddingMethod, QStringLiteral("Random")))
                            .rawInput());
 
-        // Flow.
         const QString vision = QStringLiteral("xtls-rprx-vision");
         for (const ContractCtx &ctx : { rawTlsNoFlow, rawCtx(QStringLiteral("reality"), QString()) }) {
             for (const QString &flow : XrayConfigModel::flowOptions()) {
@@ -674,7 +650,6 @@ namespace xraytest
         out.append(kase(xTlsOne, QStringLiteral("flow=foo"), set(&XrayConfigModel::setFlow, QStringLiteral("foo")))
                            .blocked().stricter(QStringLiteral("the generator drops flow outside raw")).rawInput());
 
-        // Transport and security values.
         out.append(kase(rawTls, QStringLiteral("security=foo"), set(&XrayConfigModel::setSecurity, QStringLiteral("foo")))
                            .blocked().reject(QStringLiteral("Unknown security")).rawInput());
         out.append(kase(rawReality, QStringLiteral("transport=foo"), set(&XrayConfigModel::setTransport, QStringLiteral("foo")))

@@ -153,8 +153,7 @@ PageType {
                     TextFieldType {
                         Layout.fillWidth: true
                         Layout.topMargin: 12
-                        visible: XrayConfigModel.security !== "none"
-                                 && !(XrayConfigModel.security === "tls" && XrayConfigModel.alpn.toLowerCase() === "http/1.1")
+                        visible: XrayConfigModel.xmuxKeepAliveApplies
                         headerText: qsTr("hKeepAlivePeriod")
                         helperText: qsTr("HTTP keep-alive period. Integer, may be negative.")
                         textField.text: XrayConfigModel.xmuxHKeepAlivePeriod

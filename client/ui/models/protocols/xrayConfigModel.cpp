@@ -586,6 +586,11 @@ void XrayConfigModel::setXmuxHKeepAlivePeriod(const QString &value)
     assignField(m_protocolConfig.serverConfig.xhttp.xmux.hKeepAlivePeriod, value);
 }
 
+bool XrayConfigModel::xmuxKeepAliveApplies() const
+{
+    return !xrayEffective::xhttpUsesHttp11(m_protocolConfig.serverConfig);
+}
+
 void XrayConfigModel::assignField(QString &field, const QString &value)
 {
     if (field == value) {
@@ -766,7 +771,7 @@ QStringList XrayConfigModel::fingerprintOptions()
 
 QStringList XrayConfigModel::realityFingerprintOptions()
 {
-    return { "chrome", "firefox", "safari", "ios", "edge", "qq", "random" };
+    return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "edge", "qq", "random" };
 }
 
 QStringList XrayConfigModel::alpnOptions()
@@ -984,19 +989,6 @@ QStringList XrayConfigModel::validationErrors() const
         errs << tr("Fingerprints android and 360 do not support TLS 1.3 and do not work with xtls-rprx-vision");
     }
 
-    QStringList alpn;
-    for (const QString &part : (srv.alpn.isEmpty() ? QString::fromLatin1(protocols::xray::defaultAlpn) : srv.alpn)
-                                       .split(QLatin1Char(','))) {
-        QString t = part.trimmed();
-        if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
-            t = QStringLiteral("h2");
-        else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
-            t = QStringLiteral("http/1.1");
-        if (!t.isEmpty())
-            alpn << t;
-    }
-    const bool alpnHttp11Only = alpn.size() == 1 && alpn.first() == QLatin1String("http/1.1");
-
     if (!srv.isThirdPartyConfig) {
         auto checkValue = [&errs](const QString &field, const QString &value, const QStringList &allowed) {
             if (!allowed.contains(value)) {
@@ -1010,7 +1002,8 @@ QStringList XrayConfigModel::validationErrors() const
             checkValue(QStringLiteral("Fingerprint"), fingerprint, fingerprintOptions());
         }
         if (security == QLatin1String("tls")) {
-            for (const QString &a : alpn) {
+            const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(protocols::xray::defaultAlpn) : srv.alpn;
+            for (const QString &a : xrayEffective::alpnList(alpnEff)) {
                 checkValue(QStringLiteral("ALPN"), a, { "h2", "http/1.1" });
             }
         }
@@ -1038,12 +1031,9 @@ QStringList XrayConfigModel::validationErrors() const
     }
 
     if (srv.transport == QLatin1String("xhttp")) {
-        if (security == QLatin1String("tls") && tls12OnlyFingerprint && !alpnHttp11Only) {
+        if (security == QLatin1String("tls") && tls12OnlyFingerprint && !xrayEffective::xhttpUsesHttp11(srv)) {
             errs << tr("Fingerprints android and 360 do not offer HTTP/2; with XHTTP use ALPN http/1.1");
         }
-    }
-
-    if (srv.transport == QLatin1String("xhttp")) {
         if (!isValidHost(srv.xhttp.host)) {
             errs << tr("Host: enter a valid IP address or domain name");
         }

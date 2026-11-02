@@ -184,7 +184,7 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     // tls-wise settings
     const auto hasSecurity = query.hasQueryItem("security");
     const auto security = hasSecurity ? query.queryItemValue("security") : "none";
-    const auto tlsKey = security == "xtls" ? "xtlsSettings" : ( security == "tls" ? "tlsSettings" : "realitySettings" );
+    const auto tlsKey = security == "tls" ? "tlsSettings" : "realitySettings";
     if (security != "none")
     {
         QJsonIO::SetValue(stream, security, "security");
@@ -275,11 +275,11 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
     if (!server.security.isEmpty() && server.security != "none") {
         query.addQueryItem("security", server.security);
     }
-    
-    if (!server.flow.isEmpty() && (server.security == "xtls" || server.security == "reality" || server.security == "tls")) {
+
+    if (!server.flow.isEmpty() && (server.security == "reality" || server.security == "tls")) {
         query.addQueryItem("flow", server.flow);
     }
-    
+
     if (!server.serverName.isEmpty()) {
         query.addQueryItem("sni", server.serverName);
     }

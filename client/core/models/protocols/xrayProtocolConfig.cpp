@@ -546,6 +546,33 @@ namespace xrayEffective
     {
         return xhttpMode(srv.xhttp.mode);
     }
+
+    QStringList alpnList(const QString &alpn)
+    {
+        QStringList list;
+        for (const QString &part : alpn.split(QLatin1Char(','))) {
+            QString t = part.trimmed();
+            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("h2");
+            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("http/1.1");
+            if (!t.isEmpty())
+                list << t;
+        }
+        return list;
+    }
+
+    bool xhttpUsesHttp11(const XrayServerConfig &srv)
+    {
+        namespace px = protocols::xray;
+        const QString securityEff = security(srv);
+        if (securityEff.isEmpty() || securityEff == QLatin1String(px::securityNone))
+            return true;
+        if (securityEff != QLatin1String(px::securityTls))
+            return false;
+        const QStringList alpn = alpnList(srv.alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : srv.alpn);
+        return alpn == QStringList { QStringLiteral("http/1.1") };
+    }
 }
 
 QJsonObject XrayServerConfig::serverStreamSettings() const
@@ -576,18 +603,8 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
     if (securityEff == QLatin1String(px::securityTls)) {
         QJsonObject tlsSettings;
         tlsSettings[px::serverName] = sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : sni;
-        const QString alpnEff = alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : alpn;
-        QJsonArray alpnArray;
-        for (const QString &a : alpnEff.split(QLatin1Char(','))) {
-            QString t = a.trimmed();
-            if (t.isEmpty())
-                continue;
-            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
-                t = QStringLiteral("h2");
-            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
-                t = QStringLiteral("http/1.1");
-            alpnArray.append(t);
-        }
+        const QJsonArray alpnArray = QJsonArray::fromStringList(
+                xrayEffective::alpnList(alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : alpn));
         if (!alpnArray.isEmpty())
             tlsSettings[px::alpn] = alpnArray;
         if (clientSide && transport != QLatin1String(px::transportMkcp))
@@ -719,11 +736,7 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
             addMuxRange(px::xmuxCMaxReuseTimes, xmux.cMaxReuseTimesMin, xmux.cMaxReuseTimesMax);
             addMuxRange(px::xmuxHMaxRequestTimes, xmux.hMaxRequestTimesMin, xmux.hMaxRequestTimesMax);
             addMuxRange(px::xmuxHMaxReusableSecs, xmux.hMaxReusableSecsMin, xmux.hMaxReusableSecsMax);
-            const QJsonArray alpnWritten = streamSettings.value(px::tlsSettings).toObject().value(px::alpn).toArray();
-            const bool http11 = securityEff.isEmpty() || securityEff == QLatin1String(px::securityNone)
-                    || (securityEff == QLatin1String(px::securityTls) && alpnWritten.size() == 1
-                        && alpnWritten.at(0).toString() == QLatin1String("http/1.1"));
-            if (!xmux.hKeepAlivePeriod.isEmpty() && !http11)
+            if (!xmux.hKeepAlivePeriod.isEmpty() && !xrayEffective::xhttpUsesHttp11(*this))
                 mux[px::xmuxHKeepAlivePeriod] = xmux.hKeepAlivePeriod.toLongLong();
             if (!mux.isEmpty())
                 xo[px::xmux] = mux;
@@ -1006,17 +1019,10 @@ namespace
                 srv.fingerprint = normalizedFingerprint(tls.value(px::fingerprint).toString());
             }
 
-            QStringList alpnList;
-            for (const QJsonValue &value : tls.value(px::alpn).toArray()) {
-                QString entry = value.toString().trimmed();
-                if (entry.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
-                    entry = QStringLiteral("h2");
-                else if (entry.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
-                    entry = QStringLiteral("http/1.1");
-                if (!entry.isEmpty())
-                    alpnList << entry;
-            }
-            srv.alpn = alpnList.join(QLatin1Char(','));
+            QStringList alpnEntries;
+            for (const QJsonValue &value : tls.value(px::alpn).toArray())
+                alpnEntries << value.toString();
+            srv.alpn = xrayEffective::alpnList(alpnEntries.join(QLatin1Char(','))).join(QLatin1Char(','));
         }
 
         if (srv.transport == QLatin1String(px::transportXhttp)) {

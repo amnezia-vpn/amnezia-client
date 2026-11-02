@@ -20,12 +20,14 @@ PageType {
         return m === "packet-up" || ((m === "" || m === "auto") && XrayConfigModel.security !== "reality")
     }
     readonly property bool packetUpExplicit: XrayConfigModel.xhttpMode.toLowerCase() === "packet-up"
+    readonly property bool streamUpExplicit: XrayConfigModel.xhttpMode.toLowerCase() === "stream-up"
     readonly property bool streamOneEffective: {
         var m = XrayConfigModel.xhttpMode.toLowerCase()
         return m === "stream-one" || ((m === "" || m === "auto") && XrayConfigModel.security === "reality")
     }
     readonly property string uplinkDataPlacementEffective: XrayConfigModel.xhttpUplinkDataPlacement === ""
                                                          ? "body" : XrayConfigModel.xhttpUplinkDataPlacement.toLowerCase()
+    readonly property bool uplinkDataUsesKey: uplinkDataPlacementEffective === "header" || uplinkDataPlacementEffective === "cookie"
     function placementUsesKey(placement) {
         var p = placement.toLowerCase()
         return p === "header" || p === "cookie" || p === "query"
@@ -471,8 +473,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
-                    visible: root.packetUpExplicit
-                             && (root.uplinkDataPlacementEffective === "header" || root.uplinkDataPlacementEffective === "cookie")
+                    visible: root.packetUpExplicit && root.uplinkDataUsesKey
                     headerText: qsTr("UplinkDataKey")
                     textField.text: XrayConfigModel.xhttpUplinkDataKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -492,8 +493,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
-                    visible: root.packetUpExplicit
-                             && (root.uplinkDataPlacementEffective === "header" || root.uplinkDataPlacementEffective === "cookie")
+                    visible: root.packetUpExplicit && root.uplinkDataUsesKey
                     headerText: qsTr("UplinkChunkSize")
                     helperText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = core default (2–3 KB in cookie, 3–4 KB in header). Values below 64 are raised to 64.")
                     placeholderText: XrayConfigModel.xhttpUplinkChunkSizeDefault()
@@ -543,12 +543,12 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
-                    visible: XrayConfigModel.xhttpMode.toLowerCase() === "stream-up"
+                    visible: root.streamUpExplicit
                     text: qsTr("scStreamUpServerSecs")
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
-                    visible: XrayConfigModel.xhttpMode.toLowerCase() === "stream-up"
+                    visible: root.streamUpExplicit
                     minValue: XrayConfigModel.xhttpScStreamUpServerSecsMin
                     helperText: qsTr("≤ 2147483647. Empty = core default (20–80).")
                     maxValue: XrayConfigModel.xhttpScStreamUpServerSecsMax

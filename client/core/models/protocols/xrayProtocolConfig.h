@@ -184,6 +184,7 @@ namespace xrayEffective
     QString xPaddingPlacement(const QString &placement);
     QString xPaddingMethod(const QString &method);
     QString range(const QString &minV, const QString &maxV);
+    QStringList alpnList(const QString &alpn);
     void putRangeIfAny(QJsonObject &obj, const char *key, QString minV, QString maxV, const char *fallbackMin,
                        const char *fallbackMax);
 
@@ -192,6 +193,7 @@ namespace xrayEffective
     QString serverFlow(const XrayServerConfig &srv);
     QString network(const XrayServerConfig &srv);
     QString xhttpModeSent(const XrayServerConfig &srv);
+    bool xhttpUsesHttp11(const XrayServerConfig &srv);
 }
 
 QString sanitizeNativeConfig(const QString &nativeConfig);
