@@ -34,6 +34,23 @@
 #include "core/utils/serverConfigUtils.h"
 #include "vpnConnection.h"
 
+namespace
+{
+    QStringList parseAllowedIps(const QString &allowedIps)
+    {
+        QStringList result;
+        const QStringList values = allowedIps.split(',', Qt::SkipEmptyParts);
+        for (const QString &value : values) {
+            const QString normalizedValue = value.trimmed();
+            if (!normalizedValue.isEmpty()) {
+                result.append(normalizedValue);
+            }
+        }
+        result.removeDuplicates();
+        return result;
+    }
+}
+
 using namespace ProtocolUtils;
 
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
@@ -413,29 +430,38 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     // this block is for old native configs and for old self-hosted configs
     auto protocolName = m_vpnConfiguration.value(configKey::vpnProto).toString();
-    if (protocolName == ProtocolUtils::protoToString(Proto::Awg) || protocolName == ProtocolUtils::protoToString(Proto::WireGuard)) {
+    if (protocolName == ProtocolUtils::protoToString(Proto::Awg)
+        || protocolName == ProtocolUtils::protoToString(Proto::WireGuard)) {
         allowSiteBasedSplitTunneling = false;
-        auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
-        if (configData.value(configKey::allowedIps).isString()) {
-            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(configKey::allowedIps).toString().split(", "));
-            configData.insert(configKey::allowedIps, allowedIpsJsonArray);
-            m_vpnConfiguration.insert(protocolName + "_config_data", configData);
-        } else if (configData.value(configKey::allowedIps).isUndefined()) {
-            auto nativeConfig = configData.value(configKey::config).toString();
-            auto nativeConfigLines = nativeConfig.split("\n");
-            for (auto &line : nativeConfigLines) {
-                auto allowedIpsString = line.split("=", Qt::KeepEmptyParts);
-                if (allowedIpsString.size() >= 2 && allowedIpsString.first().trimmed() == QStringLiteral("AllowedIPs")) {
-                    QJsonArray allowedIpsJsonArray;
-                    const QString allowedIps = allowedIpsString.mid(1).join(QStringLiteral("=")).trimmed();
-                    for (const QString &allowedIp : allowedIps.split(",", Qt::SkipEmptyParts)) {
-                        allowedIpsJsonArray.append(allowedIp.trimmed());
-                    }
-                    configData.insert(configKey::allowedIps, allowedIpsJsonArray);
-                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
-                    break;
-                }
+        QJsonObject configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
+        const QJsonValue allowedIpsValue = configData.value(configKey::allowedIps);
+        QStringList allowedIps;
+        if (allowedIpsValue.isArray()) {
+            const QJsonArray allowedIpsJsonArray = allowedIpsValue.toArray();
+            for (const QJsonValue &value : allowedIpsJsonArray) {
+                allowedIps.append(parseAllowedIps(value.toString()));
             }
+        } else if (allowedIpsValue.isString()) {
+            allowedIps = parseAllowedIps(allowedIpsValue.toString());
+        }
+        if (allowedIps.isEmpty()) {
+            const QStringList nativeConfigLines = configData.value(configKey::config).toString().split('\n');
+            for (const QString &line : nativeConfigLines) {
+                const qsizetype separatorIndex = line.indexOf('=');
+                if (separatorIndex < 0
+                    || line.left(separatorIndex).trimmed().compare(QStringLiteral("AllowedIPs"), Qt::CaseInsensitive)
+                            != 0) {
+                    continue;
+                }
+
+                allowedIps = parseAllowedIps(line.mid(separatorIndex + 1));
+                break;
+            }
+        }
+        allowedIps.removeDuplicates();
+        if (!allowedIps.isEmpty()) {
+            configData.insert(configKey::allowedIps, QJsonArray::fromStringList(allowedIps));
+            m_vpnConfiguration.insert(protocolName + "_config_data", configData);
         }
 
         if (configData.value(configKey::persistentKeepAlive).isUndefined()) {
@@ -453,10 +479,9 @@ void VpnConnection::appendSplitTunnelingConfig()
             }
         }
 
-        QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
-        if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
-            allowSiteBasedSplitTunneling = true;
-        }
+        // Desktop site routes currently contain IPv4 addresses, therefore an IPv4 default route is sufficient.
+        // Requiring an additional IPv6 default route disables valid IPv4-only WG/AWG configurations.
+        allowSiteBasedSplitTunneling = allowedIps.contains(QStringLiteral("0.0.0.0/0"));
     }
 
     amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
