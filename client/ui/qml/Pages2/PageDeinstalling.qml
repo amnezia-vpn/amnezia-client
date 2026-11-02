@@ -18,6 +18,9 @@ PageType {
     Component.onCompleted: PageController.disableTabBar(true)
     Component.onDestruction: PageController.disableTabBar(false)
 
+    property string headerText: qsTr("Removing services from %1")
+    property string progressText: qsTr("Usually it takes no more than 5 minutes")
+
     SortFilterProxyModel {
         id: proxyServersModel
 
@@ -47,7 +50,7 @@ PageType {
                 Layout.fillWidth: true
 
                 backButtonVisible: false
-                title: qsTr("Removing services from %1").arg(name)
+                title: root.headerText.arg(name)
             }
 
             ProgressBarType {
@@ -75,7 +78,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Usually it takes no more than 5 minutes")
+                text: root.progressText
             }
         }
     }
