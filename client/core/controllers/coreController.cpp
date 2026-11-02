@@ -120,6 +120,9 @@ void CoreController::initModels()
     m_tProxyConfigModel = new TProxyConfigModel(this);
     setQmlContextProperty("TProxyConfigModel", m_tProxyConfigModel);
 
+    m_whatsAppProxyConfigModel = new WhatsAppProxyConfigModel(this);
+    setQmlContextProperty("WhatsAppProxyConfigModel", m_whatsAppProxyConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 
@@ -197,7 +200,7 @@ void CoreController::initControllers()
                                                      m_ikev2ConfigModel,
 #endif
                                                      m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel,
-                                                     m_tProxyConfigModel,
+                                                     m_tProxyConfigModel, m_whatsAppProxyConfigModel,
                                                      m_connectionController, this);
     setQmlContextProperty("InstallController", m_installUiController);
 

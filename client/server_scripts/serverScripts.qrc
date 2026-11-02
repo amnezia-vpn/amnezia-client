@@ -37,6 +37,10 @@
         <file>tproxy/Dockerfile</file>
         <file>tproxy/run_container.sh</file>
         <file>tproxy/start.sh</file>
+        <file>whatsapp_proxy/configure_container.sh</file>
+        <file>whatsapp_proxy/Dockerfile</file>
+        <file>whatsapp_proxy/run_container.sh</file>
+        <file>whatsapp_proxy/start.sh</file>
         <file>openvpn/configure_container.sh</file>
         <file>openvpn/Dockerfile</file>
         <file>openvpn/run_container.sh</file>

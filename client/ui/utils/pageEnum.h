@@ -50,6 +50,7 @@ namespace PageLoader
         PageServiceMtProxySettings,
         PageServiceTelemtSettings,
         PageServiceTProxySettings,
+        PageServiceWhatsAppProxySettings,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,

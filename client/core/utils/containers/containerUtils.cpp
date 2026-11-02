@@ -80,6 +80,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::MtProxy, QObject::tr("MTProxy (Telegram)") },
              { DockerContainer::Telemt, QObject::tr("Telemt (Telegram)") },
              { DockerContainer::TProxy, QObject::tr("TProxy (Telegram WEB)") },
+             { DockerContainer::WhatsAppProxy, QObject::tr("WhatsApp proxy") },
     };
 }
 
@@ -120,6 +121,8 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
                QObject::tr("Telegram MTProto proxy (Telemt, Rust)") },
              { DockerContainer::TProxy,
                QObject::tr("Telegram WEB proxy (tproxy-server)") },
+             { DockerContainer::WhatsAppProxy,
+               QObject::tr("WhatsApp chat and media proxy") },
     };
 }
 
@@ -203,6 +206,11 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
           QObject::tr("Telegram WEB proxy. Clients connect over HTTPS to a hostname; "
                       "the server relays traffic to official MTProxy. Requires a domain, "
                       "ports 80 and 443, and a WEB-capable Telegram app.") },
+        { DockerContainer::WhatsAppProxy,
+          QObject::tr("WhatsApp proxy based on the official Meta implementation. "
+                      "Relays chat traffic through the chat port and media through the media port. "
+                      "Users enter the server address and both ports in WhatsApp settings. "
+                      "Calls are not proxied.") },
     };
 }
 
@@ -235,6 +243,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::MtProxy: return Proto::MtProxy;
     case DockerContainer::Telemt: return Proto::Telemt;
     case DockerContainer::TProxy: return Proto::TProxy;
+    case DockerContainer::WhatsAppProxy: return Proto::WhatsAppProxy;
     default: return Proto::Unknown;
     }
 }
@@ -265,6 +274,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
     case DockerContainer::TProxy: return true;
+    case DockerContainer::WhatsAppProxy: return true;
     default:
         return false;
     }
@@ -283,6 +293,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
     case DockerContainer::TProxy: return true;
+    case DockerContainer::WhatsAppProxy: return true;
     default:
         return false;
     }
@@ -304,6 +315,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
     case DockerContainer::TProxy: return true;
+    case DockerContainer::WhatsAppProxy: return true;
     default: return false;
     }
 
@@ -373,6 +385,7 @@ bool ContainerUtils::isShareable(DockerContainer container)
     case DockerContainer::MtProxy: return false;
     case DockerContainer::Telemt: return false;
     case DockerContainer::TProxy: return false;
+    case DockerContainer::WhatsAppProxy: return false;
     default: return true;
     }
 }
@@ -409,6 +422,7 @@ int ContainerUtils::installPageOrder(DockerContainer container)
     case DockerContainer::MtProxy:
     case DockerContainer::Telemt:
     case DockerContainer::TProxy:
+    case DockerContainer::WhatsAppProxy:
         return 20;
     default: return 0;
     }

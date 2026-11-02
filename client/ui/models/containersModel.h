@@ -54,6 +54,7 @@ public:
         IsMtProxyRole,
         IsTelemtRole,
         IsTProxyRole,
+        IsWhatsAppProxyRole,
     };
     
     Q_INVOKABLE void openContainerSettings(int containerIndex);

@@ -59,6 +59,7 @@ PageType {
                     required property string detailedDescription
                     required property int dockerContainer
                     required property bool isTProxy
+                    required property bool isWhatsAppProxy
 
                     function install() {
                         if (isTProxy) {
@@ -94,6 +95,20 @@ PageType {
                                 ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
                             port.errorText = qsTr("The port must be in the range of 1 to 65535")
                             return
+                        }
+
+                        if (isWhatsAppProxy) {
+                            mediaPort.errorText = ""
+                            if (!mediaPort.textField.acceptableInput) {
+                                mediaPort.errorText = qsTr("The port must be in the range of 1 to 65535")
+                                return
+                            }
+                            if (mediaPort.textField.text === port.textField.text) {
+                                mediaPort.errorText = qsTr("The media port must differ from the chat port")
+                                return
+                            }
+                            WhatsAppProxyConfigModel.setPort(port.textField.text)
+                            WhatsAppProxyConfigModel.setMediaPort(mediaPort.textField.text)
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
@@ -155,9 +170,31 @@ PageType {
 
                             visible: !delegateRoot.isTProxy
 
-                            headerText: qsTr("Port")
+                            headerText: delegateRoot.isWhatsAppProxy ? qsTr("Chat port") : qsTr("Port")
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
+                        }
+
+                        TextFieldType {
+                            id: mediaPort
+
+                            Layout.fillWidth: true
+
+                            visible: delegateRoot.isWhatsAppProxy
+
+                            headerText: qsTr("Media port")
+                            textField.text: WhatsAppProxyConfigModel.defaultMediaPort()
+                            textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+                        }
+
+                        CaptionTextType {
+                            Layout.fillWidth: true
+
+                            visible: delegateRoot.isWhatsAppProxy
+
+                            text: qsTr("WhatsApp uses chat port 443 and media port 587 by default. With other ports, users must enter them in WhatsApp proxy settings and enable TLS for the chat port. Calls are not proxied.")
+                            color: AmneziaStyle.color.textAccent
                         }
 
                         TextFieldType {

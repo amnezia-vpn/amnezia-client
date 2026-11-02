@@ -32,6 +32,7 @@
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
 #include "ui/models/services/tProxyConfigModel.h"
+#include "ui/models/services/whatsAppProxyConfigModel.h"
 
 class InstallUiController : public QObject
 {
@@ -55,6 +56,7 @@ public:
                                MtProxyConfigModel* mtConfigModel,
                                TelemtConfigModel* telemtConfigModel,
                                TProxyConfigModel* tProxyConfigModel,
+                               WhatsAppProxyConfigModel* whatsAppProxyConfigModel,
                                ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
@@ -163,6 +165,7 @@ private:
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
     TProxyConfigModel* m_tProxyConfigModel;
+    WhatsAppProxyConfigModel* m_whatsAppProxyConfigModel;
     ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
