@@ -15,6 +15,7 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "windowsfirewall.h"
+#include "windowswcmsuspender.h"
 
 #pragma comment(lib, "iphlpapi.lib")
 
@@ -308,8 +309,50 @@ bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
   return result == NO_ERROR;
 }
 
+bool WireguardUtilsWindows::updateRoutePrefixes(
+    const QList<IPAddress>& prefixes) {
+  WcmSuspender suspender(prefixes.size());
+  bool ok = true;
+  for (const IPAddress& prefix : prefixes) {
+    if (!updateRoutePrefix(prefix)) {
+      ok = false;
+    }
+  }
+  return ok;
+}
+
+bool WireguardUtilsWindows::deleteRoutePrefixes(
+    const QList<IPAddress>& prefixes) {
+  WcmSuspender suspender(prefixes.size());
+  bool ok = true;
+  for (const IPAddress& prefix : prefixes) {
+    if (!deleteRoutePrefix(prefix)) {
+      ok = false;
+    }
+  }
+  return ok;
+}
+
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
   return m_routeMonitor->addExclusionRoute(prefix);
+}
+
+bool WireguardUtilsWindows::addExclusionRoutes(
+    const QList<IPAddress>& prefixes) {
+  if (!m_routeMonitor) {
+    return false;
+  }
+  m_routeMonitor->addExclusionRoutes(prefixes);
+  return true;
+}
+
+bool WireguardUtilsWindows::deleteExclusionRoutes(
+    const QList<IPAddress>& prefixes) {
+  if (!m_routeMonitor) {
+    return false;
+  }
+  m_routeMonitor->deleteExclusionRoutes(prefixes);
+  return true;
 }
 
 bool WireguardUtilsWindows::deleteExclusionRoute(const IPAddress& prefix) {
