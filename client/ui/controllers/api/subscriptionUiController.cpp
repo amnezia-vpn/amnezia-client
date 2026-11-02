@@ -459,6 +459,7 @@ bool SubscriptionUiController::importFreeFromGateway()
 void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const QString &solution)
 {
     if (!m_captchaState.isPending) {
+        emit captchaFlowDismissRequested();
         return;
     }
 
@@ -484,8 +485,7 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
             &retryCaptcha);
 
     if (errorCode == ErrorCode::NoError) {
-        m_captchaState.isPending = false;
-        emit captchaFlowDismissRequested();
+        finishCaptchaFlow();
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
         return;
     }
@@ -498,7 +498,7 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
         return;
     }
 
-    m_captchaState.isPending = false;
+    finishCaptchaFlow();
     emit errorOccurred(errorCode);
 }
 
@@ -525,7 +525,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
         } else if (errorCode == ErrorCode::NoError) {
             emitCaptchaUpdateSuccess();
         } else {
-            m_captchaState.isPending = false;
+            finishCaptchaFlow();
             if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
                 emit subscriptionExpiredOnServer();
             } else {
@@ -554,7 +554,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
         emit captchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
                              captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
     } else if (errorCode != ErrorCode::NoError) {
-        m_captchaState.isPending = false;
+        finishCaptchaFlow();
         emit errorOccurred(errorCode);
     }
 }
@@ -584,7 +584,7 @@ void SubscriptionUiController::resolveUpdateCaptcha(const QString &captchaId, co
         return;
     }
 
-    m_captchaState.isPending = false;
+    finishCaptchaFlow();
     if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
         emit subscriptionExpiredOnServer();
     } else {
@@ -670,6 +670,12 @@ void SubscriptionUiController::emitUpdateSuccess(bool wasSubscriptionExpired, bo
     }
 }
 
+void SubscriptionUiController::finishCaptchaFlow()
+{
+    m_captchaState.isPending = false;
+    emit captchaFlowDismissRequested();
+}
+
 void SubscriptionUiController::emitCaptchaUpdateSuccess()
 {
     const bool fromValidateConfig = m_captchaState.fromValidateConfig;
@@ -677,8 +683,7 @@ void SubscriptionUiController::emitCaptchaUpdateSuccess()
     const bool reloadServiceConfig = m_captchaState.reloadServiceConfig;
     const QString newCountryName = m_captchaState.newCountryName;
 
-    m_captchaState.isPending = false;
-    emit captchaFlowDismissRequested();
+    finishCaptchaFlow();
 
     if (fromValidateConfig) {
         emit configValidated(true);
