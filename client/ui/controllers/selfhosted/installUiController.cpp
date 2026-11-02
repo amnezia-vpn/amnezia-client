@@ -509,6 +509,22 @@ void InstallUiController::rebootServer(const QString &serverId)
     }
 }
 
+void InstallUiController::updateServerPackages(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+
+    bool isRebootRequired = false;
+    const auto errorCode = m_installController->updateServerPackages(serverId, isRebootRequired);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+    } else if (isRebootRequired) {
+        emit updateServerPackagesFinished(
+                tr("Packages on server '%1' were updated. Reboot the server to apply the updates").arg(serverName));
+    } else {
+        emit updateServerPackagesFinished(tr("Packages on server '%1' were updated").arg(serverName));
+    }
+}
+
 void InstallUiController::removeServer(const QString &serverId)
 {
     if (serverId.isEmpty()) {
