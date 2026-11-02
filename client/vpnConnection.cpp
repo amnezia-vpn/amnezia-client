@@ -36,13 +36,32 @@
 
 using namespace ProtocolUtils;
 
+namespace
+{
+#ifdef AMNEZIA_DESKTOP
+    constexpr int splitDnsConcurrentLookupLimit = 16;
+    constexpr int splitDnsPreparationTimeoutMs = 10000;
+#endif
+
+}
+
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),
       m_appSettingsRepository(appSettingsRepository),
       m_checkTimer(this),
       m_connectionState(Vpn::ConnectionState::Disconnected)
+#ifdef AMNEZIA_DESKTOP
+    , m_splitDnsTimeoutTimer(this)
+#endif
 {
+#ifdef AMNEZIA_DESKTOP
+    m_splitDnsTimeoutTimer.setSingleShot(true);
+    connect(&m_splitDnsTimeoutTimer, &QTimer::timeout, this, [this]() {
+        finishSplitTunnelingPreparation(m_splitDnsRequestId, true);
+    });
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::setConnectionState);
@@ -52,6 +71,10 @@ VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureA
 
 VpnConnection::~VpnConnection()
 {
+#ifdef AMNEZIA_DESKTOP
+    ++m_splitDnsRequestId;
+    cancelSplitTunnelingPreparation();
+#endif
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -334,11 +357,27 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
                         .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
 
+#ifdef AMNEZIA_DESKTOP
+    ++m_splitDnsRequestId;
+    cancelSplitTunnelingPreparation();
+#endif
+
     m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
     setConnectionState(Vpn::ConnectionState::Connecting);
-
     m_vpnConfiguration = vpnConfiguration;
+    m_currentContainer = container;
 
+#ifdef AMNEZIA_DESKTOP
+    if (prepareSplitTunnelingSites(container)) {
+        return;
+    }
+#endif
+
+    startVpnConnection(container);
+}
+
+void VpnConnection::startVpnConnection(DockerContainer container)
+{
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
@@ -377,6 +416,126 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     }
 }
 
+#ifdef AMNEZIA_DESKTOP
+bool VpnConnection::prepareSplitTunnelingSites(DockerContainer container)
+{
+    if ((!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard)
+        || !m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
+        return false;
+    }
+
+    const RouteMode routeMode = m_appSettingsRepository->routeMode();
+    if (routeMode == RouteMode::VpnAllSites) {
+        return false;
+    }
+
+    const QVariantMap sites = m_appSettingsRepository->vpnSites(routeMode);
+    for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+        const QString site = i.key().trimmed();
+        if (!site.isEmpty() && !NetworkUtilities::checkIpSubnetFormat(site)) {
+            m_pendingSplitDomains.append(site);
+        }
+    }
+    m_pendingSplitDomains.removeDuplicates();
+
+    if (m_pendingSplitDomains.isEmpty()) {
+        return false;
+    }
+
+    m_pendingSplitContainer = container;
+    m_pendingSplitRouteMode = routeMode;
+    m_resolvedSplitSites.clear();
+    m_activeSplitDnsLookups.clear();
+    m_splitDnsPreparationActive = true;
+    m_splitDnsTimeoutTimer.start(splitDnsPreparationTimeoutMs);
+
+    qDebug() << "VpnConnection::prepareSplitTunnelingSites: resolving"
+             << m_pendingSplitDomains.size() << "domains before activating WG/AWG";
+    startNextSplitDnsLookups(m_splitDnsRequestId);
+    return true;
+}
+
+void VpnConnection::startNextSplitDnsLookups(quint64 requestId)
+{
+    if (!m_splitDnsPreparationActive || requestId != m_splitDnsRequestId) {
+        return;
+    }
+
+    while (!m_pendingSplitDomains.isEmpty()
+           && m_activeSplitDnsLookups.size() < splitDnsConcurrentLookupLimit) {
+        const QString site = m_pendingSplitDomains.takeFirst();
+        const QSharedPointer<int> lookupId = QSharedPointer<int>::create(-1);
+        *lookupId = QHostInfo::lookupHost(site, this, [this, requestId, site, lookupId](const QHostInfo &hostInfo) {
+            if (!m_splitDnsPreparationActive || requestId != m_splitDnsRequestId) {
+                return;
+            }
+
+            m_activeSplitDnsLookups.remove(*lookupId);
+            QStringList resolvedIps;
+            for (const QHostAddress &address : hostInfo.addresses()) {
+                if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+                    resolvedIps.append(address.toString());
+                }
+            }
+            resolvedIps.removeDuplicates();
+            resolvedIps.sort();
+            if (!resolvedIps.isEmpty()) {
+                m_resolvedSplitSites.insert(site, resolvedIps);
+            }
+
+            startNextSplitDnsLookups(requestId);
+        });
+        m_activeSplitDnsLookups.insert(*lookupId);
+    }
+
+    if (m_pendingSplitDomains.isEmpty() && m_activeSplitDnsLookups.isEmpty()) {
+        finishSplitTunnelingPreparation(requestId, false);
+    }
+}
+
+void VpnConnection::finishSplitTunnelingPreparation(quint64 requestId, bool timedOut)
+{
+    if (!m_splitDnsPreparationActive || requestId != m_splitDnsRequestId) {
+        return;
+    }
+
+    const DockerContainer container = m_pendingSplitContainer;
+    const RouteMode routeMode = m_pendingSplitRouteMode;
+    const QMap<QString, QStringList> resolvedSites = m_resolvedSplitSites;
+    const qsizetype unresolvedCount = m_pendingSplitDomains.size() + m_activeSplitDnsLookups.size();
+    cancelSplitTunnelingPreparation();
+
+    if (!resolvedSites.isEmpty()) {
+        m_appSettingsRepository->replaceVpnSiteIps(routeMode, resolvedSites);
+    }
+
+    if (timedOut) {
+        qWarning() << "VpnConnection::finishSplitTunnelingPreparation: DNS preparation timed out;"
+                   << unresolvedCount << "domains will use their last stored addresses";
+    } else {
+        qDebug() << "VpnConnection::finishSplitTunnelingPreparation: resolved"
+                 << resolvedSites.size() << "domains";
+    }
+
+    startVpnConnection(container);
+}
+
+void VpnConnection::cancelSplitTunnelingPreparation()
+{
+    m_splitDnsTimeoutTimer.stop();
+    m_splitDnsPreparationActive = false;
+    const QSet<int> lookupIds = m_activeSplitDnsLookups;
+    m_activeSplitDnsLookups.clear();
+    for (const int lookupId : lookupIds) {
+        QHostInfo::abortHostLookup(lookupId);
+    }
+    m_pendingSplitDomains.clear();
+    m_resolvedSplitSites.clear();
+    m_pendingSplitContainer = DockerContainer::None;
+    m_pendingSplitRouteMode = RouteMode::VpnAllSites;
+}
+#endif
+
 void VpnConnection::createProtocolConnections()
 {
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
@@ -385,8 +544,9 @@ void VpnConnection::createProtocolConnections()
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        const auto connectionType = static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection);
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, connectionType);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, connectionType);
     });
 #endif
 }
@@ -554,7 +714,8 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
     return QString("%1 %2").arg(QString::number(mbps, 'f', 2)).arg(tr("Mbps")); // Mbit/s
 }
 
-void VpnConnection::reconnectToVpn() {
+void VpnConnection::reconnectToVpn()
+{
     if (m_vpnProtocol.isNull())
         return;
 
@@ -568,6 +729,19 @@ void VpnConnection::reconnectToVpn() {
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 
+#ifdef AMNEZIA_DESKTOP
+    if (m_currentContainer != DockerContainer::None) {
+        ++m_splitDnsRequestId;
+        cancelSplitTunnelingPreparation();
+        if (prepareSplitTunnelingSites(m_currentContainer)) {
+            return;
+        }
+
+        startVpnConnection(m_currentContainer);
+        return;
+    }
+#endif
+
     m_vpnProtocol->stop();
     if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
         setConnectionState(Vpn::ConnectionState::Error);
@@ -577,6 +751,11 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
+#ifdef AMNEZIA_DESKTOP
+    ++m_splitDnsRequestId;
+    cancelSplitTunnelingPreparation();
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();

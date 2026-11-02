@@ -122,9 +122,13 @@ QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
 
 QStringList SecureAppSettingsRepository::siteIpList(const QVariant &value)
 {
-    // QVariant::toStringList() handles both a QStringList/QVariantList and a single QString
-    // (a single string is returned as a one-element list), which covers the legacy format.
     QStringList result = value.toStringList();
+    if (result.isEmpty()) {
+        const QString legacyValue = value.toString();
+        if (!legacyValue.isEmpty()) {
+            result.append(legacyValue);
+        }
+    }
     result.removeAll(QString());
     result.removeDuplicates();
     return result;
@@ -140,20 +144,22 @@ bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site
     QVariantMap sites = vpnSites(mode);
     const bool siteExisted = sites.contains(site);
 
-    if (siteExisted && ips.isEmpty())
+    if (siteExisted && ips.isEmpty()) {
         return false;
+    }
 
     QStringList mergedIps = siteIpList(sites.value(site));
     bool changed = !siteExisted;
     for (const QString &ip : ips) {
-        if (!ip.isEmpty() && !mergedIps.contains(ip)) {
+        if (NetworkUtilities::checkIPv4Format(ip) && !mergedIps.contains(ip)) {
             mergedIps.append(ip);
             changed = true;
         }
     }
 
-    if (!changed)
+    if (!changed) {
         return false;
+    }
 
     sites.insert(site, mergedIps);
     setVpnSites(mode, sites);
@@ -169,8 +175,9 @@ void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString
 
         QStringList mergedIps = siteIpList(allSites.value(site));
         for (const QString &ip : i.value()) {
-            if (!ip.isEmpty() && !mergedIps.contains(ip))
+            if (NetworkUtilities::checkIPv4Format(ip) && !mergedIps.contains(ip)) {
                 mergedIps.append(ip);
+            }
         }
 
         allSites.insert(site, mergedIps);
@@ -178,6 +185,37 @@ void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString
 
     setVpnSites(mode, allSites);
     emit sitesChanged(mode);
+}
+
+void SecureAppSettingsRepository::replaceVpnSiteIps(RouteMode mode, const QMap<QString, QStringList> &sites)
+{
+    QVariantMap allSites = vpnSites(mode);
+    bool changed = false;
+
+    for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
+        if (!allSites.contains(i.key())) {
+            continue;
+        }
+
+        QStringList validIps;
+        for (const QString &ip : i.value()) {
+            if (NetworkUtilities::checkIPv4Format(ip) && !validIps.contains(ip)) {
+                validIps.append(ip);
+            }
+        }
+        validIps.sort();
+        if (validIps.isEmpty() || siteIpList(allSites.value(i.key())) == validIps) {
+            continue;
+        }
+
+        allSites.insert(i.key(), validIps);
+        changed = true;
+    }
+
+    if (changed) {
+        setVpnSites(mode, allSites);
+        emit sitesChanged(mode);
+    }
 }
 
 void SecureAppSettingsRepository::removeVpnSite(RouteMode mode, const QString &site)
