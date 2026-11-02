@@ -124,6 +124,59 @@ private slots:
         QCOMPARE(importResult.config, config);
     }
 
+    void testVlessLinkRoundTrip()
+    {
+        const QJsonObject extra {
+            { "xPaddingObfsMode", true },
+            { "xPaddingKey", "x_pad" },
+            { "xPaddingPlacement", "cookie" },
+            { "xPaddingBytes", "200-400" },
+            { "xmux", QJsonObject { { "maxConnections", 4 } } },
+        };
+        const QString pin = QStringLiteral("0a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9");
+
+        serialization::VlessServerObject server;
+        server.address = QStringLiteral("203.0.113.10");
+        server.port = 443;
+        server.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        server.flow.clear();
+        server.network = QStringLiteral("xhttp");
+        server.security = QStringLiteral("tls");
+        server.serverName = QStringLiteral("www.example.com");
+        server.fingerprint = QStringLiteral("chrome");
+        server.alpn = QStringLiteral("h2,http/1.1");
+        server.xhttpHost = QStringLiteral("www.example.com");
+        server.xhttpPath = QStringLiteral("/p");
+        server.xhttpMode = QStringLiteral("packet-up");
+        server.xhttpExtra = QString::fromUtf8(QJsonDocument(extra).toJson(QJsonDocument::Compact));
+        server.tlsPin = pin;
+
+        const QString link = serialization::vless::Serialize(server, QStringLiteral("rt"));
+        QVERIFY2(link.startsWith(QStringLiteral("vless://")), qPrintable(link));
+
+        QString alias;
+        QString error;
+        const QJsonObject root = serialization::vless::Deserialize(link, &alias, &error);
+        QVERIFY2(!root.isEmpty(), qPrintable(error + QStringLiteral(" ") + link));
+
+        const QJsonObject stream =
+                root.value("outbounds").toArray().first().toObject().value("streamSettings").toObject();
+        QCOMPARE(stream.value("network").toString(), QStringLiteral("xhttp"));
+        QCOMPARE(stream.value("security").toString(), QStringLiteral("tls"));
+
+        const QJsonObject xhttp = stream.value("xhttpSettings").toObject();
+        QCOMPARE(xhttp.value("host").toString(), server.xhttpHost);
+        QCOMPARE(xhttp.value("path").toString(), server.xhttpPath);
+        QCOMPARE(xhttp.value("mode").toString(), server.xhttpMode);
+        QCOMPARE(xhttp.value("extra").toObject(), extra);
+
+        const QJsonObject tls = stream.value("tlsSettings").toObject();
+        QCOMPARE(tls.value("pinnedPeerCertSha256").toString(), pin);
+        QCOMPARE(tls.value("serverName").toString(), server.serverName);
+        QCOMPARE(tls.value("fingerprint").toString(), server.fingerprint);
+        QCOMPARE(tls.value("alpn").toArray(), QJsonArray({ "h2", "http/1.1" }));
+    }
+
     void testVmessNew()
     {
         const QString configData = getEnvValue("THIRD_PARTY_VMESS_NEW_IMPORT_DATA");

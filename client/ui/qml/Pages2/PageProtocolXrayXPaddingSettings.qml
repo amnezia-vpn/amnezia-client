@@ -15,6 +15,15 @@ import "../Components"
 PageType {
     id: root
 
+    readonly property string placementEffective: XrayConfigModel.xPaddingPlacement === ""
+                                                 ? "cookie" : XrayConfigModel.xPaddingPlacement.toLowerCase().replace(/ /g, "")
+    readonly property bool bytesDefault: (XrayConfigModel.xPaddingBytesMin === "" && XrayConfigModel.xPaddingBytesMax === "")
+                                         || (XrayConfigModel.xPaddingBytesMin === "0" && XrayConfigModel.xPaddingBytesMax === "0")
+    readonly property string bytesMinEffective: XrayConfigModel.xPaddingBytesMin !== "" ? XrayConfigModel.xPaddingBytesMin
+                                                                                         : XrayConfigModel.xPaddingBytesMinDefault()
+    readonly property string bytesMaxEffective: XrayConfigModel.xPaddingBytesMax !== "" ? XrayConfigModel.xPaddingBytesMax
+                                                                                         : XrayConfigModel.xPaddingBytesMaxDefault()
+
     FlickableType {
         id: flickable
 
@@ -50,9 +59,10 @@ PageType {
 
                 ListItemType {
                     Layout.fillWidth: true
-                    enabled: XrayConfigModel.xPaddingObfsMode
                     text: qsTr("xPaddingBytes")
-                    subtitle: (XrayConfigModel.xPaddingBytesMin === "" && XrayConfigModel.xPaddingBytesMax === "") ? qsTr("Default") : (XrayConfigModel.xPaddingBytesMin !== "" ? XrayConfigModel.xPaddingBytesMin : XrayConfigModel.xPaddingBytesMinDefault()) + "—" + (XrayConfigModel.xPaddingBytesMax !== "" ? XrayConfigModel.xPaddingBytesMax : XrayConfigModel.xPaddingBytesMaxDefault())
+                    subtitle: root.bytesDefault
+                              ? qsTr("Default (%1—%2)").arg(XrayConfigModel.xPaddingBytesMinDefault()).arg(XrayConfigModel.xPaddingBytesMaxDefault())
+                              : root.bytesMinEffective + "—" + root.bytesMaxEffective
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                     onClicked: {
                         PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
@@ -69,7 +79,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
-                    enabled: XrayConfigModel.xPaddingObfsMode
+                    enabled: XrayConfigModel.xPaddingObfsMode && root.placementEffective !== "header"
                     Layout.topMargin: 12
                     headerText: qsTr("xPaddingKey")
                     placeholderText: XrayConfigModel.xPaddingKeyDefault()
@@ -85,6 +95,7 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     enabled: XrayConfigModel.xPaddingObfsMode
+                             && (root.placementEffective === "header" || root.placementEffective === "queryinheader")
                     headerText: qsTr("xPaddingHeader")
                     placeholderText: XrayConfigModel.xPaddingHeaderDefault()
                     textField.text: XrayConfigModel.xPaddingHeader
