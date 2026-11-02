@@ -713,7 +713,7 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
     }
 
     if (dockerDaemonContainerMissing(stdOut, ContainerUtils::containerToString(container))) {
-        qDebug() << "configureContainerWorker: Docker daemon reports container missing/stopped, output:" << stdOut;
+        qDebug() << "configureContainerWorker: Docker daemon reports container missing/stopped";
         return ErrorCode::ServerContainerMissingError;
     }
 
@@ -1780,8 +1780,6 @@ void InstallController::updateContainerConfigAfterInstallation(DockerContainer c
         }
     } else if (container == DockerContainer::MtProxy) {
         if (auto* mtProxyConfig = containerConfig.getMtProxyProtocolConfig()) {
-            qDebug() << "amnezia mtproxy" << stdOut;
-
             static const QRegularExpression reSecret(
                     QStringLiteral(R"(\[\*\]\s+Secret:\s+([0-9a-fA-F]{32}))"),
                     QRegularExpression::CaseInsensitiveOption);
@@ -1805,8 +1803,6 @@ void InstallController::updateContainerConfigAfterInstallation(DockerContainer c
         }
     } else if (container == DockerContainer::Telemt) {
         if (auto *telemtConfig = containerConfig.getTelemtProtocolConfig()) {
-            qDebug() << "amnezia-telemt configure stdout" << stdOut;
-
             static const QRegularExpression reSecret(
                     QStringLiteral(R"(\[\*\]\s+Secret:\s+([0-9a-fA-F]{32}))"),
                     QRegularExpression::CaseInsensitiveOption);

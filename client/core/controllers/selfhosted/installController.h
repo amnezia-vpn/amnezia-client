@@ -99,6 +99,8 @@ signals:
     void clientAppendRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
 
 private:
+    friend class TestProxyConfigurationLogging;
+
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
