@@ -29,6 +29,10 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_menu.addSeparator();
     m_trayActionConnect = m_menu.addAction(tr("Connect"), this, [this](){ emit connectRequested(); });
     m_trayActionDisconnect = m_menu.addAction(tr("Disconnect"), this, [this](){ emit disconnectRequested(); });
+    m_trayActionSplitTunneling = m_menu.addAction(tr("Split tunneling"));
+    m_trayActionSplitTunneling->setCheckable(true);
+    connect(m_trayActionSplitTunneling, &QAction::triggered, this,
+            &SystemTrayNotificationHandler::splitTunnelingToggleRequested);
 
     m_menu.addSeparator();
 
@@ -75,6 +79,7 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
     m_trayActionShow->setText(tr("Show") + " " + APPLICATION_NAME);
     m_trayActionConnect->setText(tr("Connect"));
     m_trayActionDisconnect->setText(tr("Disconnect"));
+    m_trayActionSplitTunneling->setText(tr("Split tunneling"));
     m_trayActionVisitWebSite->setText(tr("Visit Website"));
     m_trayActionQuit->setText(tr("Quit")+ " " + APPLICATION_NAME);
 }
@@ -82,6 +87,11 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
 void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUrl) {
     qDebug() << "Updated website URL:" << newWebsiteUrl;
     websiteUrl = newWebsiteUrl;
+}
+
+void SystemTrayNotificationHandler::setSplitTunnelingEnabled(bool enabled)
+{
+    m_trayActionSplitTunneling->setChecked(enabled);
 }
 
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
@@ -148,6 +158,10 @@ void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
         m_trayActionDisconnect->setEnabled(true);
         setTrayIcon(QString(resourcesPath).arg(DisconnectedTrayIconName));
     }
+
+    m_trayActionSplitTunneling->setEnabled(state == Vpn::ConnectionState::Disconnected
+                                           || state == Vpn::ConnectionState::Connected
+                                           || state == Vpn::ConnectionState::Error);
 
     //#ifdef Q_OS_MAC
     //    // Get theme from current user (note, this app can be launched as root application and in this case this theme can be different from theme of real current user )
