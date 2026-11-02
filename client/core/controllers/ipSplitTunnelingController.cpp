@@ -1,5 +1,6 @@
 #include "ipSplitTunnelingController.h"
 #include "core/utils/networkUtilities.h"
+#include "daemon/wildcardsite.h"
 #include <QJsonObject>
 #include <QDebug>
 
@@ -85,7 +86,15 @@ bool IpSplitTunnelingController::addSite(const QString &hostname)
         processSite(normalizedHostname, {});
         return true;
     }
-    
+
+    if (WildcardSite::isPattern(normalizedHostname)) {
+        if (m_currentRouteMode != RouteMode::VpnAllExceptSites) {
+            return false;
+        }
+        processSite(normalizedHostname, {});
+        return true;
+    }
+
     if (addSiteInternal(normalizedHostname, {})) {
         QHostInfo::lookupHost(normalizedHostname, this, SLOT(onHostResolved(QHostInfo)));
         return true;
@@ -159,6 +168,10 @@ QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) c
         return normalized;
     }
 
+    if (WildcardSite::isPattern(normalized)) {
+        return WildcardSite::canonicalize(normalized);
+    }
+
     const QStringList parts = normalized.split("/", Qt::SkipEmptyParts);
     return parts.isEmpty() ? QString() : parts.first();
 }
@@ -168,12 +181,14 @@ bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
     if (hostname.isEmpty()) {
         return false;
     }
+    if (WildcardSite::isPattern(hostname)) {
+        return WildcardSite::isValid(hostname);
+    }
     if (!hostname.contains(".") && !NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
         return false;
     }
     return true;
 }
-
 
 void IpSplitTunnelingController::onHostResolved(const QHostInfo &hostInfo)
 {
@@ -289,4 +304,3 @@ QByteArray IpSplitTunnelingController::exportSitesToJson() const
     QJsonDocument jsonDocument(jsonArray);
     return jsonDocument.toJson();
 }
-

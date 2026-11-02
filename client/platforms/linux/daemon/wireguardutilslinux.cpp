@@ -105,7 +105,6 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     out << "private_key=" << QString(privateKey.toHex()) << "\n";
     out << "replace_peers=true\n";
 
-
     if (!config.m_junkPacketCount.isEmpty()) {
         out << "jc=" << config.m_junkPacketCount << "\n";
     }
@@ -493,8 +492,72 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     return QString();
 }
 
+bool WireguardUtilsLinux::allowBypassTraffic(const IPAddress& prefix)
+{
+    const QString addr = prefix.toString();
+    if (!m_dynamicAllowAddrs.contains(addr)) {
+        m_dynamicAllowAddrs.append(addr);
+    }
+    refreshDynamicFirewall();
+    return true;
+}
+
+bool WireguardUtilsLinux::revokeBypassTraffic(const IPAddress& prefix)
+{
+    m_dynamicAllowAddrs.removeAll(prefix.toString());
+    refreshDynamicFirewall();
+    return true;
+}
+
+bool WireguardUtilsLinux::allowResolverEndpoint(const QHostAddress& address)
+{
+    const QString addr = address.toString();
+    if (!m_dynamicDnsServers.contains(addr)) {
+        m_dynamicDnsServers.append(addr);
+    }
+    refreshDynamicFirewall();
+    return true;
+}
+
+bool WireguardUtilsLinux::revokeResolverEndpoint(const QHostAddress& address)
+{
+    m_dynamicDnsServers.removeAll(address.toString());
+    refreshDynamicFirewall();
+    return true;
+}
+
+void WireguardUtilsLinux::refreshDynamicFirewall()
+{
+    if (!m_firewallActive) {
+        return;
+    }
+
+    FirewallParams params = m_firewallParams;
+    for (const QString& addr : m_dynamicAllowAddrs) {
+        if (!params.allowAddrs.contains(addr)) {
+            params.allowAddrs.append(addr);
+        }
+    }
+    if (!params.allowAddrs.isEmpty()) {
+        params.allowNets = true;
+    }
+    for (const QString& server : m_dynamicDnsServers) {
+        if (!params.dnsServers.contains(server)) {
+            params.dnsServers.append(server);
+        }
+    }
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4,
+                                    QStringLiteral("110.allowNets"), params.allowNets);
+    LinuxFirewall::updateAllowNets(params.allowAddrs);
+    LinuxFirewall::updateDNSServers(params.dnsServers);
+}
+
 void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
 {
+    m_firewallParams = params;
+    m_firewallActive = true;
+
     // double-check + ensure our firewall is installed and enabled
     if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
 

@@ -98,7 +98,7 @@ bool ensureSublayer(HANDLE wfp, const GUID& key, const wchar_t* name,
   logger.debug() << "Initialised Sublayer:" << QString::fromWCharArray(name);
   return true;
 }
-}  // namespace
+}
 
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   if (s_instance != nullptr) {
@@ -285,7 +285,6 @@ bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
   return true;
 }
 
-
 bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
   // Start the firewall transaction
   auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
@@ -366,6 +365,36 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
 
   cleanup.dismiss();
   return true;
+}
+
+namespace {
+QString bypassKey(const IPAddress& addr) {
+  return QStringLiteral("wildcard-bypass:") + addr.toString();
+}
+}
+
+bool WindowsFirewall::allowBypassTraffic(const IPAddress& addr) {
+  return allowTrafficTo(addr, HIGH_WEIGHT, "Allow wildcard bypass",
+                        bypassKey(addr));
+}
+
+bool WindowsFirewall::revokeBypassTraffic(const IPAddress& addr) {
+  return disablePeerTraffic(bypassKey(addr));
+}
+
+namespace {
+QString resolverKey(const QHostAddress& address) {
+  return QStringLiteral("wildcard-resolver:") + address.toString();
+}
+}
+
+bool WindowsFirewall::allowResolverEndpoint(const QHostAddress& address) {
+  return allowTrafficTo(address, 53, HIGH_WEIGHT, "Allow wildcard resolver",
+                        resolverKey(address));
+}
+
+bool WindowsFirewall::revokeResolverEndpoint(const QHostAddress& address) {
+  return disablePeerTraffic(resolverKey(address));
 }
 
 bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {

@@ -11,6 +11,8 @@
 #include "daemon/daemonerrors.h"
 #include "daemonerrors.h"
 #include "dnsutils.h"
+#include "dnswildcardrouter.h"
+#include "wildcardroutetable.h"
 #include "interfaceconfig.h"
 #include "iputils.h"
 #include "wireguardutils.h"
@@ -47,10 +49,6 @@ class Daemon : public QObject {
 
  signals:
   void connected(const QString& pubkey);
-  /**
-   * Can be fired if a call to activate() was unsucessfull
-   * and connected systems should rollback
-   */
   void activationFailure();
   void disconnected();
   void backendFailure(DaemonError reason = DaemonError::ERROR_FATAL);
@@ -59,6 +57,12 @@ class Daemon : public QObject {
   bool maybeUpdateResolvers(const InterfaceConfig& config);
   bool addExclusionRoute(const IPAddress& address);
   bool delExclusionRoute(const IPAddress& address);
+  void reconcileDnsWildcardRouter(const InterfaceConfig& config);
+  void onWildcardAddressesResolved(const QString& name,
+                                   const QList<DnsWildcardRouter::Record>& records);
+  void onWildcardSweep();
+  void withdrawWildcardRoutes();
+  void stopDnsWildcardRouter();
 
  protected:
   virtual bool run(Op op, const InterfaceConfig& config) {
@@ -72,6 +76,24 @@ class Daemon : public QObject {
   virtual bool supportIPUtils() const { return false; }
   virtual IPUtils* iputils() { return nullptr; }
   virtual DnsUtils* dnsutils() { return nullptr; }
+
+  virtual bool allowBypassAddress(const IPAddress& prefix) {
+    Q_UNUSED(prefix);
+    return true;
+  }
+  virtual bool revokeBypassAddress(const IPAddress& prefix) {
+    Q_UNUSED(prefix);
+    return true;
+  }
+
+  virtual bool allowResolverEndpoint(const QHostAddress& address) {
+    Q_UNUSED(address);
+    return true;
+  }
+  virtual bool revokeResolverEndpoint(const QHostAddress& address) {
+    Q_UNUSED(address);
+    return true;
+  }
 
   static bool parseStringList(const QJsonObject& obj, const QString& name,
                               QStringList& list);
@@ -88,6 +110,9 @@ class Daemon : public QObject {
   QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
   QHash<IPAddress, int> m_excludedAddrSet;
   QTimer m_handshakeTimer;
+  DnsWildcardRouter* m_dnsWildcardRouter = nullptr;
+  WildcardRouteTable m_wildcardRoutes;
+  QTimer m_wildcardSweep;
 };
 
 #endif  // DAEMON_H

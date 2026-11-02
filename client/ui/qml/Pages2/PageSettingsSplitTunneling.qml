@@ -210,7 +210,7 @@ PageType {
         anchors.bottomMargin: addSitePanel.textField.activeFocus ? 0 : PageController.imeHeight
 
         enabled: root.pageEnabled
-        placeholderText: qsTr("website or IP")
+        placeholderText: qsTr("website, IP, subnet or *.example.com")
         moreButtonAccessibleName: qsTr("Additional options")
 
         onAddClicked: function(text) {

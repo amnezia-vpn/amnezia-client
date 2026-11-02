@@ -8,11 +8,9 @@
 #include <QObject>
 #include <QProcess>
 
-
 #include "daemon/wireguardutils.h"
 #include "linuxroutemonitor.h"
 #include "linuxfirewall.h"
-
 
 class WireguardUtilsLinux final : public WireguardUtils {
     Q_OBJECT
@@ -41,6 +39,11 @@ public:
     bool excludeLocalNetworks(const QList<IPAddress>& lanAddressRanges) override;
 
     void applyFirewallRules(FirewallParams& params);
+
+    bool allowBypassTraffic(const IPAddress& prefix);
+    bool revokeBypassTraffic(const IPAddress& prefix);
+    bool allowResolverEndpoint(const QHostAddress& address);
+    bool revokeResolverEndpoint(const QHostAddress& address);
 signals:
     void backendFailure();
 
@@ -53,9 +56,15 @@ private:
     static int uapiErrno(const QString& command);
     QString waitForTunnelName(const QString& filename);
 
+    void refreshDynamicFirewall();
+
     QString m_ifname;
     QProcess m_tunnel;
     LinuxRouteMonitor* m_rtmonitor = nullptr;
+    FirewallParams m_firewallParams {};
+    bool m_firewallActive = false;
+    QStringList m_dynamicAllowAddrs;
+    QStringList m_dynamicDnsServers;
 };
 
 #endif  // WIREGUARDUTILSLINUX_H
