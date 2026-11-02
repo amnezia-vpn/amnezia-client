@@ -11,6 +11,7 @@
 #include <ws2ipdef.h>
 
 #include <QFileInfo>
+#include <QList>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -20,6 +21,22 @@
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+// Wintun on Windows is a /32 point-to-point adapter. CreateIpForwardEntry2()
+// for 0.0.0.0/0 (and ::/0) with an empty next-hop typically fails, so the
+// daemon aborts activation while the tunnel already has a handshake.
+// Split defaults match wg-quick / the working manual workaround.
+QList<IPAddress> windowsRoutePrefixes(const IPAddress& prefix) {
+  if (prefix.prefixLength() != 0) {
+    return {prefix};
+  }
+  if (prefix.type() == QAbstractSocket::IPv6Protocol) {
+    return {IPAddress(QHostAddress(QHostAddress::AnyIPv6), 1),
+            IPAddress(QHostAddress(QStringLiteral("8000::")), 1)};
+  }
+  return {IPAddress(QHostAddress(QHostAddress::Any), 1),
+          IPAddress(QHostAddress(QStringLiteral("128.0.0.0")), 1)};
+}
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -260,29 +277,30 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
     // capture traffic to all non-excluded destinations
     m_routeMonitor->setDetaultRouteCapture(true);
   }
-  // Build the route
-  
-  MIB_IPFORWARD_ROW2 entry;
-  buildMibForwardRow(prefix, &entry);
 
-  // Install the route
-  DWORD result = CreateIpForwardEntry2(&entry);
-  if (result == ERROR_OBJECT_ALREADY_EXISTS) {
-    return true;
-  }
+  bool ok = true;
+  for (const IPAddress& part : windowsRoutePrefixes(prefix)) {
+    MIB_IPFORWARD_ROW2 entry;
+    buildMibForwardRow(part, &entry);
 
-  // Case for ipv6 route with disabled ipv6
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol
-      && result == ERROR_NOT_FOUND) {
-    return true;
-  }
+    DWORD result = CreateIpForwardEntry2(&entry);
+    if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+      continue;
+    }
 
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to create route to"
-                   << prefix.toString()
-                   << "result:" << result;
+    // Case for ipv6 route with disabled ipv6
+    if (part.address().protocol() == QAbstractSocket::IPv6Protocol &&
+        result == ERROR_NOT_FOUND) {
+      continue;
+    }
+
+    if (result != NO_ERROR) {
+      logger.error() << "Failed to create route to" << part.toString()
+                     << "result:" << result;
+      ok = false;
+    }
   }
-  return result == NO_ERROR;
+  return ok;
 }
 
 bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
@@ -290,22 +308,23 @@ bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
     // Deactivate the route capture feature.
     m_routeMonitor->setDetaultRouteCapture(false);
   }
-  // Build the route
-  
-  MIB_IPFORWARD_ROW2 entry;
-  buildMibForwardRow(prefix, &entry);
 
-  // Install the route
-  DWORD result = DeleteIpForwardEntry2(&entry);
-  if (result == ERROR_NOT_FOUND) {
-    return true;
+  bool ok = true;
+  for (const IPAddress& part : windowsRoutePrefixes(prefix)) {
+    MIB_IPFORWARD_ROW2 entry;
+    buildMibForwardRow(part, &entry);
+
+    DWORD result = DeleteIpForwardEntry2(&entry);
+    if (result == ERROR_NOT_FOUND) {
+      continue;
+    }
+    if (result != NO_ERROR) {
+      logger.error() << "Failed to delete route to" << part.toString()
+                     << "result:" << result;
+      ok = false;
+    }
   }
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to delete route to"
-                   << prefix.toString()
-                   << "result:" << result;
-  }
-  return result == NO_ERROR;
+  return ok;
 }
 
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
