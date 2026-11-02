@@ -32,6 +32,7 @@
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/serverConfigUtils.h"
+#include "daemon/wildcardsite.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -461,15 +462,19 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
+    QJsonArray wildcardsJsonArray;
     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
         routeMode = m_appSettingsRepository->routeMode();
 
         if (allowSiteBasedSplitTunneling) {
             QStringList sites;
+            QStringList wildcards;
             const QVariantMap &m = m_appSettingsRepository->vpnSites(routeMode);
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
                 if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
                     sites.append(i.key());
+                } else if (WildcardSite::isPattern(i.key())) {
+                    wildcards.append(i.key());
                 } else {
                     const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
                     for (const QString &ip : siteIps) {
@@ -484,7 +489,17 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(site);
             }
 
-            if (sitesJsonArray.isEmpty()) {
+            if (routeMode == amnezia::RouteMode::VpnAllExceptSites) {
+                wildcards.removeDuplicates();
+                for (const auto &wildcard : wildcards) {
+                    wildcardsJsonArray.append(wildcard);
+                }
+            } else if (!wildcards.isEmpty()) {
+                qWarning() << "Wildcard sites are only supported in the bypass"
+                              " mode and were left out of this configuration";
+            }
+
+            if (sitesJsonArray.isEmpty() && wildcardsJsonArray.isEmpty()) {
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
@@ -496,6 +511,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
+    m_vpnConfiguration.insert(configKey::wildcardSites, wildcardsJsonArray);
 
     amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;

@@ -20,6 +20,19 @@ void IpSplitTunnelingUiController::addSite(QString hostname)
 {
     if (m_ipSplitTunnelingController->addSite(hostname)) {
         emit finished(tr("New site added: %1").arg(hostname));
+        return;
+    }
+    if (hostname.trimmed().startsWith(QStringLiteral("*."))) {
+        if (m_ipSplitTunnelingController->getRouteMode() != RouteMode::VpnAllExceptSites) {
+            emit errorOccurred(tr("A wildcard such as %1 only works in the "
+                                  "Directly mode, where listed addresses are "
+                                  "not accessed via the VPN.")
+                                       .arg(hostname));
+            return;
+        }
+        emit errorOccurred(tr("%1 is not a usable wildcard. Use a form like "
+                              "*.example.com, with no path.")
+                                   .arg(hostname));
     }
 }
 
