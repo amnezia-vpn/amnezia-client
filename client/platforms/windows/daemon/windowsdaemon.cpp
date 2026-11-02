@@ -90,6 +90,34 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
   }
 }
 
+bool WindowsDaemon::allowBypassAddress(const IPAddress& prefix) {
+  if (!m_firewallManager) {
+    return true;
+  }
+  return m_firewallManager->allowBypassTraffic(prefix);
+}
+
+bool WindowsDaemon::revokeBypassAddress(const IPAddress& prefix) {
+  if (!m_firewallManager) {
+    return true;
+  }
+  return m_firewallManager->revokeBypassTraffic(prefix);
+}
+
+bool WindowsDaemon::allowResolverEndpoint(const QHostAddress& address) {
+  if (!m_firewallManager) {
+    return true;
+  }
+  return m_firewallManager->allowResolverEndpoint(address);
+}
+
+bool WindowsDaemon::revokeResolverEndpoint(const QHostAddress& address) {
+  if (!m_firewallManager) {
+    return true;
+  }
+  return m_firewallManager->revokeResolverEndpoint(address);
+}
+
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
   if (!m_splitTunnelManager) {
     if (config.m_vpnDisabledApps.length() > 0) {

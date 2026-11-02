@@ -496,8 +496,73 @@ QString WireguardUtilsMacos::waitForTunnelName(const QString& filename) {
   return QString();
 }
 
+bool WireguardUtilsMacos::allowBypassTraffic(const IPAddress& prefix)
+{
+  const QString addr = prefix.toString();
+  if (!m_dynamicAllowAddrs.contains(addr)) {
+    m_dynamicAllowAddrs.append(addr);
+  }
+  refreshDynamicFirewall();
+  return true;
+}
+
+bool WireguardUtilsMacos::revokeBypassTraffic(const IPAddress& prefix)
+{
+  m_dynamicAllowAddrs.removeAll(prefix.toString());
+  refreshDynamicFirewall();
+  return true;
+}
+
+bool WireguardUtilsMacos::allowResolverEndpoint(const QHostAddress& address)
+{
+  const QString addr = address.toString();
+  if (!m_dynamicDnsServers.contains(addr)) {
+    m_dynamicDnsServers.append(addr);
+  }
+  refreshDynamicFirewall();
+  return true;
+}
+
+bool WireguardUtilsMacos::revokeResolverEndpoint(const QHostAddress& address)
+{
+  m_dynamicDnsServers.removeAll(address.toString());
+  refreshDynamicFirewall();
+  return true;
+}
+
+void WireguardUtilsMacos::refreshDynamicFirewall()
+{
+  if (!m_firewallActive) {
+    return;
+  }
+
+  FirewallParams params = m_firewallParams;
+  for (const QString& addr : m_dynamicAllowAddrs) {
+    if (!params.allowAddrs.contains(addr)) {
+      params.allowAddrs.append(addr);
+    }
+  }
+  if (!params.allowAddrs.isEmpty()) {
+    params.allowNets = true;
+  }
+  for (const QString& server : m_dynamicDnsServers) {
+    if (!params.dnsServers.contains(server)) {
+      params.dnsServers.append(server);
+    }
+  }
+
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), params.allowNets);
+  MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), params.allowNets,
+                                QStringLiteral("allownets"), params.allowAddrs);
+  MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true,
+                                QStringLiteral("dnsaddr"), params.dnsServers);
+}
+
 void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
 {
+  m_firewallParams = params;
+  m_firewallActive = true;
+
   // double-check + ensure our firewall is installed and enabled. This is necessary as
   // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
   if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
