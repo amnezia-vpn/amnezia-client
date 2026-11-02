@@ -179,9 +179,11 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   const QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
   const bool allowSiteSplitTunneling = plainAllowedIP.isEmpty()
       || plainAllowedIP.contains(QStringLiteral("0.0.0.0/0"));
+  // Use AllowedIP list from WG config because of higher priority
   QJsonArray effectiveAllowedIP = plainAllowedIP;
 
   if (splitTunnelType == 1 && allowSiteSplitTunneling) {
+    // Use APP split tunnel
     effectiveAllowedIP = splitTunnelSites;
   } else if (effectiveAllowedIP.isEmpty()) {
     effectiveAllowedIP = QJsonArray { "0.0.0.0/0", "::/0" };
