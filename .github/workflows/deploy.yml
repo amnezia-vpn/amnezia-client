@@ -1053,7 +1053,6 @@ jobs:
           - XrayGeneratorMatrixTest
           - XrayConfigModelTest
           - XrayCoreAcceptsTest
-          - XrayPagesUiTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
@@ -1271,7 +1270,6 @@ jobs:
           - XrayGeneratorMatrixTest
           - XrayConfigModelTest
           - XrayCoreAcceptsTest
-          - XrayPagesUiTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest

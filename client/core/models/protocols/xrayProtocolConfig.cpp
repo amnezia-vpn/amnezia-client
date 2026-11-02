@@ -202,6 +202,28 @@ XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
     return c;
 }
 
+void XrayXhttpConfig::applyRangeDefaults()
+{
+    if (scMaxEachPostBytesMin.isEmpty()) {
+        scMaxEachPostBytesMin = protocols::xray::defaultXhttpScMaxEachPostBytesMin;
+    }
+    if (scMaxEachPostBytesMax.isEmpty()) {
+        scMaxEachPostBytesMax = protocols::xray::defaultXhttpScMaxEachPostBytesMax;
+    }
+    if (scMinPostsIntervalMsMin.isEmpty()) {
+        scMinPostsIntervalMsMin = protocols::xray::defaultXhttpScMinPostsIntervalMsMin;
+    }
+    if (scMinPostsIntervalMsMax.isEmpty()) {
+        scMinPostsIntervalMsMax = protocols::xray::defaultXhttpScMinPostsIntervalMsMax;
+    }
+    if (scStreamUpServerSecsMin.isEmpty()) {
+        scStreamUpServerSecsMin = protocols::xray::defaultXhttpScStreamUpServerSecsMin;
+    }
+    if (scStreamUpServerSecsMax.isEmpty()) {
+        scStreamUpServerSecsMax = protocols::xray::defaultXhttpScStreamUpServerSecsMax;
+    }
+}
+
 QJsonObject XrayMkcpConfig::toJson() const
 {
     QJsonObject obj;
@@ -386,35 +408,19 @@ void XrayServerConfig::applyDefaults(bool fillFlowDefault)
         if (xhttp.uplinkMethod.isEmpty()) {
             xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
         }
-        if (xhttp.sessionPlacement.isEmpty()) {
+        if (xhttp.sessionPlacement.isEmpty()
+            || xhttp.sessionPlacement.compare(QLatin1String("None"), Qt::CaseInsensitive) == 0) {
             xhttp.sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
         }
         if (xhttp.sessionKey.isEmpty()) {
             xhttp.sessionKey = protocols::xray::defaultXhttpSessionKey;
         }
-        if (xhttp.seqPlacement.isEmpty()) {
+        if (xhttp.seqPlacement.isEmpty()
+            || xhttp.seqPlacement.compare(QLatin1String("None"), Qt::CaseInsensitive) == 0) {
             xhttp.seqPlacement = protocols::xray::defaultXhttpSeqPlacement;
         }
         if (xhttp.uplinkDataPlacement.isEmpty()) {
             xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
-        }
-        if (xhttp.scMaxEachPostBytesMin.isEmpty()) {
-            xhttp.scMaxEachPostBytesMin = protocols::xray::defaultXhttpScMaxEachPostBytesMin;
-        }
-        if (xhttp.scMaxEachPostBytesMax.isEmpty()) {
-            xhttp.scMaxEachPostBytesMax = protocols::xray::defaultXhttpScMaxEachPostBytesMax;
-        }
-        if (xhttp.scMinPostsIntervalMsMin.isEmpty()) {
-            xhttp.scMinPostsIntervalMsMin = protocols::xray::defaultXhttpScMinPostsIntervalMsMin;
-        }
-        if (xhttp.scMinPostsIntervalMsMax.isEmpty()) {
-            xhttp.scMinPostsIntervalMsMax = protocols::xray::defaultXhttpScMinPostsIntervalMsMax;
-        }
-        if (xhttp.scStreamUpServerSecsMin.isEmpty()) {
-            xhttp.scStreamUpServerSecsMin = protocols::xray::defaultXhttpScStreamUpServerSecsMin;
-        }
-        if (xhttp.scStreamUpServerSecsMax.isEmpty()) {
-            xhttp.scStreamUpServerSecsMax = protocols::xray::defaultXhttpScStreamUpServerSecsMax;
         }
 
         if (xhttp.xPadding.placement.isEmpty()) {
@@ -656,33 +662,33 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
                 xo[px::uplinkChunkSize] = chunkSizeEff.toInt();
         }
 
-        if (!xhttp.scMaxBufferedPosts.isEmpty())
+        if (!xhttp.scMaxBufferedPosts.isEmpty() && xhttp.scMaxBufferedPosts.toLongLong() != 0)
             xo[px::scMaxBufferedPosts] = xhttp.scMaxBufferedPosts.toLongLong();
         xrayEffective::putRangeIfAny(xo, px::scMaxEachPostBytes, xhttp.scMaxEachPostBytesMin,
-                                     xhttp.scMaxEachPostBytesMax, px::defaultXhttpScMaxEachPostBytesMin,
-                                     px::defaultXhttpScMaxEachPostBytesMax);
+                                     xhttp.scMaxEachPostBytesMax, px::coreDefaultXhttpScMaxEachPostBytesMin,
+                                     px::coreDefaultXhttpScMaxEachPostBytesMax);
         if (clientSide) {
             xrayEffective::putRangeIfAny(xo, px::scMinPostsIntervalMs, xhttp.scMinPostsIntervalMsMin,
                                          xhttp.scMinPostsIntervalMsMax,
-                                         px::defaultXhttpScMinPostsIntervalMsMin,
-                                         px::defaultXhttpScMinPostsIntervalMsMax);
+                                         px::coreDefaultXhttpScMinPostsIntervalMsMin,
+                                         px::coreDefaultXhttpScMinPostsIntervalMsMax);
         }
         xrayEffective::putRangeIfAny(xo, px::scStreamUpServerSecs, xhttp.scStreamUpServerSecsMin,
-                                     xhttp.scStreamUpServerSecsMax, px::defaultXhttpScStreamUpServerSecsMin,
-                                     px::defaultXhttpScStreamUpServerSecsMax);
+                                     xhttp.scStreamUpServerSecsMax, px::coreDefaultXhttpScStreamUpServerSecsMin,
+                                     px::coreDefaultXhttpScStreamUpServerSecsMax);
 
         const auto &pad = xhttp.xPadding;
         xo[px::xPaddingObfsMode] = pad.obfsMode;
+        if (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty()) {
+            const int fromV = pad.bytesMin.isEmpty() ? QString::fromLatin1(px::defaultXPaddingBytesMin).toInt()
+                                                     : pad.bytesMin.toInt();
+            int toV = pad.bytesMax.isEmpty() ? QString::fromLatin1(px::defaultXPaddingBytesMax).toInt()
+                                             : pad.bytesMax.toInt();
+            if (toV < fromV)
+                toV = fromV;
+            xo[px::xPaddingBytes] = xrayEffective::range(QString::number(fromV), QString::number(toV));
+        }
         if (pad.obfsMode) {
-            if (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty()) {
-                const int fromV = pad.bytesMin.isEmpty() ? QString::fromLatin1(px::defaultXPaddingBytesMin).toInt()
-                                                         : pad.bytesMin.toInt();
-                int toV = pad.bytesMax.isEmpty() ? QString::fromLatin1(px::defaultXPaddingBytesMax).toInt()
-                                                 : pad.bytesMax.toInt();
-                if (toV < fromV)
-                    toV = fromV;
-                xo[px::xPaddingBytes] = xrayEffective::range(QString::number(fromV), QString::number(toV));
-            }
             xo[px::xPaddingKey] = pad.key.isEmpty() ? QString::fromLatin1(px::defaultXPaddingKey) : pad.key;
             xo[px::xPaddingHeader] = pad.header.isEmpty() ? QString::fromLatin1(px::defaultXPaddingHeader) : pad.header;
             xo[px::xPaddingPlacement] = xrayEffective::xPaddingPlacement(
@@ -713,7 +719,11 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
             addMuxRange(px::xmuxCMaxReuseTimes, xmux.cMaxReuseTimesMin, xmux.cMaxReuseTimesMax);
             addMuxRange(px::xmuxHMaxRequestTimes, xmux.hMaxRequestTimesMin, xmux.hMaxRequestTimesMax);
             addMuxRange(px::xmuxHMaxReusableSecs, xmux.hMaxReusableSecsMin, xmux.hMaxReusableSecsMax);
-            if (!xmux.hKeepAlivePeriod.isEmpty())
+            const QJsonArray alpnWritten = streamSettings.value(px::tlsSettings).toObject().value(px::alpn).toArray();
+            const bool http11 = securityEff.isEmpty() || securityEff == QLatin1String(px::securityNone)
+                    || (securityEff == QLatin1String(px::securityTls) && alpnWritten.size() == 1
+                        && alpnWritten.at(0).toString() == QLatin1String("http/1.1"));
+            if (!xmux.hKeepAlivePeriod.isEmpty() && !http11)
                 mux[px::xmuxHKeepAlivePeriod] = xmux.hKeepAlivePeriod.toLongLong();
             if (!mux.isEmpty())
                 xo[px::xmux] = mux;
@@ -834,10 +844,14 @@ namespace
 
         if (padding.contains(px::xPaddingObfsMode))
             out.obfsMode = padding.value(px::xPaddingObfsMode).toBool(true);
-        out.key = padding.value(px::xPaddingKey).toString();
-        out.header = padding.value(px::xPaddingHeader).toString();
-        out.placement = padding.value(px::xPaddingPlacement).toString();
-        out.method = padding.value(px::xPaddingMethod).toString();
+        if (padding.contains(px::xPaddingKey))
+            out.key = padding.value(px::xPaddingKey).toString();
+        if (padding.contains(px::xPaddingHeader))
+            out.header = padding.value(px::xPaddingHeader).toString();
+        if (padding.contains(px::xPaddingPlacement))
+            out.placement = padding.value(px::xPaddingPlacement).toString();
+        if (padding.contains(px::xPaddingMethod))
+            out.method = padding.value(px::xPaddingMethod).toString();
 
         QString bytesMin;
         QString bytesMax;

@@ -80,6 +80,8 @@ struct XrayXhttpConfig {
     QJsonObject toJson() const;
     /// Reads only keys present in JSON (no Amnezia UI defaults). Use XrayConfigModel::applyDefaultsToServerConfig for UI.
     static XrayXhttpConfig fromJson(const QJsonObject &json);
+
+    void applyRangeDefaults();
 };
 
 // ── mKCP transport ────────────────────────────────────────────────────────────

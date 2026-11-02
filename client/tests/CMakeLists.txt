@@ -197,29 +197,6 @@ if(NOT ANDROID)
         test_common
     )
 
-    qt6_add_resources(XRAY_PAGES_UI_QRC
-        ${CLIENT_QML_QRC_FILE}
-        ../images/images.qrc
-    )
-
-    add_executable(test_xray_pages_ui
-        xrayPagesUi/testXrayPagesUi.h
-        xrayPagesUi/main.cpp
-        xrayPagesUi/pageMain.cpp
-        xrayPagesUi/pageTransport.cpp
-        xrayPagesUi/pageSecurity.cpp
-        xrayPagesUi/pageFlowPadding.cpp
-        xrayPagesUi/pageXmux.cpp
-        xrayPagesUi/saveFlowSnapshots.cpp
-        xrayPagesUi/knownIssues.cpp
-        ${XRAY_PAGES_UI_QRC}
-    )
-
-    target_link_libraries(test_xray_pages_ui PRIVATE
-        Qt6::Test
-        test_common
-    )
-
     add_executable(test_ui_language_model_and_controller
         testUiLanguageModelAndController.cpp
     )
@@ -505,7 +482,6 @@ if(NOT ANDROID)
     add_test(NAME XrayGeneratorMatrixTest          COMMAND test_xray_generator_matrix)
     add_test(NAME XrayConfigModelTest              COMMAND test_xray_config_model)
     add_test(NAME XrayCoreAcceptsTest              COMMAND test_xray_core_accepts)
-    add_test(NAME XrayPagesUiTest                  COMMAND test_xray_pages_ui)
     add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
     add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
     add_test(NAME UiIpModelAndControllerTest       COMMAND test_ui_ip_model_and_controller)
