@@ -169,10 +169,6 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onUpdateServerPackagesFinished(finishedMessage) {
-            onRemoveAllContainersFinished(finishedMessage)
-        }
-
         function onRemoveContainerFinished(finishedMessage) {
             if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
                 PageController.closePage()

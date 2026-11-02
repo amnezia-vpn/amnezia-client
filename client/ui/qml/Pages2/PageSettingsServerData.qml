@@ -17,6 +17,16 @@ PageType {
 
     property bool isServerWithWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
+    function rebootServer() {
+        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+        } else {
+            PageController.showBusyIndicator(true)
+            InstallController.rebootServer(ServersUiController.processedServerId)
+            PageController.showBusyIndicator(false)
+        }
+    }
+
     Connections {
         target: InstallController
 
@@ -33,6 +43,25 @@ PageType {
 
         function onRebootServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
+        }
+
+        function onUpdateServerPackagesFinished(finishedMessage, isRebootRequired) {
+            PageController.closePage()
+
+            if (!isRebootRequired) {
+                PageController.showNotificationMessage(finishedMessage)
+                return
+            }
+
+            var descriptionText = qsTr("A reboot is required to apply the updates. Do you want to reboot the server now?")
+            var yesButtonText = qsTr("Reboot")
+            var noButtonText = qsTr("Not now")
+
+            var noButtonFunction = function() {
+
+            }
+
+            Dialogs.askQuestion(finishedMessage, descriptionText, yesButtonText, noButtonText, root.rebootServer, noButtonFunction)
         }
     }
 
@@ -93,6 +122,7 @@ PageType {
 
                 text: qsTr("Update server packages")
                 subtitle: qsTr("Install system updates with the distribution's package manager")
+                destructive: true
 
                 onClicked: {
                     var headerText = qsTr("Do you want to update packages on the server?")
@@ -131,20 +161,11 @@ PageType {
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
-                    var yesButtonFunction = function() {
-                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
-                        } else {
-                            PageController.showBusyIndicator(true)
-                            InstallController.rebootServer(ServersUiController.processedServerId)
-                            PageController.showBusyIndicator(false)
-                        }
-                    }
                     var noButtonFunction = function() {
 
                     }
 
-                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, root.rebootServer, noButtonFunction)
                 }
             }
 

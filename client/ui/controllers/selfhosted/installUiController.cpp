@@ -515,13 +515,10 @@ void InstallUiController::updateServerPackages(const QString &serverId)
 
     bool isRebootRequired = false;
     const auto errorCode = m_installController->updateServerPackages(serverId, isRebootRequired);
-    if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorCode);
-    } else if (isRebootRequired) {
-        emit updateServerPackagesFinished(
-                tr("Packages on server '%1' were updated. Reboot the server to apply the updates").arg(serverName));
+    if (errorCode == ErrorCode::NoError) {
+        emit updateServerPackagesFinished(tr("Packages on server '%1' were updated").arg(serverName), isRebootRequired);
     } else {
-        emit updateServerPackagesFinished(tr("Packages on server '%1' were updated").arg(serverName));
+        emit installationErrorOccurred(errorCode);
     }
 }
 

@@ -1,4 +1,4 @@
-if pm=$(command -v apt-get 2>/dev/null); then pm_env="DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l"; update_pkgs="-yq update"; upgrade_pkgs="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold --with-new-pkgs upgrade"; dist="debian";\
+if pm=$(command -v apt-get 2>/dev/null); then pm_env="DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l"; update_pkgs="-yq update"; upgrade_pkgs="-yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold dist-upgrade"; dist="debian";\
 elif pm=$(command -v dnf 2>/dev/null); then update_pkgs="-yq makecache"; upgrade_pkgs="-yq upgrade"; dist="fedora";\
 elif pm=$(command -v yum 2>/dev/null); then update_pkgs="-y -q makecache"; upgrade_pkgs="-y -q update"; dist="centos";\
 elif pm=$(command -v zypper 2>/dev/null); then update_pkgs="-nq refresh"; upgrade_pkgs="-nq update -l"; dist="suse";\
