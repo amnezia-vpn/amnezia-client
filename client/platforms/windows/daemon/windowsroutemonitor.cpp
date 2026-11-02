@@ -22,6 +22,8 @@ constexpr const ULONG EXCLUSION_ROUTE_METRIC = 0x5e72;
 
 constexpr int ROUTE_CHANGE_DEBOUNCE_MSEC = 50;
 
+// Called by the kernel on route changes - perform some basic filtering and
+// schedule the routeChanged slot to do the real work.
 static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
                                 MIB_NOTIFICATION_TYPE type) {
   WindowsRouteMonitor* monitor = (WindowsRouteMonitor*)context;
@@ -38,6 +40,7 @@ static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
     }
   }
 
+  // Invoke the route changed signal to do the real work in Qt.
   QMetaObject::invokeMethod(monitor, "scheduleRouteChanged",
                             Qt::QueuedConnection);
 }
@@ -454,6 +457,7 @@ bool WindowsRouteMonitor::addExclusionRoutes(
       continue;
     }
 
+    // Allocate and initialize the MIB routing table row.
     MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
     InitializeIpForwardEntry(data);
     if (protocol == QAbstractSocket::IPv6Protocol) {
@@ -473,6 +477,7 @@ bool WindowsRouteMonitor::addExclusionRoutes(
     }
     data->DestinationPrefix.PrefixLength = prefix.prefixLength();
     data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
+    // Set the rest of the flags for a static route.
     data->ValidLifetime = 0xffffffff;
     data->PreferredLifetime = 0xffffffff;
     data->Metric = EXCLUSION_ROUTE_METRIC;
