@@ -123,7 +123,7 @@ private:
 
         // Update flow
         QString serverId;
-        QString newCountryCode;
+        QString serverCountryCode;
         QString newCountryName;
         bool isConnectEvent = false;
         bool reloadServiceConfig = false;
