@@ -10,6 +10,7 @@
 #include <QVector>
 #include <QDateTime>
 #include <QByteArray>
+#include <QJsonObject>
 
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
@@ -84,6 +85,11 @@ public:
     void setFavoriteLocations(const QString &serverId, const QStringList &codes);
     void removeFavoriteLocations(const QString &serverId);
     void migrateLegacyFavoriteLocations(const QStringList &serverIds);
+
+    QJsonObject connectionHistory(const QString &serverId) const;
+    void recordConnectionResult(const QString &serverId, const QString &countryCode,
+                                bool success, int setupMs, int errorCode);
+    void clearConnectionHistory(const QString &serverId);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 
@@ -127,6 +133,7 @@ signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
     void settingsCleared();
+    void connectionHistoryChanged(const QString &serverId);
 
 private:
     void setVpnSites(RouteMode mode, const QVariantMap &sites);

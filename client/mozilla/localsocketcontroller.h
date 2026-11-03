@@ -63,6 +63,7 @@ class LocalSocketController final : public ControllerImpl {
   std::function<void(const QString&)> m_logCallback = nullptr;
 
   QTimer m_initializingTimer;
+  QTimer m_statusTimer;
   uint32_t m_initializingRetry = 0;
 };
 

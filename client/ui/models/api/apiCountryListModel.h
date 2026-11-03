@@ -30,7 +30,13 @@ public:
         IsCurrentRole,
         IsIssuedRole,
         IsWorkerExpiredRole,
-        IsFavoriteRole
+        IsFavoriteRole,
+        AvailableProtocolsRole,
+        LastConnectionStateRole,
+        LastConnectionAtRole,
+        LastSuccessAtRole,
+        LastConnectionSetupMsRole,
+        LastConnectionErrorRole
     };
 
     enum SortMode {

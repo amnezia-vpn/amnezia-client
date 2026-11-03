@@ -12,6 +12,7 @@ ItemDelegate {
     property bool favorite: false
     property string countryFlagCode
     property string subtitle
+    property color statusColor: "transparent"
     property int maximumLineCount: 2
     property bool showSeparator: true
 
@@ -86,6 +87,21 @@ ItemDelegate {
 
     contentItem: RowLayout {
         spacing: root.spacing
+
+        Item {
+            Layout.preferredWidth: root.statusColor.a > 0 ? 8 : 0
+            Layout.preferredHeight: 48
+
+            visible: root.statusColor.a > 0
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 8
+                height: 8
+                radius: 4
+                color: root.statusColor
+            }
+        }
 
         Item {
             Layout.preferredWidth: 24

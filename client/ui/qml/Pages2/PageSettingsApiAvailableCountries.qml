@@ -191,6 +191,14 @@ PageType {
             required property string sectionKey
             required property bool isCurrent
             required property bool isFavorite
+            required property bool isIssued
+            required property bool isWorkerExpired
+            required property var availableProtocols
+            required property int lastConnectionState
+            required property string lastConnectionAt
+            required property string lastSuccessAt
+            required property int lastConnectionSetupMs
+            required property string lastConnectionError
             required property string countryName
             required property string sourceCountryName
             required property string countryCode
@@ -200,6 +208,151 @@ PageType {
 
             implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : countryItem.implicitHeight
             height: implicitHeight
+
+            readonly property bool isLiveConnection: rowItem.isCurrent && ConnectionController.isConnected
+
+            readonly property string protocolsLabel: {
+                if (!rowItem.availableProtocols || rowItem.availableProtocols.length === 0) {
+                    return ""
+                }
+
+                let names = []
+                for (let i = 0; i < rowItem.availableProtocols.length; ++i) {
+                    const protocol = rowItem.availableProtocols[i]
+                    if (protocol === "awg") {
+                        names.push("AmneziaWG")
+                    } else if (protocol === "vless") {
+                        names.push("VLESS")
+                    } else {
+                        names.push(String(protocol).toUpperCase())
+                    }
+                }
+                return names.join(" · ")
+            }
+
+            function formatBytes(bytes) {
+                if (!bytes || bytes <= 0) {
+                    return "0 B"
+                }
+
+                const units = ["B", "KB", "MB", "GB", "TB"]
+                let value = Number(bytes)
+                let unit = 0
+                while (value >= 1024 && unit < units.length - 1) {
+                    value /= 1024
+                    ++unit
+                }
+                return (unit === 0 ? value.toFixed(0) : value.toFixed(1)) + " " + units[unit]
+            }
+
+            function formatDuration(seconds) {
+                if (!seconds || seconds <= 0) {
+                    return "0 s"
+                }
+                if (seconds < 60) {
+                    return seconds + " s"
+                }
+
+                const minutes = Math.floor(seconds / 60)
+                if (minutes < 60) {
+                    return qsTr("%1 min").arg(minutes)
+                }
+
+                const hours = Math.floor(minutes / 60)
+                const remainder = minutes % 60
+                return remainder > 0 ? qsTr("%1 h %2 min").arg(hours).arg(remainder)
+                                     : qsTr("%1 h").arg(hours)
+            }
+
+            function timeAgo(isoDate) {
+                if (!isoDate) {
+                    return ""
+                }
+
+                const timestamp = Date.parse(isoDate)
+                if (isNaN(timestamp)) {
+                    return ""
+                }
+
+                const diff = Math.max(0, Date.now() - timestamp)
+                const minutes = Math.floor(diff / 60000)
+                if (minutes < 1) {
+                    return qsTr("just now")
+                }
+                if (minutes < 60) {
+                    return qsTr("%1 min ago").arg(minutes)
+                }
+
+                const hours = Math.floor(minutes / 60)
+                if (hours < 24) {
+                    return qsTr("%1 h ago").arg(hours)
+                }
+                return Qt.formatDateTime(new Date(timestamp), "dd.MM.yyyy")
+            }
+
+            readonly property string connectionSubtitle: {
+                if (rowItem.rowType !== "country") {
+                    return ""
+                }
+
+                if (rowItem.isLiveConnection) {
+                    return qsTr("Connected · %1 · ↓ %2/s ↑ %3/s")
+                            .arg(formatDuration(ConnectionController.connectionDurationSecs))
+                            .arg(formatBytes(ConnectionController.downloadSpeed))
+                            .arg(formatBytes(ConnectionController.uploadSpeed))
+                }
+
+                if (rowItem.isCurrent) {
+                    return rowItem.protocolsLabel ? qsTr("Selected · %1").arg(rowItem.protocolsLabel)
+                                                  : qsTr("Selected")
+                }
+
+                if (rowItem.lastConnectionState === 2) {
+                    const error = rowItem.lastConnectionError ? ": " + rowItem.lastConnectionError : ""
+                    const when = rowItem.lastConnectionAt ? " · " + timeAgo(rowItem.lastConnectionAt) : ""
+                    return qsTr("Last attempt failed") + error + when
+                }
+
+                if (rowItem.lastConnectionState === 1) {
+                    const setup = rowItem.lastConnectionSetupMs > 0
+                            ? " · " + qsTr("setup %1 s").arg((rowItem.lastConnectionSetupMs / 1000).toFixed(1))
+                            : ""
+                    const when = rowItem.lastSuccessAt ? timeAgo(rowItem.lastSuccessAt) : ""
+                    return when ? qsTr("Last connected %1").arg(when) + setup
+                                : qsTr("Last connection successful") + setup
+                }
+
+                if (rowItem.isWorkerExpired) {
+                    return rowItem.protocolsLabel ? qsTr("Update available · %1").arg(rowItem.protocolsLabel)
+                                                  : qsTr("Update available")
+                }
+
+                if (rowItem.isIssued) {
+                    return rowItem.protocolsLabel ? qsTr("Config ready · %1").arg(rowItem.protocolsLabel)
+                                                  : qsTr("Config ready")
+                }
+
+                return rowItem.protocolsLabel
+            }
+
+            readonly property color connectionStatusColor: {
+                if (rowItem.isLiveConnection) {
+                    return AmneziaStyle.color.statusSuccess
+                }
+                if (rowItem.isCurrent) {
+                    return AmneziaStyle.color.accentDefault
+                }
+                if (rowItem.lastConnectionState === 2) {
+                    return AmneziaStyle.color.statusDestructive
+                }
+                if (rowItem.isWorkerExpired) {
+                    return AmneziaStyle.color.statusWarning
+                }
+                if (rowItem.lastConnectionState === 1) {
+                    return AmneziaStyle.color.statusSuccess
+                }
+                return AmneziaStyle.color.transparent
+            }
 
             CountrySectionHeader {
                 id: sectionHeader
@@ -222,6 +375,8 @@ PageType {
                 visible: rowItem.rowType === "country"
 
                 text: rowItem.countryName
+                subtitle: rowItem.connectionSubtitle
+                statusColor: rowItem.connectionStatusColor
                 countryFlagCode: rowItem.countryImageCode
                 highlighted: rowItem.isCurrent
                 favorite: rowItem.isFavorite
