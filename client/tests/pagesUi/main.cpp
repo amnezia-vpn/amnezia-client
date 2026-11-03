@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     PageLoader::declareQmlPageEnum();
 
-    qmlRegisterUncreatableMetaObject(ProtocolEnumNS::staticMetaObject, "ProtocolEnum", 1, 0, "ProtocolEnum", QStringLiteral("Error: only enums"));
+    qmlRegisterUncreatableMetaObject(amnezia::ProtocolEnumNS::staticMetaObject, "ProtocolEnum", 1, 0, "ProtocolEnum", QStringLiteral("Error: only enums"));
 
     int result = 0;
 
