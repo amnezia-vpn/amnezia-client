@@ -42,7 +42,8 @@ bool DaemonLocalServer::initialize() {
   }
 
   if (!m_server.listen(path)) {
-    logger.error() << "Failed to listen the daemon path";
+    logger.error() << "Failed to listen the daemon path:"
+                   << m_server.errorString();
     return false;
   }
 
