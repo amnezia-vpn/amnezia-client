@@ -27,7 +27,10 @@ namespace
     {
         QList<CoreCase> out;
         for (const QString &security : { QStringLiteral("tls"), QStringLiteral("reality") }) {
-            for (const QString &fp : XrayConfigModel::fingerprintOptions()) {
+            const QStringList fingerprints = security == QLatin1String("reality")
+                    ? XrayConfigModel::realityFingerprintOptions()
+                    : XrayConfigModel::fingerprintOptions();
+            for (const QString &fp : fingerprints) {
                 XrayServerConfig srv = baseConfig("raw", security, "xtls-rprx-vision");
                 srv.fingerprint = fp;
                 out.append({ QStringLiteral("option/raw/%1/fingerprint=%2").arg(security, fp), srv });
@@ -39,13 +42,13 @@ namespace
             out.append({ QStringLiteral("option/xhttp/tls/alpn=%1").arg(alpn), srv });
         }
         for (const QString &method : XrayConfigModel::xhttpUplinkMethodOptions()) {
-            XrayServerConfig srv = baseConfig("xhttp", "none", "");
+            XrayServerConfig srv = baseConfig("xhttp", "tls", "");
             srv.xhttp.mode = QStringLiteral("Packet-up");
             srv.xhttp.uplinkMethod = method;
             out.append({ QStringLiteral("option/xhttp/packet-up/uplinkMethod=%1").arg(method), srv });
         }
         for (const QString &pl : XrayConfigModel::xhttpSessionPlacementOptions()) {
-            XrayServerConfig srv = baseConfig("xhttp", "none", "");
+            XrayServerConfig srv = baseConfig("xhttp", "tls", "");
             srv.xhttp.mode = QStringLiteral("Packet-up");
             srv.xhttp.sessionPlacement = pl;
             srv.xhttp.seqPlacement = pl;
@@ -118,6 +121,7 @@ private:
     void useLocalCertificate(QJsonObject &serverConfig) const;
 
     QString m_xray;
+    bool m_coreBypassesNoTlsRule = false;
     QTemporaryDir m_dir;
     QString m_certFile;
     QString m_keyFile;
@@ -127,7 +131,7 @@ void TestXrayCoreAccepts::initTestCase()
 {
     m_xray = qEnvironmentVariable("XRAY_BIN");
     if (m_xray.isEmpty() || !QFileInfo(m_xray).isExecutable())
-        QSKIP("Set XRAY_BIN to an xray v26.7.28 binary to run the core checks");
+        QSKIP("Set XRAY_BIN to an xray v26.10.31 or v26.7.28 binary to run the core checks");
     QVERIFY(m_dir.isValid());
 
     QProcess version;
@@ -135,8 +139,9 @@ void TestXrayCoreAccepts::initTestCase()
     QVERIFY(version.waitForFinished(30000));
     const QString firstLine = QString::fromUtf8(version.readAllStandardOutput()).section(QLatin1Char('\n'), 0, 0);
     qInfo().noquote() << "xray under test:" << firstLine;
-    if (!firstLine.contains(QLatin1String("26.7.28")))
-        qWarning().noquote() << "XRAY_BIN is not v26.7.28, results may differ from the VPS";
+    m_coreBypassesNoTlsRule = firstLine.contains(QLatin1String("26.7.28"));
+    if (!m_coreBypassesNoTlsRule && !firstLine.contains(QLatin1String("26.10.31")))
+        qWarning().noquote() << "XRAY_BIN is neither v26.10.31 nor v26.7.28, results may differ from the VPS";
 
     const QString prefix = m_dir.filePath(QStringLiteral("tls"));
     QProcess cert;
@@ -228,6 +233,7 @@ void TestXrayCoreAccepts::coreRejectsWhatWeRelyOn_data()
     QTest::newRow("cookie uplinkDataPlacement outside packet-up") << "cookie" << "only in packet-up";
     QTest::newRow("GET outside packet-up") << "get" << "GET only in packet-up";
     QTest::newRow("allowInsecure") << "insecure" << "allowInsecure";
+    QTest::newRow("vless without TLS to a public address") << "none" << "vless without TLS";
 }
 
 void TestXrayCoreAccepts::coreRejectsWhatWeRelyOn()
@@ -241,6 +247,10 @@ void TestXrayCoreAccepts::coreRejectsWhatWeRelyOn()
         XrayServerInboundInputs in = inboundInputs(srv);
         in.clients = QJsonArray { XrayServerConfig::makeClientEntry(clientId(), "xtls-rprx-vision-udp443") };
         config = srv.toServerInboundJson(in);
+    } else if (what == QLatin1String("none")) {
+        if (m_coreBypassesNoTlsRule)
+            QSKIP("xray v26.7.28 lets VLESS outbounds in the vnext style skip this check");
+        config = clientJson(baseConfig("raw", "none", ""));
     } else {
         XrayServerConfig srv = baseConfig("xhttp", "tls", "");
         srv.xhttp.mode = QStringLiteral("Stream-one");

@@ -59,7 +59,7 @@ namespace xraytest
     inline QList<MatrixCase> matrix()
     {
         const QStringList transports = { "raw", "xhttp", "mkcp" };
-        const QStringList securities = { "none", "tls", "reality" };
+        const QStringList securities = { "tls", "reality" };
         const QStringList flows = { "", "xtls-rprx-vision", "xtls-rprx-vision-udp443" };
         const QStringList modes = { "Auto", "Packet-up", "Stream-up", "Stream-one" };
         const QStringList placements = { "Body", "Auto", "Header", "Cookie" };
@@ -71,7 +71,8 @@ namespace xraytest
                     const QString flowName = flow.isEmpty() ? QStringLiteral("noflow") : flow;
                     if (transport != QLatin1String("xhttp")) {
                         cases.append({ QStringLiteral("%1/%2/%3").arg(transport, security, flowName),
-                                       baseConfig(transport, security, flow), true });
+                                       baseConfig(transport, security, flow),
+                                       transport != QLatin1String("mkcp") || security != QLatin1String("reality") });
                         continue;
                     }
                     for (const QString &mode : modes) {

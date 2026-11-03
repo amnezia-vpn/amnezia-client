@@ -14,6 +14,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "version.h"
 
 using namespace amnezia;
@@ -328,7 +329,8 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         vlessServer.serverName = realitySettings.value(amnezia::protocols::xray::serverName).toString();
         vlessServer.publicKey = realitySettings.value(amnezia::protocols::xray::publicKey).toString();
         vlessServer.shortId = realitySettings.value(amnezia::protocols::xray::shortId).toString();
-        vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint).toString(QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint));
+        vlessServer.fingerprint = amnezia::xrayEffective::realityFingerprint(
+                realitySettings.value(amnezia::protocols::xray::fingerprint).toString());
         vlessServer.spiderX = realitySettings.value(amnezia::protocols::xray::spiderX).toString("");
     } else if (vlessServer.security == "tls") {
         QJsonObject tlsSettings = streamSettings.value("tlsSettings").toObject();
