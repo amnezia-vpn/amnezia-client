@@ -123,6 +123,13 @@ void LocalSocketController::daemonConnected() {
 }
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
+  if (m_daemonState != eReady) {
+    logger.debug() << "Queue activation until daemon initialization completes";
+    m_pendingActivation = rawConfig;
+    m_activationPending = true;
+    return;
+  }
+
   QString protocolName = rawConfig.value("protocol").toString();
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
@@ -267,6 +274,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 void LocalSocketController::deactivate() {
   logger.debug() << "Deactivating";
 
+  m_pendingActivation = {};
+  m_activationPending = false;
+
   if (m_daemonState != eReady) {
     logger.debug() << "No disconnect, controller is not ready";
     emit disconnected();
@@ -400,6 +410,12 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     }
 
     emit initialized(true, connected.toBool(), datetime);
+    if (m_activationPending) {
+      const QJsonObject pendingActivation = m_pendingActivation;
+      m_pendingActivation = {};
+      m_activationPending = false;
+      activate(pendingActivation);
+    }
     return;
   }
 
