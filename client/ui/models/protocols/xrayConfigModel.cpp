@@ -75,6 +75,10 @@ void XrayConfigModel::setTransport(const QString &value)
     if (value == QLatin1String(protocols::xray::transportXhttp)) {
         srv.applyDefaults(false);
     }
+    if (value == QLatin1String(protocols::xray::transportMkcp)
+        && srv.security == QLatin1String(protocols::xray::securityReality)) {
+        srv.security = QString::fromLatin1(protocols::xray::securityTls);
+    }
     emitChanged(wasUnsavedChanges);
 }
 
@@ -106,6 +110,12 @@ QString XrayConfigModel::fingerprint() const
 void XrayConfigModel::setFingerprint(const QString &value)
 {
     assignField(m_protocolConfig.serverConfig.fingerprint, value);
+}
+
+QString XrayConfigModel::realityFingerprint() const
+{
+    const auto &srv = m_protocolConfig.serverConfig;
+    return srv.isThirdPartyConfig ? srv.fingerprint : xrayEffective::realityFingerprint(srv.fingerprint);
 }
 
 QString XrayConfigModel::sni() const
@@ -749,7 +759,7 @@ QStringList XrayConfigModel::flowOptions()
 
 QStringList XrayConfigModel::securityOptions()
 {
-    return { "none", "tls", "reality" };
+    return { "tls", "reality" };
 }
 
 QStringList XrayConfigModel::transportOptions()
@@ -760,6 +770,11 @@ QStringList XrayConfigModel::transportOptions()
 QStringList XrayConfigModel::fingerprintOptions()
 {
     return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
+}
+
+QStringList XrayConfigModel::realityFingerprintOptions()
+{
+    return { "chrome", "firefox", "safari" };
 }
 
 QStringList XrayConfigModel::alpnOptions()
@@ -960,6 +975,8 @@ QStringList XrayConfigModel::validationErrors() const
         if (!isValidSni(srv.sni)) {
             errs << tr("SNI: enter a valid IP address or domain name");
         }
+    } else if (!srv.isThirdPartyConfig) {
+        errs << tr("None is not supported by Xray 26.10. Choose TLS or REALITY.");
     }
 
     if (srv.transport == QLatin1String("xhttp")) {

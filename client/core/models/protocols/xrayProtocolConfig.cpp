@@ -509,6 +509,17 @@ namespace xrayEffective
         return srv.security;
     }
 
+    QString realityFingerprint(const QString &fingerprint)
+    {
+        static const QStringList mlkemCapable = { "chrome",           "firefox",           "safari",
+                                                  "hellochrome_131",  "hellochrome_133",   "hellochrome_auto",
+                                                  "hellofirefox_148", "hellofirefox_auto", "hellosafari_26_3",
+                                                  "hellosafari_auto", "hellogolang" };
+        const QString normalized = fingerprint.trimmed().toLower();
+        return mlkemCapable.contains(normalized) ? normalized
+                                                 : QString::fromLatin1(protocols::xray::defaultRealityFingerprint);
+    }
+
     QString clientFlow(const XrayServerConfig &srv)
     {
         namespace px = protocols::xray;
@@ -597,7 +608,8 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
 
     if (clientSide && securityEff == QLatin1String(px::securityReality)) {
         QJsonObject realitySettings;
-        realitySettings[px::fingerprint] = fingerprintEff;
+        realitySettings[px::fingerprint] =
+                isThirdPartyConfig ? fingerprintEff : xrayEffective::realityFingerprint(fingerprintEff);
         realitySettings[px::serverName] = sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : sni;
         streamSettings[px::realitySettings] = realitySettings;
     }

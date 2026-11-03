@@ -54,6 +54,8 @@ private slots:
     void serverEditTouchesServer();
     void portChangeRequiresReinstall();
     void switchingToXhttpFillsDefaultsButKeepsParsedMode();
+    void switchingToMkcpReplacesReality();
+    void realityShowsTheFingerprintItSends();
     void unchangedSaveKeepsClientConfig();
     void serverEditDropsClientConfig();
     void deviceOnlyEditRebuildsClientConfig();
@@ -63,6 +65,8 @@ private slots:
 
 void TestXrayConfigModel::options()
 {
+    QCOMPARE(XrayConfigModel::securityOptions(), QStringList({ "tls", "reality" }));
+    QCOMPARE(XrayConfigModel::realityFingerprintOptions(), QStringList({ "chrome", "firefox", "safari" }));
     QCOMPARE(XrayConfigModel::xhttpModeOptions(),
              QStringList({ "Auto", "Packet-up", "Stream-up", "Stream-one" }));
     QCOMPARE(XrayConfigModel::xhttpUplinkDataPlacementOptions(),
@@ -104,7 +108,9 @@ void TestXrayConfigModel::validationErrors_data()
     QTest::newRow("port 70000") << "raw" << "reality" << "port=70000" << "Port must be";
     QTest::newRow("tls sni *") << "raw" << "tls" << "sni=*" << "SNI";
     QTest::newRow("reality wildcard sni") << "xhttp" << "reality" << "sni=*.asd.com" << "SNI";
-    QTest::newRow("none ignores sni") << "raw" << "none" << "sni=*" << "";
+    QTest::newRow("none is rejected") << "raw" << "none" << "" << "None is not supported";
+    QTest::newRow("mkcp + reality is rejected") << "mkcp" << "reality" << "" << "None is not supported";
+    QTest::newRow("native none is accepted") << "raw" << "none" << "native" << "";
     QTest::newRow("packet-up + reality") << "xhttp" << "reality" << "mode=Packet-up" << "";
     QTest::newRow("packet-up + tls") << "xhttp" << "tls" << "mode=Packet-up" << "";
     QTest::newRow("auto + reality") << "xhttp" << "reality" << "mode=Auto" << "";
@@ -121,8 +127,10 @@ void TestXrayConfigModel::validationErrors()
     QFETCH(QString, edit);
     QFETCH(QString, expected);
 
+    XrayServerConfig srv = baseConfig(transport, security, "");
+    srv.isThirdPartyConfig = edit == QLatin1String("native");
     XrayConfigModel model;
-    model.updateModel(DockerContainer::Xray, issued(baseConfig(transport, security, "")));
+    model.updateModel(DockerContainer::Xray, issued(srv));
 
     const QString value = edit.section(QLatin1Char('='), 1);
     if (edit.startsWith("port="))
@@ -250,6 +258,37 @@ void TestXrayConfigModel::switchingToXhttpFillsDefaultsButKeepsParsedMode()
     parsed.updateModel(DockerContainer::Xray, issued(rawWithPacketUp));
     parsed.setTransport("xhttp");
     QCOMPARE(parsed.xhttpMode(), QStringLiteral("Packet-up"));
+}
+
+void TestXrayConfigModel::switchingToMkcpReplacesReality()
+{
+    XrayConfigModel reality;
+    reality.updateModel(DockerContainer::Xray, issued(baseConfig("raw", "reality", "")));
+    reality.setTransport("mkcp");
+    QCOMPARE(reality.security(), QStringLiteral("tls"));
+    QVERIFY2(reality.validationErrors().isEmpty(), qPrintable(reality.validationErrors().join("; ")));
+
+    XrayConfigModel tls;
+    tls.updateModel(DockerContainer::Xray, issued(baseConfig("raw", "tls", "")));
+    tls.setTransport("mkcp");
+    QCOMPARE(tls.security(), QStringLiteral("tls"));
+}
+
+void TestXrayConfigModel::realityShowsTheFingerprintItSends()
+{
+    XrayServerConfig selfHosted = baseConfig("raw", "reality", "");
+    selfHosted.fingerprint = QStringLiteral("hellochrome_120");
+    XrayConfigModel model;
+    model.updateModel(DockerContainer::Xray, issued(selfHosted));
+    QCOMPARE(model.realityFingerprint(), QStringLiteral("chrome"));
+    model.setFingerprint(QStringLiteral("firefox"));
+    QCOMPARE(model.realityFingerprint(), QStringLiteral("firefox"));
+
+    XrayServerConfig native = selfHosted;
+    native.isThirdPartyConfig = true;
+    XrayConfigModel nativeModel;
+    nativeModel.updateModel(DockerContainer::Xray, issued(native));
+    QCOMPARE(nativeModel.realityFingerprint(), QStringLiteral("hellochrome_120"));
 }
 
 void TestXrayConfigModel::unchangedSaveKeepsClientConfig()

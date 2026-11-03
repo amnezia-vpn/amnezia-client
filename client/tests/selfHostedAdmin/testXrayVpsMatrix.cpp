@@ -12,13 +12,13 @@
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QProcess>
-#include <QTcpServer>
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimer>
 #include <QUuid>
 
+#include <cstdio>
 #include <functional>
 #include <libssh/libssh.h>
 
@@ -34,6 +34,8 @@
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "utils/testCoreController.h"
 #include "utils/testUtils.h"
+#include "utils/xrayMatrix.h"
+#include "utils/xrayRuntime.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
@@ -81,10 +83,10 @@ namespace
         QList<VpsCase> cases;
 
         const QList<QPair<QString, QString>> xhttpCombos = {
-            { "Auto", "none" },       { "Auto", "tls" },       { "Auto", "reality" },
-            { "Packet-up", "none" },  { "Packet-up", "tls" },
-            { "Stream-up", "none" },  { "Stream-up", "tls" },  { "Stream-up", "reality" },
-            { "Stream-one", "none" }, { "Stream-one", "tls" }, { "Stream-one", "reality" },
+            { "Auto", "tls" },       { "Auto", "reality" },
+            { "Packet-up", "tls" },
+            { "Stream-up", "tls" },  { "Stream-up", "reality" },
+            { "Stream-one", "tls" }, { "Stream-one", "reality" },
         };
         for (const auto &combo : xhttpCombos) {
             const QString mode = combo.first;
@@ -94,7 +96,6 @@ namespace
         }
 
         const QList<QPair<QString, QString>> rawCombos = {
-            { "none", "" },
             { "tls", "" },     { "tls", "xtls-rprx-vision" },     { "tls", "xtls-rprx-vision-udp443" },
             { "reality", "" }, { "reality", "xtls-rprx-vision" }, { "reality", "xtls-rprx-vision-udp443" },
         };
@@ -105,7 +106,6 @@ namespace
                            [security, flow](XrayConfigModel &m) { base(m, "raw", security, flow); } });
         }
 
-        cases.append({ "mkcp/none", [](XrayConfigModel &m) { base(m, "mkcp", "none"); } });
         cases.append({ "mkcp/tls", [](XrayConfigModel &m) { base(m, "mkcp", "tls"); } });
 
         cases.append({ "xhttp/packet-up/tls/cookie+GET", [](XrayConfigModel &m) {
@@ -150,6 +150,29 @@ namespace
         cases.append({ "xhttp/packet-up/reality",
                        [](XrayConfigModel &m) { base(m, "xhttp", "reality", QString(), "Packet-up"); } });
 
+        for (const QString &fingerprint : { QStringLiteral("chrome"), QStringLiteral("hellochrome_120") }) {
+            cases.append(
+                    { QStringLiteral("raw/reality/fingerprint %1").arg(fingerprint), [fingerprint](XrayConfigModel &m) {
+                         base(m, "raw", "reality");
+                         m.setFingerprint(fingerprint);
+                     } });
+        }
+
+        if (!qEnvironmentVariableIsSet("VPS_MATRIX_FULL"))
+            return cases;
+
+        for (const xraytest::MatrixCase &full : xraytest::matrix()) {
+            if (!full.allowedByUi)
+                continue;
+            const XrayServerConfig srv = full.srv;
+            cases.append({ QStringLiteral("full/") + full.name, [srv](XrayConfigModel &m) {
+                              XrayServerConfig edited = srv;
+                              edited.port = m.port();
+                              edited.sni = QStringLiteral("www.googletagmanager.com");
+                              edited.site = m.site();
+                              m.applyServerConfig(edited);
+                          } });
+        }
         return cases;
     }
 
@@ -157,15 +180,6 @@ namespace
     {
         static const QList<VpsCase> all = vpsCases();
         return all;
-    }
-
-    int freeLocalPort()
-    {
-        QTcpServer server;
-        server.listen(QHostAddress::LocalHost, 0);
-        const int port = server.serverPort();
-        server.close();
-        return port;
     }
 }
 
@@ -183,6 +197,9 @@ private:
     XrayServerConfig m_originalSettings;
     QTemporaryDir m_dir;
     bool m_ready = false;
+    QString m_lastReason;
+    QStringList m_failures;
+    int m_casesRun = 0;
 
     ContainerConfig storedContainer() const
     {
@@ -214,7 +231,7 @@ private:
         }
         QJsonObject native =
                 QJsonDocument::fromJson(sanitizeNativeConfig(xray.clientConfig->nativeConfig).toUtf8()).object();
-        const int socksPort = freeLocalPort();
+        const int socksPort = xrayruntime::freeLocalPort();
         QJsonArray inbounds = native.value("inbounds").toArray();
         QJsonObject socks = inbounds.first().toObject();
         socks["listen"] = QStringLiteral("127.0.0.1");
@@ -253,7 +270,8 @@ private:
         if (!up) {
             client.kill();
             client.waitForFinished(3000);
-            error = QStringLiteral("local socks never came up: ") + QString::fromUtf8(client.readAll());
+            error = QStringLiteral("local socks never came up: ")
+                    + xrayruntime::collapsedLog(QString::fromUtf8(client.readAll()));
             return {};
         }
 
@@ -277,8 +295,11 @@ private:
 
         client.kill();
         client.waitForFinished(3000);
-        if (ip.isEmpty())
-            error += QStringLiteral("\nxray client output: ") + QString::fromUtf8(client.readAll());
+        if (ip.isEmpty()) {
+            const QString clientLog = xrayruntime::collapsedLog(QString::fromUtf8(client.readAll()));
+            if (!clientLog.isEmpty())
+                error += QStringLiteral(" | ") + clientLog;
+        }
         return ip;
     }
 
@@ -344,6 +365,9 @@ private slots:
                                      << static_cast<int>(restoreError);
             else
                 qInfo().noquote() << "Original Xray settings restored";
+
+            std::fprintf(stderr, "%s\n",
+                         qPrintable(xrayruntime::failureSummary(QStringLiteral("VPS matrix"), m_failures, m_casesRun)));
         }
         if (m_coreController) {
             ssh_finalize();
@@ -351,6 +375,18 @@ private slots:
             delete m_coreController;
             delete m_settings;
         }
+    }
+
+    void cleanup()
+    {
+        ++m_casesRun;
+        if (QTest::currentTestFailed()) {
+            const QString name = QStringLiteral("%1(%2)").arg(QString::fromLatin1(QTest::currentTestFunction()),
+                                                              QString::fromLatin1(QTest::currentDataTag()));
+            m_failures << name + QStringLiteral(": ")
+                            + (m_lastReason.isEmpty() ? QStringLiteral("details in the FAIL line above") : m_lastReason);
+        }
+        m_lastReason.clear();
     }
 
     void matrix_data()
@@ -371,13 +407,18 @@ private slots:
 
         const QStringList errors = model.validationErrors();
         if (c.expect == Expect::Refused) {
-            QVERIFY2(!errors.isEmpty(), "validation must refuse this before anything reaches the server");
+            m_lastReason = QStringLiteral("validation must refuse this before anything reaches the server");
+            QVERIFY2(!errors.isEmpty(), qPrintable(m_lastReason));
             return;
         }
-        if (c.expect == Expect::Connects)
-            QVERIFY2(errors.isEmpty(), qPrintable(errors.join("; ")));
-        if (c.deviceOnly)
-            QVERIFY2(!model.pendingChangeTouchesServer(QString()), "a device-only edit must not count as a server change");
+        if (c.expect == Expect::Connects) {
+            m_lastReason = QStringLiteral("validation refused it: ") + errors.join("; ");
+            QVERIFY2(errors.isEmpty(), qPrintable(m_lastReason));
+        }
+        if (c.deviceOnly) {
+            m_lastReason = QStringLiteral("a device-only edit must not count as a server change");
+            QVERIFY2(!model.pendingChangeTouchesServer(QString()), qPrintable(m_lastReason));
+        }
 
         QElapsedTimer timer;
         timer.start();
@@ -395,13 +436,15 @@ private slots:
             QSKIP(qPrintable(result));
         }
 
-        QVERIFY2(saveError == ErrorCode::NoError,
-                 qPrintable(QStringLiteral("save failed, error %1").arg(static_cast<int>(saveError))));
+        m_lastReason = QStringLiteral("save failed, error %1").arg(static_cast<int>(saveError));
+        QVERIFY2(saveError == ErrorCode::NoError, qPrintable(m_lastReason));
         qInfo().noquote() << c.name << "saved in" << saveMs << "ms";
 
         QString why;
         const QString ip = egressIpThroughTunnel(why);
+        m_lastReason = why;
         QVERIFY2(!ip.isEmpty(), qPrintable(why));
+        m_lastReason = QStringLiteral("traffic left through an unexpected address");
         QVERIFY2(m_expectedIps.isEmpty() || m_expectedIps.contains(ip),
                  qPrintable(QStringLiteral("traffic left through %1, expected %2")
                                     .arg(ip, m_expectedIps.join(QStringLiteral(", ")))));
@@ -423,7 +466,9 @@ private slots:
         QCOMPARE(storedXray().serverConfig.port, newPort);
 
         QString why;
-        QVERIFY2(!egressIpThroughTunnel(why).isEmpty(), qPrintable(why));
+        const bool tunnelUp = !egressIpThroughTunnel(why).isEmpty();
+        m_lastReason = tunnelUp ? QString() : why;
+        QVERIFY2(tunnelUp, qPrintable(why));
 
         model.updateModel(DockerContainer::Xray, storedXray());
         model.setPort(originalPort);
@@ -445,7 +490,9 @@ private slots:
         QCOMPARE(after.fingerprint, QStringLiteral("firefox"));
 
         QString why;
-        QVERIFY2(!egressIpThroughTunnel(why).isEmpty(), qPrintable(why));
+        const bool tunnelUp = !egressIpThroughTunnel(why).isEmpty();
+        m_lastReason = tunnelUp ? QString() : why;
+        QVERIFY2(tunnelUp, qPrintable(why));
     }
 };
 
