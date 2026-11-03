@@ -42,7 +42,9 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool deleteRoutePrefix(const IPAddress& prefix) override;
 
   bool addExclusionRoute(const IPAddress& prefix) override;
+  bool addExclusionRouteList(const QList<IPAddress>& prefixes) override;
   bool deleteExclusionRoute(const IPAddress& prefix) override;
+  bool deleteExclusionRouteList(const QList<IPAddress>& prefixes) override;
 
   bool WireguardUtilsWindows::excludeLocalNetworks(const QList<IPAddress>& addresses) override;
 

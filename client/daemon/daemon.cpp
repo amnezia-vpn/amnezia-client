@@ -132,9 +132,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // Configure routing for excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRouteList(config.m_excludedAddresses);
 
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
@@ -219,6 +217,43 @@ bool Daemon::addExclusionRoute(const IPAddress& prefix) {
   }
   m_excludedAddrSet[prefix] = 1;
   return true;
+}
+
+// Batched variant for large split-tunneling lists: hand the whole batch to
+// the platform layer at once so it can amortize per-prefix costs.
+bool Daemon::addExclusionRouteList(const QStringList& addresses) {
+  logger.debug() << "Exclusion batch: parsing" << addresses.count()
+                 << "addresses";
+  QList<IPAddress> batch;
+  // QHash rather than QMap: IPAddress has no operator<, but provides
+  // qHash and operator==.
+  QHash<IPAddress, int> pending;
+  for (const QString& i : addresses) {
+    IPAddress prefix(i);
+    if (m_excludedAddrSet.contains(prefix)) {
+      m_excludedAddrSet[prefix]++;
+      continue;
+    }
+    auto it = pending.find(prefix);
+    if (it != pending.end()) {
+      it.value()++;
+      continue;
+    }
+    pending[prefix] = 1;
+    batch.append(prefix);
+  }
+  if (batch.isEmpty()) {
+    logger.debug() << "Exclusion batch: nothing new to add";
+    return true;
+  }
+  logger.debug() << "Exclusion batch: handing" << batch.count()
+                 << "prefixes to the platform layer";
+  bool ok = wgutils()->addExclusionRouteList(batch);
+  logger.debug() << "Exclusion batch: platform layer returned" << ok;
+  for (auto it = pending.constBegin(); it != pending.constEnd(); ++it) {
+    m_excludedAddrSet[it.key()] = it.value();
+  }
+  return ok;
 }
 
 bool Daemon::delExclusionRoute(const IPAddress& prefix) {
@@ -504,12 +539,12 @@ bool Daemon::deactivate(bool emitSignals) {
     wgutils()->deletePeer(config);
   }
 
-  // Cleanup routing for excluded addresses.
-  for (auto iterator = m_excludedAddrSet.constBegin();
-       iterator != m_excludedAddrSet.constEnd(); ++iterator) {
-    wgutils()->deleteExclusionRoute(iterator.key());
+  // Cleanup routing for excluded addresses (batched: per-prefix teardown
+  // rescans the routing table on every delete).
+  if (!m_excludedAddrSet.isEmpty()) {
+    wgutils()->deleteExclusionRouteList(m_excludedAddrSet.keys());
+    m_excludedAddrSet.clear();
   }
-  m_excludedAddrSet.clear();
 
   m_connections.clear();
   // Delete the interface
@@ -546,9 +581,7 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
       m_connections.value(config.m_hopType).m_config;
 
   // Configure routing for new excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRouteList(config.m_excludedAddresses);
 
   // Activate the new peer and its routes.
   if (!wgutils()->updatePeer(config)) {
