@@ -18,6 +18,8 @@ SystemService::SystemService(int argc, char **argv)
     setServiceDescription("Service for AmneziaVPN");
 
 #ifdef Q_OS_WIN
+    setServiceFlags(serviceFlags() | QtServiceBase::NeedsStopOnShutdown);
+
     if(argc > 2){
         s_argc = argc;
         s_argv = argv;
@@ -46,4 +48,5 @@ void SystemService::start()
 void SystemService::stop()
 {
     delete m_localServer;
+    m_localServer = nullptr;
 }
