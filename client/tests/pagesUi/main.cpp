@@ -4,8 +4,7 @@
 #include <QTest>
 
 #include "ui/utils/pageEnum.h"
-
-using namespace amnezia;
+#include "core/utils/protocolEnum.h"
 
 int runPageSetupWizardConfigSourceTests(int argc, char *argv[]);
 int runPageHomeTests(int argc, char *argv[]);
