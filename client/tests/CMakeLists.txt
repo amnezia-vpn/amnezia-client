@@ -462,8 +462,8 @@ endif()
 
 if(NOT ANDROID)
     add_subdirectory(selfHostedAdmin)
-    add_subdirectory(api)
 endif()
+    add_subdirectory(api)
 
 enable_testing()
 
@@ -494,7 +494,7 @@ if(NOT ANDROID)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
 endif()
 
-# Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
+# Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/deploy.yml).
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
 
 amnezia_copy_runtime_dlls()
