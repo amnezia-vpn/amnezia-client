@@ -101,7 +101,9 @@ QJsonObject Deserialize(const QString &ssUri, QString *alias, QString *errMessag
         auto x = QUrl::fromUserInput(uri);
         server.address = x.host();
         server.port = x.port();
-        const auto userInfo = Utils::SafeBase64Decode(x.userName());
+        const auto userInfo = x.password().isEmpty()
+                ? Utils::SafeBase64Decode(x.userName())
+                : x.userName(QUrl::FullyDecoded) + ":" + x.password(QUrl::FullyDecoded);
         const auto userInfoSp = userInfo.indexOf(':');
 
         if (userInfoSp < 0)
