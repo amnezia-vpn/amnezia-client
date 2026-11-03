@@ -32,8 +32,9 @@ void PagesUiTestFixture::cleanup()
 {
     closePage();
 
-    if (m_settings)
+    if (m_settings) {
         m_settings->clearSettings();
+    }
 
     delete m_core;
     m_core = nullptr;
@@ -71,23 +72,27 @@ bool PagesUiTestFixture::loadPage(const QString &pageName)
 
     m_engine->loadData(hostQml, QUrl(QStringLiteral("qrc:/ui/qml/Pages2/pagesUiTestHost.qml")));
 
-    if (m_engine->rootObjects().isEmpty())
+    if (m_engine->rootObjects().isEmpty()) {
         return false;
+    }
 
     m_window = qobject_cast<QQuickWindow *>(m_engine->rootObjects().last());
 
-    if (!m_window || !QTest::qWaitForWindowExposed(m_window))
+    if (!m_window || !QTest::qWaitForWindowExposed(m_window)) {
         return false;
+    }
 
     m_window->requestActivate();
 
-    if (!QTest::qWaitForWindowActive(m_window))
+    if (!QTest::qWaitForWindowActive(m_window)) {
         return false;
+    }
 
     QObject *loader = m_window->findChild<QObject *>(QStringLiteral("pageLoader"));
 
-    if (!loader)
+    if (!loader) {
         return false;
+    }
 
     if (!QTest::qWaitFor([loader] { return loader->property("status").toInt() == 1; }, 5000)) {
         return false;
@@ -102,8 +107,9 @@ void PagesUiTestFixture::closePage()
 {
     m_page = nullptr;
 
-    if (!m_window)
+    if (!m_window) {
         return;
+    }
 
     m_window->close();
     m_window->deleteLater();
@@ -114,13 +120,15 @@ void PagesUiTestFixture::closePage()
 
 void PagesUiTestFixture::collectItems(QQuickItem *root, QList<QQuickItem *> &result)
 {
-    if (!root)
+    if (!root) {
         return;
+    }
 
     result.append(root);
 
-    for (QQuickItem *child : root->childItems())
+    for (QQuickItem *child : root->childItems()) {
         collectItems(child, result);
+    }
 }
 
 QList<QQuickItem *> PagesUiTestFixture::items(QQuickItem *root) const
@@ -140,8 +148,9 @@ QList<QQuickItem *> PagesUiTestFixture::itemsOfType(const QString &qmlType, QQui
     QList<QQuickItem *> result;
 
     for (QQuickItem *candidate : items(root)) {
-        if (isQmlType(candidate, qmlType))
+        if (isQmlType(candidate, qmlType)) {
             result.append(candidate);
+        }
     }
 
     return result;
@@ -152,8 +161,9 @@ QQuickItem *PagesUiTestFixture::item(const QString &property, const QVariant &va
     for (QQuickItem *candidate : items(root)) {
         const QVariant candidateValue = candidate->property(property.toUtf8().constData());
 
-        if (candidateValue.isValid() && candidateValue == value)
+        if (candidateValue.isValid() && candidateValue == value) {
             return candidate;
+        }
     }
 
     return nullptr;
@@ -188,32 +198,37 @@ QQuickItem *PagesUiTestFixture::clickable(const QString &text) const
 
 void PagesUiTestFixture::click(QQuickItem *target)
 {
-    if (!target || !m_window)
+    if (!target || !m_window) {
         return;
+    }
 
     const QPointF center = target->mapToScene(QPointF(target->width() / 2, target->height() / 2));
 
-    QTest::mouseClick(m_window, Qt::LeftButton, {}, center.toPoint());
+    QTest::mouseClick(m_window, Qt::LeftButton, { }, center.toPoint());
     QTest::qWait(50);
 }
 
 void PagesUiTestFixture::typeText(QQuickItem *target, const QString &text)
 {
-    if (!target || !m_window)
+    if (!target || !m_window) {
         return;
+    }
 
     click(target);
 
-    for (const QChar character : text)
+    for (const QChar character : text) {
         QTest::keyClick(m_window, character.toLatin1());
+    }
 }
 
 void PagesUiTestFixture::clearAndType(QQuickItem *target, const QString &text)
 {
-    if (!target || !m_window)
+    if (!target || !m_window) {
         return;
+    }
 
     click(target);
+
     QTest::keySequence(m_window, QKeySequence::SelectAll);
     QTest::keyClick(m_window, Qt::Key_Backspace);
 

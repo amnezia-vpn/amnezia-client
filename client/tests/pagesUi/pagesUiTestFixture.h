@@ -23,10 +23,12 @@ public:
     {
         return m_core;
     }
+
     QQmlApplicationEngine *engine() const
     {
         return m_engine;
     }
+
     PageController *pageController() const
     {
         return m_pageController;
@@ -36,6 +38,7 @@ public:
     {
         return m_window;
     }
+
     QQuickItem *page() const
     {
         return m_page;

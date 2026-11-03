@@ -330,9 +330,11 @@ if(NOT ANDROID)
     )
 
     add_executable(test_pages_ui
-        pagesUi/testPagesUi.cpp
+        pagesUi/main.cpp
         pagesUi/pagesUiTestFixture.cpp
         pagesUi/pagesUiTestFixture.h
+        pagesUi/testPageSetupWizardConfigSource.cpp
+        pagesUi/testPageHome.cpp
         ${PAGES_UI_QRC}
     )
 
