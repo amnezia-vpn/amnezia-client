@@ -5,6 +5,8 @@
 
 #include "ui/utils/pageEnum.h"
 
+using namespace amnezia;
+
 int runPageSetupWizardConfigSourceTests(int argc, char *argv[]);
 int runPageHomeTests(int argc, char *argv[]);
 
