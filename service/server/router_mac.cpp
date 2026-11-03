@@ -1,10 +1,49 @@
 #include "router_mac.h"
 #include "helper_route_mac.h"
 
+#include <QNetworkInterface>
 #include <QProcess>
 #include <QThread>
 
 #include <core/utils/networkUtilities.h>
+
+namespace {
+void runRoute(const QString &cmd)
+{
+    const QStringList parts = cmd.split(' ');
+    const int argc = parts.size();
+    char **argv = new char*[argc];
+    for (int i = 0; i < argc; ++i) {
+        const QByteArray arg = parts.at(i).toUtf8();
+        argv[i] = new char[arg.size() + 1];
+        strcpy(argv[i], arg.constData());
+    }
+    mainRouteIface(argc, argv);
+    for (int i = 0; i < argc; ++i) delete[] argv[i];
+    delete[] argv;
+}
+
+QPair<QString, QString> onLinkInterface(const QString &destination, const QString &gateway)
+{
+    const auto subnet = QHostAddress::parseSubnet(destination);
+    const QHostAddress router(gateway);
+    if (subnet.second < 0 || subnet.second == 32 || router.protocol() != QAbstractSocket::IPv4Protocol)
+        return {};
+
+    for (const QNetworkInterface &iface : QNetworkInterface::allInterfaces()) {
+        if (!(iface.flags() & QNetworkInterface::IsUp) || (iface.flags() & QNetworkInterface::IsLoopBack))
+            continue;
+        for (const QNetworkAddressEntry &entry : iface.addressEntries()) {
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol && entry.prefixLength() >= 0 &&
+                entry.prefixLength() <= subnet.second &&
+                router.isInSubnet(entry.ip(), entry.prefixLength()) &&
+                subnet.first.isInSubnet(entry.ip(), entry.prefixLength()))
+                return {iface.name(), entry.ip().toString()};
+        }
+    }
+    return {};
+}
+}
 
 RouterMac &RouterMac::Instance()
 {
@@ -26,32 +65,24 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
         return false;
     }
 
-    QString cmd;
-    if (mask == "255.255.255.255") {
-        cmd = QString("route add -host %1 %2").arg(ip).arg(gw);
+    const auto [iface, localIp] = onLinkInterface(ipWithSubnet, gw);
+    if (!iface.isEmpty()) {
+        const QStringList args = {"-n", "add", "-net", ip, "-netmask", mask, "-interface", localIp};
+        // XRay has interface-scoped /1 routes, so both route scopes need the on-link prefix.
+        const bool directAdded = QProcess::execute("/sbin/route", args) == 0;
+        const bool scopedAdded = QProcess::execute("/sbin/route", args + QStringList{"-ifscope", iface}) == 0;
+        if (!directAdded && !scopedAdded) {
+            qWarning().noquote() << "Failed to add on-link route:" << ipWithSubnet << iface;
+            return false;
+        }
+        m_addedRoutes.append({ipWithSubnet, gw, iface, directAdded, scopedAdded});
+        return true;
+    } else if (mask == "255.255.255.255") {
+        runRoute(QString("route add -host %1 %2").arg(ip, gw));
+    } else {
+        runRoute(QString("route add -net %1 %2 %3").arg(ip, gw, mask));
     }
-    else {
-        cmd = QString("route add -net %1 %2 %3").arg(ip).arg(gw).arg(mask);
-    }
-
-    QStringList parts = cmd.split(" ");
-
-    int argc = parts.size();
-    char **argv = new char*[argc];
-
-    for (int i = 0; i < argc; i++) {
-        argv[i] = new char[parts.at(i).toStdString().length() + 1];
-        strcpy(argv[i], parts.at(i).toStdString().c_str());
-    }
-
-    // TODO refactor
-    mainRouteIface(argc, argv);
     m_addedRoutes.append({ipWithSubnet, gw});
-
-    for (int i = 0; i < argc; i++) {
-        delete [] argv[i];
-    }
-    delete[] argv;
     return true;
 }
 
@@ -94,30 +125,24 @@ bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
         return true;
     }
 
-    QString cmd;
-    if (mask == "255.255.255.255") {
-        cmd = QString("route delete -host %1 %2").arg(ip).arg(gw);
+    const Route *added = nullptr;
+    for (const Route &route : m_addedRoutes) {
+        if (route.dst == ipWithSubnet && route.gw == gw) {
+            added = &route;
+            break;
+        }
     }
-    else {
-        cmd = QString("route delete -net %1 %2 %3").arg(ip).arg(gw).arg(mask);
+    if (added && !added->iface.isEmpty()) {
+        const QStringList args = {"-n", "delete", "-net", ip, "-netmask", mask};
+        if (added->scopedAdded)
+            QProcess::execute("/sbin/route", args + QStringList{"-ifscope", added->iface});
+        if (added->directAdded)
+            QProcess::execute("/sbin/route", args);
+    } else if (mask == "255.255.255.255") {
+        runRoute(QString("route delete -host %1 %2").arg(ip, gw));
+    } else {
+        runRoute(QString("route delete -net %1 %2 %3").arg(ip, gw, mask));
     }
-
-    QStringList parts = cmd.split(" ");
-
-    int argc = parts.size();
-    char **argv = new char*[argc];
-
-    for (int i = 0; i < argc; i++) {
-        argv[i] = new char[parts.at(i).toStdString().length() + 1];
-        strcpy(argv[i], parts.at(i).toStdString().c_str());
-    }
-
-    mainRouteIface(argc, argv);
-
-    for (int i = 0; i < argc; i++) {
-        delete [] argv[i];
-    }
-    delete[] argv;
     return true;
 }
 

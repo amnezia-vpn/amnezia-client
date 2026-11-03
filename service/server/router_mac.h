@@ -22,6 +22,9 @@ public:
     struct Route {
         QString dst;
         QString gw;
+        QString iface;
+        bool directAdded = false;
+        bool scopedAdded = false;
     };
 
     bool routeAdd(const QString &ip, const QString &gw);
