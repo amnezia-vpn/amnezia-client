@@ -8,10 +8,6 @@
 #include "ui/utils/pageEnum.h"
 #include "vpnConnection.h"
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-#include "common/logger/logger.h"
-#endif
-
 using namespace amnezia;
 
 void TestXrayPagesUi::initTestCase()
@@ -274,10 +270,6 @@ int main(int argc, char *argv[])
         qputenv("QT_QPA_PLATFORM", "offscreen");
 #endif
     QApplication app(argc, argv);
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    test_logger::Logger logger("AmneziaVPN-Test");
-    spdLog()->debug("start");
-#endif
     TestXrayPagesUi test;
     QStringList args = app.arguments();
     if (!args.contains(QStringLiteral("-maxwarnings")))
