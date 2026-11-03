@@ -323,6 +323,23 @@ if(NOT ANDROID)
             )
         endforeach()
     endforeach()
+
+    qt6_add_resources(PAGES_UI_QRC
+        ${CLIENT_QML_QRC_FILE}
+        ../images/images.qrc
+    )
+
+    add_executable(test_pages_ui
+        pagesUi/testPagesUi.cpp
+        pagesUi/pagesUiTestFixture.cpp
+        pagesUi/pagesUiTestFixture.h
+        ${PAGES_UI_QRC}
+    )
+
+    target_link_libraries(test_pages_ui PRIVATE
+        Qt6::Test
+        test_common
+    )
 endif() # NOT ANDROID
 
 if(ANDROID)
@@ -492,6 +509,8 @@ if(NOT ANDROID)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
+
+    add_test(NAME PagesUiTest                      COMMAND test_pages_ui)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
