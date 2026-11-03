@@ -6,6 +6,10 @@
 
 #include <qassert.h>
 
+#include <array>
+#include <cstdint>
+#include <cstring>
+#include <limits>
 #include <memory>
 
 #include "../windowscommons.h"
@@ -22,7 +26,7 @@
 
 #include <QCoreApplication>
 #include <QFileInfo>
-#include <QNetworkInterface>
+#include <QMetaObject>
 #include <QScopeGuard>
 #include <QUrl>
 
@@ -127,6 +131,78 @@ constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
 
 namespace {
 Logger logger("WindowsSplitTunnel");
+constexpr int AddressRefreshRetryIntervalMs = 1000;
+
+enum class DadState { Other, Tentative, Deprecated, Preferred };
+
+struct AddressAvailability {
+  bool internetIpv4;
+  bool tunnelIpv4;
+  bool internetIpv6;
+  bool tunnelIpv6;
+};
+
+constexpr int dadAddressScore(DadState state) {
+  return state == DadState::Preferred    ? 2
+         : state == DadState::Deprecated ? 1
+                                         : 0;
+}
+
+constexpr bool hasInternetAddress(const AddressAvailability& addresses) {
+  return addresses.internetIpv4 || addresses.internetIpv6;
+}
+
+constexpr bool hasTunnelAddress(const AddressAvailability& addresses) {
+  return addresses.tunnelIpv4 || addresses.tunnelIpv6;
+}
+
+constexpr int splittingMode(const AddressAvailability& addresses) {
+  if (addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 1;
+  }
+  if (addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      !addresses.internetIpv6 && !addresses.tunnelIpv6) {
+    return 2;
+  }
+  if (addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && !addresses.tunnelIpv6) {
+    return 3;
+  }
+  if (addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      !addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 4;
+  }
+  if (!addresses.internetIpv4 && !addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 5;
+  }
+  if (addresses.internetIpv4 && !addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 6;
+  }
+  if (!addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 7;
+  }
+  if (!addresses.internetIpv4 && addresses.tunnelIpv4 &&
+      addresses.internetIpv6 && !addresses.tunnelIpv6) {
+    return 8;
+  }
+  if (addresses.internetIpv4 && !addresses.tunnelIpv4 &&
+      !addresses.internetIpv6 && addresses.tunnelIpv6) {
+    return 9;
+  }
+  return 0;
+}
+
+constexpr bool operationalWhileDadSettles(bool driverRunning,
+                                          bool driverReady,
+                                          bool monitoringActive,
+                                          bool stabilizationPending) {
+  return driverRunning ||
+         (driverReady && monitoringActive && stabilizationPending);
+}
 
 ProcessInfo getProcessInfo(HANDLE process, const PROCESSENTRY32W& processMeta) {
   ProcessInfo pi;
@@ -162,6 +238,11 @@ QString normalizeExecutablePath(const QString& path) {
 }
 
 }  // namespace
+
+struct WindowsSplitTunnel::NotificationContext {
+  SRWLOCK lock = SRWLOCK_INIT;
+  WindowsSplitTunnel* target = nullptr;
+};
 
 std::unique_ptr<WindowsSplitTunnel> WindowsSplitTunnel::create(
     WindowsFirewall* fw) {
@@ -279,13 +360,36 @@ bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
   return true;
 }
 
-WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO) : m_driver(driverIO) {
+WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO)
+    : QObject(nullptr), m_driver(driverIO), m_addressRefreshTimer(this) {
   logger.debug() << "Connected to the Driver";
+
+  m_addressRefreshTimer.setSingleShot(true);
+  m_addressRefreshTimer.setInterval(250);
+  connect(&m_addressRefreshTimer, &QTimer::timeout, this, [this]() {
+    const bool refreshSucceeded =
+        !m_addressMonitoringActive ||
+        registerIPConfiguration(false, false);
+    if (!refreshSucceeded) {
+      logger.error() << "Failed to refresh split-tunnel network addresses";
+      if (m_addressMonitoringActive && m_addressRefreshRetryAttempts < 3) {
+        ++m_addressRefreshRetryAttempts;
+        m_addressRefreshTimer.start(AddressRefreshRetryIntervalMs);
+      }
+      return;
+    }
+    m_addressRefreshRetryAttempts = 0;
+    if (m_addressMonitoringActive && m_addressStabilizationPending) {
+      m_addressRefreshTimer.start();
+    }
+  });
 
   Q_ASSERT(getState() == STATE_INITIALIZED);
 }
 
 WindowsSplitTunnel::~WindowsSplitTunnel() {
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
   CloseHandle(m_driver);
   uninstallDriver();
 }
@@ -319,11 +423,23 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
   return true;
 }
 
-bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
+bool WindowsSplitTunnel::start(const QHostAddress& endpoint,
+                               int inetAdapterIndex, int vpnAdapterIndex) {
   // To Start we need to send 2 things:
   // Network info (what is vpn what is network)
   logger.debug() << "Starting SplitTunnel";
   DWORD bytesReturned;
+
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
+  m_endpoint = endpoint;
+  if (!updateAdapterLuids(inetAdapterIndex, vpnAdapterIndex)) {
+    return false;
+  }
+  auto failedStart = qScopeGuard([this]() {
+    m_addressMonitoringActive = false;
+    stopAddressMonitoring();
+  });
 
   if (getState() == STATE_STARTED) {
     logger.debug() << "Driver needs Init Call";
@@ -334,6 +450,7 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
       logger.error() << "Driver init failed. Error:" << GetLastError();
       return false;
     }
+    m_lastIPConfiguration.clear();
   }
 
   // Process Info (what is running already)
@@ -361,24 +478,26 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   }
   logger.debug() << "Driver is  ready || new State:" << stateString();
 
-  auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
-  if (config.empty()) {
-    logger.error() << "Network configuration blob is empty. Internet adapter:"
-                   << inetAdapterIndex << "VPN adapter:" << vpnAdapterIndex;
+  if (!startAddressMonitoring()) {
     return false;
   }
-  auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
-                            (DWORD)config.size(), nullptr, 0, &bytesReturned,
-                            nullptr);
-  if (!ok) {
-    logger.error() << "Failed to set Network Config. Error:" << GetLastError();
+  if (!registerIPConfiguration(true, true)) {
+    logger.error() << "Failed to register initial split-tunnel addresses";
     return false;
   }
-  logger.debug() << "New Network Config Applied || new State:" << stateString();
+  m_addressMonitoringActive = true;
+  if (m_addressStabilizationPending) {
+    m_addressRefreshTimer.start();
+  }
+  failedStart.dismiss();
   return true;
 }
 
 void WindowsSplitTunnel::stop() {
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
+  m_lastIPConfiguration.clear();
+
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_CLEAR_CONFIGURATION, nullptr, 0,
                             nullptr, 0, &bytesReturned, nullptr);
@@ -479,57 +598,444 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
   return outBuffer;
 }
 
-std::vector<std::byte> WindowsSplitTunnel::generateIPConfiguration(
-    int inetAdapterIndex, int vpnAdapterIndex) {
-  std::vector<std::byte> out(sizeof(IP_ADDRESSES_CONFIG));
-
-  auto config = reinterpret_cast<IP_ADDRESSES_CONFIG*>(&out[0]);
-
+bool WindowsSplitTunnel::updateAdapterLuids(int inetAdapterIndex,
+                                            int vpnAdapterIndex) {
   if (vpnAdapterIndex == 0) {
     vpnAdapterIndex = WindowsCommons::VPNAdapterIndex();
   }
-  // Always the VPN
-  if (!getAddress(vpnAdapterIndex, &config->TunnelIpv4,
-                  &config->TunnelIpv6)) {
-    return {};
-  }
-  // 2nd best route is usually the internet adapter
-  if (!getAddress(inetAdapterIndex, &config->InternetIpv4,
-                  &config->InternetIpv6)) {
-    return {};
-  };
-  return out;
-}
-bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
-                                    IN6_ADDR* out_ipv6) {
-  QNetworkInterface target =
-      QNetworkInterface::interfaceFromIndex(adapterIndex);
-  logger.debug() << "Getting adapter info for:" << target.humanReadableName();
-
-  auto get = [&target](QAbstractSocket::NetworkLayerProtocol protocol) {
-    for (auto address : target.addressEntries()) {
-      if (address.ip().protocol() != protocol) {
-        continue;
-      }
-      return address.ip().toString().toStdWString();
-    }
-    return std::wstring{};
-  };
-  auto ipv4 = get(QAbstractSocket::IPv4Protocol);
-  auto ipv6 = get(QAbstractSocket::IPv6Protocol);
-
-  if (InetPtonW(AF_INET, ipv4.c_str(), out_ipv4) != 1) {
-    logger.debug() << "Ipv4 Conversation error" << WSAGetLastError();
+  if (vpnAdapterIndex <= 0 ||
+      ConvertInterfaceIndexToLuid(vpnAdapterIndex, &m_vpnAdapterLuid) !=
+          NO_ERROR) {
+    logger.error() << "Failed to resolve VPN adapter LUID:" << vpnAdapterIndex;
+    m_vpnAdapterLuid.Value = 0;
     return false;
   }
-  if (ipv6.empty()) {
-    std::memset(out_ipv6, 0x00, sizeof(IN6_ADDR));
-    return true;
-  }
-  if (InetPtonW(AF_INET6, ipv6.c_str(), out_ipv6) != 1) {
-    logger.debug() << "Ipv6 Conversation error" << WSAGetLastError();
+
+  m_internetHintLuid.Value = 0;
+  if (inetAdapterIndex > 0 &&
+      ConvertInterfaceIndexToLuid(inetAdapterIndex, &m_internetHintLuid) !=
+          NO_ERROR) {
+    logger.warning() << "Failed to resolve internet adapter LUID:"
+                     << inetAdapterIndex;
+    m_internetHintLuid.Value = 0;
   }
   return true;
+}
+
+namespace {
+
+bool isEmpty(const IN_ADDR& address) {
+  return address.S_un.S_addr == INADDR_ANY;
+}
+
+bool isEmpty(const IN6_ADDR& address) {
+  return IN6_IS_ADDR_UNSPECIFIED(&address);
+}
+
+bool isUsable(const IN_ADDR& address) {
+  const std::uint32_t hostAddress = ntohl(address.S_un.S_addr);
+  const std::uint8_t firstOctet =
+      static_cast<std::uint8_t>(hostAddress >> 24);
+  return hostAddress != INADDR_ANY && firstOctet != 127 && firstOctet < 224 &&
+         (hostAddress & 0xffff0000u) != 0xa9fe0000u;
+}
+
+bool isUsable(const IN6_ADDR& address) {
+  return !IN6_IS_ADDR_UNSPECIFIED(&address) &&
+         !IN6_IS_ADDR_LOOPBACK(&address) && !IN6_IS_ADDR_LINKLOCAL(&address) &&
+         !IN6_IS_ADDR_MULTICAST(&address);
+}
+
+AddressAvailability availability(
+    const IP_ADDRESSES_CONFIG& addresses) {
+  return {
+      !isEmpty(addresses.InternetIpv4),
+      !isEmpty(addresses.TunnelIpv4),
+      !isEmpty(addresses.InternetIpv6),
+      !isEmpty(addresses.TunnelIpv6),
+  };
+}
+
+}  // namespace
+
+std::vector<std::byte> WindowsSplitTunnel::generateIPConfiguration() {
+  std::vector<std::byte> out(sizeof(IP_ADDRESSES_CONFIG));
+  auto config = reinterpret_cast<IP_ADDRESSES_CONFIG*>(out.data());
+  m_addressStabilizationPending = false;
+  m_addressCollectionIncomplete = false;
+
+  if (!getAddresses(m_vpnAdapterLuid, &config->TunnelIpv4,
+                    &config->TunnelIpv6)) {
+    logger.error() << "Failed to collect VPN interface addresses";
+    return {};
+  }
+
+  NET_LUID preferredAdapter = m_internetHintLuid;
+  const auto endpointRoute = getEndpointRoute();
+  if (endpointRoute) {
+    preferredAdapter = endpointRoute->adapter;
+    m_internetHintLuid = endpointRoute->adapter;
+  }
+
+  if (m_endpoint.protocol() == QAbstractSocket::IPv4Protocol &&
+      endpointRoute) {
+    if (endpointRoute->source.si_family == AF_INET &&
+        isUsable(endpointRoute->source.Ipv4.sin_addr)) {
+      config->InternetIpv4 = endpointRoute->source.Ipv4.sin_addr;
+    } else if (!getAddresses(endpointRoute->adapter, &config->InternetIpv4,
+                             nullptr)) {
+      logger.error() << "Failed to collect fallback internet IPv4 address";
+      return {};
+    }
+  } else if (auto adapter = getBestDefaultRoute(AF_INET, preferredAdapter)) {
+    if (!getAddresses(*adapter, &config->InternetIpv4, nullptr)) {
+      logger.error() << "Failed to collect internet IPv4 address";
+      return {};
+    }
+  }
+
+  if (m_endpoint.protocol() == QAbstractSocket::IPv6Protocol &&
+      endpointRoute) {
+    if (endpointRoute->source.si_family == AF_INET6 &&
+        isUsable(endpointRoute->source.Ipv6.sin6_addr)) {
+      config->InternetIpv6 = endpointRoute->source.Ipv6.sin6_addr;
+    } else if (!getAddresses(endpointRoute->adapter, nullptr,
+                             &config->InternetIpv6)) {
+      logger.error() << "Failed to collect fallback internet IPv6 address";
+      return {};
+    }
+  } else if (auto adapter = getBestDefaultRoute(AF_INET6, preferredAdapter)) {
+    if (!getAddresses(*adapter, nullptr, &config->InternetIpv6)) {
+      logger.error() << "Failed to collect internet IPv6 address";
+      return {};
+    }
+  }
+
+  if (m_addressCollectionIncomplete) {
+    return {};
+  }
+
+  auto addressState = availability(*config);
+  if (!hasInternetAddress(addressState)) {
+    std::memset(config, 0, sizeof(*config));
+    addressState = availability(*config);
+  }
+
+  const int mode = splittingMode(addressState);
+  if (hasTunnelAddress(addressState) && mode == 0) {
+    logger.error() << "Unsupported split-tunnel address combination";
+    return {};
+  }
+  logger.debug() << "Split-tunnel address availability: internet v4"
+                 << addressState.internetIpv4 << "tunnel v4"
+                 << addressState.tunnelIpv4 << "internet v6"
+                 << addressState.internetIpv6 << "tunnel v6"
+                 << addressState.tunnelIpv6 << "mode" << mode;
+  return out;
+}
+
+bool WindowsSplitTunnel::registerIPConfiguration(bool force,
+                                                 bool requireActiveMode) {
+  auto config = generateIPConfiguration();
+  if (config.empty()) {
+    return false;
+  }
+
+  const auto* addresses =
+      reinterpret_cast<const IP_ADDRESSES_CONFIG*>(config.data());
+  const auto addressState = availability(*addresses);
+  const bool activeMode =
+      hasInternetAddress(addressState) &&
+      hasTunnelAddress(addressState) &&
+      splittingMode(addressState) != 0;
+  if (requireActiveMode && !activeMode && !m_addressStabilizationPending) {
+    logger.error() << "No usable tunnel/internet address pair";
+    return false;
+  }
+  if (!activeMode && m_addressStabilizationPending) {
+    std::memset(config.data(), 0, config.size());
+  }
+  if (!force && config == m_lastIPConfiguration) {
+    return true;
+  }
+
+  DWORD bytesReturned = 0;
+  const auto ok = DeviceIoControl(
+      m_driver, IOCTL_REGISTER_IP_ADDRESSES, config.data(),
+      static_cast<DWORD>(config.size()), nullptr, 0, &bytesReturned, nullptr);
+  if (!ok) {
+    logger.error() << "Failed to set Network Config. Error:" << GetLastError();
+    return false;
+  }
+  m_lastIPConfiguration = std::move(config);
+  logger.debug() << "New Network Config Applied || new State:" << stateString();
+  return true;
+}
+
+bool WindowsSplitTunnel::getAddresses(const NET_LUID& adapter,
+                                      IN_ADDR* outIpv4, IN6_ADDR* outIpv6) {
+  if (outIpv4 != nullptr) {
+    std::memset(outIpv4, 0, sizeof(*outIpv4));
+  }
+  if (outIpv6 != nullptr) {
+    std::memset(outIpv6, 0, sizeof(*outIpv6));
+  }
+  if (adapter.Value == 0) {
+    return true;
+  }
+
+  PMIB_UNICASTIPADDRESS_TABLE table = nullptr;
+  const DWORD result = GetUnicastIpAddressTable(AF_UNSPEC, &table);
+  if (result == ERROR_NOT_FOUND) {
+    return true;
+  }
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to retrieve unicast address table:" << result;
+    m_addressCollectionIncomplete = true;
+    return false;
+  }
+  auto guard = qScopeGuard([&] { FreeMibTable(table); });
+
+  int ipv4Score = 0;
+  int ipv6Score = 0;
+  bool ipv4Tentative = false;
+  bool ipv6Tentative = false;
+  for (ULONG i = 0; i < table->NumEntries; ++i) {
+    const MIB_UNICASTIPADDRESS_ROW& row = table->Table[i];
+    if (row.InterfaceLuid.Value != adapter.Value || row.SkipAsSource) {
+      continue;
+    }
+
+    DadState dadState =
+        DadState::Other;
+    if (row.DadState == IpDadStatePreferred) {
+      dadState = DadState::Preferred;
+    } else if (row.DadState == IpDadStateDeprecated) {
+      dadState = DadState::Deprecated;
+    } else if (row.DadState == IpDadStateTentative) {
+      dadState = DadState::Tentative;
+      const bool requestedUsableIpv4 =
+          outIpv4 != nullptr && row.Address.si_family == AF_INET &&
+          isUsable(row.Address.Ipv4.sin_addr);
+      const bool requestedUsableIpv6 =
+          outIpv6 != nullptr && row.Address.si_family == AF_INET6 &&
+          isUsable(row.Address.Ipv6.sin6_addr);
+      ipv4Tentative = ipv4Tentative || requestedUsableIpv4;
+      ipv6Tentative = ipv6Tentative || requestedUsableIpv6;
+    }
+    const int score = dadAddressScore(dadState);
+    if (score == 0) {
+      continue;
+    }
+    if (outIpv4 != nullptr && row.Address.si_family == AF_INET &&
+        score > ipv4Score && isUsable(row.Address.Ipv4.sin_addr)) {
+      *outIpv4 = row.Address.Ipv4.sin_addr;
+      ipv4Score = score;
+    }
+    if (outIpv6 != nullptr && row.Address.si_family == AF_INET6 &&
+        score > ipv6Score && isUsable(row.Address.Ipv6.sin6_addr)) {
+      *outIpv6 = row.Address.Ipv6.sin6_addr;
+      ipv6Score = score;
+    }
+  }
+  m_addressStabilizationPending =
+      m_addressStabilizationPending ||
+      (ipv4Tentative && ipv4Score == 0) ||
+      (ipv6Tentative && ipv6Score == 0);
+  return true;
+}
+
+std::optional<NET_LUID> WindowsSplitTunnel::getBestDefaultRoute(
+    ADDRESS_FAMILY family, const NET_LUID& preferredAdapter) {
+  PMIB_IPFORWARD_TABLE2 table = nullptr;
+  const DWORD result = GetIpForwardTable2(family, &table);
+  if (result == ERROR_NOT_FOUND || result == ERROR_NOT_SUPPORTED) {
+    return std::nullopt;
+  }
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to retrieve route table for family" << family
+                   << ":" << result;
+    m_addressCollectionIncomplete = true;
+    return std::nullopt;
+  }
+  auto guard = qScopeGuard([&] { FreeMibTable(table); });
+
+  std::optional<NET_LUID> bestAdapter;
+  std::uint64_t bestMetric = (std::numeric_limits<std::uint64_t>::max)();
+  bool bestIsPreferred = false;
+  for (ULONG i = 0; i < table->NumEntries; ++i) {
+    const MIB_IPFORWARD_ROW2& route = table->Table[i];
+    if (route.DestinationPrefix.PrefixLength != 0 || route.Loopback ||
+        route.ValidLifetime == 0 ||
+        route.InterfaceLuid.Value == m_vpnAdapterLuid.Value) {
+      continue;
+    }
+
+    MIB_IPINTERFACE_ROW interfaceRow = {};
+    InitializeIpInterfaceEntry(&interfaceRow);
+    interfaceRow.Family = family;
+    interfaceRow.InterfaceLuid = route.InterfaceLuid;
+    if (GetIpInterfaceEntry(&interfaceRow) != NO_ERROR ||
+        !interfaceRow.Connected) {
+      continue;
+    }
+
+    const std::uint64_t metric = static_cast<std::uint64_t>(route.Metric) +
+                                 static_cast<std::uint64_t>(interfaceRow.Metric);
+    const bool isPreferred =
+        route.InterfaceLuid.Value == preferredAdapter.Value;
+    if (metric > bestMetric ||
+        (metric == bestMetric && (bestIsPreferred || !isPreferred))) {
+      continue;
+    }
+    bestAdapter = route.InterfaceLuid;
+    bestMetric = metric;
+    bestIsPreferred = isPreferred;
+  }
+  return bestAdapter;
+}
+
+std::optional<WindowsSplitTunnel::EndpointRoute>
+WindowsSplitTunnel::getEndpointRoute() {
+  SOCKADDR_INET destination = {};
+  if (m_endpoint.protocol() == QAbstractSocket::IPv4Protocol) {
+    destination.Ipv4.sin_family = AF_INET;
+    destination.Ipv4.sin_addr.S_un.S_addr = htonl(m_endpoint.toIPv4Address());
+  } else if (m_endpoint.protocol() == QAbstractSocket::IPv6Protocol) {
+    destination.Ipv6.sin6_family = AF_INET6;
+    const Q_IPV6ADDR address = m_endpoint.toIPv6Address();
+    std::memcpy(&destination.Ipv6.sin6_addr, address.c, sizeof(address.c));
+  } else {
+    return std::nullopt;
+  }
+
+  MIB_IPFORWARD_ROW2 route = {};
+  SOCKADDR_INET source = {};
+  const DWORD result =
+      GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &route, &source);
+  if (result != NO_ERROR) {
+    logger.warning() << "Failed to resolve current route to VPN endpoint:"
+                     << result;
+    m_addressCollectionIncomplete = true;
+    return std::nullopt;
+  }
+  if (route.InterfaceLuid.Value == m_vpnAdapterLuid.Value) {
+    logger.warning() << "VPN endpoint route points into the VPN interface";
+    return std::nullopt;
+  }
+  return EndpointRoute{route.InterfaceLuid, source};
+}
+
+bool WindowsSplitTunnel::startAddressMonitoring() {
+  if (m_notificationContext != nullptr) {
+    return true;
+  }
+
+  auto context = std::make_unique<NotificationContext>();
+  context->target = this;
+  m_notificationContext = context.release();
+
+  DWORD result = NotifyRouteChange2(AF_UNSPEC, routeChangeCallback,
+                                    m_notificationContext, FALSE,
+                                    &m_routeChangeHandle);
+  if (result == NO_ERROR) {
+    result = NotifyUnicastIpAddressChange(
+        AF_UNSPEC, addressChangeCallback, m_notificationContext, FALSE,
+        &m_addressChangeHandle);
+  }
+  if (result == NO_ERROR) {
+    result = NotifyIpInterfaceChange(AF_UNSPEC, interfaceChangeCallback,
+                                     m_notificationContext, FALSE,
+                                     &m_interfaceChangeHandle);
+  }
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to monitor network address changes:" << result;
+    stopAddressMonitoring();
+    return false;
+  }
+  return true;
+}
+
+void WindowsSplitTunnel::stopAddressMonitoring() {
+  m_addressRefreshTimer.stop();
+  m_addressRefreshRetryAttempts = 0;
+
+  NotificationContext* context = m_notificationContext;
+  if (context != nullptr) {
+    AcquireSRWLockExclusive(&context->lock);
+    context->target = nullptr;
+    ReleaseSRWLockExclusive(&context->lock);
+  }
+
+  bool allCancelled = true;
+  auto cancel = [&allCancelled](HANDLE& handle) {
+    if (handle == nullptr) {
+      return;
+    }
+    const DWORD result = CancelMibChangeNotify2(handle);
+    if (result != NO_ERROR) {
+      logger.error() << "Failed to cancel network change notification:"
+                     << result;
+      allCancelled = false;
+    }
+    handle = nullptr;
+  };
+  cancel(m_interfaceChangeHandle);
+  cancel(m_addressChangeHandle);
+  cancel(m_routeChangeHandle);
+
+  m_notificationContext = nullptr;
+  if (allCancelled) {
+    delete context;
+  } else if (context != nullptr) {
+    logger.error()
+        << "Retaining disabled network callback context after cancel failure";
+  }
+}
+
+void WindowsSplitTunnel::scheduleAddressRefresh() {
+  QMetaObject::invokeMethod(
+      this,
+      [this]() {
+        m_addressRefreshRetryAttempts = 0;
+        if (m_addressMonitoringActive && !m_addressRefreshTimer.isActive()) {
+          m_addressRefreshTimer.start();
+        }
+      },
+      Qt::QueuedConnection);
+}
+
+void WindowsSplitTunnel::dispatchAddressRefresh(PVOID context) {
+  auto notification = static_cast<NotificationContext*>(context);
+  if (notification == nullptr) {
+    return;
+  }
+  AcquireSRWLockShared(&notification->lock);
+  if (notification->target != nullptr) {
+    notification->target->scheduleAddressRefresh();
+  }
+  ReleaseSRWLockShared(&notification->lock);
+}
+
+void CALLBACK WindowsSplitTunnel::routeChangeCallback(
+    PVOID context, PMIB_IPFORWARD_ROW2 row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
+}
+
+void CALLBACK WindowsSplitTunnel::addressChangeCallback(
+    PVOID context, PMIB_UNICASTIPADDRESS_ROW row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
+}
+
+void CALLBACK WindowsSplitTunnel::interfaceChangeCallback(
+    PVOID context, PMIB_IPINTERFACE_ROW row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
 }
 
 std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {
@@ -758,7 +1264,12 @@ bool WindowsSplitTunnel::detectConflict() {
   return err == ERROR_SERVICE_DOES_NOT_EXIST;
 }
 
-bool WindowsSplitTunnel::isRunning() { return getState() == STATE_RUNNING; }
+bool WindowsSplitTunnel::isOperational() {
+  const auto state = getState();
+  return operationalWhileDadSettles(
+      state == STATE_RUNNING, state == STATE_READY, m_addressMonitoringActive,
+      m_addressStabilizationPending);
+}
 QString WindowsSplitTunnel::stateString() {
   switch (getState()) {
     case STATE_UNKNOWN:
