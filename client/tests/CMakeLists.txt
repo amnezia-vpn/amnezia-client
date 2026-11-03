@@ -463,6 +463,7 @@ endif()
 if(NOT ANDROID)
     add_subdirectory(selfHostedAdmin)
     add_subdirectory(api)
+    add_subdirectory(ui/xray)
 endif()
 
 enable_testing()
