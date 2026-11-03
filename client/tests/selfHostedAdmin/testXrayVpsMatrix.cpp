@@ -12,8 +12,6 @@
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QProcess>
-#include <QRegularExpression>
-#include <QTcpServer>
 #include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
@@ -36,6 +34,8 @@
 #include "ui/models/protocols/xrayConfigModel.h"
 #include "utils/testCoreController.h"
 #include "utils/testUtils.h"
+#include "utils/xrayMatrix.h"
+#include "utils/xrayRuntime.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
@@ -158,6 +158,21 @@ namespace
                      } });
         }
 
+        if (!qEnvironmentVariableIsSet("VPS_MATRIX_FULL"))
+            return cases;
+
+        for (const xraytest::MatrixCase &full : xraytest::matrix()) {
+            if (!full.allowedByUi)
+                continue;
+            const XrayServerConfig srv = full.srv;
+            cases.append({ QStringLiteral("full/") + full.name, [srv](XrayConfigModel &m) {
+                              XrayServerConfig edited = srv;
+                              edited.port = m.port();
+                              edited.sni = QStringLiteral("www.googletagmanager.com");
+                              edited.site = m.site();
+                              m.applyServerConfig(edited);
+                          } });
+        }
         return cases;
     }
 
@@ -165,41 +180,6 @@ namespace
     {
         static const QList<VpsCase> all = vpsCases();
         return all;
-    }
-
-    QString collapsedXrayLog(const QString &output)
-    {
-        static const QRegularExpression entry(QStringLiteral(R"(\[(?:Error|Warning)\]\s+(?:\[\d+\]\s+)?(.+)$)"));
-        static const QRegularExpression address(QStringLiteral(R"(\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?)"));
-        QStringList messages;
-        QHash<QString, int> counts;
-        for (const QString &line : output.split(QLatin1Char('\n'))) {
-            const QRegularExpressionMatch match = entry.match(line.trimmed());
-            if (!match.hasMatch())
-                continue;
-            QString message = match.captured(1);
-            message.replace(address, QStringLiteral("<ip>"));
-            if (message.startsWith(QLatin1String("core: Xray ")) && message.endsWith(QLatin1String(" started")))
-                continue;
-            if (!counts.contains(message))
-                messages << message;
-            ++counts[message];
-        }
-        QStringList collapsed;
-        for (const QString &message : messages)
-            collapsed << (counts.value(message) > 1
-                                  ? QStringLiteral("%1 x%2").arg(message, QString::number(counts.value(message)))
-                                  : message);
-        return collapsed.join(QStringLiteral(" | "));
-    }
-
-    int freeLocalPort()
-    {
-        QTcpServer server;
-        server.listen(QHostAddress::LocalHost, 0);
-        const int port = server.serverPort();
-        server.close();
-        return port;
     }
 }
 
@@ -251,7 +231,7 @@ private:
         }
         QJsonObject native =
                 QJsonDocument::fromJson(sanitizeNativeConfig(xray.clientConfig->nativeConfig).toUtf8()).object();
-        const int socksPort = freeLocalPort();
+        const int socksPort = xrayruntime::freeLocalPort();
         QJsonArray inbounds = native.value("inbounds").toArray();
         QJsonObject socks = inbounds.first().toObject();
         socks["listen"] = QStringLiteral("127.0.0.1");
@@ -290,7 +270,8 @@ private:
         if (!up) {
             client.kill();
             client.waitForFinished(3000);
-            error = QStringLiteral("local socks never came up: ") + collapsedXrayLog(QString::fromUtf8(client.readAll()));
+            error = QStringLiteral("local socks never came up: ")
+                    + xrayruntime::collapsedLog(QString::fromUtf8(client.readAll()));
             return {};
         }
 
@@ -315,7 +296,7 @@ private:
         client.kill();
         client.waitForFinished(3000);
         if (ip.isEmpty()) {
-            const QString clientLog = collapsedXrayLog(QString::fromUtf8(client.readAll()));
+            const QString clientLog = xrayruntime::collapsedLog(QString::fromUtf8(client.readAll()));
             if (!clientLog.isEmpty())
                 error += QStringLiteral(" | ") + clientLog;
         }
@@ -385,12 +366,8 @@ private slots:
             else
                 qInfo().noquote() << "Original Xray settings restored";
 
-            const QString summary = m_failures.isEmpty()
-                    ? QStringLiteral("VPS matrix: all %1 cases passed").arg(m_casesRun)
-                    : QStringLiteral("VPS matrix: %1 of %2 cases failed\n  %3")
-                              .arg(QString::number(m_failures.size()), QString::number(m_casesRun),
-                                   m_failures.join(QStringLiteral("\n  ")));
-            std::fprintf(stderr, "%s\n", qPrintable(summary));
+            std::fprintf(stderr, "%s\n",
+                         qPrintable(xrayruntime::failureSummary(QStringLiteral("VPS matrix"), m_failures, m_casesRun)));
         }
         if (m_coreController) {
             ssh_finalize();
