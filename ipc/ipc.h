@@ -18,7 +18,8 @@ enum PermittedProcess {
     Wireguard,
     Tun2Socks,
     CertUtil,
-    PermittedProcessCount
+    Security,
+    PermittedProcessCount,
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -32,6 +33,8 @@ inline QString permittedProcessPath(PermittedProcess pid)
             return Utils::certUtilPath();
         case PermittedProcess::Tun2Socks:
             return Utils::tun2socksPath();
+        case PermittedProcess::Security:
+            return Utils::securityPath();
         default:
             return "";
     }
