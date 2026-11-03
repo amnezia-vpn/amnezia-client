@@ -27,6 +27,26 @@ IpcServerProcess::~IpcServerProcess()
     qDebug() << "IpcServerProcess::~IpcServerProcess";
 }
 
+namespace {
+QStringList redactedArguments(const QStringList &args)
+{
+    static const QSet<QString> sensitiveFlags = { "-p", "--config", "--management" };
+
+    QStringList redacted;
+    bool maskNext = false;
+    for (const auto &arg : args) {
+        if (maskNext) {
+            redacted << "<redacted>";
+            maskNext = false;
+            continue;
+        }
+        redacted << arg;
+        maskNext = sensitiveFlags.contains(arg);
+    }
+    return redacted;
+}
+}
+
 void IpcServerProcess::start()
 {
     if (m_process->program().isEmpty()) {
@@ -35,7 +55,7 @@ void IpcServerProcess::start()
 
     Utils::killProcessByName(m_process->program());
     m_process->start();
-    qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
+    qDebug() << "IpcServerProcess started, " << m_process->program() << redactedArguments(m_process->arguments());
 
     m_process->waitForStarted();
 }
