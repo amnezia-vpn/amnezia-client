@@ -45,6 +45,7 @@ private:
     RouterLinux& operator= (RouterLinux const&) = delete;
 
     bool isServiceActive(const QString &serviceName);
+    bool flushDnsFallback();
     QList<Route> m_addedRoutes;
     DnsUtilsLinux *m_dnsUtil;
 };

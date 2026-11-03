@@ -6,6 +6,10 @@
 #include "systemservice.h"
 #include "core/utils/utilities.h"
 
+#ifdef Q_OS_UNIX
+#  include "signalhandler.h"
+#endif
+
 #ifdef Q_OS_WIN
 #include "platforms/windows/daemon/windowsdaemontunnel.h"
 
@@ -19,6 +23,14 @@ char** s_argv = nullptr;
 int runApplication(int argc, char** argv)
 {
     QCoreApplication app(argc,argv);
+
+#ifdef Q_OS_UNIX
+    // OpenRC/runit/dinit stop the daemon with SIGTERM.  Without a handler
+    // aboutToQuit never fires, so routes and iptables chains stay behind.
+    SignalHandler signalHandler;
+    QObject::connect(&signalHandler, &SignalHandler::quitRequested,
+                     &app, &QCoreApplication::quit);
+#endif
 
 #ifdef Q_OS_WIN
     if(argc > 2){

@@ -19,8 +19,25 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <QFileInfo>
+#include <QStandardPaths>
 
 #include <core/utils/networkUtilities.h>
+
+namespace {
+void startPrivileged(QProcess& process, const QStringList& command) {
+    if (command.isEmpty()) {
+        return;
+    }
+
+    if (geteuid() == 0) {
+        QStringList args = command;
+        const QString program = args.takeFirst();
+        process.start(program, args);
+    } else {
+        process.start(QStringLiteral("sudo"), command);
+    }
+}
+}  // namespace
 
 RouterLinux &RouterLinux::Instance()
 {
@@ -153,31 +170,64 @@ bool RouterLinux::routeDeleteList(const QString &gw, const QStringList &ips)
 }
 
 bool RouterLinux::isServiceActive(const QString &serviceName) {
+    if (QStandardPaths::findExecutable(QStringLiteral("systemctl")).isEmpty()) {
+        return false;
+    }
+
     QProcess process;
-    process.start("systemctl", { "is-active", "--quiet", serviceName });
-    process.waitForFinished();
+    process.start(QStringLiteral("systemctl"),
+                  {QStringLiteral("is-active"), QStringLiteral("--quiet"),
+                   serviceName});
+    if (!process.waitForFinished(3000) ||
+        process.exitStatus() != QProcess::NormalExit) {
+        return false;
+    }
 
     return process.exitCode() == 0;
 }
 
+bool RouterLinux::flushDnsFallback() {
+    // nscd is also used on several non-systemd distributions.
+    const QString nscd = QStandardPaths::findExecutable(QStringLiteral("nscd"));
+    if (!nscd.isEmpty()) {
+        QProcess process;
+        process.start(nscd, {QStringLiteral("-i"), QStringLiteral("hosts")});
+        if (process.waitForFinished(3000) &&
+            process.exitStatus() == QProcess::NormalExit &&
+            process.exitCode() == 0) {
+            qDebug() << "Flushed the nscd hosts cache";
+            return true;
+        }
+    }
+
+    // glibc/openresolv keep no persistent DNS cache to flush.
+    qDebug() << "No DNS cache manager found, nothing to flush";
+    return true;
+}
+
 bool RouterLinux::flushDns()
 {
+    if (QStandardPaths::findExecutable(QStringLiteral("systemctl")).isEmpty()) {
+        return flushDnsFallback();
+    }
+
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
     //check what the dns manager use
-    if (isServiceActive("nscd.service")) {
+    if (isServiceActive(QStringLiteral("nscd.service"))) {
         qDebug() << "Restarting nscd.service";
-        p.start("systemctl", { "restart", "nscd" });
-    } else if (isServiceActive("systemd-resolved.service")) {
+        p.start(QStringLiteral("systemctl"),
+                {QStringLiteral("restart"), QStringLiteral("nscd")});
+    } else if (isServiceActive(QStringLiteral("systemd-resolved.service"))) {
         qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+        p.start(QStringLiteral("systemctl"),
+                {QStringLiteral("restart"), QStringLiteral("systemd-resolved")});
     } else {
-        qDebug() << "No suitable DNS manager found.";
-        return false;
+        return flushDnsFallback();
     }
 
-    p.waitForFinished();
+    p.waitForFinished(3000);
     QByteArray output(p.readAll());
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
@@ -194,7 +244,7 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     QStringList commands;
 
     commands << "ip" << "tuntap" << "add" << "mode" << "tun" << "dev" << dev;
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start adding tun device!\n";
@@ -208,7 +258,7 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     commands.clear();
 
     commands << "ip" << "addr" << "add" << QString("%1/24").arg(subnet) << "dev" << dev;
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start adding a subnet for tun device!\n";
@@ -222,7 +272,7 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     commands.clear();
 
     commands << "ip" << "link" << "set" << "dev" << dev << "up";
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start link set for tun device!\n";
@@ -291,7 +341,7 @@ bool RouterLinux::StartRoutingIpv6()
     QStringList commands;
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=0";
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
@@ -305,7 +355,7 @@ bool RouterLinux::StartRoutingIpv6()
     commands.clear();
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=0";
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
@@ -328,7 +378,7 @@ bool RouterLinux::StopRoutingIpv6()
     QStringList commands;
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=1";
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
@@ -342,7 +392,7 @@ bool RouterLinux::StopRoutingIpv6()
     commands.clear();
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=1";
-    process.start("sudo", commands);
+    startPrivileged(process, commands);
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
