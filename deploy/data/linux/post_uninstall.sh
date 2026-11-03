@@ -55,14 +55,13 @@ if test -f /usr/local/sbin/$APP_NAME; then
         sudo rm -f /usr/local/sbin/$APP_NAME >> $LOG_FILE
 fi
 
-if test -f /usr/share/applications/$APP_NAME.desktop; then
-	sudo rm -f /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
-
+if test -f /usr/local/share/applications/$APP_NAME.desktop; then
+	sudo rm -f /usr/local/share/applications/$APP_NAME.desktop >> $LOG_FILE
 fi
 
+# remove later; left to clean up old installations
 if test -f /usr/share/pixmaps/$APP_NAME.png; then
 	sudo rm -f /usr/share/pixmaps/$APP_NAME.png >> $LOG_FILE
-
 fi
 
 ### Remove the service log file (keep post-uninstall.log)
