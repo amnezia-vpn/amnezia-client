@@ -288,35 +288,14 @@ bool RouterLinux::restoreResolvers() {
 bool RouterLinux::StartRoutingIpv6()
 {
     QProcess process;
-    QStringList commands;
 
-    commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=0";
-    process.start("sudo", commands);
-    if (!process.waitForStarted(1000))
+    // Remove the unreachable default IPv6 route added by StopRoutingIpv6
+    process.start("sudo", { "ip", "-6", "route", "del", "unreachable", "default", "metric", "1" });
+    if (!process.waitForStarted(1000) || !process.waitForFinished(2000))
     {
-        qDebug().noquote() << "Could not start activate ipv6\n";
+        qDebug().noquote() << "Could not remove IPv6 unreachable route";
         return false;
     }
-    else if (!process.waitForFinished(2000))
-    {
-        qDebug().noquote() << "Could not activate ipv6\n";
-        return false;
-    }
-    commands.clear();
-
-    commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=0";
-    process.start("sudo", commands);
-    if (!process.waitForStarted(1000))
-    {
-        qDebug().noquote() << "Could not start activate ipv6\n";
-        return false;
-    }
-    else if (!process.waitForFinished(2000))
-    {
-        qDebug().noquote() << "Could not activate ipv6\n";
-        return false;
-    }
-    commands.clear();
 
     qDebug().noquote() << "StartRoutingIpv6 OK";
     return true;
@@ -325,35 +304,17 @@ bool RouterLinux::StartRoutingIpv6()
 bool RouterLinux::StopRoutingIpv6()
 {
     QProcess process;
-    QStringList commands;
 
-    commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=1";
-    process.start("sudo", commands);
-    if (!process.waitForStarted(1000))
+    // Add an unreachable default IPv6 route to prevent IPv6 leaks.
+    // Unlike "sysctl disable_ipv6=1", this preserves IPv6 loopback (::1)
+    // so applications using IPv6 localhost (e.g. UE ZenServer) keep working.
+    // The kernel's local table route for ::1 takes precedence over this.
+    process.start("sudo", { "ip", "-6", "route", "add", "unreachable", "default", "metric", "1" });
+    if (!process.waitForStarted(1000) || !process.waitForFinished(2000))
     {
-        qDebug().noquote() << "Could not start disable ipv6\n";
+        qDebug().noquote() << "Could not add IPv6 unreachable route";
         return false;
     }
-    else if (!process.waitForFinished(2000))
-    {
-        qDebug().noquote() << "Could not disable ipv6\n";
-        return false;
-    }
-    commands.clear();
-
-    commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=1";
-    process.start("sudo", commands);
-    if (!process.waitForStarted(1000))
-    {
-        qDebug().noquote() << "Could not start disable ipv6\n";
-        return false;
-    }
-    else if (!process.waitForFinished(2000))
-    {
-        qDebug().noquote() << "Could not disable ipv6\n";
-        return false;
-    }
-    commands.clear();
 
     qDebug().noquote() << "StopRoutingIpv6 OK";
     return true;
