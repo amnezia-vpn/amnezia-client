@@ -341,6 +341,7 @@ if(NOT ANDROID)
     target_link_libraries(test_pages_ui PRIVATE
         Qt6::Test
         test_common
+        SortFilterProxyModel
     )
 
     if(COMMAND qt_import_qml_plugins)
