@@ -12,6 +12,10 @@
 
 #include "windowstunnellogger.h"
 
+#define TUNNEL_PIPE_PREFIX \
+  "\\\\.\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\"
+#define TUNNEL_CONFIG_PIPE_PREFIX TUNNEL_PIPE_PREFIX "AmneziaVPN-config-"
+
 class WindowsTunnelService final : public QObject {
   Q_OBJECT
   Q_DISABLE_COPY_MOVE(WindowsTunnelService)
@@ -24,6 +28,8 @@ class WindowsTunnelService final : public QObject {
   void stop();
   bool isRunning();
   QString uapiCommand(const QString& command);
+
+  static QString readConfigFromPipe(const QString& pipeName);
 
  signals:
   void backendFailure();
