@@ -195,10 +195,6 @@ bool WindowsTunnelService::start(const QString& configData) {
     return false;
   }
 
-  // StartService only returns once the tunnel process has entered ServiceMain,
-  // and ServiceMain is reached only after that process has read its config from
-  // the pipe. Writing the config after StartService would deadlock, so the two
-  // must overlap.
   std::atomic<bool> started(false);
   std::thread starter(
       [&] { started = (StartService(service, 0, nullptr) != FALSE); });
