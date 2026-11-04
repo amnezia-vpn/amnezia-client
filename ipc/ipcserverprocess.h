@@ -3,6 +3,8 @@
 
 #include "ipc.h"
 #include <QObject>
+#include <QSharedPointer>
+#include <QTemporaryFile>
 
 #ifndef Q_OS_IOS
 #include "rep_ipc_process_interface_source.h"
@@ -24,7 +26,11 @@ public:
     void setNativeArguments(const QString &arguments) override;
     void setProcessChannelMode(QProcess::ProcessChannelMode mode) override;
     void setProgram(int programId) override;
+    void setTun2SocksConfig(const QString &device, const QString &proxy) override;
     void setWorkingDirectory(const QString &dir) override;
+
+    void write(const QByteArray &data) override;
+    void closeWriteChannel() override;
 
     QByteArray readAll() override;
     QByteArray readAllStandardError() override;
@@ -40,6 +46,7 @@ signals:
 private:
     amnezia::PermittedProcess m_program = amnezia::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
+    QSharedPointer<QTemporaryFile> m_tun2socksConfig;
 };
 
 #else
