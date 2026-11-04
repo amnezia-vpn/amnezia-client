@@ -342,6 +342,14 @@ if(NOT ANDROID)
         Qt6::Test
         test_common
     )
+
+    if(COMMAND qt_import_qml_plugins)
+        qt_import_qml_plugins(test_pages_ui)
+    endif()
+
+    if(COMMAND qt_finalize_executable)
+        qt_finalize_executable(test_pages_ui)
+    endif()
 endif() # NOT ANDROID
 
 if(ANDROID)

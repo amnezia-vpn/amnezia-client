@@ -18,6 +18,7 @@ bool PagesUiTestFixture::initialize(QObject *parent)
 
     m_engine = new QQmlApplicationEngine(parent);
     m_engine->addImportPath(QStringLiteral("qrc:/ui/qml/Modules/"));
+    m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
 
     auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
 
