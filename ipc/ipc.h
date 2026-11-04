@@ -72,9 +72,6 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
         break;
     }
     case Tun2Socks:
-        // tun2socks takes its arguments from setTun2SocksConfig() only: a
-        // caller-supplied -config could point at a file whose tun-pre-up and
-        // tun-post-up keys run commands as the service user.
         return {};
     case CertUtil:
         return args;

@@ -144,8 +144,6 @@ void IpcServerProcess::setTun2SocksConfig(const QString &device, const QString &
         return;
     }
 
-    // The config carries the local proxy credentials, so it must not be
-    // readable by other users: narrow the permissions while it is still empty.
     if (!restrictToOwner(m_tun2socksConfig->fileName())) {
         qWarning() << "Failed to restrict the tun2socks config file";
         m_tun2socksConfig.reset();
