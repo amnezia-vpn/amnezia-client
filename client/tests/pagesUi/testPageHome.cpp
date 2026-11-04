@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTest>
 #include <QVariant>
+#include <QSignalSpy>
 
 #include "core/controllers/selfhosted/importController.h"
 #include "core/utils/constants/configKeys.h"
