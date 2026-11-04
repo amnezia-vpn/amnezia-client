@@ -22,9 +22,6 @@ class PageHomeTest : public QObject
 private:
     PagesUiTestFixture m_fixture;
 
-    private:
-    PagesUiTestFixture m_fixture;
-
     QJsonObject createAwg2Config(const QString &serverName)
     {
         QJsonObject clientConfig;
