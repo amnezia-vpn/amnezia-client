@@ -169,7 +169,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     const QString proxyUrl = QString("socks5://%1:%2@127.0.0.1:%3").arg(m_socksUser, m_socksPassword, QString::number(m_socksPort));
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
+    m_tun2socksProcess->setTun2SocksConfig(QString("tun://%1").arg(tunName), proxyUrl);
 
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
