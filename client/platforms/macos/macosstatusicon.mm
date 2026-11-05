@@ -38,6 +38,7 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   }
 
   NSImage* image = [[NSImage alloc] initWithData:resource.uncompressedData().toNSData()];
+  [image setTemplate:iconPath.endsWith(QLatin1String("/active.png"))];
   CGFloat side = [[NSStatusBar systemStatusBar] thickness] - 4.0;
   image.size = NSMakeSize(side, side);
   static_cast<NSStatusItem*>(m_statusItem).button.image = image;
