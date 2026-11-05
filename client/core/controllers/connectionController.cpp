@@ -6,6 +6,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/payloadSender.h"
 #include "core/utils/utilities.h"
 #include "core/utils/serverConfigUtils.h"
@@ -198,6 +199,10 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
     case serverConfigUtils::ConfigType::Invalid:
     default:
         return ErrorCode::InternalError;
+    }
+
+    if (!m_appSettingsRepository->useAmneziaDns() && dns.first == protocols::dns::amneziaDnsIp) {
+        dns = { primaryDns, secondaryDns };
     }
 
     vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
