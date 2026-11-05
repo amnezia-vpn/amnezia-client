@@ -131,7 +131,10 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
     m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
+    if (!m_firewall->enableInterface(ifindex)) {
+      logger.error() << "Failed to enable the killswitch for the interface";
+      return false;
+    }
   }
 
   logger.debug() << "Registration completed";
@@ -156,7 +159,10 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
+    if (!m_firewall->enablePeerTraffic(config)) {
+      logger.error() << "Failed to enable the killswitch for the peer";
+      return false;
+    }
   }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
