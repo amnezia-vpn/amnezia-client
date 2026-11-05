@@ -104,6 +104,19 @@ private slots:
         QVERIFY2(exportedObj == importedObj,
                  "Imported and exported backup config should be equal (ignoring platform-specific keys)");
     }
+
+    void testRestoreRouteModeStoredAsString() {
+        QJsonObject backup;
+        backup.insert("Conf/sitesSplitTunnelingEnabled", "true");
+        backup.insert("Conf/routeMode", QString::number(amnezia::RouteMode::VpnAllExceptSites));
+
+        const amnezia::ErrorCode err =
+                m_coreController->m_settingsController->restoreAppConfigFromData(QJsonDocument(backup).toJson());
+        QVERIFY2(err == amnezia::ErrorCode::NoError, "Restore must succeed");
+
+        QVERIFY2(m_coreController->m_appSettingsRepository->routeMode() == amnezia::RouteMode::VpnAllExceptSites,
+                 "Route mode saved as a string by INI-backed settings must survive restore");
+    }
 };
 
 QTEST_MAIN(TestBackupExportImport)
