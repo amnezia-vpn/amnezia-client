@@ -29,6 +29,7 @@ namespace amnezia
             MtProxy,
             Telemt,
             TProxy,
+            WhatsAppProxy,
         };
         Q_ENUM_NS(DockerContainer)
     } // namespace ContainerEnumNS

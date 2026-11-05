@@ -55,6 +55,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          MtProxyConfigModel* mtConfigModel,
                                          TelemtConfigModel *telemtConfigModel,
                                          TProxyConfigModel *tProxyConfigModel,
+                                         WhatsAppProxyConfigModel *whatsAppProxyConfigModel,
                                          ConnectionController *connectionController,
                                          QObject *parent)
     : QObject(parent),
@@ -76,6 +77,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_mtProxyConfigModel(mtConfigModel),
       m_telemtConfigModel(telemtConfigModel),
       m_tProxyConfigModel(tProxyConfigModel),
+      m_whatsAppProxyConfigModel(whatsAppProxyConfigModel),
       m_connectionController(connectionController)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
@@ -91,6 +93,9 @@ void InstallUiController::install(DockerContainer container, int port, Transport
     if (container == DockerContainer::TProxy && m_tProxyConfigModel) {
         m_installController->setTProxyInstallHints(m_tProxyConfigModel->getHostname(),
                                                    m_tProxyConfigModel->getAcmeEmail());
+    }
+    if (container == DockerContainer::WhatsAppProxy && m_whatsAppProxyConfigModel) {
+        m_installController->setWhatsAppProxyInstallHints(m_whatsAppProxyConfigModel->getMediaPort());
     }
 
     const bool isNewServer = serverId.isEmpty();
@@ -269,6 +274,10 @@ bool InstallUiController::buildContainerConfigFromModel(int containerIndex, int 
         containerConfig.protocolConfig = m_tProxyConfigModel->getProtocolConfig();
         break;
     }
+    case Proto::WhatsAppProxy: {
+        containerConfig.protocolConfig = m_whatsAppProxyConfigModel->getProtocolConfig();
+        break;
+    }
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
         containerConfig.protocolConfig = m_ikev2ConfigModel->getProtocolConfig();
@@ -325,7 +334,7 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverId, container);
 
     const bool asyncUpdate = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
-            || container == DockerContainer::TProxy
+            || container == DockerContainer::TProxy || container == DockerContainer::WhatsAppProxy
             || container == DockerContainer::Xray || container == DockerContainer::SSXray;
 
 
@@ -336,7 +345,7 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
         m_serverConfigUpdateInProgress = true;
 
         const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
-                || container == DockerContainer::TProxy;
+                || container == DockerContainer::TProxy || container == DockerContainer::WhatsAppProxy;
         if (emitBusy)
             emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
@@ -391,7 +400,7 @@ void InstallUiController::setContainerEnabled(const QString &serverId, int conta
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
     if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
-            && container != DockerContainer::TProxy) {
+            && container != DockerContainer::TProxy && container != DockerContainer::WhatsAppProxy) {
         return;
     }
 
@@ -423,7 +432,7 @@ void InstallUiController::refreshContainerStatus(const QString &serverId, int co
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
     if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
-            && container != DockerContainer::TProxy) {
+            && container != DockerContainer::TProxy && container != DockerContainer::WhatsAppProxy) {
         return;
     }
 
@@ -759,6 +768,7 @@ void InstallUiController::updateProtocolConfigModel(const QString &serverId, int
     case Proto::MtProxy: updateIfPresent(m_mtProxyConfigModel, containerConfig.getMtProxyProtocolConfig()); break;
     case Proto::Telemt: updateIfPresent(m_telemtConfigModel, containerConfig.getTelemtProtocolConfig()); break;
     case Proto::TProxy: updateIfPresent(m_tProxyConfigModel, containerConfig.getTProxyProtocolConfig()); break;
+    case Proto::WhatsAppProxy: updateIfPresent(m_whatsAppProxyConfigModel, containerConfig.getWhatsAppProxyProtocolConfig()); break;
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: updateIfPresent(m_ikev2ConfigModel, containerConfig.getIkev2ProtocolConfig()); break;
 #endif

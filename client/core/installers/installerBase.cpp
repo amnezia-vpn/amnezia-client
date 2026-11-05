@@ -125,6 +125,13 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             config.protocolConfig = tProxyConfig;
             break;
         }
+        case Proto::WhatsAppProxy: {
+            WhatsAppProxyProtocolConfig whatsAppProxyConfig;
+            whatsAppProxyConfig.port = portStr.isEmpty() ? QString(protocols::whatsAppProxy::defaultPort) : portStr;
+            whatsAppProxyConfig.mediaPort = QString(protocols::whatsAppProxy::defaultMediaPort);
+            config.protocolConfig = whatsAppProxyConfig;
+            break;
+        }
         case Proto::Ikev2: {
             Ikev2ProtocolConfig ikev2Config;
             config.protocolConfig = ikev2Config;

@@ -25,6 +25,7 @@
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
 #include "core/models/protocols/tProxyProtocolConfig.h"
+#include "core/models/protocols/whatsAppProxyProtocolConfig.h"
 
 namespace amnezia
 {
@@ -42,6 +43,7 @@ struct ProtocolConfig {
         MtProxyProtocolConfig,
         TelemtProtocolConfig,
         TProxyProtocolConfig,
+        WhatsAppProxyProtocolConfig,
         Ikev2ProtocolConfig,
         TorProtocolConfig,
         DnsProtocolConfig

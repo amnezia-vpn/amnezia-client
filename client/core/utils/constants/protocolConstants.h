@@ -413,6 +413,16 @@ namespace amnezia
             constexpr int  maxWorkers       = 32;
         }
 
+        namespace whatsAppProxy
+        {
+            constexpr char mediaPortKey[]  = "whatsapp_proxy_media_port";
+            constexpr char publicHostKey[] = "whatsapp_proxy_public_host";
+            constexpr char isEnabledKey[]  = "whatsapp_proxy_is_enabled";
+
+            constexpr char defaultPort[]      = "443";
+            constexpr char defaultMediaPort[] = "587";
+        }
+
     } // namespace protocols
 }
 

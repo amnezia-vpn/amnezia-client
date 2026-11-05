@@ -29,6 +29,7 @@ public:
         IsMtProxyRole,
         IsTelemtRole,
         IsTProxyRole,
+        IsWhatsAppProxyRole,
     };
 
     explicit ProtocolsModel(QObject *parent = nullptr);
