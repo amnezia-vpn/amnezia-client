@@ -369,7 +369,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
       }
 
       config.m_allowedIPAddressRanges.append(
-          IPAddress(QHostAddress(address.toString()), range.toInt()));
+          IPAddress(QString("%1/%2").arg(address.toString()).arg(range.toInt())));
     }
 
     // Sort allowed IPs by decreasing prefix length.
