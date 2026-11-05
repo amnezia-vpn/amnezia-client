@@ -1,6 +1,7 @@
 package org.amnezia.vpn.protocol
 
 import android.content.Context
+import android.content.pm.PackageManager.NameNotFoundException
 import android.net.IpPrefix
 import android.net.VpnService
 import android.net.VpnService.Builder
@@ -124,12 +125,20 @@ abstract class Protocol {
 
         for (app in config.includedApplications) {
             Log.d(TAG, "addAllowedApplication")
-            vpnBuilder.addAllowedApplication(app)
+            try {
+                vpnBuilder.addAllowedApplication(app)
+            } catch (e: NameNotFoundException) {
+                Log.w(TAG, "Package $app was not found: $e")
+            }
         }
 
         for (app in config.excludedApplications) {
             Log.d(TAG, "addDisallowedApplication")
-            vpnBuilder.addDisallowedApplication(app)
+            try {
+                vpnBuilder.addDisallowedApplication(app)
+            } catch (e: NameNotFoundException) {
+                Log.w(TAG, "Package $app was not found: $e")
+            }
         }
 
         Log.d(TAG, "setMtu: ${config.mtu}")
