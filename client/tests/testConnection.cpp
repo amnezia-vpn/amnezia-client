@@ -11,6 +11,7 @@
 #include "secureQSettings.h"
 #include "core/utils/utilities.h"
 #include "version.h"
+#include "ui/utils/notificationHandler.h"
 
 using namespace amnezia;
 using namespace amnezia::test;
@@ -45,6 +46,53 @@ private slots:
         if (m_coreController->m_serversModel) {
             m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), "");
         }
+        m_coreController->m_connectionUiController->onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+    }
+
+    void testTrayConnectRejectsUnpreparedServer()
+    {
+        SelfHostedUserServerConfig config { };
+        config.hostName = QStringLiteral("vpn.example.invalid");
+        config.defaultContainer = DockerContainer::None;
+        const QString serverId = m_coreController->m_serversRepository->addServer(
+                { }, config.toJson(), serverConfigUtils::ConfigType::SelfHostedUser);
+        QVERIFY(m_coreController->m_serversRepository->selfHostedUserConfig(serverId).has_value());
+        m_coreController->m_serversRepository->setDefaultServer(serverId);
+
+        auto *connection = m_coreController->findChild<ConnectionController *>();
+        auto *notification = m_coreController->findChild<NotificationHandler *>();
+        QVERIFY(connection);
+        QVERIFY(notification);
+        QSignalSpy openSpy(connection, &ConnectionController::openConnectionRequested);
+        QSignalSpy noContainersSpy(m_coreController->m_connectionUiController,
+                                   &ConnectionUiController::noInstalledContainers);
+        QSignalSpy errorSpy(m_coreController->m_connectionUiController, &ConnectionUiController::connectionErrorOccurred);
+        const bool serviceReady = connection->isServiceReady();
+
+        emit notification->connectRequested();
+
+        QCOMPARE(openSpy.count(), 0);
+        if (serviceReady) {
+            QCOMPARE(noContainersSpy.count(), 1);
+            QCOMPARE(errorSpy.count(), 0);
+        } else {
+            QCOMPARE(errorSpy.count(), 1);
+            QCOMPARE(qvariant_cast<ErrorCode>(errorSpy.first().first()), ErrorCode::AmneziaServiceNotRunning);
+        }
+    }
+
+    void testTrayConnectDoesNotBypassPreparationInProgress()
+    {
+        auto *notification = m_coreController->findChild<NotificationHandler *>();
+        QVERIFY(notification);
+        auto *connectionUi = m_coreController->m_connectionUiController;
+        connectionUi->onConnectionStateChanged(Vpn::ConnectionState::Preparing);
+        QSignalSpy preparingSpy(connectionUi, &ConnectionUiController::preparingConfig);
+
+        emit notification->connectRequested();
+
+        QCOMPARE(preparingSpy.count(), 1);
+        QVERIFY(connectionUi->isConnectionInProgress());
     }
 
     void testConnect() {
