@@ -55,7 +55,7 @@ struct ICMP_ECHO_REPLY_BUFFER {
   MZ_ICMP_ECHO_REPLY reply;
   std::array<uint8_t, reply_padding> padding;
   quint16 payload;
-  std::array<char8_t, ICMP_ERR_SIZE> icmp_error;
+  std::array<uint8_t, ICMP_ERR_SIZE> icmp_error;
   IO_STATUS_BLOCK status;
 };
 #pragma pack(pop)
