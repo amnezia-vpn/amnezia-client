@@ -461,6 +461,7 @@ print('SONAME patch done.')
 endif()
 
 if(NOT ANDROID)
+    add_subdirectory(domainRouting)
     add_subdirectory(selfHostedAdmin)
     add_subdirectory(api)
 endif()

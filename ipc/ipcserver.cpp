@@ -332,6 +332,16 @@ qint64 IpcServer::xrayStartOwned(const QString& cfg)
     return Xray::getInstance().start(cfg);
 }
 
+qint64 IpcServer::xrayStartExclusive(const QString &cfg)
+{
+    return Xray::getInstance().start(cfg, true);
+}
+
+bool IpcServer::xrayKeepAliveOwned(qint64 token)
+{
+    return Xray::getInstance().keepAlive(token);
+}
+
 bool IpcServer::xrayStopOwned(qint64 token)
 {
 #ifdef MZ_DEBUG
@@ -364,4 +374,13 @@ bool IpcServer::isTcpPortAvailable(int port)
     const bool available = server.listen(QHostAddress::LocalHost, static_cast<quint16>(port));
     server.close();
     return available;
+}
+
+bool IpcServer::supportsDomainRouting()
+{
+#ifdef Q_OS_WIN
+    return true;
+#else
+    return false;
+#endif
 }

@@ -11,6 +11,8 @@
 #endif
 
 #ifdef Q_OS_WINDOWS
+    #include "core/utils/constants/configKeys.h"
+    #include "domainRoutingProtocol.h"
     #include "ikev2VpnProtocolWindows.h"
 #endif
 
@@ -123,6 +125,12 @@ QString VpnProtocol::vpnLocalAddress() const
 
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
+#ifdef Q_OS_WINDOWS
+    if (configuration.value(configKey::domainRoutingEnabled).toBool()
+        && (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard)) {
+        return new DomainRoutingProtocol(configuration);
+    }
+#endif
     switch (container) {
 #if defined(Q_OS_WINDOWS)
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
