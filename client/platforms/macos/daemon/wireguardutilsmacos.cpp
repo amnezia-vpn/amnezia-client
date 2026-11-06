@@ -13,6 +13,7 @@
 #include <QLocalSocket>
 #include <QTimer>
 
+#include "daemon/wireguardaddressutils.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -248,15 +249,13 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   if (!config.m_serverPskKey.isNull()) {
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
-    out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
-    out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
-  } else {
-    logger.warning() << "Failed to create peer with no endpoints";
-    return false;
+  const QString serverAddress =
+          config.m_serverIpv4AddrIn.isNull() ? config.m_serverIpv6AddrIn : config.m_serverIpv4AddrIn;
+  if (serverAddress.isEmpty()) {
+      logger.warning() << "Failed to create peer with no endpoints";
+      return false;
   }
-  out << config.m_serverPort << "\n";
+  out << "endpoint=" << WireguardAddressUtils::formatEndpoint(serverAddress, config.m_serverPort) << "\n";
 
   out << "replace_allowed_ips=true\n";
   if (!config.m_persistentKeepalive.isEmpty()) {

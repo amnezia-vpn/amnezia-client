@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "interfaceconfig.h"
+#include "wireguardaddressutils.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -193,14 +194,9 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
 
   out << "\n[Peer]\n";
   out << "PublicKey = " << m_serverPublicKey << "\n";
-  out << "Endpoint = " << m_serverIpv4AddrIn.toUtf8() << ":" << m_serverPort
-      << "\n";
+  const QString serverAddress = m_serverIpv4AddrIn.isNull() ? m_serverIpv6AddrIn : m_serverIpv4AddrIn;
+  out << "Endpoint = " << WireguardAddressUtils::formatEndpoint(serverAddress, m_serverPort) << "\n";
 
-  /* In theory, we should use the ipv6 endpoint, but wireguard doesn't seem
-   * to be happy if there are 2 endpoints.
-  out << "Endpoint = [" << config.m_serverIpv6AddrIn << "]:"
-      << config.m_serverPort << "\n";
-  */
   QStringList ranges;
   for (const IPAddress& ip : m_allowedIPAddressRanges) {
     ranges.append(ip.toString());
