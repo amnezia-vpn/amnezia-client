@@ -483,6 +483,7 @@ bool SubscriptionUiController::importFreeFromGateway()
 void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const QString &solution)
 {
     if (!m_captchaState.isPending) {
+        emit captchaFlowDismissRequested();
         return;
     }
 
@@ -508,8 +509,7 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
             &retryCaptcha);
 
     if (errorCode == ErrorCode::NoError) {
-        m_captchaState.isPending = false;
-        emit captchaFlowDismissRequested();
+        finishCaptchaFlow();
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
         return;
     }
@@ -529,7 +529,7 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
         return;
     }
 
-    m_captchaState.isPending = false;
+    finishCaptchaFlow();
     emit errorOccurred(errorCode);
 }
 
@@ -544,7 +544,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
         SubscriptionController::ProtocolData usedProtocolData;
         ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(
                 m_captchaState.serverId,
-                m_captchaState.newCountryCode,
+                m_captchaState.serverCountryCode,
                 m_captchaState.isConnectEvent,
                 &captchaInfo,
                 &usedProtocolData);
@@ -556,7 +556,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
         } else if (errorCode == ErrorCode::NoError) {
             emitCaptchaUpdateSuccess();
         } else {
-            m_captchaState.isPending = false;
+            finishCaptchaFlow();
             if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
                 emit subscriptionExpiredOnServer();
             } else {
@@ -589,7 +589,7 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
         emit captchaFlowDismissRequested();
         emit freeEmailSignInRequired();
     } else if (errorCode != ErrorCode::NoError) {
-        m_captchaState.isPending = false;
+        finishCaptchaFlow();
         emit errorOccurred(errorCode);
     }
 }
@@ -599,7 +599,7 @@ void SubscriptionUiController::resolveUpdateCaptcha(const QString &captchaId, co
     SubscriptionController::CaptchaInfo retryCaptcha;
     ErrorCode errorCode = m_subscriptionController->resolveUpdateServiceCaptcha(
             m_captchaState.serverId,
-            m_captchaState.newCountryCode,
+            m_captchaState.serverCountryCode,
             m_captchaState.isConnectEvent,
             m_captchaState.updateProtocolData,
             captchaId,
@@ -619,7 +619,7 @@ void SubscriptionUiController::resolveUpdateCaptcha(const QString &captchaId, co
         return;
     }
 
-    m_captchaState.isPending = false;
+    finishCaptchaFlow();
     if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
         emit subscriptionExpiredOnServer();
     } else {
@@ -882,16 +882,19 @@ int SubscriptionUiController::freeAccountRetryAfterSec() const
 bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
-    bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
     bool wasSubscriptionExpired = false;
+    QString serverCountryCode = newCountryCode;
     if (const auto oldApiV2 = m_serversController->apiV2Config(serverId)) {
         wasSubscriptionExpired = oldApiV2->apiConfig.subscriptionExpiredByServer
                 || oldApiV2->apiConfig.isSubscriptionExpired();
+        if (serverCountryCode.isEmpty()) {
+            serverCountryCode = oldApiV2->apiConfig.serverCountryCode;
+        }
     }
 
     SubscriptionController::CaptchaInfo captchaInfo;
     SubscriptionController::ProtocolData usedProtocolData;
-    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverId, newCountryCode, isConnectEvent,
+    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverId, serverCountryCode, false,
                                                                              &captchaInfo, &usedProtocolData);
 
     if (errorCode == ErrorCode::NoError) {
@@ -901,9 +904,8 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
         m_captchaState = CaptchaState{};
         m_captchaState.flow = CaptchaFlow::Update;
         m_captchaState.serverId = serverId;
-        m_captchaState.newCountryCode = newCountryCode;
+        m_captchaState.serverCountryCode = serverCountryCode;
         m_captchaState.newCountryName = newCountryName;
-        m_captchaState.isConnectEvent = isConnectEvent;
         m_captchaState.reloadServiceConfig = reloadServiceConfig;
         m_captchaState.wasSubscriptionExpired = wasSubscriptionExpired;
         m_captchaState.updateProtocolData = usedProtocolData;
@@ -938,6 +940,12 @@ void SubscriptionUiController::emitUpdateSuccess(bool wasSubscriptionExpired, bo
     }
 }
 
+void SubscriptionUiController::finishCaptchaFlow()
+{
+    m_captchaState.isPending = false;
+    emit captchaFlowDismissRequested();
+}
+
 void SubscriptionUiController::emitCaptchaUpdateSuccess()
 {
     const bool fromValidateConfig = m_captchaState.fromValidateConfig;
@@ -945,8 +953,7 @@ void SubscriptionUiController::emitCaptchaUpdateSuccess()
     const bool reloadServiceConfig = m_captchaState.reloadServiceConfig;
     const QString newCountryName = m_captchaState.newCountryName;
 
-    m_captchaState.isPending = false;
-    emit captchaFlowDismissRequested();
+    finishCaptchaFlow();
 
     if (fromValidateConfig) {
         emit configValidated(true);
@@ -1000,6 +1007,9 @@ void SubscriptionUiController::validateConfig()
         m_captchaState.flow = CaptchaFlow::Update;
         m_captchaState.fromValidateConfig = true;
         m_captchaState.serverId = serverId;
+        if (const auto apiV2 = m_serversController->apiV2Config(serverId)) {
+            m_captchaState.serverCountryCode = apiV2->apiConfig.serverCountryCode;
+        }
         m_captchaState.isConnectEvent = true;
         m_captchaState.updateProtocolData = usedProtocolData;
         m_captchaState.isPending = true;
