@@ -2,6 +2,14 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 
 include(CTest)
 
+if(NOT ANDROID)
+    add_subdirectory(wireguardAddresses)
+endif()
+
+if(APPLE AND NOT CMAKE_CROSSCOMPILING)
+    add_subdirectory(appleWireguardAddresses)
+endif()
+
 function(amnezia_copy_runtime_dlls)
     if(NOT WIN32)
         return()

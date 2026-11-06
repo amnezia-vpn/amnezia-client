@@ -34,6 +34,7 @@
 #include "logger.h"
 #include "xray_defs.h"
 #include <QFileInfo>
+#include <QHostAddress>
 #include <QProcess>
 
 #define BRAND_CODE "amn"
@@ -418,7 +419,28 @@ void LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPVersion ip, const QString 
     }
 }
 
-void LinuxFirewall::updateDNSServers(const QStringList& servers)
+void LinuxFirewall::updateIpv6Endpoint(const QString &serverAddress, int port)
+{
+    const QString chain = QStringLiteral("%1.250.blockIPv6").arg(kAnchorName);
+    if (executeIptables(QStringLiteral("ip6tables"),
+                        { QStringLiteral("-R"), chain, QStringLiteral("1"), QStringLiteral("!"), QStringLiteral("-o"),
+                          QStringLiteral("lo+"), QStringLiteral("-j"), QStringLiteral("REJECT") })
+        != 0) {
+        return;
+    }
+    while (executeIptables(QStringLiteral("ip6tables"), { QStringLiteral("-D"), chain, QStringLiteral("2") }, true) == 0) {
+    }
+    QHostAddress address(serverAddress);
+    if (address.protocol() == QAbstractSocket::IPv6Protocol && port > 0 && port <= 65535) {
+        address.setScopeId(QString());
+        executeIptables(QStringLiteral("ip6tables"),
+                        { QStringLiteral("-I"), chain, QStringLiteral("1"), QStringLiteral("-p"), QStringLiteral("udp"),
+                          QStringLiteral("-d"), address.toString(), QStringLiteral("--dport"), QString::number(port),
+                          QStringLiteral("-j"), QStringLiteral("ACCEPT") });
+    }
+}
+
+void LinuxFirewall::updateDNSServers(const QStringList &servers)
 {
     static QStringList existingServers {};
 
