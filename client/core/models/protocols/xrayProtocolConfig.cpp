@@ -1431,6 +1431,20 @@ QString XrayClientConfig::localPortFromNativeJson(const QJsonObject &nativeJson)
     return jsonPortToString(inbound.value(px::port));
 }
 
+QString XrayClientConfig::serverPortFromNativeJson(const QJsonObject &nativeJson)
+{
+    namespace px = protocols::xray;
+
+    const QJsonObject settings = entryOutbound(nativeJson.value(px::outbounds).toArray()).value(px::settings).toObject();
+    for (const char *serverEntriesKey : { px::vnext, px::servers }) {
+        const QJsonArray serverEntries = settings.value(serverEntriesKey).toArray();
+        if (!serverEntries.isEmpty()) {
+            return jsonPortToString(serverEntries[0].toObject().value(px::port));
+        }
+    }
+    return { };
+}
+
 QJsonObject XrayProtocolConfig::toJson() const
 {
     QJsonObject obj = serverConfig.toJson();

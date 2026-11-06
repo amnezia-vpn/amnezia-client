@@ -42,6 +42,7 @@
     #include <net/if.h>
 #endif
 
+#include <QFile>
 #include <QHostAddress>
 #include <QHostInfo>
 
@@ -193,6 +194,79 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
     return routeInfo.dwForwardIfIndex;
 #endif
     return 0;
+}
+
+QNetworkInterface NetworkUtilities::interfaceWithAddress(const QString &addressList)
+{
+    const QHostAddress address(addressList.section(',', 0, 0).section('/', 0, 0).trimmed());
+    if (address.isNull()) {
+        return { };
+    }
+
+    const QList<QNetworkInterface> networkInterfaces = QNetworkInterface::allInterfaces();
+    for (const QNetworkInterface &networkInterface : networkInterfaces) {
+        for (const QNetworkAddressEntry &entry : networkInterface.addressEntries()) {
+            if (entry.ip().isEqual(address)) {
+                return networkInterface;
+            }
+        }
+    }
+    return { };
+}
+
+std::optional<NetworkUtilities::InterfaceTraffic>
+NetworkUtilities::interfaceTraffic(const QNetworkInterface &networkInterface)
+{
+    if (!networkInterface.isValid()) {
+        return std::nullopt;
+    }
+#if defined(Q_OS_WIN)
+    MIB_IF_ROW2 row = { };
+    row.InterfaceIndex = static_cast<NET_IFINDEX>(networkInterface.index());
+    if (GetIfEntry2(&row) != NO_ERROR) {
+        return std::nullopt;
+    }
+    return InterfaceTraffic { row.InOctets, row.OutOctets };
+#elif defined(Q_OS_LINUX)
+    const QString statisticsPath = QStringLiteral("/sys/class/net/%1/statistics/").arg(networkInterface.name());
+    QFile receivedFile(statisticsPath + QStringLiteral("rx_bytes"));
+    QFile sentFile(statisticsPath + QStringLiteral("tx_bytes"));
+    if (!receivedFile.open(QIODevice::ReadOnly) || !sentFile.open(QIODevice::ReadOnly)) {
+        return std::nullopt;
+    }
+    bool receivedOk = false;
+    bool sentOk = false;
+    const InterfaceTraffic traffic { receivedFile.readAll().trimmed().toULongLong(&receivedOk),
+                                     sentFile.readAll().trimmed().toULongLong(&sentOk) };
+    if (!receivedOk || !sentOk) {
+        return std::nullopt;
+    }
+    return traffic;
+#elif defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    int mib[] = { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, networkInterface.index() };
+    size_t length = 0;
+    if (sysctl(mib, 6, nullptr, &length, nullptr, 0) < 0 || length == 0) {
+        return std::nullopt;
+    }
+    QByteArray buffer(static_cast<qsizetype>(length), Qt::Uninitialized);
+    if (sysctl(mib, 6, buffer.data(), &length, nullptr, 0) < 0) {
+        return std::nullopt;
+    }
+    for (size_t offset = 0; offset + sizeof(if_msghdr) <= length;) {
+        const auto *header = reinterpret_cast<const if_msghdr *>(buffer.constData() + offset);
+        if (header->ifm_msglen == 0) {
+            break;
+        }
+        if (header->ifm_type == RTM_IFINFO2 && header->ifm_index == networkInterface.index()) {
+            const auto *header2 = reinterpret_cast<const if_msghdr2 *>(header);
+            return InterfaceTraffic { header2->ifm_data.ifi_ibytes, header2->ifm_data.ifi_obytes };
+        }
+        offset += header->ifm_msglen;
+    }
+    return std::nullopt;
+#else
+    return std::nullopt;
+#endif
 }
 
 bool NetworkUtilities::checkIpv6Enabled() {

@@ -2,10 +2,13 @@
 #define SERVERSMODEL_H
 
 #include <QAbstractListModel>
+#include <QHash>
+#include <QSet>
 #include <QVector>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/models/serverDescription.h"
+#include "core/utils/latencyProbe.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -30,6 +33,10 @@ public:
         IsServerFromGatewayApiRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
+
+        LatencyMsRole,
+        LatencyQualityRole,
+        IsLatencyTestingRole,
     };
 
     ServersModel(QObject *parent = nullptr);
@@ -42,6 +49,7 @@ public slots:
     void updateModel(const QVector<amnezia::ServerDescription> &descriptions,
                      const QString &defaultServerId);
     void setDefaultServerId(const QString &serverId);
+    void setServerLatency(const QString &serverId, const LatencyResult &result, bool isTesting);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -52,6 +60,9 @@ private:
     QVector<amnezia::ServerDescription> m_descriptions;
 
     QString m_defaultServerId;
+
+    QHash<QString, LatencyResult> m_latencyResults;
+    QSet<QString> m_latencyTestingServerIds;
 };
 
 #endif // SERVERSMODEL_H

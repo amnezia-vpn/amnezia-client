@@ -35,6 +35,9 @@ struct OpenVpnClientConfig {
     
     QJsonObject toJson() const;
     static OpenVpnClientConfig fromJson(const QJsonObject& json);
+
+    QString remotePort() const;
+    QString remoteTransportProto() const;
 };
 
 struct OpenVpnProtocolConfig {

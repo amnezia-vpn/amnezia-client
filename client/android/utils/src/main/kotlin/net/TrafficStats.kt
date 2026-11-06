@@ -35,6 +35,8 @@ class TrafficStats {
         lastTimestamp = SystemClock.elapsedRealtime()
     }
 
+    fun getTrafficData(): TrafficData = getTrafficDataCompat()
+
     fun isSupported(): Boolean =
         lastTrafficData.rx != TrafficStats.UNSUPPORTED.toLong() && lastTrafficData.tx != TrafficStats.UNSUPPORTED.toLong()
 

@@ -211,6 +211,16 @@ extension PacketTunnelProvider {
         completionHandler()
     }
 
+    func handleXrayStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+        guard let completionHandler = completionHandler else { return }
+        let traffic = Socks5Tunnel.trafficBytes
+        let response: [String: Any] = [
+            "rx_bytes": traffic.received,
+            "tx_bytes": traffic.sent
+        ]
+        completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
+    }
+
     func sockCallback(fd: uintptr_t) {
         if activeIfaceIdx != 0 {
             withUnsafePointer(to: activeIfaceIdx) { ptr in
