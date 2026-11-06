@@ -62,6 +62,15 @@ target_include_directories(test_common PUBLIC
 )
 
 if(NOT ANDROID)
+    if(WIN32)
+        add_executable(test_local_socket_controller testLocalSocketController.cpp)
+        target_link_libraries(test_local_socket_controller PRIVATE Qt6::Test test_common)
+        if(MSVC)
+            target_compile_options(test_local_socket_controller PRIVATE /utf-8)
+        endif()
+        add_test(NAME LocalSocketControllerTest COMMAND test_local_socket_controller)
+    endif()
+
     add_executable(test_multiple_imports
         testMultipleImports.cpp
     )
