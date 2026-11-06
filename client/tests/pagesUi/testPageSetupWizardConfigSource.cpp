@@ -118,7 +118,7 @@ private slots:
 
     void moreMenuCanBeOpened()
     {
-        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSetupWizardConfigSource")));
+        QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
 
         const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
 
@@ -138,7 +138,7 @@ private slots:
 
     void loggingSwitchCanBeToggledFromMoreMenu()
     {
-        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSetupWizardConfigSource")));
+        QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
 
         const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
 

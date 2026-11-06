@@ -19,6 +19,7 @@ bool PagesUiTestFixture::initialize(QObject *parent)
     m_engine = new QQmlApplicationEngine(parent);
     m_engine->addImportPath(QStringLiteral("qrc:/ui/qml/Modules/"));
     m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", false);
 
     auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
 
@@ -102,6 +103,39 @@ bool PagesUiTestFixture::loadPage(const QString &pageName)
     m_page = qvariant_cast<QQuickItem *>(loader->property("item"));
 
     return m_page != nullptr;
+}
+
+bool PagesUiTestFixture::loadPageFromStartPage(PageLoader::PageEnum page)
+{
+    if (!m_pageController || !m_pageController->isStartPageVisible()) {
+        return false;
+    }
+
+    // Load the actual application start page
+    if (!loadPage(QStringLiteral("PageStart"))) {
+        return false;
+    }
+
+    // Navigate through PageController
+    emit m_pageController->goToPage(page, false);
+
+    const QString pagePath = m_pageController->getPagePath(page);
+    QQuickItem *targetPage = nullptr;
+
+    const bool pageLoaded = QTest::qWaitFor(
+            [this, &targetPage, &pagePath]() {
+                targetPage = item(QStringLiteral("objectName"), pagePath, m_page);
+
+                return targetPage && targetPage->isVisible();
+            },
+            5000);
+
+    if (!pageLoaded) {
+        return false;
+    }
+
+    m_page = targetPage;
+    return true;
 }
 
 void PagesUiTestFixture::closePage()

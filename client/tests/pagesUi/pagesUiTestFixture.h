@@ -8,6 +8,7 @@
 
 #include "secureQSettings.h"
 #include "ui/controllers/qml/pageController.h"
+#include "ui/utils/pageEnum.h"
 #include "utils/testCoreController.h"
 
 class PagesUiTestFixture
@@ -17,6 +18,7 @@ public:
     void cleanup();
 
     bool loadPage(const QString &pageName);
+    bool loadPageFromStartPage(PageLoader::PageEnum page);
     void closePage();
 
     TestCoreController *core() const

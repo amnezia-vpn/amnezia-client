@@ -150,6 +150,7 @@ private slots:
     void selectsServerFromExpandedList()
     {
         TestCoreController *core = m_fixture.core();
+
         QVERIFY(core);
         QVERIFY(core->m_importCoreController);
         QVERIFY(core->m_serversRepository);
@@ -165,13 +166,34 @@ private slots:
         QCOMPARE(core->m_serversRepository->serversCount(), 2);
         QCOMPARE(core->m_serversModel->rowCount(), 2);
 
-        // The first imported server is selected by default
+        // Find a server that is not currently selected
         const QString initialDefaultServerId = core->m_serversRepository->defaultServerId();
-        const QString targetServerId = core->m_serversRepository->serverIdAt(1);
 
         QVERIFY(!initialDefaultServerId.isEmpty());
+
+        int targetServerIndex = -1;
+        QString targetServerId;
+        QString targetServerName;
+
+        for (int row = 0; row < core->m_serversModel->rowCount(); ++row) {
+            const QModelIndex index = core->m_serversModel->index(row, 0);
+            const QString serverId = core->m_serversModel->data(index, ServersModel::ServerIdRole).toString();
+
+            if (serverId.isEmpty() || serverId == initialDefaultServerId) {
+                continue;
+            }
+
+            targetServerIndex = row;
+            targetServerId = serverId;
+            targetServerName = core->m_serversModel->data(index, ServersModel::NameRole).toString();
+
+            break;
+        }
+
+        QVERIFY2(targetServerIndex >= 0, "Could not find a server different from the default server");
+
         QVERIFY(!targetServerId.isEmpty());
-        QVERIFY(initialDefaultServerId != targetServerId);
+        QVERIFY(!targetServerName.isEmpty());
 
         // Load PageHome after importing the servers
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageHome")));
@@ -182,21 +204,20 @@ private slots:
         QVERIFY(!summaries.isEmpty());
         QVERIFY(QMetaObject::invokeMethod(summaries.first(), "expandRequested"));
 
-        // Wait until the second server becomes visible in ServersListView
+        // Wait until the target server becomes visible
         QQuickItem *targetServerItem = nullptr;
 
-        QTRY_VERIFY((targetServerItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Server 2"))) != nullptr);
-
+        QTRY_VERIFY((targetServerItem = m_fixture.visibleItem(QStringLiteral("text"), targetServerName)) != nullptr);
         QVERIFY(targetServerItem->isEnabled());
 
-        // Select the second server through the UI
+        // Select the target server through the UI
         m_fixture.click(targetServerItem);
 
         // Verify that the selected server has changed
         QTRY_COMPARE(core->m_serversRepository->defaultServerId(), targetServerId);
 
-        // Verify that the selected server is reflected in the UI model
-        const QModelIndex selectedServerIndex = core->m_serversModel->index(1, 0);
+        // Verify that the selection is reflected in ServersModel
+        const QModelIndex selectedServerIndex = core->m_serversModel->index(targetServerIndex, 0);
 
         QVERIFY(selectedServerIndex.isValid());
         QCOMPARE(core->m_serversModel->data(selectedServerIndex, ServersModel::IsDefaultRole).toBool(), true);
