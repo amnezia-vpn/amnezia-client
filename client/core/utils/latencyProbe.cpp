@@ -1,5 +1,6 @@
 #include "latencyProbe.h"
 
+#include <algorithm>
 #include <numeric>
 
 #include <QElapsedTimer>
