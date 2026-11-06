@@ -18,7 +18,8 @@ namespace ServerQuality
         Good,
         Fair,
         Poor,
-        Unreachable
+        Unreachable,
+        NoReply
     };
     Q_ENUM_NS(Quality)
 }

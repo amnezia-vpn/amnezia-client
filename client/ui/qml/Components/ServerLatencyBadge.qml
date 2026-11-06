@@ -16,6 +16,7 @@ GridLayout {
     property bool stacked: false
 
     readonly property bool hasResult: !root.testing && root.quality !== ServerQuality.Unknown
+    readonly property bool hasLatency: root.hasResult && root.latencyMs >= 0
     readonly property bool hasContent: root.testing || root.hasResult
 
     columns: root.stacked ? 1 : 2
@@ -35,22 +36,28 @@ GridLayout {
         Layout.alignment: root.stacked ? Qt.AlignRight : Qt.AlignVCenter
 
         visible: root.hasResult
-        dot: true
+        dot: root.quality !== ServerQuality.NoReply
         variant: {
             switch (root.quality) {
             case ServerQuality.Excellent:
             case ServerQuality.Good: return StatusBadgeType.Success
             case ServerQuality.Fair: return StatusBadgeType.Warning
+            case ServerQuality.NoReply: return StatusBadgeType.Neutral
             default: return StatusBadgeType.Destructive
             }
         }
-        text: root.quality === ServerQuality.Unreachable ? qsTr("Unreachable") : qsTr("%1 ms").arg(root.latencyMs)
+        text: {
+            if (root.hasLatency) {
+                return qsTr("%1 ms").arg(root.latencyMs)
+            }
+            return root.quality === ServerQuality.NoReply ? qsTr("No reply") : qsTr("Unreachable")
+        }
     }
 
     CaptionTextType {
         Layout.alignment: root.stacked ? Qt.AlignRight : Qt.AlignVCenter
 
-        visible: root.hasResult && root.quality !== ServerQuality.Unreachable
+        visible: root.hasLatency
         text: {
             switch (root.quality) {
             case ServerQuality.Excellent: return qsTr("Excellent")
