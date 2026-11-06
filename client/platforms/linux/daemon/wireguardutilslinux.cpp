@@ -179,7 +179,9 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         logger.error() << "Interface configuration failed:" << strerror(err);
     } else {
         if (config.m_killSwitchEnabled) {
-            FirewallParams params { };
+            FirewallParams params {};
+            params.serverIpv6Address = config.m_serverIpv6AddrIn;
+            params.serverPort = config.m_serverPort;
             params.dnsServers.append(config.m_primaryDnsServer);
             if (!config.m_secondaryDnsServer.isEmpty()) {
                 params.dnsServers.append(config.m_secondaryDnsServer);
@@ -508,6 +510,7 @@ void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
     LinuxFirewall::updateBlockNets(params.blockAddrs);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::updateIpv6Endpoint(params.serverIpv6Address, params.serverPort);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);

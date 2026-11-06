@@ -1,12 +1,27 @@
 #include <QtTest>
 
 #include "../../daemon/wireguardaddressutils.h"
+#include "../../platforms/macos/daemon/macosfirewall.h"
 
 class TestWireguardAddresses : public QObject
 {
     Q_OBJECT
 
 private slots:
+    void ipv6FirewallRules()
+    {
+        const QString block = QStringLiteral("block return out inet6 flags any no state");
+        QCOMPARE(MacOSFirewall::ipv6Rules("2001:db8::10", 51820),
+                 (QStringList { block, "pass out inet6 proto udp to 2001:db8::10 port 51820 no state" }));
+        for (const QString &address : { QString(), QStringLiteral("192.0.2.10"), QStringLiteral("invalid") }) {
+            QCOMPARE(MacOSFirewall::ipv6Rules(address, 51820), QStringList { block });
+        }
+        QCOMPARE(MacOSFirewall::ipv6Rules("2001:db8::10", 0), QStringList { block });
+        QCOMPARE(MacOSFirewall::ipv6Rules("2001:db8::10", 65536), QStringList { block });
+        QCOMPARE(MacOSFirewall::ipv6Rules("fe80::1%en0", 51820),
+                 (QStringList { block, "pass out inet6 proto udp to fe80::1 port 51820 no state" }));
+    }
+
     void parseDeviceAddresses_data()
     {
         QTest::addColumn<QString>("input");
