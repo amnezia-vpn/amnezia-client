@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QThread>
 #include <QEventLoop>
+#include <QWindow>
 
 #include "../core/protocols/vpnProtocol.h"
 #import "ios_controller_wrapper.h"
@@ -1274,3 +1275,20 @@ bool IosController::isTestFlight() {
     return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
 
+
+#ifdef Q_OS_IOS
+QMargins IosController::windowSafeAreaMargins(QWindow *window) const {
+    if (!window || !window->handle()) {
+        return {};
+    }
+
+    UIView *view = (__bridge UIView *)reinterpret_cast<void *>(window->winId());
+    UIWindow *uiWindow = view.window;
+    if (!uiWindow) {
+        return {};
+    }
+
+    const UIEdgeInsets insets = uiWindow.safeAreaInsets;
+    return QMarginsF(insets.left, insets.top, insets.right, insets.bottom).toMargins();
+}
+#endif

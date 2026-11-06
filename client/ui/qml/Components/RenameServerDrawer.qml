@@ -14,7 +14,21 @@ SheetType {
 
     id: root
 
-    expandedHeight: content.implicitHeight + 16 + 8 + PageController.safeAreaBottomMargin + PageController.imeHeight
+    readonly property real keyboardHeight: {
+        if (PageController.imeHeight > 0) {
+            return PageController.imeHeight
+        }
+        if (Qt.platform.os === "ios" && Qt.inputMethod.visible) {
+            const keyboardRect = Qt.inputMethod.keyboardRectangle
+            if (keyboardRect.height <= 0) {
+                return 0
+            }
+            return Math.max(0, Math.round(root.windowHeight - keyboardRect.y))
+        }
+        return 0
+    }
+
+    expandedHeight: content.implicitHeight + 16 + 8 + PageController.safeAreaBottomMargin + root.keyboardHeight
 
     ColumnLayout {
         id: content
