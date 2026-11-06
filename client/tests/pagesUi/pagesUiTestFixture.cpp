@@ -1,6 +1,7 @@
 #include "pagesUiTestFixture.h"
 
 #include <QCoreApplication>
+#include <QElapsedTimer>
 #include <QEvent>
 #include <QJSValue>
 #include <QObject>
@@ -282,13 +283,45 @@ QQuickItem *PagesUiTestFixture::clickable(const QString &text) const
 
 void PagesUiTestFixture::click(QQuickItem *target)
 {
-    if (!target || !m_window) {
+    if (!target) {
         return;
     }
 
-    const QPointF center = target->mapToScene(QPointF(target->width() / 2, target->height() / 2));
+    QPointF stablePoint;
+    bool haveStablePoint = false;
+    QElapsedTimer stableFor;
 
-    QTest::mouseClick(m_window, Qt::LeftButton, { }, center.toPoint());
+    QTest::qWaitFor([&] {
+        QQuickWindow *window = target->window();
+        if (!window || !target->isVisible() || target->width() < 1 || target->height() < 1) {
+            haveStablePoint = false;
+            return false;
+        }
+
+        const QPointF point = target->mapToScene(QPointF(target->width() / 2.0, target->height() / 2.0));
+        const bool inside = point.x() >= 0 && point.y() >= 0 && point.x() < window->width() && point.y() < window->height();
+        const bool moved = !haveStablePoint || qAbs(point.x() - stablePoint.x()) > 1.0 || qAbs(point.y() - stablePoint.y()) > 1.0;
+
+        if (!inside || moved) {
+            stablePoint = point;
+            haveStablePoint = inside;
+            stableFor.restart();
+            return false;
+        }
+
+        return stableFor.elapsed() >= 200;
+    }, 5000);
+
+    QQuickWindow *window = target->window();
+    if (!window) {
+        return;
+    }
+
+    window->requestActivate();
+    QTest::qWaitForWindowExposed(window);
+
+    const QPointF center = target->mapToScene(QPointF(target->width() / 2.0, target->height() / 2.0));
+    QTest::mouseClick(window, Qt::LeftButton, Qt::NoModifier, center.toPoint());
     QTest::qWait(50);
 }
 
