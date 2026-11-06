@@ -193,6 +193,7 @@ ErrorCode XrayProtocol::startTun2Socks()
                         setLastError(res);
                     } else {
                         setConnectionState(Vpn::ConnectionState::Connected);
+                        startTunnelTrafficPolling();
                     }
                 }
             },

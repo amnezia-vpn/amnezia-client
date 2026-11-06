@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QJsonObject>
+#include <QNetworkInterface>
 #include <QtQml/qqml.h>
 
 #include "core/utils/errorCodes.h"
@@ -88,6 +89,7 @@ public slots:
 protected:
     void startTimeoutTimer();
     void stopTimeoutTimer();
+    void startTunnelTrafficPolling();
 
     bool guardStop();
     void resetStopGuard();
@@ -107,6 +109,12 @@ private:
     ErrorCode m_lastError;
     quint64 m_receivedBytes;
     quint64 m_sentBytes;
+
+    void stopTunnelTrafficPolling();
+    void pollTunnelTraffic();
+
+    QTimer *m_tunnelTrafficTimer;
+    QNetworkInterface m_tunnelInterface;
 };
 
 #endif // VPNPROTOCOL_H

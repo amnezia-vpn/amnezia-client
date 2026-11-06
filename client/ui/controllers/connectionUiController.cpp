@@ -19,6 +19,8 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
       m_serversController(serversController)
 {
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
+    connect(m_connectionController, &ConnectionController::trafficRateChanged, this,
+            &ConnectionUiController::onTrafficRateChanged);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 
@@ -103,7 +105,37 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
         break;
     }
     }
+    if (!m_isConnected && m_hasTrafficSpeed) {
+        m_hasTrafficSpeed = false;
+        emit trafficSpeedChanged();
+    }
     emit connectionStateChanged();
+}
+
+void ConnectionUiController::onTrafficRateChanged(quint64 receivedBytesPerSec, quint64 sentBytesPerSec)
+{
+    if (!m_isConnected) {
+        return;
+    }
+    m_hasTrafficSpeed = true;
+    m_downloadBytesPerSec = receivedBytesPerSec;
+    m_uploadBytesPerSec = sentBytesPerSec;
+    emit trafficSpeedChanged();
+}
+
+bool ConnectionUiController::hasTrafficSpeed() const
+{
+    return m_hasTrafficSpeed;
+}
+
+QString ConnectionUiController::downloadSpeed() const
+{
+    return VpnConnection::bytesPerSecToText(m_downloadBytesPerSec);
+}
+
+QString ConnectionUiController::uploadSpeed() const
+{
+    return VpnConnection::bytesPerSecToText(m_uploadBytesPerSec);
 }
 
 void ConnectionUiController::onTranslationsUpdated()

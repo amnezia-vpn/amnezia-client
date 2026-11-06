@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.impl
 import QtQuick.Layouts
 
+import ServerQuality 1.0
 import Style 1.0
 
 import "../Controls2"
@@ -11,8 +12,20 @@ RadioItemType {
     id: root
 
     property bool showWarning: false
+    property int latencyMs: -1
+    property int latencyQuality: ServerQuality.Unknown
+    property bool latencyTesting: false
 
     signal settingsRequested()
+
+    ServerLatencyBadge {
+        Layout.leftMargin: 8
+
+        stacked: true
+        latencyMs: root.latencyMs
+        quality: root.latencyQuality
+        testing: root.latencyTesting
+    }
 
     Item {
         Layout.preferredWidth: 48

@@ -378,7 +378,8 @@ void IosController::checkStatus()
                 }
             }
 
-            emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
+            emit bytesChanged(rxBytes >= m_rxBytes ? rxBytes - m_rxBytes : rxBytes,
+                              txBytes >= m_txBytes ? txBytes - m_txBytes : txBytes);
             m_rxBytes = rxBytes;
             m_txBytes = txBytes;
             m_statusRequestInFlight = false;

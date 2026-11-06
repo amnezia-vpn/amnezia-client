@@ -2,6 +2,7 @@
 #define VPNCONNECTION_H
 
 #include <QObject>
+#include <QElapsedTimer>
 #include <QMetaObject>
 #include <QString>
 #include <QScopedPointer>
@@ -60,6 +61,7 @@ public slots:
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
+    void trafficRateChanged(quint64 receivedBytesPerSec, quint64 sentBytesPerSec);
     void connectionStateChanged(Vpn::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
 
@@ -82,6 +84,7 @@ private:
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
+    QElapsedTimer m_trafficRateTimer;
 
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;

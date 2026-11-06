@@ -57,6 +57,15 @@ VpnConnection::~VpnConnection()
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 {
     emit bytesChanged(receivedBytes, sentBytes);
+
+    if (!m_trafficRateTimer.isValid()) {
+        m_trafficRateTimer.start();
+        return;
+    }
+    const qint64 elapsedMs = m_trafficRateTimer.restart();
+    if (elapsedMs > 0) {
+        emit trafficRateChanged(receivedBytes * 1000 / elapsedMs, sentBytes * 1000 / elapsedMs);
+    }
 }
 
 void VpnConnection::onKillSwitchModeChanged(bool enabled)
@@ -613,6 +622,9 @@ void VpnConnection::disconnectFromVpn()
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
     onConnectionStateChanged(state);
+    if (state != Vpn::ConnectionState::Connected) {
+        m_trafficRateTimer.invalidate();
+    }
 
     if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
         return;

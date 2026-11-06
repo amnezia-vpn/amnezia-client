@@ -20,11 +20,13 @@
         <file>Components/HomeContainersListView.qml</file>
         <file>Components/HomeServerSummary.qml</file>
         <file>Components/HomeInfoButton.qml</file>
+        <file>Components/HomeConnectionStats.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
         <file>Components/InstalledAppsDrawer.qml</file>
         <file>Components/QuestionDrawer.qml</file>
         <file>Components/SelectLanguageDrawer.qml</file>
         <file>Components/ServersListView.qml</file>
+        <file>Components/ServerLatencyBadge.qml</file>
         <file>Components/SettingsContainersListView.qml</file>
         <file>Components/BenefitRow.qml</file>
         <file>Components/BenefitsPanel.qml</file>

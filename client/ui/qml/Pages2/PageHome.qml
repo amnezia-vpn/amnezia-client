@@ -159,6 +159,11 @@ PageType {
                 }
             }
 
+            HomeConnectionStats {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.bottomMargin: 16
+            }
+
             HomeInfoButton {
                 id: splitTunnelingButton
 
@@ -296,6 +301,8 @@ PageType {
         grabberTopMargin: 16
         expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
+        onAboutToShow: ServerLatencyController.testAllServers()
+
         Item {
             anchors.fill: parent
 
@@ -338,14 +345,27 @@ PageType {
                     onClicked: containersSheet.open()
                 }
 
-                BodyTextType {
+                RowLayout {
                     Layout.fillWidth: true
-                    Layout.topMargin: containersDropDown.visible ? 24 : 16
+                    Layout.topMargin: containersDropDown.visible ? 18 : 10
                     Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    Layout.rightMargin: 22
 
-                    text: qsTr("Servers")
-                    color: AmneziaStyle.color.textTertiary
+                    BodyTextType {
+                        Layout.fillWidth: true
+
+                        text: qsTr("Servers")
+                        color: AmneziaStyle.color.textTertiary
+                    }
+
+                    IconButtonType {
+                        size: IconButtonType.Small
+                        icon.source: "qrc:/images/controls/refresh-cw.svg"
+                        enabled: !ServerLatencyController.isTesting
+                        Accessible.name: qsTr("Test server ping")
+
+                        onClicked: ServerLatencyController.testAllServers()
+                    }
                 }
             }
 
