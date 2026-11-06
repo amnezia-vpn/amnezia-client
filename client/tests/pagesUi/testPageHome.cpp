@@ -191,23 +191,50 @@ private slots:
         }
 
         QVERIFY2(targetServerIndex >= 0, "Could not find a server different from the default server");
-
         QVERIFY(!targetServerId.isEmpty());
         QVERIFY(!targetServerName.isEmpty());
 
-        // Load PageHome after importing the servers
+        // Load PageHome
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageHome")));
 
-        // Expand the server drawer through HomeServerSummary
+        // Find the collapsed HomeServerSummary
         const QList<QQuickItem *> summaries = m_fixture.itemsOfType(QStringLiteral("HomeServerSummary"));
 
         QVERIFY(!summaries.isEmpty());
-        QVERIFY(QMetaObject::invokeMethod(summaries.first(), "expandRequested"));
 
-        // Wait until the target server becomes visible
+        QQuickItem *collapsedSummary = nullptr;
+
+        for (QQuickItem *summary : summaries) {
+            const QVariant expanded = summary->property("expanded");
+
+            if (expanded.isValid() && !expanded.toBool()) {
+                collapsedSummary = summary;
+                break;
+            }
+        }
+
+        QVERIFY2(collapsedSummary, "Collapsed HomeServerSummary was not found");
+
+        // Open the server drawer
+        QVERIFY(QMetaObject::invokeMethod(collapsedSummary, "expandRequested"));
+
+        // Find the actual ServerListItem delegate
         QQuickItem *targetServerItem = nullptr;
 
-        QTRY_VERIFY((targetServerItem = m_fixture.visibleItem(QStringLiteral("text"), targetServerName)) != nullptr);
+        QTRY_VERIFY(([&]() {
+            const QList<QQuickItem *> serverItems = m_fixture.itemsOfType(QStringLiteral("ServerListItem"));
+
+            for (QQuickItem *item : serverItems) {
+                if (item->isVisible() && item->property("text").toString() == targetServerName) {
+                    targetServerItem = item;
+                    return true;
+                }
+            }
+
+            return false;
+        })());
+
+        QVERIFY(targetServerItem);
         QVERIFY(targetServerItem->isEnabled());
 
         // Select the target server through the UI

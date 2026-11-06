@@ -17,6 +17,19 @@ private:
         return m_fixture.item("text", text);
     }
 
+    QQuickItem *findVisibleEnabledIconButton() const
+    {
+        const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
+
+        for (QQuickItem *button : buttons) {
+            if (button->isVisible() && button->isEnabled()) {
+                return button;
+            }
+        }
+
+        return nullptr;
+    }
+
 private slots:
     void initTestCase()
     {
@@ -119,38 +132,32 @@ private slots:
     void moreMenuCanBeOpened()
     {
         QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
+        QVERIFY(m_fixture.pageController()->isStartPageVisible());
 
-        const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
+        QQuickItem *moreButton = findVisibleEnabledIconButton();
 
-        QVERIFY2(!buttons.isEmpty(), "More menu button was not found");
-
-        // The first IconButtonType belongs to NavigationBarType
-        QQuickItem *moreButton = buttons.first();
-
-        QVERIFY(moreButton->isVisible());
-        QVERIFY(moreButton->isEnabled());
+        QVERIFY2(moreButton, "Visible More button was not found");
 
         m_fixture.click(moreButton);
 
         QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Settings")) != nullptr);
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Enable logs")) != nullptr);
+        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Enable logs")) != nullptr);
     }
 
     void loggingSwitchCanBeToggledFromMoreMenu()
     {
         QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
+        QVERIFY(m_fixture.pageController()->isStartPageVisible());
 
-        const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
+        QQuickItem *moreButton = findVisibleEnabledIconButton();
 
-        QVERIFY(!buttons.isEmpty());
+        QVERIFY2(moreButton, "Visible More button was not found");
 
-        m_fixture.click(buttons.first());
+        m_fixture.click(moreButton);
 
-        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Enable logs")) != nullptr);
+        QQuickItem *loggingRow = nullptr;
 
-        QQuickItem *loggingRow = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Enable logs"));
-
-        QVERIFY(loggingRow);
+        QTRY_VERIFY((loggingRow = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Enable logs"))) != nullptr);
 
         const QList<QQuickItem *> switches = m_fixture.itemsOfType(QStringLiteral("SwitchType"));
 
@@ -165,7 +172,7 @@ private slots:
             }
         }
 
-        QVERIFY(loggingSwitch);
+        QVERIFY2(loggingSwitch, "Visible logging switch was not found");
 
         const bool initialState = loggingSwitch->property("checked").toBool();
 
