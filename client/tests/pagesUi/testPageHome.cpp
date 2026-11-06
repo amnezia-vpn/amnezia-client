@@ -218,22 +218,9 @@ private slots:
         // Open the server drawer
         QVERIFY(QMetaObject::invokeMethod(collapsedSummary, "expandRequested"));
 
-        // Find the actual ServerListItem delegate
         QQuickItem *targetServerItem = nullptr;
 
-        QTRY_VERIFY(([&]() {
-            const QList<QQuickItem *> serverItems = m_fixture.itemsOfType(QStringLiteral("ServerListItem"));
-
-            for (QQuickItem *item : serverItems) {
-                if (item->isVisible() && item->property("text").toString() == targetServerName) {
-                    targetServerItem = item;
-                    return true;
-                }
-            }
-
-            return false;
-        })());
-
+        QTRY_VERIFY((targetServerItem = m_fixture.visibleItem(QStringLiteral("text"), targetServerName)) != nullptr);
         QVERIFY(targetServerItem);
         QVERIFY(targetServerItem->isEnabled());
 

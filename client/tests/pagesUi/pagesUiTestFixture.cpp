@@ -3,7 +3,9 @@
 #include <QCoreApplication>
 #include <QEvent>
 #include <QJSValue>
+#include <QObject>
 #include <QQuickStyle>
+#include <QSet>
 #include <QUuid>
 #include <QVariant>
 
@@ -153,29 +155,76 @@ void PagesUiTestFixture::closePage()
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
 }
 
-void PagesUiTestFixture::collectItems(QQuickItem *root, QList<QQuickItem *> &result)
+static void collectFromObject(QObject *object, QList<QQuickItem *> &result, QSet<QObject *> &seen)
 {
-    if (!root) {
+    if (!object || seen.contains(object)) {
         return;
     }
 
-    result.append(root);
+    seen.insert(object);
 
-    for (QQuickItem *child : root->childItems()) {
-        collectItems(child, result);
+    if (auto *item = qobject_cast<QQuickItem *>(object)) {
+        result.append(item);
+
+        for (QQuickItem *child : item->childItems()) {
+            collectFromObject(child, result, seen);
+        }
     }
+
+    const QObjectList objectChildren = object->children();
+    for (QObject *child : objectChildren) {
+        collectFromObject(child, result, seen);
+    }
+}
+
+void PagesUiTestFixture::collectItems(QQuickItem *root, QList<QQuickItem *> &result)
+{
+    QSet<QObject *> seen;
+    collectFromObject(root, result, seen);
 }
 
 QList<QQuickItem *> PagesUiTestFixture::items(QQuickItem *root) const
 {
     QList<QQuickItem *> result;
-    collectItems(root ? root : m_page, result);
+    QSet<QObject *> seen;
+
+    if (root) {
+        collectFromObject(root, result, seen);
+        return result;
+    }
+
+    collectFromObject(m_page, result, seen);
+
+    if (m_window && m_window->contentItem()) {
+        collectFromObject(m_window->contentItem(), result, seen);
+    }
+
     return result;
+}
+
+static bool isShown(QQuickItem *item)
+{
+    if (!item || !item->isVisible()) {
+        return false;
+    }
+
+    for (QObject *object = item; object; object = object->parent()) {
+        if (object->inherits("QQuickPopup")) {
+            return object->property("visible").toBool();
+        }
+    }
+
+    return true;
 }
 
 bool PagesUiTestFixture::isQmlType(const QObject *object, const QString &qmlType)
 {
-    return object && QString::fromLatin1(object->metaObject()->className()).startsWith(qmlType);
+    if (!object) {
+        return false;
+    }
+
+    const QString className = QString::fromLatin1(object->metaObject()->className());
+    return className == qmlType || className.startsWith(qmlType + QLatin1Char('_'));
 }
 
 QList<QQuickItem *> PagesUiTestFixture::itemsOfType(const QString &qmlType, QQuickItem *root) const
@@ -209,7 +258,7 @@ QQuickItem *PagesUiTestFixture::visibleItem(const QString &property, const QVari
     for (QQuickItem *candidate : items(root)) {
         const QVariant candidateValue = candidate->property(property.toUtf8().constData());
 
-        if (candidate->isVisible() && candidateValue.isValid() && candidateValue == value) {
+        if (isShown(candidate) && candidateValue.isValid() && candidateValue == value) {
             return candidate;
         }
     }
@@ -222,7 +271,7 @@ QQuickItem *PagesUiTestFixture::clickable(const QString &text) const
     for (QQuickItem *candidate : items()) {
         const QVariant candidateText = candidate->property("text");
 
-        if (candidateText.isValid() && candidateText.toString() == text && candidate->isVisible()
+        if (candidateText.isValid() && candidateText.toString() == text && isShown(candidate)
             && candidate->isEnabled()) {
             return candidate;
         }

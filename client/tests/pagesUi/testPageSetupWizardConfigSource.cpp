@@ -1,5 +1,7 @@
-#include <QTest>
+#include <QQmlProperty>
 #include <QSignalSpy>
+#include <QTest>
+#include <QUrl>
 
 #include "ui/utils/pageEnum.h"
 
@@ -17,12 +19,18 @@ private:
         return m_fixture.item("text", text);
     }
 
-    QQuickItem *findVisibleEnabledIconButton() const
+    QQuickItem *findMoreButton() const
     {
         const QList<QQuickItem *> buttons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
 
         for (QQuickItem *button : buttons) {
-            if (button->isVisible() && button->isEnabled()) {
+            if (!button->isVisible() || !button->isEnabled()) {
+                continue;
+            }
+
+            const QUrl source = QQmlProperty(button, QStringLiteral("icon.source")).read().toUrl();
+
+            if (source.toString().contains(QStringLiteral("more-vertical"))) {
                 return button;
             }
         }
@@ -134,7 +142,7 @@ private slots:
         QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
         QVERIFY(m_fixture.pageController()->isStartPageVisible());
 
-        QQuickItem *moreButton = findVisibleEnabledIconButton();
+        QQuickItem *moreButton = findMoreButton();
 
         QVERIFY2(moreButton, "Visible More button was not found");
 
@@ -149,7 +157,7 @@ private slots:
         QVERIFY(m_fixture.loadPageFromStartPage(PageLoader::PageEnum::PageSetupWizardConfigSource));
         QVERIFY(m_fixture.pageController()->isStartPageVisible());
 
-        QQuickItem *moreButton = findVisibleEnabledIconButton();
+        QQuickItem *moreButton = findMoreButton();
 
         QVERIFY2(moreButton, "Visible More button was not found");
 
