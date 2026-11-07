@@ -57,6 +57,7 @@ QString amnezia::scriptName(SharedScriptType type)
     case SharedScriptType::remove_container: return QLatin1String("remove_container.sh");
     case SharedScriptType::remove_all_containers: return QLatin1String("remove_all_containers.sh");
     case SharedScriptType::setup_host_firewall: return QLatin1String("setup_host_firewall.sh");
+    case SharedScriptType::setup_host_firewall_service: return QLatin1String("setup_host_firewall.service");
     case SharedScriptType::check_connection: return QLatin1String("check_connection.sh");
     case SharedScriptType::check_server_is_busy: return QLatin1String("check_server_is_busy.sh");
     case SharedScriptType::check_user_in_sudo: return QLatin1String("check_user_in_sudo.sh");
