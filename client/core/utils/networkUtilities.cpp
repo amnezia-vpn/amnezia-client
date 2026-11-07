@@ -264,6 +264,19 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
+    if (dst.protocol() == QAbstractSocket::IPv6Protocol) {
+        SOCKADDR_INET destination {};
+        destination.Ipv6.sin6_family = AF_INET6;
+        const Q_IPV6ADDR ipv6 = dst.toIPv6Address();
+        memcpy(&destination.Ipv6.sin6_addr, ipv6.c, sizeof(ipv6.c));
+        MIB_IPFORWARD_ROW2 route {};
+        SOCKADDR_INET source {};
+        if (GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &route, &source) != NO_ERROR) {
+            return -1;
+        }
+        qDebug() << "Internet Adapter:" << QNetworkInterface::interfaceFromIndex(route.InterfaceIndex).name();
+        return route.InterfaceIndex;
+    }
     quint32 ipBigEndian;
     quint32 ip = dst.toIPv4Address();
     qToBigEndian(ip, &ipBigEndian);
