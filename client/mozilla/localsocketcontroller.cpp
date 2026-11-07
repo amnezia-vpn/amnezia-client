@@ -38,6 +38,17 @@ constexpr int CONNECTION_RETRY_TIMER_MSEC = 500;
 
 namespace {
 Logger logger("LocalSocketController");
+
+QJsonObject ipRangeJson(const QString& ipRange) {
+  const QString address = ipRange.section('/', 0, 0).trimmed();
+  const bool isIpv6 = QHostAddress(address).protocol() == QAbstractSocket::IPv6Protocol;
+  QJsonObject range;
+  range.insert("address", address);
+  range.insert("range", ipRange.contains('/') ? ipRange.section('/', 1).trimmed().toInt()
+                                              : (isIpv6 ? 128 : 32));
+  range.insert("isIpv6", isIpv6);
+  return range;
+}
 }
 
 LocalSocketController::LocalSocketController() {
@@ -138,8 +149,18 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
-  json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
-  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
+  QString deviceIpv6Address;
+  m_deviceIpv4.clear();
+  for (const QString& address : wgConfig.value(amnezia::configKey::clientIp).toString().split(',', Qt::SkipEmptyParts)) {
+    if (ipRangeJson(address).value("isIpv6").toBool()) {
+      deviceIpv6Address = address.trimmed();
+    } else {
+      m_deviceIpv4 = address.trimmed();
+    }
+  }
+  if (!m_deviceIpv4.isEmpty()) {
+    json.insert("deviceIpv4Address", m_deviceIpv4);
+  }
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
@@ -148,7 +169,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   // https://man7.org/linux/man-pages/man5/gai.conf.5.html
 
   // simply "dead::1" is globally-routable, don't use it
-  json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  json.insert("deviceIpv6Address", deviceIpv6Address.isEmpty() ? QStringLiteral("fd58:baa6:dead::1") : deviceIpv6Address);
 
   json.insert("serverPublicKey", wgConfig.value(amnezia::configKey::serverPubKey));
   json.insert("serverPskKey", wgConfig.value(amnezia::configKey::pskKey));
@@ -182,20 +203,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
-      QString ipRange = v.toString();
-      if (ipRange.split('/').size() > 1){
-          QJsonObject range;
-          range.insert("address", ipRange.split('/')[0]);
-          range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      } else {
-          QJsonObject range;
-          range.insert("address",ipRange);
-          range.insert("range", 32);
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      }
+      jsAllowedIPAddesses.append(ipRangeJson(v.toString()));
     }
   } else {
 
@@ -216,20 +224,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
-              QString ipRange = v.toString();
-              if (ipRange.split('/').size() > 1){
-                  QJsonObject range;
-                  range.insert("address", ipRange.split('/')[0]);
-                  range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              } else {
-                  QJsonObject range;
-                  range.insert("address",ipRange);
-                  range.insert("range", 32);
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              }
+              jsAllowedIPAddesses.append(ipRangeJson(v.toString()));
           }
       }
   }
