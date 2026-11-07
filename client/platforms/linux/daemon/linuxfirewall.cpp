@@ -240,6 +240,8 @@ void LinuxFirewall::install()
     installAnchor(IPv6, QStringLiteral("290.allowDHCP"), {
                                                              QStringLiteral("-p udp -d ff00::/8 --sport 546 --dport 547 -j ACCEPT"),
                                                          });
+    installAnchor(Both, QStringLiteral("110.allowNets"), {});
+
     installAnchor(IPv6, QStringLiteral("250.blockIPv6"), {
                                                              QStringLiteral("! -o lo+ -j REJECT"),
                                                          });
@@ -255,8 +257,6 @@ void LinuxFirewall::install()
                                                          });
 
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
-
-    installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
 
     installAnchor(Both, QStringLiteral("400.allowPIA"), {});
 
@@ -333,7 +333,7 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));
     uninstallAnchor(Both, QStringLiteral("130.allowMarkedXray"));
-    uninstallAnchor(IPv4, QStringLiteral("110.allowNets"));
+    uninstallAnchor(Both, QStringLiteral("110.allowNets"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
 
     // Remove Nat anchors
@@ -446,10 +446,12 @@ void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
     const QString chain = QStringLiteral("%1.110.allowNets").arg(kAnchorName);
     executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
-    for (const QString& server : servers)
-        executeIptables(QStringLiteral("iptables"),
+    executeIptables(QStringLiteral("ip6tables"), {QStringLiteral("-F"), chain});
+    for (const QString& server : servers) {
+        executeIptables(server.contains(QLatin1Char(':')) ? QStringLiteral("ip6tables") : QStringLiteral("iptables"),
             {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
              QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+    }
 }
 
 void LinuxFirewall::updateBlockNets(const QStringList& servers)
