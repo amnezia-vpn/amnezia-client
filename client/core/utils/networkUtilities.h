@@ -13,6 +13,9 @@ class NetworkUtilities : public QObject
     Q_OBJECT
 public:
     static QString getIPAddress(const QString &host);
+    static bool parseHostPort(const QString &input, QString &host, int &port);
+    static QString endpointHost(const QString &host);
+    static QString endpoint(const QString &host, int port);
     static QString getStringBetween(const QString &s, const QString &a, const QString &b);
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
