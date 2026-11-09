@@ -28,12 +28,6 @@
 }
 @end
 
-/**
- * Creates a NSStatusItem that holds the tray icon. The icon is set as a
- * template image, so the system controls its effective appearance for the
- * current menu bar theme. The connection status is baked into the artwork, so
- * no separate colored indicator is drawn.
- */
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
 @property(retain) NSMenu* nativeMenu;
@@ -45,16 +39,10 @@
 @end
 
 @implementation MacOSStatusIconDelegate
-/**
- * Initializes and sets the status item and indicator objects.
- *
- * @return An instance of MacOSStatusIconDelegate.
- */
 - (id)init {
   self = [super init];
   self.menuActionTargets = [[NSMutableArray alloc] init];
 
-  // Create status item
   self.statusItem =
       [[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength] retain];
   self.statusItem.visible = true;
@@ -68,14 +56,6 @@
   [super dealloc];
 }
 
-/**
- * Sets the image for the status icon.
- *
- * @param imageData The data for the icon image.
- * @param asTemplate When true the icon is a template image recolored by the
- *        system for the current menu bar appearance. When false the icon is
- *        rendered in its original colors (used for the colored error icon).
- */
 - (void)setIcon:(NSData*)imageData asTemplate:(BOOL)asTemplate {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
   [image setTemplate:asTemplate];
@@ -84,20 +64,10 @@
   [image release];
 }
 
-/**
- * Sets the status bar menu to the status item.
- *
- * @param statusBarMenu The menu object that is passed from QT.
- */
 - (void)setMenu:(NSMenu*)statusBarMenu {
   [self.statusItem setMenu:statusBarMenu];
 }
 
-/**
- * Sets the tooltip string for the status item.
- *
- * @param tooltip The tooltip string.
- */
 - (void)setToolTip:(NSString*)tooltip {
   [self.statusItem.button setToolTip:tooltip];
 }
@@ -209,12 +179,10 @@ void MacOSStatusIcon::showMessage(const QString& title, const QString& message) 
 
   UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
 
-  // This is a no-op is authorization has been granted.
   [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert |
                                            UNAuthorizationOptionBadge)
                         completionHandler:^(__unused BOOL granted, NSError* _Nullable error) {
                           if (error) {
-                            // Note: This error may happen if the application is not signed.
                             NSLog(@"Error asking for permission to send notifications %@", error);
                             return;
                           }

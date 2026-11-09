@@ -6,5 +6,4 @@ void MacTrayTheme::installThemeObserver(const std::function<void()> &onThemeChan
 {
     Q_UNUSED(onThemeChanged);
     Q_UNUSED(parent);
-    // macOS template tray icons follow the menu bar appearance automatically.
 }

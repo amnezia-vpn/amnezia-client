@@ -69,7 +69,7 @@ QByteArray pixmapToPng(const QPixmap &pixmap)
 
 QByteArray buildTemplatePng(Vpn::ConnectionState state)
 {
-    return pixmapToPng(renderIcon(resourcePathForState(state, /*darkTheme*/ true), kDefaultTrayIconSize));
+    return pixmapToPng(renderIcon(resourcePathForState(state, true), kDefaultTrayIconSize));
 }
 
 QByteArray buildColorPng(Vpn::ConnectionState state, bool darkTheme)

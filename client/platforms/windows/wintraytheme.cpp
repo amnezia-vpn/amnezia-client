@@ -1,7 +1,10 @@
 #include "wintraytheme.h"
 
-#include "platforms/windows/windowsutils.h"
 #include "ui/utils/trayThemeChangeFilter.h"
+
+#ifdef Q_OS_WIN
+#  include "platforms/windows/windowsutils.h"
+#endif
 
 #include <QApplication>
 #include <QGuiApplication>
@@ -28,5 +31,7 @@ void WinTrayTheme::installThemeObserver(const std::function<void()> &onThemeChan
 
     qApp->installEventFilter(new TrayThemeChangeFilter([schedule]() { schedule(); }, parent));
 
+#ifdef Q_OS_WIN
     WindowsUtils::installThemeChangeObserver([schedule]() { schedule(); });
+#endif
 }
