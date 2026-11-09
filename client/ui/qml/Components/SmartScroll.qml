@@ -4,7 +4,7 @@ import QtQuick.Controls
 QtObject {
     id: root
     
-    property var listView: null
+    property var flickable: null
     property var scrollToItemTarget: null
     
     property Connections imeConnection: Connections {
@@ -20,13 +20,13 @@ QtObject {
         interval: 100
         repeat: false
         onTriggered: {
-            if (root.scrollToItemTarget && root.listView) {
+            if (root.scrollToItemTarget && root.flickable) {
                 if (PageController.imeHeight > 0) {
                     var item = root.scrollToItemTarget
-                    var itemY = item.mapToItem(root.listView.contentItem, 0, 0).y
+                    var itemY = item.mapToItem(root.flickable.contentItem, 0, 0).y
                     var itemHeight = item.height
                     var keyboardHeight = PageController.imeHeight + PageController.safeAreaBottomMargin
-                    var visibleHeight = root.listView.height - keyboardHeight
+                    var visibleHeight = root.flickable.height - keyboardHeight
                     
                     var desiredTopOffset = visibleHeight * 0.25
                     var targetContentY = itemY - desiredTopOffset
@@ -35,12 +35,12 @@ QtObject {
                         targetContentY = 0
                     }
                     
-                    var maxContentY = root.listView.contentHeight - root.listView.height
+                    var maxContentY = root.flickable.contentHeight - root.flickable.height
                     if (targetContentY > maxContentY) {
                         targetContentY = maxContentY
                     }
                     
-                    root.listView.contentY = targetContentY
+                    root.flickable.contentY = targetContentY
                     root.scrollToItemTarget = null
                 }
             }

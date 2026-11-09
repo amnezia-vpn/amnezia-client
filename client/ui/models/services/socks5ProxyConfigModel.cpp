@@ -7,71 +7,60 @@
 
 using namespace amnezia;
 
-Socks5ProxyConfigModel::Socks5ProxyConfigModel(QObject *parent) : QAbstractListModel(parent)
+Socks5ProxyConfigModel::Socks5ProxyConfigModel(QObject *parent) : QObject(parent)
 {
 }
 
-int Socks5ProxyConfigModel::rowCount(const QModelIndex &parent) const
+QString Socks5ProxyConfigModel::port() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.port;
 }
 
-bool Socks5ProxyConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void Socks5ProxyConfigModel::setPort(const QString &value)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return false;
+    if (m_protocolConfig.port == value) {
+        return;
     }
-
-    QString strValue = value.toString();
-
-    switch (role) {
-    case Roles::PortRole: m_protocolConfig.port = strValue; break;
-    case Roles::UserNameRole: m_protocolConfig.userName = strValue; break;
-    case Roles::PasswordRole: m_protocolConfig.password = strValue; break;
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
+    m_protocolConfig.port = value;
+    emit changed();
 }
 
-QVariant Socks5ProxyConfigModel::data(const QModelIndex &index, int role) const
+QString Socks5ProxyConfigModel::username() const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
-    }
+    return m_protocolConfig.userName;
+}
 
-    switch (role) {
-    case Roles::PortRole: return m_protocolConfig.port;
-    case Roles::UserNameRole: return m_protocolConfig.userName;
-    case Roles::PasswordRole: return m_protocolConfig.password;
+void Socks5ProxyConfigModel::setUsername(const QString &value)
+{
+    if (m_protocolConfig.userName == value) {
+        return;
     }
+    m_protocolConfig.userName = value;
+    emit changed();
+}
 
-    return QVariant();
+QString Socks5ProxyConfigModel::password() const
+{
+    return m_protocolConfig.password;
+}
+
+void Socks5ProxyConfigModel::setPassword(const QString &value)
+{
+    if (m_protocolConfig.password == value) {
+        return;
+    }
+    m_protocolConfig.password = value;
+    emit changed();
 }
 
 void Socks5ProxyConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::Socks5ProxyProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     m_protocolConfig = protocolConfig;
-    endResetModel();
+    emit changed();
 }
 
 amnezia::Socks5ProxyProtocolConfig Socks5ProxyConfigModel::getProtocolConfig()
 {
     return m_protocolConfig;
-}
-
-QHash<int, QByteArray> Socks5ProxyConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[PortRole] = "port";
-    roles[UserNameRole] = "username";
-    roles[PasswordRole] = "password";
-
-    return roles;
 }

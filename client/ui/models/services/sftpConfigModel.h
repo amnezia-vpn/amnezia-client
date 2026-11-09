@@ -1,37 +1,39 @@
 #ifndef SFTPCONFIGMODEL_H
 #define SFTPCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 
-class SftpConfigModel : public QAbstractListModel
+class SftpConfigModel : public QObject
 {
     Q_OBJECT
 
-public:
-    enum Roles {
-        PortRole = Qt::UserRole + 1,
-        UserNameRole,
-        PasswordRole
-    };
+    Q_PROPERTY(QString port READ port WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY changed)
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY changed)
 
+public:
     explicit SftpConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QString port() const;
+    void setPort(const QString &value);
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString username() const;
+    void setUsername(const QString &value);
+
+    QString password() const;
+    void setPassword(const QString &value);
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::SftpProtocolConfig &protocolConfig);
     amnezia::SftpProtocolConfig getProtocolConfig();
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     amnezia::DockerContainer m_container;

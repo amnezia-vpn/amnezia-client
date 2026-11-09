@@ -13,55 +13,45 @@ import "../Components"
 
 PageType {
     id: root
-    enableTimer: (SettingsController.isOnTv()) ? false : true
 
-    ColumnLayout {
-        id: content
+    initialFocusItem: SettingsController.isOnTv() ? startButton : root
 
-        anchors.fill: parent
-        spacing: 0
+    Item {
+        id: logoArea
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 16 + PageController.safeAreaTopMargin
+        anchors.bottomMargin: 96 + PageController.safeAreaBottomMargin
 
         Image {
-            id: image
-            source: "qrc:/images/amneziaBigLogo.png"
+            anchors.centerIn: parent
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.topMargin: 32 + PageController.safeAreaTopMargin
-            Layout.preferredWidth: 360
-            Layout.preferredHeight: 287
-        }
+            width: 153
+            height: 131
 
-        BasicButtonType {
-            id: startButton
-            Layout.fillWidth: true
-            Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.alignment: Qt.AlignBottom
-
-            text: qsTr("Let's get started")
-
-            clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-            }
+            source: "qrc:/images/amneziaLogo.svg"
+            sourceSize: Qt.size(153 * Screen.devicePixelRatio, 131 * Screen.devicePixelRatio)
+            fillMode: Image.PreserveAspectFit
         }
     }
 
-    Timer {
-        interval: 250
-        running: SettingsController.isOnTv()
-        repeat: true
-        onTriggered: {
-            startButton.forceActiveFocus()
-            if (startButton.activeFocus) {
-                running = false
-            }
-        }
-    }
+    ButtonType {
+        id: startButton
 
-    onVisibleChanged: {
-        if (visible && SettingsController.isOnTv()) {
-            startButton.forceActiveFocus()
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
+
+        text: qsTr("Let's get started")
+
+        onClicked: {
+            PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
         }
     }
 }

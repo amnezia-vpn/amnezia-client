@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
@@ -25,103 +23,104 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
 
-    ListViewType {
-        id: listView
+        contentHeight: content.implicitHeight
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        ColumnLayout {
+            id: content
 
-        header: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            BaseHeaderType {
+            spacing: 0
+
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                headerText: qsTr("Tor website settings")
+                title: qsTr("Tor website settings")
             }
-        }
 
-        model: TorConfigModel
-
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after migrate to 6.9
-            width: listView.width
-
-            LabelWithButtonType {
-                id: websiteName
-
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.bottomMargin: 24
 
-                text: qsTr("Website address")
-                descriptionText: site || ""
+                spacing: 12
 
-                descriptionOnTop: true
-                textColor: AmneziaStyle.color.goldenApricot
+                SmallTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                    text: qsTr("Website address")
+                }
 
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
-                    PageController.showNotificationMessage(qsTr("Copied"))
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+
+                    spacing: 8
+
+                    BodyTextType {
+                        id: websiteName
+
+                        Layout.fillWidth: true
+
+                        text: TorConfigModel.site || ""
+                        color: AmneziaStyle.color.textAccent
+                        wrapMode: Text.WrapAnywhere
+                    }
+
+                    IconButtonType {
+                        Layout.alignment: Qt.AlignVCenter
+
+                        icon.source: "qrc:/images/controls/copy.svg"
+                        Accessible.name: qsTr("Website address")
+
+                        onClicked: {
+                            GC.copyToClipBoard(websiteName.text)
+                            PageController.showNotificationMessage(qsTr("Copied"))
+                        }
+                    }
                 }
             }
-        }
 
-        footer: ColumnLayout {
-            width: listView.width
-
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                onLinkActivated: Qt.openUrlExternally(link)
-                textFormat: Text.RichText
-                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this URL.")
+                textFormat: Text.StyledText
+                linkColor: AmneziaStyle.color.textAccent
+                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this URL.").replace(/ style="[^"]*"/, "")
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
+                HoverHandler {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("After creating your onion site, it takes a few minutes for the Tor network to make it available for use.")
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
                 text: qsTr("When configuring WordPress set the this onion address as domain.")
             }

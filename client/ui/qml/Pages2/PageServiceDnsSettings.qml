@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import Style 1.0
 
@@ -16,59 +14,42 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
 
-    ListViewType {
-        id: listView
+        contentHeight: content.implicitHeight
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        ColumnLayout {
+            id: content
 
-        header: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            BaseHeaderType {
+            spacing: 0
+
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
 
-                headerText: "AmneziaDNS"
-                descriptionText: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n") +
-                                 qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
+                title: "AmneziaDNS"
+                description: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n").trim() + " " +
+                             qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
             }
-        }
 
-        model: 1 // fake model to force the ListView to be created without a model
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            LabelWithButtonType {
+            ListItemType {
                 id: removeButton
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.vibrantRed
+                destructive: true
+                showSeparator: false
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -84,14 +65,12 @@ PageType {
                     }
                     var noButtonFunction = function() {}
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
+            }
 
-                MouseArea {
-                    anchors.fill: removeButton
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
+            Item {
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
     }

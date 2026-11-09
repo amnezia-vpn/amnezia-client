@@ -18,9 +18,13 @@ PageType {
 
     property bool isEasySetup: true
 
+    property int dockerContainer
+    property int containerDefaultPort
+    property int containerDefaultTransportProto
+
     SortFilterProxyModel {
         id: proxyContainersModel
-        
+
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
@@ -34,186 +38,139 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    function selectContainer(container) {
+        root.isEasySetup = true
+        root.dockerContainer = container
+
+        var defaultContainerProto = ContainerProps.defaultProtocol(container)
+        root.containerDefaultPort = InstallController.getPortForInstall(defaultContainerProto)
+        root.containerDefaultTransportProto = InstallController.defaultTransportProto(defaultContainerProto)
+    }
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: bottomBar.top
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
+        contentHeight: content.implicitHeight + 16
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Choose Installation Type")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                spacing: 12
+
+                Repeater {
+                    model: proxyContainersModel
+
+                    delegate: SelectableListItemType {
+                        required property int index
+                        required property int dockerContainer
+                        required property string easySetupHeader
+                        required property string easySetupDescription
+
+                        Layout.fillWidth: true
+
+                        showSeparator: index > 0
+
+                        text: easySetupHeader
+                        subtitle: easySetupDescription
+
+                        checked: root.isEasySetup && root.dockerContainer === dockerContainer
+
+                        onClicked: root.selectContainer(dockerContainer)
+
+                        Component.onCompleted: {
+                            if (index === 0) {
+                                root.selectContainer(dockerContainer)
+                            }
+                        }
+                    }
+                }
+
+                SelectableListItemType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Manual")
+                    subtitle: qsTr("Choose a VPN protocol")
+
+                    checked: !root.isEasySetup
+
+                    onClicked: root.isEasySetup = false
+                }
             }
         }
     }
 
-    ButtonGroup {
-        id: buttonGroup
-    }
+    BottomBarType {
+        id: bottomBar
 
-    ListViewType {
-        id: listView
-
-        property int dockerContainer
-        property int containerDefaultPort
-        property int containerDefaultTransportProto
-
-        anchors.top: backButton.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
 
-        spacing: 16
+        filled: true
 
-        header: ColumnLayout {
-            width: listView.width
+        ButtonType {
+            id: continueButton
 
-            spacing: 16
+            Layout.fillWidth: true
 
-            BaseHeaderType {
-                id: header
+            text: qsTr("Continue")
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 16
-
-                headerTextMaximumLineCount: 10
-
-                headerText: qsTr("Choose Installation Type")
-            }
-        }
-
-        model: proxyContainersModel
-        currentIndex: 0
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            CardType {
-                id: card
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 16
-
-                headerText: easySetupHeader
-                bodyText: easySetupDescription
-
-                ButtonGroup.group: buttonGroup
-
-                onClicked: function() {
-                    isEasySetup = true
-                    checked = true
-                    var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
-
-                    listView.dockerContainer = dockerContainer
-                    listView.containerDefaultPort = InstallController.getPortForInstall(defaultContainerProto)
-                    listView.containerDefaultTransportProto = InstallController.defaultTransportProto(defaultContainerProto)
-                }
-
-                Keys.onReturnPressed: this.clicked()
-                Keys.onEnterPressed: this.clicked()
-            }
-        }
-
-        footer: ColumnLayout {
-            width: listView.width
-            spacing: 16
-
-            DividerType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-            }
-
-            CardType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("Manual")
-                bodyText: qsTr("Choose a VPN protocol")
-
-                ButtonGroup.group: buttonGroup
-
-                onClicked: function() {
-                    isEasySetup = false
-                    checked = true
-                }
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
-            }
-
-            BasicButtonType {
-                id: continueButton
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Continue")
-
-                clickedFunc: function() {
-                    if (root.isEasySetup) {
-                        ServersUiController.processedContainerIndex = listView.dockerContainer
-                        PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                        InstallController.install(listView.dockerContainer,
-                                                      listView.containerDefaultPort,
-                                                      listView.containerDefaultTransportProto,
-                                                      ServersUiController.processedServerId)
-                    } else {
-                        PageController.goToPage(PageEnum.PageSetupWizardProtocols)
-                    }
-                }
-            }
-
-            BasicButtonType {
-                id: setupLaterButton
-
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.bottomMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
-
-                visible: {
-                    if (PageController.isTriggeredByConnectButton()) {
-                        PageController.setTriggeredByConnectButton(false)
-                        return false
-                    }
-
-                    return  true
-                }
-
-                text: qsTr("Skip setup")
-
-                clickedFunc: function() {
+            onClicked: {
+                if (root.isEasySetup) {
+                    ServersUiController.processedContainerIndex = root.dockerContainer
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                    InstallController.addEmptyServer()
+                    InstallController.install(root.dockerContainer,
+                                              root.containerDefaultPort,
+                                              root.containerDefaultTransportProto,
+                                              ServersUiController.processedServerId)
+                } else {
+                    PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                 }
             }
         }
 
-        Component.onCompleted: {
-            var item = listView.itemAtIndex(listView.currentIndex)
-            if (item !== null) {
-                var button = item.children[0]
-                button.checked = true
-                button.clicked()
+        ButtonType {
+            id: setupLaterButton
+
+            Layout.fillWidth: true
+
+            variant: ButtonType.Secondary
+
+            visible: {
+                if (PageController.isTriggeredByConnectButton()) {
+                    PageController.setTriggeredByConnectButton(false)
+                    return false
+                }
+
+                return true
+            }
+
+            text: qsTr("Skip setup")
+
+            onClicked: {
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.addEmptyServer()
             }
         }
     }
 }
-

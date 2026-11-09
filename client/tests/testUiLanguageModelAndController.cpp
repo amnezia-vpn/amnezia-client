@@ -85,6 +85,42 @@ private slots:
         m_coreController->m_languageUiController->changeLanguage(LanguageSettings::AvailableLanguageEnum::English);
         QVERIFY2(m_coreController->m_languageUiController->getLineHeightAppend() == 0, "line height should be 0");
     }
+
+    void testEveryLanguageHasNativeName()
+    {
+        LanguageModel *model = m_coreController->m_languageModel;
+        LanguageUiController *controller = m_coreController->m_languageUiController;
+
+        const int count = model->rowCount();
+        QVERIFY2(count > 0, "Language model should not be empty");
+
+        for (int i = 0; i < count; i++) {
+            const QModelIndex idx = model->index(i, 0);
+
+            const QString modelName = model->data(idx, LanguageModel::NameRole).toString();
+            QVERIFY2(!modelName.isEmpty(),
+                     qPrintable(QString("Language at row %1 has no native name in the model").arg(i)));
+
+            const int languageIndex = model->data(idx, LanguageModel::IndexRole).toInt();
+            QVERIFY2(languageIndex == i,
+                     qPrintable(QString("Language at row %1 reports enum index %2").arg(i).arg(languageIndex)));
+
+            const auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(languageIndex);
+            controller->changeLanguage(language);
+
+            const QString currentName = controller->getCurrentLanguageName();
+            QVERIFY2(!currentName.isEmpty(),
+                     qPrintable(QString("Language '%1' has no native name in the controller").arg(languageIndex)));
+
+            QVERIFY2(modelName == currentName,
+                     qPrintable(QString("Native name mismatch for enum index %1: model '%2' vs controller '%3'")
+                                        .arg(languageIndex)
+                                        .arg(modelName, currentName)));
+
+            QVERIFY2(controller->getCurrentLanguageIndex() == languageIndex,
+                     qPrintable(QString("Language enum index %1 does not round-trip").arg(languageIndex)));
+        }
+    }
 };
 
 QTEST_MAIN(TestUiLanguageModelAndController)

@@ -14,6 +14,8 @@ class AmneziaVPN(ConanFile):
     def requirements(self):
         os = str(self.settings.os)
 
+        self.requires("libagw/1.0.8")
+
         has_ne = os == "iOS" or (os == "Macos" and self.options.macos_ne)
         has_service = os == "Windows" or os == "Linux" or (os == "Macos" and not has_ne)
 
@@ -26,7 +28,7 @@ class AmneziaVPN(ConanFile):
             else:
                 self.requires("awg-go/3.1.20260814")
 
-            self.requires("amnezia-xray-bindings/1.4.0")
+            self.requires("amnezia-xray-bindings/1.5.0")
             self.requires("tun2socks/2.6.0")
             self.requires("openvpn/2.7.0")
             self.requires("v2ray-rules-dat/202603162227")

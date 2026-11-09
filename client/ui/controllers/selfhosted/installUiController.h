@@ -66,11 +66,13 @@ public slots:
 
     void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true,
+                            bool acceptXrayKeyLoss = false);
     void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
     void removeServer(const QString &serverId);
     void rebootServer(const QString &serverId);
+    void updateServerPackages(const QString &serverId);
     void removeAllContainers(const QString &serverId);
     void removeContainer(const QString &serverId, int containerIndex);
     void setContainerEnabled(const QString &serverId, int containerIndex, bool enabled);
@@ -112,6 +114,7 @@ signals:
     void scanServerFinished(bool isInstalledContainerFound);
 
     void rebootServerFinished(const QString &finishedMessage);
+    void updateServerPackagesFinished(const QString &finishedMessage);
     void removeServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
@@ -123,6 +126,8 @@ signals:
 
     void installationErrorOccurred(ErrorCode errorCode);
     void wrongInstallationUser(const QString &message);
+
+    void xrayKeyMigrationNeedsConfirm(const QString &message);
 
     void serverAlreadyExists(int serverIndex);
 
@@ -163,7 +168,9 @@ private:
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
-    
+
+    bool m_serverConfigUpdateInProgress = false;
+
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
 
     bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);

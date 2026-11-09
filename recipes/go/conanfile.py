@@ -6,9 +6,7 @@ import os
 
 class Golang(ConanFile):
     name = "go"
-    # No fixed version: openvpn-pt-android pins go/1.23.x (android/arm futex_time64
-    # regression in go>=1.24, golang/go#77930) — versions are exported explicitly
-    # in recipes_bootstrap.cmake.
+    version = "1.27.1"
     settings = "os", "arch"
 
     def layout(self):

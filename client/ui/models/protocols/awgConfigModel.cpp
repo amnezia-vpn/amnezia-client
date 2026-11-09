@@ -19,180 +19,657 @@ namespace
     {
         return enabled ? QString(protocols::awg::awgBoolOn) : QString();
     }
+
+    bool isAwgToggleOn(const QString &value)
+    {
+        return value.compare(QLatin1String(protocols::awg::awgBoolOn), Qt::CaseInsensitive) == 0;
+    }
 } // namespace
 
-AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
+AwgConfigModel::AwgConfigModel(QObject *parent) : QObject(parent)
 {
 }
 
-int AwgConfigModel::rowCount(const QModelIndex &parent) const
+QString AwgConfigModel::subnetAddress() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.serverConfig.subnetAddress;
 }
 
-bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void AwgConfigModel::setSubnetAddress(const QString &value)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
-        return false;
+    if (m_protocolConfig.serverConfig.subnetAddress == value) {
+        return;
     }
-
-    QString strValue = value.toString();
-
-    switch (role) {
-    case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
-    case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
-
-    case Roles::ClientMtuRole: m_protocolConfig.clientConfig->mtu = strValue; break;
-    case Roles::ClientJunkPacketCountRole: m_protocolConfig.clientConfig->junkPacketCount = strValue; break;
-    case Roles::ClientJunkPacketMinSizeRole: m_protocolConfig.clientConfig->junkPacketMinSize = strValue; break;
-    case Roles::ClientJunkPacketMaxSizeRole: m_protocolConfig.clientConfig->junkPacketMaxSize = strValue; break;
-    case Roles::ClientSpecialJunk1Role: m_protocolConfig.clientConfig->specialJunk1 = strValue; break;
-    case Roles::ClientSpecialJunk2Role: m_protocolConfig.clientConfig->specialJunk2 = strValue; break;
-    case Roles::ClientSpecialJunk3Role: m_protocolConfig.clientConfig->specialJunk3 = strValue; break;
-    case Roles::ClientSpecialJunk4Role: m_protocolConfig.clientConfig->specialJunk4 = strValue; break;
-    case Roles::ClientSpecialJunk5Role: m_protocolConfig.clientConfig->specialJunk5 = strValue; break;
-    case Roles::ClientContentPaddingAdditionRole: m_protocolConfig.clientConfig->contentPaddingAddition = strValue; break;
-    case Roles::ClientRekeyAfterTimeRole: m_protocolConfig.clientConfig->rekeyAfterTime = strValue; break;
-    case Roles::ClientRekeyTimeoutRole: m_protocolConfig.clientConfig->rekeyTimeout = strValue; break;
-    case Roles::ClientRejectAfterTimeRole: m_protocolConfig.clientConfig->rejectAfterTime = strValue; break;
-    case Roles::ClientKeepaliveTimeoutRole: m_protocolConfig.clientConfig->keepaliveTimeout = strValue; break;
-    case Roles::ClientMaxHandshakeAttemptsRole: m_protocolConfig.clientConfig->maxHandshakeAttempts = strValue; break;
-    case Roles::ClientRandomTrailersRole:
-        m_protocolConfig.clientConfig->randomTrailers = awgToggleValue(value.toBool());
-        break;
-    case Roles::ClientDisableCookiesRole:
-        m_protocolConfig.clientConfig->disableCookies = awgToggleValue(value.toBool());
-        break;
-    case Roles::ServerJunkPacketCountRole: m_protocolConfig.serverConfig.junkPacketCount = strValue; break;
-    case Roles::ServerJunkPacketMinSizeRole: m_protocolConfig.serverConfig.junkPacketMinSize = strValue; break;
-    case Roles::ServerJunkPacketMaxSizeRole: m_protocolConfig.serverConfig.junkPacketMaxSize = strValue; break;
-    case Roles::ServerInitPacketJunkSizeRole: m_protocolConfig.serverConfig.initPacketJunkSize = strValue; break;
-    case Roles::ServerResponsePacketJunkSizeRole: m_protocolConfig.serverConfig.responsePacketJunkSize = strValue; break;
-    case Roles::ServerCookieReplyPacketJunkSizeRole: m_protocolConfig.serverConfig.cookieReplyPacketJunkSize = strValue; break;
-    case Roles::ServerTransportPacketJunkSizeRole: m_protocolConfig.serverConfig.transportPacketJunkSize = strValue; break;
-    case Roles::ServerInitPacketMagicHeaderRole: m_protocolConfig.serverConfig.initPacketMagicHeader = strValue; break;
-    case Roles::ServerResponsePacketMagicHeaderRole: m_protocolConfig.serverConfig.responsePacketMagicHeader = strValue; break;
-    case Roles::ServerUnderloadPacketMagicHeaderRole: m_protocolConfig.serverConfig.underloadPacketMagicHeader = strValue; break;
-    case Roles::ServerTransportPacketMagicHeaderRole: m_protocolConfig.serverConfig.transportPacketMagicHeader = strValue; break;
-    case Roles::ServerSpecialJunk1Role: m_protocolConfig.serverConfig.specialJunk1 = strValue; break;
-    case Roles::ServerSpecialJunk2Role: m_protocolConfig.serverConfig.specialJunk2 = strValue; break;
-    case Roles::ServerSpecialJunk3Role: m_protocolConfig.serverConfig.specialJunk3 = strValue; break;
-    case Roles::ServerSpecialJunk4Role: m_protocolConfig.serverConfig.specialJunk4 = strValue; break;
-    case Roles::ServerSpecialJunk5Role: m_protocolConfig.serverConfig.specialJunk5 = strValue; break;
-    case Roles::ServerContentPaddingAdditionRole: m_protocolConfig.serverConfig.contentPaddingAddition = strValue; break;
-    case Roles::ServerRekeyAfterTimeRole: m_protocolConfig.serverConfig.rekeyAfterTime = strValue; break;
-    case Roles::ServerRekeyTimeoutRole: m_protocolConfig.serverConfig.rekeyTimeout = strValue; break;
-    case Roles::ServerRejectAfterTimeRole: m_protocolConfig.serverConfig.rejectAfterTime = strValue; break;
-    case Roles::ServerKeepaliveTimeoutRole: m_protocolConfig.serverConfig.keepaliveTimeout = strValue; break;
-    case Roles::ServerMaxHandshakeAttemptsRole: m_protocolConfig.serverConfig.maxHandshakeAttempts = strValue; break;
-    case Roles::ServerHeaderProtectionEnabledRole: {
-        if (value.toBool()) {
-            if (m_protocolConfig.serverConfig.headerProtectionKey.isEmpty()) {
-                const QString originalKey = m_originalProtocolConfig.serverConfig.headerProtectionKey;
-                m_protocolConfig.serverConfig.headerProtectionKey =
-                        originalKey.isEmpty() ? WireguardConfigurator::genClientKeys().clientPrivKey : originalKey;
-            }
-        } else {
-            m_protocolConfig.serverConfig.headerProtectionKey.clear();
-        }
-        break;
-    }
-    case Roles::ServerRandomTrailersRole:
-        m_protocolConfig.serverConfig.randomTrailers = awgToggleValue(value.toBool());
-        break;
-    case Roles::ServerDisableCookiesRole:
-        m_protocolConfig.serverConfig.disableCookies = awgToggleValue(value.toBool());
-        break;
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
+    m_protocolConfig.serverConfig.subnetAddress = value;
+    emit changed();
 }
 
-QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
+QString AwgConfigModel::port() const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
+    return m_protocolConfig.serverConfig.port;
+}
+
+void AwgConfigModel::setPort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.port == value) {
+        return;
     }
+    m_protocolConfig.serverConfig.port = value;
+    emit changed();
+}
 
-    switch (role) {
-    case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
-    case Roles::PortRole: return m_protocolConfig.serverConfig.port;
+QString AwgConfigModel::clientMtu() const
+{
+    return m_protocolConfig.clientConfig->mtu;
+}
 
-    case Roles::ClientMtuRole: return m_protocolConfig.clientConfig->mtu;
-    case Roles::ClientJunkPacketCountRole: return m_protocolConfig.clientConfig->junkPacketCount;
-    case Roles::ClientJunkPacketMinSizeRole: return m_protocolConfig.clientConfig->junkPacketMinSize;
-    case Roles::ClientJunkPacketMaxSizeRole: return m_protocolConfig.clientConfig->junkPacketMaxSize;
-    case Roles::ClientSpecialJunk1Role: return m_protocolConfig.clientConfig->specialJunk1;
-    case Roles::ClientSpecialJunk2Role: return m_protocolConfig.clientConfig->specialJunk2;
-    case Roles::ClientSpecialJunk3Role: return m_protocolConfig.clientConfig->specialJunk3;
-    case Roles::ClientSpecialJunk4Role: return m_protocolConfig.clientConfig->specialJunk4;
-    case Roles::ClientSpecialJunk5Role: return m_protocolConfig.clientConfig->specialJunk5;
-    case Roles::ClientContentPaddingAdditionRole: return m_protocolConfig.clientConfig->contentPaddingAddition;
-    case Roles::ClientRekeyAfterTimeRole: return m_protocolConfig.clientConfig->rekeyAfterTime;
-    case Roles::ClientRekeyTimeoutRole: return m_protocolConfig.clientConfig->rekeyTimeout;
-    case Roles::ClientRejectAfterTimeRole: return m_protocolConfig.clientConfig->rejectAfterTime;
-    case Roles::ClientKeepaliveTimeoutRole: return m_protocolConfig.clientConfig->keepaliveTimeout;
-    case Roles::ClientMaxHandshakeAttemptsRole: return m_protocolConfig.clientConfig->maxHandshakeAttempts;
-    case Roles::ClientHeaderProtectionEnabledRole: return !m_protocolConfig.clientConfig->headerProtectionKey.isEmpty();
-    case Roles::ClientRandomTrailersRole:
-        return m_protocolConfig.clientConfig->randomTrailers.compare(QLatin1String(protocols::awg::awgBoolOn),
-                                                                     Qt::CaseInsensitive)
-                == 0;
-    case Roles::ClientDisableCookiesRole:
-        return m_protocolConfig.clientConfig->disableCookies.compare(QLatin1String(protocols::awg::awgBoolOn),
-                                                                     Qt::CaseInsensitive)
-                == 0;
-
-    case Roles::ServerJunkPacketCountRole: return m_protocolConfig.serverConfig.junkPacketCount;
-    case Roles::ServerJunkPacketMinSizeRole: return m_protocolConfig.serverConfig.junkPacketMinSize;
-    case Roles::ServerJunkPacketMaxSizeRole: return m_protocolConfig.serverConfig.junkPacketMaxSize;
-    case Roles::ServerInitPacketJunkSizeRole: return m_protocolConfig.serverConfig.initPacketJunkSize;
-    case Roles::ServerResponsePacketJunkSizeRole: return m_protocolConfig.serverConfig.responsePacketJunkSize;
-    case Roles::ServerCookieReplyPacketJunkSizeRole: return m_protocolConfig.serverConfig.cookieReplyPacketJunkSize;
-    case Roles::ServerTransportPacketJunkSizeRole: return m_protocolConfig.serverConfig.transportPacketJunkSize;
-    case Roles::ServerInitPacketMagicHeaderRole: return m_protocolConfig.serverConfig.initPacketMagicHeader;
-    case Roles::ServerResponsePacketMagicHeaderRole: return m_protocolConfig.serverConfig.responsePacketMagicHeader;
-    case Roles::ServerUnderloadPacketMagicHeaderRole: return m_protocolConfig.serverConfig.underloadPacketMagicHeader;
-    case Roles::ServerTransportPacketMagicHeaderRole: return m_protocolConfig.serverConfig.transportPacketMagicHeader;
-    case Roles::ServerSpecialJunk1Role: return m_protocolConfig.serverConfig.specialJunk1;
-    case Roles::ServerSpecialJunk2Role: return m_protocolConfig.serverConfig.specialJunk2;
-    case Roles::ServerSpecialJunk3Role: return m_protocolConfig.serverConfig.specialJunk3;
-    case Roles::ServerSpecialJunk4Role: return m_protocolConfig.serverConfig.specialJunk4;
-    case Roles::ServerSpecialJunk5Role: return m_protocolConfig.serverConfig.specialJunk5;
-
-    case Roles::ServerContentPaddingAdditionRole: return m_protocolConfig.serverConfig.contentPaddingAddition;
-    case Roles::ServerRekeyAfterTimeRole: return m_protocolConfig.serverConfig.rekeyAfterTime;
-    case Roles::ServerRekeyTimeoutRole: return m_protocolConfig.serverConfig.rekeyTimeout;
-    case Roles::ServerRejectAfterTimeRole: return m_protocolConfig.serverConfig.rejectAfterTime;
-    case Roles::ServerKeepaliveTimeoutRole: return m_protocolConfig.serverConfig.keepaliveTimeout;
-    case Roles::ServerMaxHandshakeAttemptsRole: return m_protocolConfig.serverConfig.maxHandshakeAttempts;
-    case Roles::ServerHeaderProtectionEnabledRole: return !m_protocolConfig.serverConfig.headerProtectionKey.isEmpty();
-    case Roles::ServerRandomTrailersRole:
-        return m_protocolConfig.serverConfig.randomTrailers.compare(QLatin1String(protocols::awg::awgBoolOn),
-                                                                    Qt::CaseInsensitive)
-                == 0;
-    case Roles::ServerDisableCookiesRole:
-        return m_protocolConfig.serverConfig.disableCookies.compare(QLatin1String(protocols::awg::awgBoolOn),
-                                                                    Qt::CaseInsensitive)
-                == 0;
-
-    case Roles::IsAwg2Role: {
-        QString version = serverProtocolVersion();
-        return version == protocols::awg::awgV2 || version == protocols::awg::awgV3;
+void AwgConfigModel::setClientMtu(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->mtu == value) {
+        return;
     }
-    case Roles::IsAwg3Role: return serverProtocolVersion() == protocols::awg::awgV3;
-    }
+    m_protocolConfig.clientConfig->mtu = value;
+    emit changed();
+}
 
-    return QVariant();
+QString AwgConfigModel::clientJunkPacketCount() const
+{
+    return m_protocolConfig.clientConfig->junkPacketCount;
+}
+
+void AwgConfigModel::setClientJunkPacketCount(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->junkPacketCount == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->junkPacketCount = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientJunkPacketMinSize() const
+{
+    return m_protocolConfig.clientConfig->junkPacketMinSize;
+}
+
+void AwgConfigModel::setClientJunkPacketMinSize(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->junkPacketMinSize == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->junkPacketMinSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientJunkPacketMaxSize() const
+{
+    return m_protocolConfig.clientConfig->junkPacketMaxSize;
+}
+
+void AwgConfigModel::setClientJunkPacketMaxSize(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->junkPacketMaxSize == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->junkPacketMaxSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientSpecialJunk1() const
+{
+    return m_protocolConfig.clientConfig->specialJunk1;
+}
+
+void AwgConfigModel::setClientSpecialJunk1(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->specialJunk1 == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->specialJunk1 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientSpecialJunk2() const
+{
+    return m_protocolConfig.clientConfig->specialJunk2;
+}
+
+void AwgConfigModel::setClientSpecialJunk2(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->specialJunk2 == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->specialJunk2 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientSpecialJunk3() const
+{
+    return m_protocolConfig.clientConfig->specialJunk3;
+}
+
+void AwgConfigModel::setClientSpecialJunk3(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->specialJunk3 == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->specialJunk3 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientSpecialJunk4() const
+{
+    return m_protocolConfig.clientConfig->specialJunk4;
+}
+
+void AwgConfigModel::setClientSpecialJunk4(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->specialJunk4 == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->specialJunk4 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientSpecialJunk5() const
+{
+    return m_protocolConfig.clientConfig->specialJunk5;
+}
+
+void AwgConfigModel::setClientSpecialJunk5(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->specialJunk5 == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->specialJunk5 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientContentPaddingAddition() const
+{
+    return m_protocolConfig.clientConfig->contentPaddingAddition;
+}
+
+void AwgConfigModel::setClientContentPaddingAddition(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->contentPaddingAddition == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->contentPaddingAddition = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientRekeyAfterTime() const
+{
+    return m_protocolConfig.clientConfig->rekeyAfterTime;
+}
+
+void AwgConfigModel::setClientRekeyAfterTime(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->rekeyAfterTime == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->rekeyAfterTime = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientRekeyTimeout() const
+{
+    return m_protocolConfig.clientConfig->rekeyTimeout;
+}
+
+void AwgConfigModel::setClientRekeyTimeout(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->rekeyTimeout == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->rekeyTimeout = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientRejectAfterTime() const
+{
+    return m_protocolConfig.clientConfig->rejectAfterTime;
+}
+
+void AwgConfigModel::setClientRejectAfterTime(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->rejectAfterTime == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->rejectAfterTime = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientKeepaliveTimeout() const
+{
+    return m_protocolConfig.clientConfig->keepaliveTimeout;
+}
+
+void AwgConfigModel::setClientKeepaliveTimeout(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->keepaliveTimeout == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->keepaliveTimeout = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientMaxHandshakeAttempts() const
+{
+    return m_protocolConfig.clientConfig->maxHandshakeAttempts;
+}
+
+void AwgConfigModel::setClientMaxHandshakeAttempts(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->maxHandshakeAttempts == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->maxHandshakeAttempts = value;
+    emit changed();
+}
+
+bool AwgConfigModel::clientHeaderProtectionEnabled() const
+{
+    return !m_protocolConfig.clientConfig->headerProtectionKey.isEmpty();
+}
+
+bool AwgConfigModel::clientRandomTrailers() const
+{
+    return isAwgToggleOn(m_protocolConfig.clientConfig->randomTrailers);
+}
+
+void AwgConfigModel::setClientRandomTrailers(bool value)
+{
+    if (clientRandomTrailers() == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->randomTrailers = awgToggleValue(value);
+    emit changed();
+}
+
+bool AwgConfigModel::clientDisableCookies() const
+{
+    return isAwgToggleOn(m_protocolConfig.clientConfig->disableCookies);
+}
+
+void AwgConfigModel::setClientDisableCookies(bool value)
+{
+    if (clientDisableCookies() == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->disableCookies = awgToggleValue(value);
+    emit changed();
+}
+
+QString AwgConfigModel::serverJunkPacketCount() const
+{
+    return m_protocolConfig.serverConfig.junkPacketCount;
+}
+
+void AwgConfigModel::setServerJunkPacketCount(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.junkPacketCount == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.junkPacketCount = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverJunkPacketMinSize() const
+{
+    return m_protocolConfig.serverConfig.junkPacketMinSize;
+}
+
+void AwgConfigModel::setServerJunkPacketMinSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.junkPacketMinSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.junkPacketMinSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverJunkPacketMaxSize() const
+{
+    return m_protocolConfig.serverConfig.junkPacketMaxSize;
+}
+
+void AwgConfigModel::setServerJunkPacketMaxSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.junkPacketMaxSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.junkPacketMaxSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverInitPacketJunkSize() const
+{
+    return m_protocolConfig.serverConfig.initPacketJunkSize;
+}
+
+void AwgConfigModel::setServerInitPacketJunkSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.initPacketJunkSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.initPacketJunkSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverResponsePacketJunkSize() const
+{
+    return m_protocolConfig.serverConfig.responsePacketJunkSize;
+}
+
+void AwgConfigModel::setServerResponsePacketJunkSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.responsePacketJunkSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.responsePacketJunkSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverCookieReplyPacketJunkSize() const
+{
+    return m_protocolConfig.serverConfig.cookieReplyPacketJunkSize;
+}
+
+void AwgConfigModel::setServerCookieReplyPacketJunkSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cookieReplyPacketJunkSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cookieReplyPacketJunkSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverTransportPacketJunkSize() const
+{
+    return m_protocolConfig.serverConfig.transportPacketJunkSize;
+}
+
+void AwgConfigModel::setServerTransportPacketJunkSize(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.transportPacketJunkSize == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.transportPacketJunkSize = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverInitPacketMagicHeader() const
+{
+    return m_protocolConfig.serverConfig.initPacketMagicHeader;
+}
+
+void AwgConfigModel::setServerInitPacketMagicHeader(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.initPacketMagicHeader == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.initPacketMagicHeader = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverResponsePacketMagicHeader() const
+{
+    return m_protocolConfig.serverConfig.responsePacketMagicHeader;
+}
+
+void AwgConfigModel::setServerResponsePacketMagicHeader(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.responsePacketMagicHeader == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.responsePacketMagicHeader = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverUnderloadPacketMagicHeader() const
+{
+    return m_protocolConfig.serverConfig.underloadPacketMagicHeader;
+}
+
+void AwgConfigModel::setServerUnderloadPacketMagicHeader(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.underloadPacketMagicHeader == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.underloadPacketMagicHeader = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverTransportPacketMagicHeader() const
+{
+    return m_protocolConfig.serverConfig.transportPacketMagicHeader;
+}
+
+void AwgConfigModel::setServerTransportPacketMagicHeader(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.transportPacketMagicHeader == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.transportPacketMagicHeader = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverSpecialJunk1() const
+{
+    return m_protocolConfig.serverConfig.specialJunk1;
+}
+
+void AwgConfigModel::setServerSpecialJunk1(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.specialJunk1 == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.specialJunk1 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverSpecialJunk2() const
+{
+    return m_protocolConfig.serverConfig.specialJunk2;
+}
+
+void AwgConfigModel::setServerSpecialJunk2(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.specialJunk2 == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.specialJunk2 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverSpecialJunk3() const
+{
+    return m_protocolConfig.serverConfig.specialJunk3;
+}
+
+void AwgConfigModel::setServerSpecialJunk3(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.specialJunk3 == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.specialJunk3 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverSpecialJunk4() const
+{
+    return m_protocolConfig.serverConfig.specialJunk4;
+}
+
+void AwgConfigModel::setServerSpecialJunk4(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.specialJunk4 == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.specialJunk4 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverSpecialJunk5() const
+{
+    return m_protocolConfig.serverConfig.specialJunk5;
+}
+
+void AwgConfigModel::setServerSpecialJunk5(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.specialJunk5 == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.specialJunk5 = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverContentPaddingAddition() const
+{
+    return m_protocolConfig.serverConfig.contentPaddingAddition;
+}
+
+void AwgConfigModel::setServerContentPaddingAddition(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.contentPaddingAddition == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.contentPaddingAddition = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverRekeyAfterTime() const
+{
+    return m_protocolConfig.serverConfig.rekeyAfterTime;
+}
+
+void AwgConfigModel::setServerRekeyAfterTime(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.rekeyAfterTime == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.rekeyAfterTime = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverRekeyTimeout() const
+{
+    return m_protocolConfig.serverConfig.rekeyTimeout;
+}
+
+void AwgConfigModel::setServerRekeyTimeout(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.rekeyTimeout == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.rekeyTimeout = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverRejectAfterTime() const
+{
+    return m_protocolConfig.serverConfig.rejectAfterTime;
+}
+
+void AwgConfigModel::setServerRejectAfterTime(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.rejectAfterTime == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.rejectAfterTime = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverKeepaliveTimeout() const
+{
+    return m_protocolConfig.serverConfig.keepaliveTimeout;
+}
+
+void AwgConfigModel::setServerKeepaliveTimeout(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.keepaliveTimeout == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.keepaliveTimeout = value;
+    emit changed();
+}
+
+QString AwgConfigModel::serverMaxHandshakeAttempts() const
+{
+    return m_protocolConfig.serverConfig.maxHandshakeAttempts;
+}
+
+void AwgConfigModel::setServerMaxHandshakeAttempts(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.maxHandshakeAttempts == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.maxHandshakeAttempts = value;
+    emit changed();
+}
+
+bool AwgConfigModel::serverHeaderProtectionEnabled() const
+{
+    return !m_protocolConfig.serverConfig.headerProtectionKey.isEmpty();
+}
+
+void AwgConfigModel::setServerHeaderProtectionEnabled(bool value)
+{
+    if (serverHeaderProtectionEnabled() == value) {
+        return;
+    }
+    if (value) {
+        const QString originalKey = m_originalProtocolConfig.serverConfig.headerProtectionKey;
+        m_protocolConfig.serverConfig.headerProtectionKey =
+                originalKey.isEmpty() ? WireguardConfigurator::genClientKeys().clientPrivKey : originalKey;
+    } else {
+        m_protocolConfig.serverConfig.headerProtectionKey.clear();
+    }
+    emit changed();
+}
+
+bool AwgConfigModel::serverRandomTrailers() const
+{
+    return isAwgToggleOn(m_protocolConfig.serverConfig.randomTrailers);
+}
+
+void AwgConfigModel::setServerRandomTrailers(bool value)
+{
+    if (serverRandomTrailers() == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.randomTrailers = awgToggleValue(value);
+    emit changed();
+}
+
+bool AwgConfigModel::serverDisableCookies() const
+{
+    return isAwgToggleOn(m_protocolConfig.serverConfig.disableCookies);
+}
+
+void AwgConfigModel::setServerDisableCookies(bool value)
+{
+    if (serverDisableCookies() == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.disableCookies = awgToggleValue(value);
+    emit changed();
+}
+
+bool AwgConfigModel::isAwg2() const
+{
+    QString version = serverProtocolVersion();
+    return version == protocols::awg::awgV2 || version == protocols::awg::awgV3;
+}
+
+bool AwgConfigModel::isAwg3() const
+{
+    return serverProtocolVersion() == protocols::awg::awgV3;
 }
 
 void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::AwgProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     
     m_protocolConfig = protocolConfig;
@@ -206,7 +683,7 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
 
     m_originalProtocolConfig = m_protocolConfig;
 
-    endResetModel();
+    emit changed();
 }
 
 QString AwgConfigModel::serverProtocolVersion() const
@@ -253,64 +730,3 @@ bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3,
 {
     return amnezia::AwgProtocolConfig::isPacketSizeEqual(s1, s2, s3, s4);
 }
-
-QHash<int, QByteArray> AwgConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[SubnetAddressRole] = "subnetAddress";
-    roles[PortRole] = "port";
-
-    roles[ClientMtuRole] = "clientMtu";
-    roles[ClientJunkPacketCountRole] = "clientJunkPacketCount";
-    roles[ClientJunkPacketMinSizeRole] = "clientJunkPacketMinSize";
-    roles[ClientJunkPacketMaxSizeRole] = "clientJunkPacketMaxSize";
-    roles[ClientSpecialJunk1Role] = "clientSpecialJunk1";
-    roles[ClientSpecialJunk2Role] = "clientSpecialJunk2";
-    roles[ClientSpecialJunk3Role] = "clientSpecialJunk3";
-    roles[ClientSpecialJunk4Role] = "clientSpecialJunk4";
-    roles[ClientSpecialJunk5Role] = "clientSpecialJunk5";
-    roles[ClientContentPaddingAdditionRole] = "clientContentPaddingAddition";
-    roles[ClientRekeyAfterTimeRole] = "clientRekeyAfterTime";
-    roles[ClientRekeyTimeoutRole] = "clientRekeyTimeout";
-    roles[ClientRejectAfterTimeRole] = "clientRejectAfterTime";
-    roles[ClientKeepaliveTimeoutRole] = "clientKeepaliveTimeout";
-    roles[ClientMaxHandshakeAttemptsRole] = "clientMaxHandshakeAttempts";
-    roles[ClientHeaderProtectionEnabledRole] = "clientHeaderProtectionEnabled";
-    roles[ClientRandomTrailersRole] = "clientRandomTrailers";
-    roles[ClientDisableCookiesRole] = "clientDisableCookies";
-
-    roles[ServerJunkPacketCountRole] = "serverJunkPacketCount";
-    roles[ServerJunkPacketMinSizeRole] = "serverJunkPacketMinSize";
-    roles[ServerJunkPacketMaxSizeRole] = "serverJunkPacketMaxSize";
-    roles[ServerInitPacketJunkSizeRole] = "serverInitPacketJunkSize";
-    roles[ServerResponsePacketJunkSizeRole] = "serverResponsePacketJunkSize";
-    roles[ServerCookieReplyPacketJunkSizeRole] = "serverCookieReplyPacketJunkSize";
-    roles[ServerTransportPacketJunkSizeRole] = "serverTransportPacketJunkSize";
-
-    roles[ServerInitPacketMagicHeaderRole] = "serverInitPacketMagicHeader";
-    roles[ServerResponsePacketMagicHeaderRole] = "serverResponsePacketMagicHeader";
-    roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
-    roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
-    roles[ServerSpecialJunk1Role] = "serverSpecialJunk1";
-    roles[ServerSpecialJunk2Role] = "serverSpecialJunk2";
-    roles[ServerSpecialJunk3Role] = "serverSpecialJunk3";
-    roles[ServerSpecialJunk4Role] = "serverSpecialJunk4";
-    roles[ServerSpecialJunk5Role] = "serverSpecialJunk5";
-
-    roles[ServerContentPaddingAdditionRole] = "serverContentPaddingAddition";
-    roles[ServerRekeyAfterTimeRole] = "serverRekeyAfterTime";
-    roles[ServerRekeyTimeoutRole] = "serverRekeyTimeout";
-    roles[ServerRejectAfterTimeRole] = "serverRejectAfterTime";
-    roles[ServerKeepaliveTimeoutRole] = "serverKeepaliveTimeout";
-    roles[ServerMaxHandshakeAttemptsRole] = "serverMaxHandshakeAttempts";
-    roles[ServerHeaderProtectionEnabledRole] = "serverHeaderProtectionEnabled";
-    roles[ServerRandomTrailersRole] = "serverRandomTrailers";
-    roles[ServerDisableCookiesRole] = "serverDisableCookies";
-
-    roles[IsAwg2Role] = "isAwg2";
-    roles[IsAwg3Role] = "isAwg3";
-
-    return roles;
-}
-

@@ -1,8 +1,10 @@
 #ifndef PAGECONTROLLER_H
 #define PAGECONTROLLER_H
 
+#include <QMargins>
 #include <QObject>
 #include <QQmlEngine>
+#include <QVariantMap>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -28,7 +30,6 @@ public slots:
 
     void closeWindow();
     void hideWindow();
-    void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);
@@ -41,10 +42,6 @@ public slots:
 
     void closeApplication();
 
-    void setDrawerDepth(const int depth);
-    int getDrawerDepth() const;
-    int incrementDrawerDepth();
-    int decrementDrawerDepth();
     void onErrorMessageClosed();
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
@@ -53,11 +50,13 @@ public slots:
     int getSafeAreaBottomMargin();
     int getImeHeight();
 
+    void setSafeAreaMargins(const QMargins &margins);
+
 private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
 
 signals:
-    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToPage(PageLoader::PageEnum page, bool slide = true, const QVariantMap &pageProperties = {});
     void goToStartPage();
     void goToPageHome();
     void goToPageSettings();
@@ -88,7 +87,6 @@ signals:
     void unsupportedConnectDrawerRequested();
 
     void escapePressed();
-    void closeTopDrawer();
 
     void imeHeightChanged(int height);
     void safeAreaTopMarginChanged();
@@ -100,12 +98,12 @@ private:
 
     bool m_isTriggeredByConnectButton;
 
-    int m_drawerDepth = 0;
-
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;
     mutable bool m_cachedEdgeToEdgeEnabled = false;
     mutable bool m_edgeToEdgeCached = false;
+
+    QMargins m_safeAreaMargins;
     int m_imeHeight = 0;
 };
 

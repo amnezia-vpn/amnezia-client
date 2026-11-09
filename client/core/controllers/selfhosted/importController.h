@@ -22,6 +22,7 @@ namespace
         Xray,
         ShadowSocks,
         Backup,
+        XraySettings,
         Invalid
     };
 }

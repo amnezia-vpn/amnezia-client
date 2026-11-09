@@ -40,64 +40,6 @@ function(osx_bundle_files TARGET)
     endforeach()
 endfunction(osx_bundle_files)
 
-## A helper to bundle an asset catalog.
-function(osx_bundle_assetcatalog TARGET)
-    cmake_parse_arguments(XCASSETS
-        ""
-        "CATALOG;PLATFORM"
-        "DEVICES"
-        ${ARGN})
-
-    if(XCASSETS_PLATFORM)
-        set(XCASSETS_TARGET_ARGS --platform ${XCASSETS_PLATFORM})
-    elseif(IOS)
-        set(XCASSETS_TARGET_ARGS --platform iphoneos)
-    else()
-        set(XCASSETS_TARGET_ARGS --platform macosx)
-    endif()
-    foreach(DEVNAME ${XCASSETS_DEVICES})
-        list(APPEND XCASSETS_TARGET_ARGS --target-device ${DEVNAME})
-    endforeach()
-    list(APPEND XCASSETS_TARGET_ARGS --minimum-deployment-target ${CMAKE_OSX_DEPLOYMENT_TARGET})
-
-    ## Compile the asset catalog
-    set(XCASSETS_GEN_PLIST ${CMAKE_CURRENT_BINARY_DIR}/xcassets_generated_info.plist)
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/xcassets/Assets.car ${XCASSETS_GEN_PLIST}
-        MAIN_DEPENDENCY ${XCASSETS_CATALOG}/Contents.json
-        COMMENT "Building asset catalog"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/xcassets
-        COMMAND actool --output-format human-readable-text --notices --warnings
-                    ${XCASSETS_TARGET_ARGS}
-                    --app-icon AppIcon 
-                    --output-partial-info-plist ${XCASSETS_GEN_PLIST}
-                    --development-region en --enable-on-demand-resources NO
-                    --compile ${CMAKE_CURRENT_BINARY_DIR}/xcassets ${XCASSETS_CATALOG}
-    )
-
-    ## Patch the asset catalog into the target bundle.
-    if(NOT IOS)
-        set(XCASSETS_RESOURCE_DIR "Resources")
-    endif()
-    add_custom_command(TARGET ${TARGET} POST_BUILD
-        COMMENT "Bundling asset catalog"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/xcassets $<TARGET_BUNDLE_CONTENT_DIR:${TARGET}>/${XCASSETS_RESOURCE_DIR}
-        COMMAND ${CLIENT_ROOT_DIR}/scripts/macos/merge_plist.py ${XCASSETS_GEN_PLIST} -o $<TARGET_BUNDLE_CONTENT_DIR:${TARGET}>/Info.plist
-    )
-
-    target_sources(${TARGET} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/xcassets/Assets.car)
-    set_source_files_properties(
-        ${CMAKE_CURRENT_BINARY_DIR}/xcassets/Assets.car
-        ${XCASSETS_GEN_PLIST}
-        PROPERTIES
-        GENERATED TRUE
-        HEADER_FILE_ONLY TRUE
-    )
-
-    target_sources(${TARGET} PRIVATE ${XCASSETS_GEN_PLIST})
-    set_source_files_properties(${XCASSETS_GEN_PLIST} PROPERTIES GENERATED TRUE)
-endfunction()
-
 ## A helper to code-sign an executable.
 function(osx_codesign_target TARGET)
     ## Xcode should perform automatic code-signing for us.

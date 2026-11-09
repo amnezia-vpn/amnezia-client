@@ -1,33 +1,31 @@
 #ifndef TPROXYCONFIGMODEL_H
 #define TPROXYCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 #include <QJsonObject>
 #include "core/utils/containerEnum.h"
 #include "core/models/protocols/tProxyProtocolConfig.h"
 
-class TProxyConfigModel : public QAbstractListModel {
+class TProxyConfigModel : public QObject {
 Q_OBJECT
 
-public:
-    enum Roles {
-        PortRole = Qt::UserRole + 1,
-        HttpPortRole,
-        SecretRole,
-        HostnameRole,
-        AcmeEmailRole,
-        CarrierModeRole,
-        WorkersRole,
-        TgLinkRole,
-        TmeLinkRole,
-        IsEnabledRole
-    };
+    Q_PROPERTY(QString port READ getPort WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString httpPort READ getHttpPort WRITE setHttpPort NOTIFY changed)
+    Q_PROPERTY(QString secret READ getSecret WRITE setSecret NOTIFY changed)
+    Q_PROPERTY(QString hostname READ getHostname WRITE setHostname NOTIFY changed)
+    Q_PROPERTY(QString acmeEmail READ getAcmeEmail WRITE setAcmeEmail NOTIFY changed)
+    Q_PROPERTY(QString carrierMode READ getCarrierMode WRITE setCarrierMode NOTIFY changed)
+    Q_PROPERTY(QString workers READ getWorkers WRITE setWorkers NOTIFY changed)
+    Q_PROPERTY(QString tgLink READ tgLink NOTIFY changed)
+    Q_PROPERTY(QString tmeLink READ tmeLink NOTIFY changed)
+    Q_PROPERTY(bool isEnabled READ isEnabled WRITE setEnabled NOTIFY changed)
 
+public:
     explicit TProxyConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString tgLink() const;
+    QString tmeLink() const;
+    bool isEnabled() const;
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::TProxyProtocolConfig &protocolConfig);
@@ -75,8 +73,8 @@ public slots:
     Q_INVOKABLE QString sanitizeWorkersFieldText(const QString &input) const;
     Q_INVOKABLE QString sanitizePortFieldText(const QString &input) const;
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     amnezia::DockerContainer m_container;

@@ -22,11 +22,13 @@ QString getEnvValue(const QString &key)
 void logEnvValueState(const QString &key)
 {
     const QString value = getEnvValue(key);
+    const bool printable = key.endsWith(QLatin1String("_HOST_NAME")) || key.endsWith(QLatin1String("_USER_NAME"))
+            || key.endsWith(QLatin1String("_PORT")) || key.endsWith(QLatin1String("_PATH"));
     qInfo().noquote() << QString("%1: configured=%2 length=%3 value=\"%4\"")
                              .arg(key,
                                   isEnvValueConfigured(value) ? "yes" : "no",
                                   QString::number(value.size()),
-                                  value);
+                                  printable || value.isEmpty() ? value : QStringLiteral("<hidden>"));
 }
 
 bool isEnvValueConfigured(const QString &value)

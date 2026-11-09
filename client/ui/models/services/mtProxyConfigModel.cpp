@@ -15,175 +15,91 @@
 
 using namespace amnezia;
 
-MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {}
+MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QObject(parent) {}
 
-int MtProxyConfigModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-    return 1;
+QString MtProxyConfigModel::port() const {
+    return m_protocolConfig.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : m_protocolConfig.port;
 }
 
-bool MtProxyConfigModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (!index.isValid() || index.row() != 0) {
-        return false;
-    }
-
-    switch (role) {
-        case Roles::PortRole: {
-            m_protocolConfig.port = value.toString();
-            break;
-        }
-        case Roles::SecretRole: {
-            m_protocolConfig.secret = value.toString();
-            break;
-        }
-        case Roles::TagRole: {
-            const QString tag = sanitizeMtProxyTagFieldText(value.toString());
-            if (!isValidMtProxyTag(tag)) {
-                return false;
-            }
-            m_protocolConfig.tag = tag;
-            break;
-        }
-        case Roles::IsEnabledRole: {
-            m_protocolConfig.isEnabled = value.toBool();
-            break;
-        }
-        case Roles::PublicHostRole: {
-            const QString h = value.toString().trimmed();
-            if (!isValidPublicHost(h)) {
-                return false;
-            }
-            m_protocolConfig.publicHost = h;
-            break;
-        }
-        case Roles::TransportModeRole: {
-            m_protocolConfig.transportMode = value.toString();
-            break;
-        }
-        case Roles::TlsDomainRole: {
-            const QString d = value.toString().trimmed();
-            if (!isValidFakeTlsDomain(d)) {
-                return false;
-            }
-            m_protocolConfig.tlsDomain = d;
-            break;
-        }
-        case Roles::AdditionalSecretsRole: {
-            m_protocolConfig.additionalSecrets = value.toStringList();
-            break;
-        }
-        case Roles::WorkersModeRole: {
-            m_protocolConfig.workersMode = value.toString();
-            break;
-        }
-        case Roles::WorkersRole: {
-            m_protocolConfig.workers = value.toString();
-            break;
-        }
-        case Roles::NatEnabledRole: {
-            m_protocolConfig.natEnabled = value.toBool();
-            break;
-        }
-        case Roles::NatInternalIpRole: {
-            const QString ip = value.toString().trimmed();
-            if (!isValidOptionalIpv4(ip)) {
-                return false;
-            }
-            m_protocolConfig.natInternalIp = ip;
-            break;
-        }
-        case Roles::NatExternalIpRole: {
-            const QString ip = value.toString().trimmed();
-            if (!isValidOptionalIpv4(ip)) {
-                return false;
-            }
-            m_protocolConfig.natExternalIp = ip;
-            break;
-        }
-        default: {
-            return false;
-        }
-    }
-
-    emit dataChanged(index, index, QList{role});
-    return true;
+QString MtProxyConfigModel::secret() const {
+    return m_protocolConfig.secret;
 }
 
-QVariant MtProxyConfigModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || index.row() != 0) {
-        return QVariant();
+QString MtProxyConfigModel::tag() const {
+    return m_protocolConfig.tag;
+}
+
+QString MtProxyConfigModel::tgLink() const {
+    return m_protocolConfig.tgLink;
+}
+
+QString MtProxyConfigModel::tmeLink() const {
+    return m_protocolConfig.tmeLink;
+}
+
+bool MtProxyConfigModel::isEnabled() const {
+    return m_protocolConfig.isEnabled;
+}
+
+QString MtProxyConfigModel::publicHost() const {
+    return m_protocolConfig.publicHost.isEmpty()
+           ? m_fullConfig.value(configKey::hostName).toString()
+           : m_protocolConfig.publicHost;
+}
+
+QString MtProxyConfigModel::transportMode() const {
+    return m_protocolConfig.transportMode.isEmpty()
+           ? QString(protocols::mtProxy::transportModeStandard)
+           : m_protocolConfig.transportMode;
+}
+
+QString MtProxyConfigModel::tlsDomain() const {
+    return m_protocolConfig.tlsDomain;
+}
+
+QStringList MtProxyConfigModel::additionalSecrets() const {
+    return m_protocolConfig.additionalSecrets;
+}
+
+void MtProxyConfigModel::setAdditionalSecrets(const QStringList &secrets) {
+    if (m_protocolConfig.additionalSecrets == secrets) {
+        return;
     }
+    m_protocolConfig.additionalSecrets = secrets;
+    emit changed();
+}
 
-    switch (role) {
-        case Roles::PortRole: {
-            return m_protocolConfig.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : m_protocolConfig.port;
-        }
-        case Roles::SecretRole: {
-            return m_protocolConfig.secret;
-        }
-        case Roles::TagRole: {
-            return m_protocolConfig.tag;
-        }
-        case Roles::TgLinkRole: {
-            return m_protocolConfig.tgLink;
-        }
-        case Roles::TmeLinkRole: {
-            return m_protocolConfig.tmeLink;
-        }
-        case Roles::IsEnabledRole: {
-            return m_protocolConfig.isEnabled;
-        }
-        case Roles::PublicHostRole: {
-            return m_protocolConfig.publicHost.isEmpty()
-                   ? m_fullConfig.value(configKey::hostName).toString()
-                   : m_protocolConfig.publicHost;
-        }
-        case Roles::TransportModeRole: {
-            return m_protocolConfig.transportMode.isEmpty()
-                   ? QString(protocols::mtProxy::transportModeStandard)
-                   : m_protocolConfig.transportMode;
-        }
-        case Roles::TlsDomainRole: {
-            return m_protocolConfig.tlsDomain;
-        }
-        case Roles::AdditionalSecretsRole: {
-            return m_protocolConfig.additionalSecrets;
-        }
-        case Roles::WorkersModeRole: {
-            return m_protocolConfig.workersMode.isEmpty()
-                   ? QString(protocols::mtProxy::workersModeAuto)
-                   : m_protocolConfig.workersMode;
-        }
-        case Roles::WorkersRole: {
-            return m_protocolConfig.workers.isEmpty() ? QString(protocols::mtProxy::defaultWorkers)
-                                                      : m_protocolConfig.workers;
-        }
-        case Roles::NatEnabledRole: {
-            return m_protocolConfig.natEnabled;
-        }
-        case Roles::NatInternalIpRole: {
-            return m_protocolConfig.natInternalIp;
-        }
-        case Roles::NatExternalIpRole: {
-            return m_protocolConfig.natExternalIp;
-        }
-    }
+QString MtProxyConfigModel::workersMode() const {
+    return m_protocolConfig.workersMode.isEmpty()
+           ? QString(protocols::mtProxy::workersModeAuto)
+           : m_protocolConfig.workersMode;
+}
 
+QString MtProxyConfigModel::workers() const {
+    return m_protocolConfig.workers.isEmpty() ? QString(protocols::mtProxy::defaultWorkers)
+                                              : m_protocolConfig.workers;
+}
 
-    return QVariant();
+bool MtProxyConfigModel::natEnabled() const {
+    return m_protocolConfig.natEnabled;
+}
+
+QString MtProxyConfigModel::natInternalIp() const {
+    return m_protocolConfig.natInternalIp;
+}
+
+QString MtProxyConfigModel::natExternalIp() const {
+    return m_protocolConfig.natExternalIp;
 }
 
 void MtProxyConfigModel::updateModel(amnezia::DockerContainer container,
                                      const amnezia::MtProxyProtocolConfig &protocolConfig) {
-    beginResetModel();
     m_container = container;
     m_protocolConfig = protocolConfig;
-    endResetModel();
+    emit changed();
 }
 
 void MtProxyConfigModel::updateModel(const QJsonObject &config) {
-    beginResetModel();
-
     m_fullConfig = config;
     m_protocolConfig = MtProxyProtocolConfig::fromJson(config.value(configKey::mtproxy).toObject());
     if (m_protocolConfig.port.isEmpty()) m_protocolConfig.port = protocols::mtProxy::defaultPort;
@@ -198,7 +114,7 @@ void MtProxyConfigModel::updateModel(const QJsonObject &config) {
         m_protocolConfig.tag = tagIn;
     }
 
-    endResetModel();
+    emit changed();
 }
 
 QJsonObject MtProxyConfigModel::getConfig() {
@@ -215,42 +131,57 @@ void MtProxyConfigModel::generateSecret() {
     }
 
     m_protocolConfig.secret = secret;
-    emit dataChanged(index(0), index(0), QList<int>{SecretRole});
+    emit changed();
 }
 
 void MtProxyConfigModel::setSecret(const QString &secret) {
-    if (secret.isEmpty()) {
+    if (secret.isEmpty() || m_protocolConfig.secret == secret) {
         return;
     }
-    setData(index(0), secret, SecretRole);
+    m_protocolConfig.secret = secret;
+    emit changed();
 }
 
 bool MtProxyConfigModel::validateAndSetSecret(const QString &rawSecret) {
     if (!QRegularExpression("^[0-9a-fA-F]{32}$").match(rawSecret).hasMatch()) {
         return false;
     }
-    setData(index(0), rawSecret, SecretRole);
+    setSecret(rawSecret);
     return true;
 }
 
 void MtProxyConfigModel::setPort(const QString &port) {
-    setData(index(0), port, PortRole);
+    if (m_protocolConfig.port == port) {
+        return;
+    }
+    m_protocolConfig.port = port;
+    emit changed();
 }
 
 void MtProxyConfigModel::setTag(const QString &tag) {
-    setData(index(0), tag, TagRole);
+    const QString sanitized = sanitizeMtProxyTagFieldText(tag);
+    if (!isValidMtProxyTag(sanitized) || m_protocolConfig.tag == sanitized) {
+        return;
+    }
+    m_protocolConfig.tag = sanitized;
+    emit changed();
 }
 
 void MtProxyConfigModel::setPublicHost(const QString &host) {
     const QString t = host.trimmed();
-    if (!isValidPublicHost(t)) {
+    if (!isValidPublicHost(t) || m_protocolConfig.publicHost == t) {
         return;
     }
-    setData(index(0), t, PublicHostRole);
+    m_protocolConfig.publicHost = t;
+    emit changed();
 }
 
 void MtProxyConfigModel::setTransportMode(const QString &mode) {
-    setData(index(0), mode, TransportModeRole);
+    if (m_protocolConfig.transportMode == mode) {
+        return;
+    }
+    m_protocolConfig.transportMode = mode;
+    emit changed();
 }
 
 QString MtProxyConfigModel::getTransportMode() const {
@@ -271,38 +202,53 @@ QString MtProxyConfigModel::getPublicHost() const {
 
 void MtProxyConfigModel::setTlsDomain(const QString &domain) {
     const QString t = domain.trimmed();
-    if (!isValidFakeTlsDomain(t)) {
+    if (!isValidFakeTlsDomain(t) || m_protocolConfig.tlsDomain == t) {
         return;
     }
-    setData(index(0), t, TlsDomainRole);
+    m_protocolConfig.tlsDomain = t;
+    emit changed();
 }
 
 void MtProxyConfigModel::setWorkersMode(const QString &mode) {
-    setData(index(0), mode, WorkersModeRole);
+    if (m_protocolConfig.workersMode == mode) {
+        return;
+    }
+    m_protocolConfig.workersMode = mode;
+    emit changed();
 }
 
 void MtProxyConfigModel::setWorkers(const QString &workers) {
-    setData(index(0), workers, WorkersRole);
+    if (m_protocolConfig.workers == workers) {
+        return;
+    }
+    m_protocolConfig.workers = workers;
+    emit changed();
 }
 
 void MtProxyConfigModel::setNatEnabled(bool enabled) {
-    setData(index(0), enabled, NatEnabledRole);
+    if (m_protocolConfig.natEnabled == enabled) {
+        return;
+    }
+    m_protocolConfig.natEnabled = enabled;
+    emit changed();
 }
 
 void MtProxyConfigModel::setNatInternalIp(const QString &ip) {
     const QString t = ip.trimmed();
-    if (!isValidOptionalIpv4(t)) {
+    if (!isValidOptionalIpv4(t) || m_protocolConfig.natInternalIp == t) {
         return;
     }
-    setData(index(0), t, NatInternalIpRole);
+    m_protocolConfig.natInternalIp = t;
+    emit changed();
 }
 
 void MtProxyConfigModel::setNatExternalIp(const QString &ip) {
     const QString t = ip.trimmed();
-    if (!isValidOptionalIpv4(t)) {
+    if (!isValidOptionalIpv4(t) || m_protocolConfig.natExternalIp == t) {
         return;
     }
-    setData(index(0), t, NatExternalIpRole);
+    m_protocolConfig.natExternalIp = t;
+    emit changed();
 }
 
 void MtProxyConfigModel::addAdditionalSecret() {
@@ -313,7 +259,7 @@ void MtProxyConfigModel::addAdditionalSecret() {
     }
 
     m_protocolConfig.additionalSecrets.append(newSecret);
-    emit dataChanged(index(0), index(0), QList<int>{AdditionalSecretsRole});
+    emit changed();
 }
 
 void MtProxyConfigModel::removeAdditionalSecret(int idx) {
@@ -321,7 +267,7 @@ void MtProxyConfigModel::removeAdditionalSecret(int idx) {
         return;
     }
     m_protocolConfig.additionalSecrets.removeAt(idx);
-    emit dataChanged(index(0), index(0), QList<int>{AdditionalSecretsRole});
+    emit changed();
 }
 
 QVariantList MtProxyConfigModel::additionalSecretsList() const {
@@ -336,8 +282,11 @@ QVariantList MtProxyConfigModel::additionalSecretsList() const {
 }
 
 void MtProxyConfigModel::setEnabled(bool enabled) {
+    if (m_protocolConfig.isEnabled == enabled) {
+        return;
+    }
     m_protocolConfig.isEnabled = enabled;
-    emit dataChanged(index(0), index(0), QList<int>{IsEnabledRole});
+    emit changed();
 }
 
 QString MtProxyConfigModel::generateQrCode(const QString &text) {
@@ -662,28 +611,6 @@ bool MtProxyConfigModel::isValidOptionalIpv4(const QString &ip) const {
         return true;
     }
     return NetworkUtilities::checkIPv4Format(t);
-}
-
-QHash<int, QByteArray> MtProxyConfigModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-
-    roles[PortRole] = "port";
-    roles[SecretRole] = "secret";
-    roles[TagRole] = "tag";
-    roles[TgLinkRole] = "tgLink";
-    roles[TmeLinkRole] = "tmeLink";
-    roles[IsEnabledRole] = "isEnabled";
-    roles[PublicHostRole] = "publicHost";
-    roles[TransportModeRole] = "transportMode";
-    roles[TlsDomainRole] = "tlsDomain";
-    roles[AdditionalSecretsRole] = "additionalSecrets";
-    roles[WorkersModeRole] = "workersMode";
-    roles[WorkersRole] = "workers";
-    roles[NatEnabledRole] = "natEnabled";
-    roles[NatInternalIpRole] = "natInternalIp";
-    roles[NatExternalIpRole] = "natExternalIp";
-
-    return roles;
 }
 
 amnezia::MtProxyProtocolConfig MtProxyConfigModel::getProtocolConfig() {

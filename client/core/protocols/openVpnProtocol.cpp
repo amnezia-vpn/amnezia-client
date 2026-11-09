@@ -61,6 +61,10 @@ void OpenVpnProtocol::cleanupResources()
 
 void OpenVpnProtocol::stop()
 {
+    if (guardStop()) {
+        return;
+    }
+
     qDebug() << "OpenVpnProtocol::stop()";
 
     const bool wasActive = m_connectionState == Vpn::ConnectionState::Preparing
@@ -179,6 +183,8 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
 
 ErrorCode OpenVpnProtocol::start()
 {
+    resetStopGuard();
+
     cleanupResources();
 
     if (!QFileInfo::exists(configPath())) {

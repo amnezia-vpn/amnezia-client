@@ -16,109 +16,60 @@ import "../Components"
 PageType {
     id: root
 
-    QtObject {
-        id: windows
-
-        readonly property string title: qsTr("Windows")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#windows")
-    }
-
-    QtObject {
-        id: macos
-
-        readonly property string title: qsTr("macOS")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#macos")
-    }
-
-    QtObject {
-        id: android
-
-        readonly property string title: qsTr("Android")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#android")
-    }
-
-    QtObject {
-        id: androidTv
-
-        readonly property string title: qsTr("AndroidTV")
-        readonly property string link: qsTr("documentation/instructions/android_tv_connect/")
-    }
-
-    QtObject {
-        id: ios
-
-        readonly property string title: qsTr("iOS")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#ios")
-    }
-
-    QtObject {
-        id: linux
-
-        readonly property string title: qsTr("Linux")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#linux")
-    }
-
-    QtObject {
-        id: routers
-
-        readonly property string title: qsTr("Routers")
-        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#routers")
-    }
-
-    property list<QtObject> instructionsModel: [
-        windows,
-        macos,
-        android,
-        androidTv,
-        ios,
-        linux,
-        routers
+    readonly property var instructionsModel: [
+        { title: qsTr("Windows"), link: qsTr("documentation/instructions/connect-amnezia-premium#windows") },
+        { title: qsTr("macOS"), link: qsTr("documentation/instructions/connect-amnezia-premium#macos") },
+        { title: qsTr("Android"), link: qsTr("documentation/instructions/connect-amnezia-premium#android") },
+        { title: qsTr("AndroidTV"), link: qsTr("documentation/instructions/android_tv_connect/") },
+        { title: qsTr("iOS"), link: qsTr("documentation/instructions/connect-amnezia-premium#ios") },
+        { title: qsTr("Linux"), link: qsTr("documentation/instructions/connect-amnezia-premium#linux") },
+        { title: qsTr("Routers"), link: qsTr("documentation/instructions/connect-amnezia-premium#routers") }
     ]
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        anchors.bottomMargin: 24
+        anchors.top: parent.top
 
-        model: instructionsModel
+        contentHeight: content.implicitHeight
 
-        header: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            BackButtonType {
-                id: backButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("How to connect on another device")
+                description: qsTr("Setup guides on the Amnezia website")
             }
 
-            BaseHeaderType {
-                id: header
+            Repeater {
+                model: root.instructionsModel
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                delegate: ListItemType {
+                    required property var modelData
 
-                headerText: qsTr("How to connect on another device")
-                descriptionText: qsTr("Setup guides on the Amnezia website")
-            }
-        }
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-        delegate: ColumnLayout {
-            width: listView.width
+                    text: modelData.title
+                    trailingIconSource: "qrc:/images/controls/external-link.svg"
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 6
-
-                text: title
-                rightImageSource: "qrc:/images/controls/external-link.svg"
-
-                clickedFunction: function() {
-                    Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
+                    onClicked: Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(modelData.link))
                 }
             }
 
-            DividerType {}
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
+            }
         }
     }
 }

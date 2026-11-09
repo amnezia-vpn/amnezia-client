@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -17,123 +18,101 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    readonly property bool isSaveButtonEnabled: mtuTextField.errorText === ""
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: saveButton.top
+        anchors.bottomMargin: 24
 
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
-
-        model: WireGuardConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            property alias mtuTextField: mtuTextField
-            property bool isSaveButtonEnabled: mtuTextField.errorText === ""
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                headerText: qsTr("WG settings")
+                title: qsTr("WG settings")
             }
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: mtuTextField
+
                 Layout.fillWidth: true
-                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 headerText: qsTr("MTU")
-                textField.text: clientMtu
+                textField.text: WireGuardConfigModel.clientMtu
                 textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== clientMtu) {
-                        clientMtu = textField.text
-                    } 
-                }
+                textField.onTextEdited: WireGuardConfigModel.clientMtu = textField.text
+
                 checkEmptyText: true
             }
 
-            Header2TextType {
+            H2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("Server settings")
             }
 
-            TextFieldWithHeaderType {
-                id: portTextField
+            TextFieldType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 enabled: false
 
                 headerText: qsTr("Port")
-                textField.text: port
+                textField.text: WireGuardConfigModel.port
             }
         }
+    }
 
-        footer: ColumnLayout {
-            width: listView.width
+    ButtonType {
+        id: saveButton
 
-            BasicButtonType {
-                id: saveButton
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+        enabled: root.isSaveButtonEnabled
 
-                enabled: listView.currentItem.isSaveButtonEnabled
+        text: qsTr("Save")
 
-                text: qsTr("Save")
+        onClicked: {
+            var headerText = qsTr("Save settings?")
+            var descriptionText = qsTr("Only the settings for this device will be changed")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                clickedFunc: function() {
-                    var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("Only the settings for this device will be changed")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                            return
-                        }
-
-                        InstallController.updateClientConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
-                    }
-                    var noButtonFunction = function() {}
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                    return
                 }
+
+                InstallController.updateClientConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
             }
+            var noButtonFunction = function() {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

@@ -5,7 +5,7 @@ import QtQuick.Layouts
 
 import "../Controls2"
 
-TextFieldWithHeaderType {
+TextFieldType {
     id: root
 
     property var scroller: null
@@ -14,7 +14,6 @@ TextFieldWithHeaderType {
     signal edited(string text)
 
     Layout.fillWidth: true
-    Layout.topMargin: 16
     Layout.leftMargin: 16
     Layout.rightMargin: 16
 
@@ -26,11 +25,14 @@ TextFieldWithHeaderType {
 
     textField.validator: rangeValidation ? rangeValidator : null
 
+    textField.onTextEdited: root.edited(root.textField.text)
+
     textField.onEditingFinished: {
-        if (root.rangeValidation) {
-            root.textField.text = root.textField.text.replace(/^-+|-+$/g, "")
+        const value = root.rangeValidation ? root.textField.text.replace(/^-+|-+$/g, "") : root.textField.text
+        root.edited(value)
+        if (root.textField.text !== value) {
+            root.textField.text = value
         }
-        root.edited(root.textField.text)
     }
 
     textField.onActiveFocusChanged: {

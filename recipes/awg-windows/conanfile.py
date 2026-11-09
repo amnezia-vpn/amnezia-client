@@ -56,7 +56,7 @@ class AwgWindows(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("mingw-builds/15.1.0")
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.27.1")
 
     def requirements(self):
         self.requires("wintun/[*]")
