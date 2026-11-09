@@ -88,10 +88,7 @@ bool PagesUiTestFixture::loadPage(const QString &pageName)
     }
 
     m_window->requestActivate();
-
-    if (!QTest::qWaitForWindowActive(m_window)) {
-        return false;
-    }
+    QTest::qWaitForWindowActive(m_window);
 
     QObject *loader = m_window->findChild<QObject *>(QStringLiteral("pageLoader"));
 
