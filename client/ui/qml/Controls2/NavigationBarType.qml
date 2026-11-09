@@ -118,6 +118,7 @@ Item {
 
             enabled: d.scrolled > 0
             acceptedButtons: Qt.AllButtons
+            hoverEnabled: true
         }
 
         IconButtonType {
