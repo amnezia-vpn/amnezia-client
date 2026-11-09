@@ -172,6 +172,7 @@ extension PacketTunnelProvider {
 
             // Extract existing SOCKS5 credentials or generate new ones per session.
             let socksCredentials = ensureInboundAuth(jsonDict: &jsonDict, port: port, address: address)
+            usePacketUploadForXhttp(jsonDict: &jsonDict)
 
             let updatedData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
 
@@ -274,6 +275,25 @@ extension PacketTunnelProvider {
         let user = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(16)
         let pass = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
         return SocksCredentials(username: String(user), password: pass)
+    }
+
+    private func usePacketUploadForXhttp(jsonDict: inout [String: Any]) {
+        guard var outbounds = jsonDict["outbounds"] as? [[String: Any]] else { return }
+        for index in outbounds.indices {
+            guard var streamSettings = outbounds[index]["streamSettings"] as? [String: Any],
+                  let network = streamSettings["network"] as? String,
+                  network.caseInsensitiveCompare("xhttp") == .orderedSame
+                    || network.caseInsensitiveCompare("splithttp") == .orderedSame else {
+                continue
+            }
+            var xhttpSettings = streamSettings["xhttpSettings"] as? [String: Any] ?? [:]
+            let mode = xhttpSettings["mode"] as? String ?? ""
+            guard mode.isEmpty || mode == "auto" else { continue }
+            xhttpSettings["mode"] = "packet-up"
+            streamSettings["xhttpSettings"] = xhttpSettings
+            outbounds[index]["streamSettings"] = streamSettings
+        }
+        jsonDict["outbounds"] = outbounds
     }
 
     private func setupAndStartXray(configData: Data,
