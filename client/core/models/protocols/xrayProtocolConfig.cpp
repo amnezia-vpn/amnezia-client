@@ -514,7 +514,7 @@ namespace xrayEffective
         static const QStringList mlkemCapable = { "chrome",           "firefox",           "safari",
                                                   "hellochrome_131",  "hellochrome_133",   "hellochrome_auto",
                                                   "hellofirefox_148", "hellofirefox_auto", "hellosafari_26_3",
-                                                  "hellosafari_auto", "hellogolang" };
+                                                  "hellosafari_auto" };
         const QString normalized = fingerprint.trimmed().toLower();
         return mlkemCapable.contains(normalized) ? normalized
                                                  : QString::fromLatin1(protocols::xray::defaultRealityFingerprint);

@@ -39,31 +39,6 @@ namespace
     const QString kSite = QStringLiteral("www.googletagmanager.com");
     const QHostAddress kTarget(QStringLiteral("203.0.113.80"));
 
-    void editStream(QJsonObject &config, const char *bounds, const std::function<void(QJsonObject &)> &edit)
-    {
-        QJsonArray list = config.value(QString::fromLatin1(bounds)).toArray();
-        for (int i = 0; i < list.size(); ++i) {
-            QJsonObject bound = list.at(i).toObject();
-            if (bound.value("protocol").toString() != QLatin1String("vless"))
-                continue;
-            QJsonObject stream = bound.value("streamSettings").toObject();
-            edit(stream);
-            bound["streamSettings"] = stream;
-            list[i] = bound;
-        }
-        config[QString::fromLatin1(bounds)] = list;
-    }
-
-    void editSection(QJsonObject &config, const char *bounds, const char *section,
-                     const std::function<void(QJsonObject &)> &edit)
-    {
-        editStream(config, bounds, [&](QJsonObject &stream) {
-            QJsonObject settings = stream.value(QString::fromLatin1(section)).toObject();
-            edit(settings);
-            stream[QString::fromLatin1(section)] = settings;
-        });
-    }
-
     void setClientUserFlow(QJsonObject &client, const QString &flow)
     {
         QJsonArray outbounds = client.value("outbounds").toArray();
@@ -259,6 +234,52 @@ namespace
         return out;
     }
 
+    QList<RuntimeCase> fingerprintCases()
+    {
+        const QList<QPair<QString, XrayServerConfig>> realityTransports = {
+            { "raw-vision", runtimeConfig("raw", "reality", "xtls-rprx-vision") },
+            { "xhttp-stream-one", runtimeConfig("xhttp", "reality", "", "Stream-one") },
+            { "xhttp-packet-up", runtimeConfig("xhttp", "reality", "", "Packet-up") },
+        };
+        QList<RuntimeCase> out;
+        for (const RealityFingerprintCase &fp : realityFingerprintCases()) {
+            if (fp.hello == RealityHello::Unreliable)
+                continue;
+            const QString name = fp.name;
+            const QString since =
+                    fp.hello == RealityHello::RealCertificate ? QStringLiteral("26.10.17") : QString();
+            for (const auto &transport : realityTransports) {
+                out.append({ QStringLiteral("fingerprint/core/%1/%2").arg(transport.first, name), transport.second,
+                             [name](QJsonObject &, QJsonObject &client) { setClientRealityFingerprint(client, name); },
+                             fp.hello == RealityHello::Connects, since });
+            }
+        }
+
+        for (const QString &stored : legacyRealityFingerprints()) {
+            for (const auto &transport : realityTransports) {
+                XrayServerConfig srv = transport.second;
+                srv.fingerprint = stored;
+                out.append({ QStringLiteral("fingerprint/app/%1/'%2'").arg(transport.first, stored), srv });
+            }
+        }
+
+        XrayServerConfig xhttpTls = runtimeConfig("xhttp", "tls", "", "Stream-one");
+        xhttpTls.alpn = QStringLiteral("h2");
+        const QList<QPair<QString, XrayServerConfig>> tlsTransports = {
+            { "raw-vision", runtimeConfig("raw", "tls", "xtls-rprx-vision") },
+            { "xhttp-stream-one-h2", xhttpTls },
+        };
+        for (const QString &fp : XrayConfigModel::fingerprintOptions()) {
+            const bool tls12Only = fp == QLatin1String("android") || fp == QLatin1String("360");
+            for (const auto &transport : tlsTransports) {
+                XrayServerConfig srv = transport.second;
+                srv.fingerprint = fp;
+                out.append({ QStringLiteral("fingerprint/tls/%1/%2").arg(transport.first, fp), srv, {}, !tls12Only });
+            }
+        }
+        return out;
+    }
+
     const QList<RuntimeCase> &cases()
     {
         static const QList<RuntimeCase> all = [] {
@@ -267,7 +288,7 @@ namespace
                 if (m.allowedByUi)
                     out.append({ m.name, m.srv });
             }
-            out << optionCases() << ruleCases();
+            out << optionCases() << ruleCases() << fingerprintCases();
             return out;
         }();
         return all;
@@ -497,6 +518,46 @@ private slots:
         const bool flowed = runCase(c, why);
         m_lastReason = expectTraffic ? why : QStringLiteral("expected no traffic, but it flowed");
         QVERIFY2(flowed == expectTraffic, qPrintable(m_lastReason));
+    }
+
+    void appMapsRealityFingerprint_data()
+    {
+        QTest::addColumn<QString>("stored");
+        QTest::addColumn<QString>("sent");
+        for (const QString &stored : legacyRealityFingerprints())
+            QTest::newRow(qPrintable(QStringLiteral("'%1'").arg(stored))) << stored << QStringLiteral("chrome");
+        for (const RealityFingerprintCase &fp : realityFingerprintCases()) {
+            if (fp.hello == RealityHello::Connects)
+                QTest::newRow(qPrintable(fp.name)) << fp.name << fp.name;
+        }
+    }
+
+    void appMapsRealityFingerprint()
+    {
+        QFETCH(QString, stored);
+        QFETCH(QString, sent);
+        XrayServerConfig srv = runtimeConfig("raw", "reality", "xtls-rprx-vision");
+        srv.fingerprint = stored;
+        const QJsonObject reality = streamOf(vlessOutbound(clientJson(srv))).value("realitySettings").toObject();
+        QCOMPARE(reality.value("fingerprint").toString(), sent);
+    }
+
+    void realityRandomFingerprint()
+    {
+        const RuntimeCase random { QStringLiteral("random"), runtimeConfig("raw", "reality", "xtls-rprx-vision"),
+                                   [](QJsonObject &, QJsonObject &client) {
+                                       setClientRealityFingerprint(client, QStringLiteral("random"));
+                                   } };
+        const int runs = 10;
+        int flowed = 0;
+        for (int i = 0; i < runs; ++i) {
+            QString why;
+            flowed += runCase(random, why) ? 1 : 0;
+        }
+        qInfo().noquote() << QStringLiteral("REALITY fingerprint random: traffic in %1 of %2 runs on server %3")
+                                     .arg(flowed)
+                                     .arg(runs)
+                                     .arg(m_serverVersion);
     }
 };
 
