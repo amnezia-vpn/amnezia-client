@@ -247,13 +247,18 @@ namespace xraytest
         return config.value(QStringLiteral("inbounds")).toArray().first().toObject();
     }
 
-    inline QJsonObject vlessOutbound(const QJsonObject &config)
+    inline QJsonObject vlessEntry(const QJsonObject &config, const QString &list)
     {
-        for (const QJsonValue &v : config.value(QStringLiteral("outbounds")).toArray()) {
+        for (const QJsonValue &v : config.value(list).toArray()) {
             if (v.toObject().value(QStringLiteral("protocol")).toString() == QLatin1String("vless"))
                 return v.toObject();
         }
         return {};
+    }
+
+    inline QJsonObject vlessOutbound(const QJsonObject &config)
+    {
+        return vlessEntry(config, QStringLiteral("outbounds"));
     }
 
     inline QJsonObject streamOf(const QJsonObject &bound)

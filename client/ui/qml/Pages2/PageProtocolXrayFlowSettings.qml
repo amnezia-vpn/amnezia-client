@@ -49,6 +49,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Empty")
+                enabled: root.visionAllowed
                 checked: XrayConfigModel.flow === "" || !root.visionAllowed
                 onClicked: XrayConfigModel.flow = ""
             }

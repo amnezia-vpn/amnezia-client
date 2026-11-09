@@ -63,8 +63,8 @@ PageType {
 
                 SwitchRowType {
                     Layout.fillWidth: true
-                    text: qsTr("xmux")
-                    descriptionText: qsTr("Set either maxConcurrency or maxConnections, not both")
+                    text: qsTr("Custom xmux parameters")
+                    descriptionText: qsTr("Set either maxConcurrency or maxConnections, not both. Off = core defaults (maxConnections 3, hMaxRequestTimes 600–900, hMaxReusableSecs 1800–3000). If any field is set, the other defaults are not applied.")
                     checked: XrayConfigModel.xmuxEnabled
                     onToggled: XrayConfigModel.xmuxEnabled = checked
                 }
@@ -153,6 +153,7 @@ PageType {
                     TextFieldType {
                         Layout.fillWidth: true
                         Layout.topMargin: 12
+                        visible: XrayConfigModel.xmuxKeepAliveApplies
                         headerText: qsTr("hKeepAlivePeriod")
                         helperText: qsTr("HTTP keep-alive period. Integer, may be negative.")
                         textField.text: XrayConfigModel.xmuxHKeepAlivePeriod

@@ -67,6 +67,7 @@ class XrayConfigModel : public QObject
     Q_PROPERTY(QString xmuxHMaxReusableSecsMin READ xmuxHMaxReusableSecsMin WRITE setXmuxHMaxReusableSecsMin NOTIFY changed)
     Q_PROPERTY(QString xmuxHMaxReusableSecsMax READ xmuxHMaxReusableSecsMax WRITE setXmuxHMaxReusableSecsMax NOTIFY changed)
     Q_PROPERTY(QString xmuxHKeepAlivePeriod READ xmuxHKeepAlivePeriod WRITE setXmuxHKeepAlivePeriod NOTIFY changed)
+    Q_PROPERTY(bool xmuxKeepAliveApplies READ xmuxKeepAliveApplies NOTIFY changed)
 
 public:
     explicit XrayConfigModel(QObject* parent = nullptr);
@@ -229,6 +230,7 @@ public:
     void setXmuxHMaxReusableSecsMax(const QString &value);
 
     QString xmuxHKeepAlivePeriod() const;
+    bool xmuxKeepAliveApplies() const;
     void setXmuxHKeepAlivePeriod(const QString &value);
 
     // ── Static option lists (for QML DropDown models) ─────────────────

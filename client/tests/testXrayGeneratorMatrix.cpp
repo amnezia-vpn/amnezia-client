@@ -154,9 +154,12 @@ void TestXrayGeneratorMatrix::invariants()
         QVERIFY(x.contains("xPaddingObfsMode"));
         QCOMPARE(x.value("xPaddingObfsMode").toBool(), srv.xhttp.xPadding.obfsMode);
         if (!srv.xhttp.xPadding.obfsMode) {
-            for (const char *key : { "xPaddingBytes", "xPaddingKey", "xPaddingHeader", "xPaddingPlacement", "xPaddingMethod" })
+            for (const char *key : { "xPaddingKey", "xPaddingHeader", "xPaddingPlacement", "xPaddingMethod" })
                 QVERIFY2(!x.contains(QString::fromLatin1(key)), qPrintable(compact(x)));
         }
+        if (!srv.xhttp.xPadding.bytesMin.isEmpty() && !srv.xhttp.xPadding.bytesMax.isEmpty())
+            QCOMPARE(str(x, "xPaddingBytes"),
+                     xrayEffective::range(srv.xhttp.xPadding.bytesMin, srv.xhttp.xPadding.bytesMax));
     }
 
     const XrayXmuxConfig &xmux = srv.xhttp.xmux;

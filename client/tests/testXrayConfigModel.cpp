@@ -4,6 +4,7 @@
 
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "ui/models/protocols/xrayConfigModel.h"
+#include "utils/xrayContractCases.h"
 #include "utils/xrayMatrix.h"
 
 using namespace amnezia;
@@ -26,6 +27,19 @@ namespace
     XrayProtocolConfig issued(const XrayServerConfig &srv)
     {
         return withNative(srv, compact(clientJson(srv)));
+    }
+
+    XrayServerConfig xhttpWithAppRanges(const QString &mode)
+    {
+        XrayServerConfig srv = baseConfig("xhttp", "reality", "");
+        srv.xhttp.mode = mode;
+        srv.xhttp.applyRangeDefaults();
+        return srv;
+    }
+
+    XrayProtocolConfig stored(const XrayProtocolConfig &saved)
+    {
+        return issued(XrayServerConfig::fromJson(saved.serverConfig.toJson()));
     }
 
     bool hasError(const QStringList &errors, const QString &needle)
@@ -61,6 +75,13 @@ private slots:
     void deviceOnlyEditRebuildsClientConfig();
     void deviceOnlyEditWithBrokenNativeDropsClientConfig();
     void unsavedChangesFollowEdits();
+    void clearedServerRangeReachesServerAndStaysEmpty();
+    void clearedClientRangeStaysEmpty();
+    void startingXhttpFillsAppRangeDefaults();
+    void xmuxOnWithoutValuesEqualsOff();
+    void contractTable();
+    void contractAppVerdict_data();
+    void contractAppVerdict();
 };
 
 void TestXrayConfigModel::options()
@@ -73,6 +94,12 @@ void TestXrayConfigModel::options()
              QStringList({ "Body", "Auto", "Header", "Cookie" }));
     QCOMPARE(XrayConfigModel::xPaddingBytesMinDefault(), QStringLiteral("100"));
     QCOMPARE(XrayConfigModel::xPaddingBytesMaxDefault(), QStringLiteral("1000"));
+    QCOMPARE(XrayConfigModel::scStreamUpServerSecsMinDefault(), QStringLiteral("20"));
+    QCOMPARE(XrayConfigModel::scStreamUpServerSecsMaxDefault(), QStringLiteral("80"));
+    QCOMPARE(XrayConfigModel::scMinPostsIntervalMsMinDefault(), QStringLiteral("30"));
+    QCOMPARE(XrayConfigModel::scMinPostsIntervalMsMaxDefault(), QStringLiteral("30"));
+    QCOMPARE(XrayConfigModel::scMaxEachPostBytesMinDefault(), QStringLiteral("1000000"));
+    QCOMPARE(XrayConfigModel::scMaxEachPostBytesMaxDefault(), QStringLiteral("1000000"));
 }
 
 void TestXrayConfigModel::isValidSni_data()
@@ -350,6 +377,120 @@ void TestXrayConfigModel::unsavedChangesFollowEdits()
     QVERIFY(model.hasUnsavedChanges());
     model.setFingerprint(original);
     QVERIFY(!model.hasUnsavedChanges());
+}
+
+void TestXrayConfigModel::clearedServerRangeReachesServerAndStaysEmpty()
+{
+    XrayConfigModel model;
+    model.updateModel(DockerContainer::Xray, issued(xhttpWithAppRanges("Stream-up")));
+    QCOMPARE(model.xhttpScStreamUpServerSecsMin(), QStringLiteral("1"));
+    QCOMPARE(model.xhttpScStreamUpServerSecsMax(), QStringLiteral("100"));
+
+    model.setXhttpScStreamUpServerSecsMin(QString());
+    model.setXhttpScStreamUpServerSecsMax(QString());
+    QVERIFY(model.validationErrors().isEmpty());
+    QVERIFY(model.pendingChangeTouchesServer(QString()));
+
+    const XrayProtocolConfig saved = model.getProtocolConfig();
+    const QString server = compact(serverJson(saved.serverConfig));
+    QVERIFY2(!server.contains(QStringLiteral("scStreamUpServerSecs")), qPrintable(server));
+
+    XrayConfigModel reopened;
+    reopened.updateModel(DockerContainer::Xray, stored(saved));
+    QVERIFY(reopened.xhttpScStreamUpServerSecsMin().isEmpty());
+    QVERIFY(reopened.xhttpScStreamUpServerSecsMax().isEmpty());
+    QVERIFY(!reopened.hasUnsavedChanges());
+}
+
+void TestXrayConfigModel::clearedClientRangeStaysEmpty()
+{
+    XrayConfigModel model;
+    model.updateModel(DockerContainer::Xray, issued(xhttpWithAppRanges("Packet-up")));
+    QCOMPARE(model.xhttpScMinPostsIntervalMsMin(), QStringLiteral("100"));
+
+    model.setXhttpScMinPostsIntervalMsMin(QString());
+    model.setXhttpScMinPostsIntervalMsMax(QString());
+    QVERIFY(model.validationErrors().isEmpty());
+    QVERIFY(!model.pendingChangeTouchesServer(QString()));
+
+    const XrayProtocolConfig saved = model.getProtocolConfig();
+    const QString client = compact(clientJson(saved.serverConfig));
+    QVERIFY2(!client.contains(QStringLiteral("scMinPostsIntervalMs")), qPrintable(client));
+
+    XrayConfigModel reopened;
+    reopened.updateModel(DockerContainer::Xray, stored(saved));
+    QVERIFY(reopened.xhttpScMinPostsIntervalMsMin().isEmpty());
+    QVERIFY(reopened.xhttpScMinPostsIntervalMsMax().isEmpty());
+}
+
+void TestXrayConfigModel::startingXhttpFillsAppRangeDefaults()
+{
+    XrayServerConfig raw = baseConfig("raw", "reality", "");
+    raw.xhttp = XrayXhttpConfig {};
+
+    XrayConfigModel model;
+    model.updateModel(DockerContainer::Xray, issued(raw));
+    model.setTransport("xhttp");
+    QCOMPARE(model.xhttpScStreamUpServerSecsMin(), QStringLiteral("1"));
+    QCOMPARE(model.xhttpScStreamUpServerSecsMax(), QStringLiteral("100"));
+    QCOMPARE(model.xhttpScMinPostsIntervalMsMin(), QStringLiteral("100"));
+    QCOMPARE(model.xhttpScMinPostsIntervalMsMax(), QStringLiteral("800"));
+    QCOMPARE(model.xhttpScMaxEachPostBytesMin(), QStringLiteral("1000000"));
+    QCOMPARE(model.xhttpScMaxEachPostBytesMax(), QStringLiteral("1000000"));
+
+    model.setXhttpScStreamUpServerSecsMin(QString());
+    model.setXhttpScStreamUpServerSecsMax(QString());
+    model.resetToDefaults();
+    QCOMPARE(model.xhttpScStreamUpServerSecsMin(), QStringLiteral("1"));
+    QCOMPARE(model.xhttpScStreamUpServerSecsMax(), QStringLiteral("100"));
+}
+
+void TestXrayConfigModel::xmuxOnWithoutValuesEqualsOff()
+{
+    XrayServerConfig on = baseConfig("xhttp", "reality", "");
+    on.xhttp.xmux = XrayXmuxConfig::fromJson(QJsonObject {});
+    on.xhttp.xmux.enabled = true;
+    XrayServerConfig off = on;
+    off.xhttp.xmux.enabled = false;
+
+    const QString onClient = compact(clientJson(on));
+    QVERIFY2(!onClient.contains(QStringLiteral("\"xmux\"")), qPrintable(onClient));
+    QCOMPARE(onClient, compact(clientJson(off)));
+}
+
+void TestXrayConfigModel::contractTable()
+{
+    QStringList names;
+    for (const ContractCase &c : contractCases()) {
+        QVERIFY2(!names.contains(c.name), qPrintable(QStringLiteral("duplicate row ") + c.name));
+        names << c.name;
+        if (c.app == AppVerdict::Blocked && c.core == CoreVerdict::Accept)
+            QVERIFY2(!c.stricterWhy.isEmpty(), qPrintable(c.name + QStringLiteral(": app is stricter than the core, say why")));
+        if (c.app == AppVerdict::Ok)
+            QVERIFY2(c.core != CoreVerdict::Reject,
+                     qPrintable(c.name + QStringLiteral(": a row may not expect the app to pass what the core rejects")));
+    }
+    qInfo().noquote() << "contract rows:" << names.size();
+}
+
+void TestXrayConfigModel::contractAppVerdict_data()
+{
+    QTest::addColumn<int>("index");
+    for (int i = 0; i < contractCases().size(); ++i)
+        QTest::newRow(qPrintable(contractCases().at(i).name)) << i;
+}
+
+void TestXrayConfigModel::contractAppVerdict()
+{
+    QFETCH(int, index);
+    const ContractCase &c = contractCases().at(index);
+
+    const QStringList errors = contractErrors(c);
+    const AppVerdict actual = errors.isEmpty() ? AppVerdict::Ok : AppVerdict::Blocked;
+    if (!c.knownIssue.isEmpty())
+        QEXPECT_FAIL("", qPrintable(c.knownIssue), Abort);
+    QVERIFY2(actual == c.app, qPrintable(QStringLiteral("app %1, expected %2; errors: %3")
+                                                 .arg(verdictName(actual), verdictName(c.app), errors.join(QStringLiteral("; ")))));
 }
 
 QTEST_GUILESS_MAIN(TestXrayConfigModel)

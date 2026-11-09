@@ -91,6 +91,13 @@ namespace amnezia
             constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
             constexpr char defaultXhttpScStreamUpServerSecsMax[] = "100";
 
+            constexpr char coreDefaultXhttpScMaxEachPostBytesMin[] = "1000000";
+            constexpr char coreDefaultXhttpScMaxEachPostBytesMax[] = "1000000";
+            constexpr char coreDefaultXhttpScMinPostsIntervalMsMin[] = "30";
+            constexpr char coreDefaultXhttpScMinPostsIntervalMsMax[] = "30";
+            constexpr char coreDefaultXhttpScStreamUpServerSecsMin[] = "20";
+            constexpr char coreDefaultXhttpScStreamUpServerSecsMax[] = "80";
+
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";
             constexpr char defaultXPaddingKey[] = "x_padding";
