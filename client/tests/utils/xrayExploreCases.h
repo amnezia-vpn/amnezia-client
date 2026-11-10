@@ -160,11 +160,8 @@ namespace xrayexplore
                { "none", "", "xtls", "TLS", "garbage" });
     }
 
-    inline void tlsGroup(Builder &b)
+    inline void tlsFingerprintGrid(Builder &b, const QString &g, const QList<Carrier> &bases)
     {
-        const QString g = QStringLiteral("tls");
-        const QList<Carrier> bases = { raw("tls", ""), raw("tls", "xtls-rprx-vision"),
-                                       raw("tls", "xtls-rprx-vision-udp443"), xhttp("tls", "Stream-one") };
         QStringList fingerprints = XrayConfigModel::fingerprintOptions();
         fingerprints << QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint);
         fingerprints.removeDuplicates();
@@ -178,11 +175,25 @@ namespace xrayexplore
                 }
             }
         }
+    }
+
+    inline void tlsGroup(Builder &b)
+    {
+        const QString g = QStringLiteral("tls");
+        tlsFingerprintGrid(b, g,
+                           { raw("tls", ""), raw("tls", "xtls-rprx-vision"), raw("tls", "xtls-rprx-vision-udp443"),
+                             xhttp("tls", "Stream-one") });
         b.text(g, { mkcp() }, QStringLiteral("alpn"), &XrayConfigModel::setAlpn, XrayConfigModel::alpnOptions());
         b.text(g, { raw("tls", "") }, QStringLiteral("alpn"), &XrayConfigModel::setAlpn,
                { "HTTP/2", "h2, http/1.1", "http/1.1,h2", "h3", "foo", "" });
         b.text(g, { raw("tls", "") }, QStringLiteral("fingerprint"), &XrayConfigModel::setFingerprint,
                { "", "foo", " Chrome " });
+    }
+
+    inline void tlsXhttpGroup(Builder &b)
+    {
+        tlsFingerprintGrid(b, QStringLiteral("tlsxhttp"),
+                           { xhttp("tls", "Auto"), xhttp("tls", "Packet-up"), xhttp("tls", "Stream-up") });
     }
 
     inline void realityGroup(Builder &b)
@@ -414,15 +425,18 @@ namespace xrayexplore
 
     inline QStringList groupNames()
     {
-        return { "base", "tls", "reality", "oldclient", "sni", "xhttp", "mkcp", "port" };
+        return { "base", "tls", "tlsxhttp", "reality", "oldclient", "sni", "xhttp", "mkcp", "port" };
     }
 
     inline QList<ExploreCase> cases(const QStringList &groups)
     {
         Builder b;
         const QList<QPair<QString, std::function<void(Builder &)>>> all = {
-            { "base", baseGroup },   { "tls", tlsGroup }, { "reality", realityGroup }, { "oldclient", oldClientGroup },
-            { "sni", sniGroup },     { "xhttp", xhttpGroup }, { "mkcp", mkcpGroup },    { "port", portGroup },
+            { "base", baseGroup },           { "tls", tlsGroup },
+            { "tlsxhttp", tlsXhttpGroup },   { "reality", realityGroup },
+            { "oldclient", oldClientGroup }, { "sni", sniGroup },
+            { "xhttp", xhttpGroup },         { "mkcp", mkcpGroup },
+            { "port", portGroup },
         };
         for (const auto &group : all) {
             if (groups.contains(group.first))
