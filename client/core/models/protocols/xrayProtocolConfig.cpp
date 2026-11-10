@@ -526,6 +526,14 @@ namespace xrayEffective
                                                  : QString::fromLatin1(protocols::xray::defaultRealityFingerprint);
     }
 
+    QString realityServerName(const XrayServerConfig &srv)
+    {
+        const QString sniEff = srv.sni.trimmed();
+        if (!sniEff.isEmpty())
+            return sniEff;
+        return srv.site.isEmpty() ? QString::fromLatin1(protocols::xray::defaultSite) : srv.site;
+    }
+
     QString clientFlow(const XrayServerConfig &srv)
     {
         namespace px = protocols::xray;
@@ -601,9 +609,8 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
     namespace px = protocols::xray;
 
     const bool clientSide = side == XrayStreamSide::Client;
-    const QString fingerprintEff = fingerprint.isEmpty()
-            ? QString::fromLatin1(px::defaultFingerprint)
-            : fingerprint;
+    const QString fingerprintEff = fingerprint.trimmed().isEmpty() ? QString::fromLatin1(px::defaultFingerprint)
+                                                                   : fingerprint.trimmed().toLower();
 
     QJsonObject streamSettings;
     streamSettings[px::network] = xrayEffective::network(*this);
@@ -613,7 +620,8 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
 
     if (securityEff == QLatin1String(px::securityTls)) {
         QJsonObject tlsSettings;
-        tlsSettings[px::serverName] = sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : sni;
+        const QString sniEff = sni.trimmed();
+        tlsSettings[px::serverName] = sniEff.isEmpty() ? QString::fromLatin1(px::defaultSni) : sniEff;
         const QJsonArray alpnArray = QJsonArray::fromStringList(
                 xrayEffective::alpnList(alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : alpn));
         if (!alpnArray.isEmpty())
@@ -633,7 +641,7 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side) const
         QJsonObject realitySettings;
         realitySettings[px::fingerprint] =
                 isThirdPartyConfig ? fingerprintEff : xrayEffective::realityFingerprint(fingerprintEff);
-        realitySettings[px::serverName] = sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : sni;
+        realitySettings[px::serverName] = xrayEffective::realityServerName(*this);
         streamSettings[px::realitySettings] = realitySettings;
     }
 
@@ -1175,7 +1183,7 @@ QJsonObject XrayServerConfig::toServerInboundJson(const XrayServerInboundInputs 
         QJsonObject realitySettings;
         realitySettings[px::dest] = siteEff + QStringLiteral(":443");
         realitySettings[px::privateKey] = inputs.realityPrivateKey;
-        realitySettings[px::serverNames] = QJsonArray { sni.isEmpty() ? siteEff : sni };
+        realitySettings[px::serverNames] = QJsonArray { xrayEffective::realityServerName(*this) };
         realitySettings[px::shortIds] = QJsonArray { inputs.realityShortId };
         streamSettings[px::realitySettings] = realitySettings;
     }
@@ -1358,7 +1366,7 @@ QJsonObject XrayServerConfig::serverView() const
         const QString siteEff = site.isEmpty() ? QString::fromLatin1(px::defaultSite) : site;
         QJsonObject reality;
         reality[px::dest] = siteEff;
-        reality[px::serverName] = sni.isEmpty() ? siteEff : sni;
+        reality[px::serverName] = xrayEffective::realityServerName(*this);
         view[QStringLiteral("reality")] = reality;
     }
 

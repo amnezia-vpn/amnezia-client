@@ -101,7 +101,7 @@ namespace xraytest
                  } };
     }
 
-    inline ContractCtx kcpCtx(const QString &security = QStringLiteral("none"))
+    inline ContractCtx kcpCtx(const QString &security)
     {
         return { QStringLiteral("mkcp/%1").arg(security), QStringLiteral("mkcp"), security, QString(), {} };
     }
@@ -113,6 +113,8 @@ namespace xraytest
         c.transport = ctx.transport;
         c.security = ctx.security;
         c.flow = ctx.flow;
+        if (ctx.security == QLatin1String("none"))
+            c.blocked().reject(QStringLiteral("vless without TLS"));
         const ModelEdit prep = ctx.prep;
         c.edit = [prep, edit](XrayConfigModel &m) {
             if (prep)
@@ -215,11 +217,10 @@ namespace xraytest
         const ContractCtx xTlsPacket = xhttpCtx(QStringLiteral("tls"), QStringLiteral("Packet-up"));
         const ContractCtx xTlsUp = xhttpCtx(QStringLiteral("tls"), QStringLiteral("Stream-up"));
         const ContractCtx xRealityOne = xhttpCtx(QStringLiteral("reality"), QStringLiteral("Stream-one"));
-        const ContractCtx kcpNone = kcpCtx();
         const ContractCtx kcpTls = kcpCtx(QStringLiteral("tls"));
 
         for (const ContractCtx &ctx : { rawReality, rawTls, rawTlsNoFlow, rawNone, xTlsOne, xTlsPacket, xTlsUp,
-                                        xRealityOne, kcpNone, kcpTls, xhttpHeaderKeysCtx() })
+                                        xRealityOne, kcpTls, xhttpHeaderKeysCtx() })
             out.append(kase(ctx, QStringLiteral("baseline"), {}));
 
         for (const QString port : { QStringLiteral("1"), QStringLiteral("65535") })
@@ -248,8 +249,7 @@ namespace xraytest
             for (const QString sni : { QStringLiteral("www.example.com"), QStringLiteral("xn--e1afmkfd.com"), QString() })
                 out.append(kase(ctx, QStringLiteral("sni=") + shown(sni), set(&XrayConfigModel::setSni, sni)));
             out.append(kase(ctx, QStringLiteral("sni=xn--e1afmkfd.xn--p1ai"),
-                            set(&XrayConfigModel::setSni, QStringLiteral("xn--e1afmkfd.xn--p1ai")))
-                               .known(QStringLiteral("domainRegExp wants a Latin TLD, so punycode TLDs such as .xn--p1ai are refused")));
+                            set(&XrayConfigModel::setSni, QStringLiteral("xn--e1afmkfd.xn--p1ai"))));
             for (const SniRow &row : badSni) {
                 ContractCase c = kase(ctx, QStringLiteral("sni=") + shown(row.value), set(&XrayConfigModel::setSni, row.value))
                                          .blocked()
@@ -289,17 +289,22 @@ namespace xraytest
             for (const QString &fp : tls12Fingerprints)
                 out.append(kase(f.ctx, QStringLiteral("fingerprint=") + fp, set(&XrayConfigModel::setFingerprint, fp))
                                    .rule(f.tls12Rule).blocked().stricter(f.tls12Why));
-            out.append(kase(f.ctx, QStringLiteral("fingerprint=foo"), set(&XrayConfigModel::setFingerprint, QStringLiteral("foo")))
-                               .rule(QStringLiteral("tls-fingerprint-known")).blocked().reject(QStringLiteral("unknown \"fingerprint\""))
-                               .rawInput());
+            ContractCase foo = kase(f.ctx, QStringLiteral("fingerprint=foo"),
+                                    set(&XrayConfigModel::setFingerprint, QStringLiteral("foo")))
+                                       .rule(QStringLiteral("tls-fingerprint-known")).blocked().rawInput();
+            if (f.ctx.security == QLatin1String("reality"))
+                foo.stricter(QStringLiteral("the generator sends chrome instead of an unknown REALITY fingerprint"));
+            else
+                foo.reject(QStringLiteral("unknown \"fingerprint\""));
+            out.append(foo);
             out.append(kase(f.ctx, QStringLiteral("fingerprint=Chrome"), set(&XrayConfigModel::setFingerprint, QStringLiteral("Chrome")))
                                .rawInput());
         }
         out.append(kase(rawTls, QStringLiteral("fingerprint=unsafe"), set(&XrayConfigModel::setFingerprint, QStringLiteral("unsafe")))
                            .blocked().stricter(QStringLiteral("TLS accepts \"unsafe\", which turns uTLS off")).rawInput());
         out.append(kase(rawReality, QStringLiteral("fingerprint=unsafe"), set(&XrayConfigModel::setFingerprint, QStringLiteral("unsafe")))
-                           .rule(QStringLiteral("reality-fingerprint-unsafe")).blocked().reject(QStringLiteral("invalid \"fingerprint\""))
-                           .rawInput());
+                           .rule(QStringLiteral("reality-fingerprint-unsafe")).blocked()
+                           .stricter(QStringLiteral("the generator sends chrome instead of \"unsafe\" for REALITY")).rawInput());
         for (const QString &fp : tls12Fingerprints) {
             out.append(kase(rawTlsNoFlow, QStringLiteral("fingerprint=") + fp, set(&XrayConfigModel::setFingerprint, fp)));
             out.append(kase(xTlsOne, QStringLiteral("alpn=http/1.1+fingerprint=") + fp, [fp](XrayConfigModel &m) {
@@ -333,6 +338,8 @@ namespace xraytest
                                     QStringLiteral("пример.рф") })
             out.append(kase(xTlsOne, QStringLiteral("host=") + host, set(&XrayConfigModel::setXhttpHost, host))
                                .blocked().stricter(QStringLiteral("the core takes any host string")).rawInput());
+        out.append(kase(xTlsOne, QStringLiteral("host=::1"), set(&XrayConfigModel::setXhttpHost, QStringLiteral("::1")))
+                           .blocked().stricter(QStringLiteral("an IPv6 host without brackets breaks the request URL")));
         for (const QString path : { QStringLiteral("/"), QString(), QStringLiteral("text"), QStringLiteral("/?ed=1"),
                                     QStringLiteral("/%"), QStringLiteral("/") + QString(2000, QLatin1Char('p')) })
             out.append(kase(xTlsOne, QStringLiteral("path=") + shown(path), set(&XrayConfigModel::setXhttpPath, path)));
@@ -411,7 +418,9 @@ namespace xraytest
                 out.append(kase(keysCtx, field.first + QLatin1Char('=') + shown(key), set(field.second, key)));
             for (const QString key : { QStringLiteral("a b"), QStringLiteral("ключ"), QStringLiteral("a:b"),
                                        QStringLiteral("a;b") })
-                out.append(kase(keysCtx, field.first + QLatin1Char('=') + key, set(field.second, key)).rawInput());
+                out.append(kase(keysCtx, field.first + QLatin1Char('=') + key, set(field.second, key))
+                                   .blocked().stricter(QStringLiteral("the core takes the name, but the request carries no traffic"))
+                                   .rawInput());
         }
 
         const char *noRange = "Invalid integer range";
@@ -423,7 +432,7 @@ namespace xraytest
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
-            { A::Blocked, C::Reject, disabled, "", "validationErrors lets a negative Min through and the generator writes \"-1-5\"" },
+            { A::Blocked, C::Reject, disabled, "", "" },
             { A::Blocked, C::Reject, disabled, "", "" },
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
@@ -432,16 +441,18 @@ namespace xraytest
                  &XrayConfigModel::setXPaddingBytesMin, &XrayConfigModel::setXPaddingBytesMax, xPaddingBytes);
 
         const char *zeroPost = "0 in the range breaks the packet-up uplink at runtime";
+        const char *smallPost = "below 1000 bytes per post the packet-up uplink stalls";
+        const char *negativePost = "the client panics: scMaxEachPostBytes should be bigger than 0";
         const RangeExpect scMaxEachPostBytes[10] = {
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
             { A::Blocked, C::Accept, "", zeroPost, "" },
             { A::Blocked, C::Accept, "", zeroPost, "" },
-            { A::Ok, C::Accept, "", "", "" },
-            { A::Ok, C::Accept, "", "", "" },
-            { A::Ok, C::Accept, "", "", "" },
+            { A::Blocked, C::Accept, "", smallPost, "" },
+            { A::Blocked, C::Accept, "", smallPost, "" },
+            { A::Blocked, C::Accept, "", negativePost, "" },
             { A::Blocked, C::Reject, noRange, "", "" },
-            { A::Ok, C::Accept, "", "", "" },
+            { A::Blocked, C::Accept, "", smallPost, "" },
             { A::Blocked, C::Reject, noRange, "", "" },
         };
         addRange(out, xTlsPacket, QStringLiteral("scMaxEachPostBytes"), QStringLiteral("xhttp-sc-max-each-post-bytes"),
@@ -457,7 +468,7 @@ namespace xraytest
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
             { A::Ok, C::Accept, "", "", "" },
-            { A::Blocked, C::Reject, noRange, "", unchecked },
+            { A::Blocked, C::Reject, noRange, "", "" },
             { A::Ok, C::Accept, "", "", "" },
             { A::Blocked, C::Reject, noRange, "", unchecked },
         };
@@ -509,9 +520,12 @@ namespace xraytest
 
         for (const QString v : { QString(), QStringLiteral("0"), QStringLiteral("1"), QStringLiteral("65536") })
             out.append(kase(xTlsPacket, QStringLiteral("uplinkChunkSize=") + shown(v), set(&XrayConfigModel::setXhttpUplinkChunkSize, v)));
-        for (const QString v : { QStringLiteral("-1"), QStringLiteral("abc"), QStringLiteral("2147483648") })
+        for (const QString v : { QStringLiteral("-1"), QStringLiteral("2147483648") })
             out.append(kase(xTlsPacket, QStringLiteral("uplinkChunkSize=") + v, set(&XrayConfigModel::setXhttpUplinkChunkSize, v))
                                .rawInput());
+        out.append(kase(xTlsPacket, QStringLiteral("uplinkChunkSize=abc"),
+                        set(&XrayConfigModel::setXhttpUplinkChunkSize, QStringLiteral("abc")))
+                           .blocked().stricter(QStringLiteral("the generator writes 0 for a non-number")).rawInput());
 
         for (const QString v : { QStringLiteral("0"), QStringLiteral("1"), QStringLiteral("100000") })
             out.append(kase(xTlsPacket, QStringLiteral("scMaxBufferedPosts=") + v, set(&XrayConfigModel::setXhttpScMaxBufferedPosts, v))
@@ -520,15 +534,26 @@ namespace xraytest
                         set(&XrayConfigModel::setXhttpScMaxBufferedPosts, QStringLiteral("100001")))
                            .rule(QStringLiteral("xhttp-max-buffered-posts-prealloc")).blocked()
                            .stricter(QStringLiteral("the server preallocates a buffer per post")));
-        for (const QString v : { QStringLiteral("-1"), QStringLiteral("abc"), QStringLiteral("9223372036854775808") })
-            out.append(kase(xTlsPacket, QStringLiteral("scMaxBufferedPosts=") + v, set(&XrayConfigModel::setXhttpScMaxBufferedPosts, v))
-                               .rule(QStringLiteral("xhttp-max-buffered-posts-prealloc")).rawInput());
+        out.append(kase(xTlsPacket, QStringLiteral("scMaxBufferedPosts=-1"),
+                        set(&XrayConfigModel::setXhttpScMaxBufferedPosts, QStringLiteral("-1")))
+                           .rule(QStringLiteral("xhttp-max-buffered-posts-prealloc")).blocked()
+                           .stricter(QStringLiteral("a negative value carries no traffic")).rawInput());
+        out.append(kase(xTlsPacket, QStringLiteral("scMaxBufferedPosts=abc"),
+                        set(&XrayConfigModel::setXhttpScMaxBufferedPosts, QStringLiteral("abc")))
+                           .rule(QStringLiteral("xhttp-max-buffered-posts-prealloc")).blocked()
+                           .stricter(QStringLiteral("the generator drops a non-number")).rawInput());
+        out.append(kase(xTlsPacket, QStringLiteral("scMaxBufferedPosts=9223372036854775808"),
+                        set(&XrayConfigModel::setXhttpScMaxBufferedPosts, QStringLiteral("9223372036854775808")))
+                           .rule(QStringLiteral("xhttp-max-buffered-posts-prealloc")).rawInput());
 
         for (const QString v : { QStringLiteral("0"), QStringLiteral("30"), QStringLiteral("-1") })
             out.append(kase(xTlsOne, QStringLiteral("hKeepAlivePeriod=") + v, set(&XrayConfigModel::setXmuxHKeepAlivePeriod, v)));
-        for (const QString v : { QStringLiteral("abc"), QStringLiteral("9223372036854775808") })
-            out.append(kase(xTlsOne, QStringLiteral("hKeepAlivePeriod=") + v, set(&XrayConfigModel::setXmuxHKeepAlivePeriod, v))
-                               .rawInput());
+        out.append(kase(xTlsOne, QStringLiteral("hKeepAlivePeriod=abc"),
+                        set(&XrayConfigModel::setXmuxHKeepAlivePeriod, QStringLiteral("abc")))
+                           .blocked().stricter(QStringLiteral("the generator writes 0 for a non-number")).rawInput());
+        out.append(kase(xTlsOne, QStringLiteral("hKeepAlivePeriod=9223372036854775808"),
+                        set(&XrayConfigModel::setXmuxHKeepAlivePeriod, QStringLiteral("9223372036854775808")))
+                           .rawInput());
         out.append(kase(xTlsOne, QStringLiteral("alpn=http/1.1+hKeepAlivePeriod=30"), [](XrayConfigModel &m) {
                        m.setAlpn(QStringLiteral("http/1.1"));
                        m.setXmuxHKeepAlivePeriod(QStringLiteral("30"));
@@ -571,28 +596,28 @@ namespace xraytest
         };
         for (const KcpRow &row : kcpRows) {
             for (const QString &v : row.ok)
-                out.append(kase(kcpNone, row.field + QLatin1Char('=') + shown(v), set(row.setter, v)).rule(row.ruleId));
+                out.append(kase(kcpTls, row.field + QLatin1Char('=') + shown(v), set(row.setter, v)).rule(row.ruleId));
             for (const QString &v : row.clamped)
-                out.append(kase(kcpNone, row.field + QLatin1Char('=') + v, set(row.setter, v)).rule(row.ruleId).blocked()
+                out.append(kase(kcpTls, row.field + QLatin1Char('=') + v, set(row.setter, v)).rule(row.ruleId).blocked()
                                    .stricter(row.why));
             for (const QString &v : row.rawClamped)
-                out.append(kase(kcpNone, row.field + QLatin1Char('=') + v, set(row.setter, v)).rule(row.ruleId).blocked()
+                out.append(kase(kcpTls, row.field + QLatin1Char('=') + v, set(row.setter, v)).rule(row.ruleId).blocked()
                                    .stricter(row.why).rawInput());
         }
-        out.append(kase(kcpNone, QStringLiteral("cwndMultiplier=5001"), set(&XrayConfigModel::setMkcpCwndMultiplier, QStringLiteral("5001")))
+        out.append(kase(kcpTls, QStringLiteral("cwndMultiplier=5001"), set(&XrayConfigModel::setMkcpCwndMultiplier, QStringLiteral("5001")))
                            .rule(QStringLiteral("kcp-cwnd-overflow")).blocked()
                            .stricter(QStringLiteral("large cwndMultiplier overflows the window at runtime")));
         for (const QPair<QString, Setter> &cap : QList<QPair<QString, Setter>> {
                      { QStringLiteral("uplinkCapacity"), &XrayConfigModel::setMkcpUplinkCapacity },
                      { QStringLiteral("downlinkCapacity"), &XrayConfigModel::setMkcpDownlinkCapacity } }) {
             for (const QString v : { QStringLiteral("0"), QStringLiteral("4095") })
-                out.append(kase(kcpNone, cap.first + QLatin1Char('=') + v, set(cap.second, v)).rule(QStringLiteral("kcp-capacity-overflow")));
-            out.append(kase(kcpNone, cap.first + QStringLiteral("=4096"), set(cap.second, QStringLiteral("4096")))
+                out.append(kase(kcpTls, cap.first + QLatin1Char('=') + v, set(cap.second, v)).rule(QStringLiteral("kcp-capacity-overflow")));
+            out.append(kase(kcpTls, cap.first + QStringLiteral("=4096"), set(cap.second, QStringLiteral("4096")))
                                .rule(QStringLiteral("kcp-capacity-overflow")).blocked()
                                .stricter(QStringLiteral("capacity above 4095 overflows at runtime")));
-            out.append(kase(kcpNone, cap.first + QStringLiteral("=-1"), set(cap.second, QStringLiteral("-1")))
+            out.append(kase(kcpTls, cap.first + QStringLiteral("=-1"), set(cap.second, QStringLiteral("-1")))
                                .rule(QStringLiteral("kcp-capacity-overflow")).blocked().reject().rawInput());
-            out.append(kase(kcpNone, cap.first + QStringLiteral("=abc"), set(cap.second, QStringLiteral("abc")))
+            out.append(kase(kcpTls, cap.first + QStringLiteral("=abc"), set(cap.second, QStringLiteral("abc")))
                                .rule(QStringLiteral("kcp-capacity-overflow")).blocked()
                                .stricter(QStringLiteral("the generator writes 0 for a non-number")).rawInput());
         }
@@ -654,8 +679,8 @@ namespace xraytest
                            .blocked().reject(QStringLiteral("Unknown security")).rawInput());
         out.append(kase(rawReality, QStringLiteral("transport=foo"), set(&XrayConfigModel::setTransport, QStringLiteral("foo")))
                            .blocked().stricter(QStringLiteral("the generator falls back to raw")).rawInput());
-        out.append(kase(kcpNone, QStringLiteral("security=reality"), set(&XrayConfigModel::setSecurity, QStringLiteral("reality")))
-                           .rule(QStringLiteral("reality-network")));
+        out.append(kase(kcpTls, QStringLiteral("security=reality"), set(&XrayConfigModel::setSecurity, QStringLiteral("reality")))
+                           .rule(QStringLiteral("reality-network")).blocked().reject(QStringLiteral("vless without TLS")));
 
         return out;
     }

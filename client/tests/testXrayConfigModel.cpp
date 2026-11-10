@@ -136,7 +136,7 @@ void TestXrayConfigModel::validationErrors_data()
     QTest::newRow("tls sni *") << "raw" << "tls" << "sni=*" << "SNI";
     QTest::newRow("reality wildcard sni") << "xhttp" << "reality" << "sni=*.asd.com" << "SNI";
     QTest::newRow("none is rejected") << "raw" << "none" << "" << "None is not supported";
-    QTest::newRow("mkcp + reality is rejected") << "mkcp" << "reality" << "" << "None is not supported";
+    QTest::newRow("mkcp + reality is rejected") << "mkcp" << "reality" << "" << "mKCP does not work with REALITY";
     QTest::newRow("native none is accepted") << "raw" << "none" << "native" << "";
     QTest::newRow("packet-up + reality") << "xhttp" << "reality" << "mode=Packet-up" << "";
     QTest::newRow("packet-up + tls") << "xhttp" << "tls" << "mode=Packet-up" << "";

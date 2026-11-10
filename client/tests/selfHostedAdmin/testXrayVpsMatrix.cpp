@@ -491,22 +491,21 @@ namespace
                            base(m, "mkcp", "tls");
                            m.setMkcpCwndMultiplier(QStringLiteral("6000"));
                        }, Expect::RefusedButWorks, false, {}, "kcp-cwnd-overflow" });
-        const QString keyIssue = QStringLiteral("validationErrors does not check XHTTP key characters; QML allows only [A-Za-z0-9_-]");
         cases.append({ "broken/xhttp/packet-up/sessionKey with space", [](XrayConfigModel &m) {
                            base(m, "xhttp", "tls", QString(), "Packet-up");
                            m.setXhttpSessionPlacement(QStringLiteral("Header"));
                            m.setXhttpSessionKey(QStringLiteral("a b"));
-                       }, Expect::RefusedAndBroken, false, {}, {}, keyIssue });
+                       }, Expect::RefusedAndBroken });
         cases.append({ "broken/xhttp/xPaddingHeader with space", [](XrayConfigModel &m) {
                            base(m, "xhttp", "tls");
                            m.setXPaddingPlacement(QStringLiteral("Header"));
                            m.setXPaddingHeader(QStringLiteral("a b"));
-                       }, Expect::RefusedAndBroken, false, {}, {}, keyIssue });
+                       }, Expect::RefusedAndBroken });
         cases.append({ "broken/xhttp/packet-up/uplinkDataKey with colon", [](XrayConfigModel &m) {
                            base(m, "xhttp", "tls", QString(), "Packet-up");
                            m.setXhttpUplinkDataPlacement(QStringLiteral("Header"));
                            m.setXhttpUplinkDataKey(QStringLiteral("a:b"));
-                       }, Expect::RefusedAndBroken, false, {}, {}, keyIssue });
+                       }, Expect::RefusedAndBroken });
 
         for (const QString &fingerprint : { QStringLiteral("chrome"), QStringLiteral("hellochrome_120") }) {
             cases.append(
@@ -1356,7 +1355,7 @@ private slots:
     {
         XrayConfigModel model;
         model.updateModel(DockerContainer::Xray, storedXray());
-        base(model, "raw", "reality", "xtls-rprx-vision");
+        model.applyServerConfig(cleanConfig());
         QCOMPARE(save(model), ErrorCode::NoError);
 
         model.updateModel(DockerContainer::Xray, storedXray());

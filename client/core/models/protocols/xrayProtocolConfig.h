@@ -190,6 +190,7 @@ namespace xrayEffective
 
     QString security(const XrayServerConfig &srv);
     QString realityFingerprint(const QString &fingerprint);
+    QString realityServerName(const XrayServerConfig &srv);
     QString clientFlow(const XrayServerConfig &srv);
     QString serverFlow(const XrayServerConfig &srv);
     QString network(const XrayServerConfig &srv);
