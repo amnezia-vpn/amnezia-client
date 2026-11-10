@@ -10,6 +10,8 @@
 
 int runPageSetupWizardConfigSourceTests(int argc, char *argv[]);
 int runPageHomeTests(int argc, char *argv[]);
+int runPageSettingsConnectionTests(int argc, char *argv[]);
+int runPageSettingsDnsTests(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +32,8 @@ int main(int argc, char *argv[])
 
     result |= runPageSetupWizardConfigSourceTests(argc, argv);
     result |= runPageHomeTests(argc, argv);
+    result |= runPageSettingsConnectionTests(argc, argv);
+    result |= runPageSettingsDnsTests(argc, argv);
 
     return result;
 }

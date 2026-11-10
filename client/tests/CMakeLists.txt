@@ -335,6 +335,8 @@ if(NOT ANDROID)
         pagesUi/pagesUiTestFixture.h
         pagesUi/testPageSetupWizardConfigSource.cpp
         pagesUi/testPageHome.cpp
+        pagesUi/testPageSettingsConnection.cpp
+        pagesUi/testPageSettingsDns.cpp
         ${PAGES_UI_QRC}
     )
 
