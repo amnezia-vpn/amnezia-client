@@ -325,6 +325,10 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
     if (json.contains(configKey::xrayFingerprint)) {
         c.fingerprint = json.value(configKey::xrayFingerprint).toString();
     }
+    if (c.fingerprint == QLatin1String(protocols::xray::legacyDefaultFingerprint)
+        && c.security != QLatin1String(protocols::xray::securityTls)) {
+        c.fingerprint = protocols::xray::defaultFingerprint;
+    }
     if (json.contains(configKey::xrayTransport)) {
         c.transport = json.value(configKey::xrayTransport).toString();
     }
@@ -1503,7 +1507,10 @@ QString sanitizeNativeConfig(const QString &nativeConfig)
             return;
         }
         QJsonObject settings = holder.value(key).toObject();
-        if (!settings.value(px::fingerprint).toString().contains(legacyFingerprint, Qt::CaseInsensitive)) {
+        const QString fingerprint = settings.value(px::fingerprint).toString();
+        const bool rejectedByReality =
+                qstrcmp(key, px::realitySettings) == 0 && fingerprint == QLatin1String(px::legacyDefaultFingerprint);
+        if (!fingerprint.contains(legacyFingerprint, Qt::CaseInsensitive) && !rejectedByReality) {
             return;
         }
         settings[px::fingerprint] = QString::fromLatin1(px::defaultFingerprint);
