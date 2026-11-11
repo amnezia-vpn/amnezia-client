@@ -17,6 +17,7 @@
 
 constexpr const char* JSON_ALLOWEDIPADDRESSRANGES = "allowedIPAddressRanges";
 constexpr int HANDSHAKE_POLL_MSEC = 250;
+constexpr int CONNECTION_POLL_MSEC = 5000;
 
 namespace {
 
@@ -36,6 +37,7 @@ Daemon::Daemon(QObject* parent) : QObject(parent) {
 
   m_handshakeTimer.setSingleShot(true);
   connect(&m_handshakeTimer, &QTimer::timeout, this, &Daemon::checkHandshake);
+  m_connectionClock.start();
 }
 
 Daemon::~Daemon() {
@@ -476,6 +478,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
 bool Daemon::deactivate(bool emitSignals) {
   Q_ASSERT(wgutils() != nullptr);
+  m_handshakeTimer.stop();
 
   // Deactivate the main interface.
   if (!m_connections.isEmpty()) {
@@ -594,12 +597,20 @@ QJsonObject Daemon::getStatus() {
   }
 
   const ConnectionState& connection = m_connections.first();
+  bool reconnecting = false;
+  bool connecting = false;
+  for (const ConnectionState &state : m_connections) {
+      reconnecting |= state.m_monitor.isRecovering();
+      connecting |= !state.m_date.isValid();
+  }
+  json.insert("connecting", connecting);
+  json.insert("reconnecting", reconnecting);
   QList<WireguardUtils::PeerStatus> peers = wgutils()->getPeerStatus();
   for (const WireguardUtils::PeerStatus& status : peers) {
     if (status.m_pubkey != connection.m_config.m_serverPublicKey) {
       continue;
     }
-    json.insert("connected", QJsonValue(true));
+    json.insert("connected", !connecting && !reconnecting);
     json.insert("serverIpv4Gateway",
                 QJsonValue(connection.m_config.m_serverIpv4Gateway));
     json.insert("deviceIpv4Address",
@@ -610,6 +621,7 @@ QJsonObject Daemon::getStatus() {
     return json;
   }
 
+  json.insert("statusUnavailable", wgutils()->supportsConnectionRecovery() && connection.m_date.isValid());
   json.insert("connected", QJsonValue(false));
   return json;
 }
@@ -619,33 +631,81 @@ void Daemon::checkHandshake() {
 
   logger.debug() << "Checking for handshake...";
 
-  int pendingHandshakes = 0;
+  const bool monitorConnections = wgutils()->supportsConnectionRecovery();
+  const qint64 nowMsec = monotonicMsec();
+  bool pendingHandshake = false;
+  bool interfaceRebound = false;
+  bool recoveryStarted = false;
+  QStringList completedPeers;
   QList<WireguardUtils::PeerStatus> peers = wgutils()->getPeerStatus();
   for (ConnectionState& connection : m_connections) {
     const InterfaceConfig& config = connection.m_config;
-    if (connection.m_date.isValid()) {
-      continue;
-    }
-    logger.debug() << "awaiting" << config.m_serverPublicKey;
-
-    // Check if the handshake has completed.
-    for (const WireguardUtils::PeerStatus& status : peers) {
-      if (config.m_serverPublicKey != status.m_pubkey) {
-        continue;
-      }
-      if (status.m_handshake != 0) {
-        connection.m_date.setMSecsSinceEpoch(status.m_handshake);
-        emit connected(status.m_pubkey);
-      }
+    const WireguardUtils::PeerStatus *peer = nullptr;
+    for (const WireguardUtils::PeerStatus &status : peers) {
+        if (config.m_serverPublicKey == status.m_pubkey) {
+            peer = &status;
+            break;
+        }
     }
 
     if (!connection.m_date.isValid()) {
-      pendingHandshakes++;
+        if (peer && peer->m_handshake != 0) {
+            connection.m_date.setMSecsSinceEpoch(peer->m_handshake);
+            if (monitorConnections) {
+                connection.m_monitor.update(peer->m_handshake, peer->m_rxBytes, peer->m_txBytes, nowMsec);
+            }
+            completedPeers.append(peer->m_pubkey);
+        } else {
+            pendingHandshake = true;
+        }
+        continue;
+    }
+
+    if (!monitorConnections) {
+        continue;
+    }
+
+    const bool wasRecovering = connection.m_monitor.isRecovering();
+    const auto action = peer ? connection.m_monitor.update(peer->m_handshake, peer->m_rxBytes, peer->m_txBytes, nowMsec)
+                             : connection.m_monitor.unavailable(nowMsec);
+    if (action == WireguardConnectionMonitor::Action::Rebind) {
+        if (!wasRecovering) {
+            logger.warning() << "Peer stopped responding; recovering the tunnel transport";
+            recoveryStarted = true;
+        }
+        if (!interfaceRebound) {
+            interfaceRebound = true;
+            if (!wgutils()->rebindInterface()) {
+                logger.warning() << "Tunnel transport rebind failed; waiting before retrying";
+            }
+        }
+    } else if (action == WireguardConnectionMonitor::Action::Recovered) {
+        logger.info() << "Peer responded after tunnel recovery";
+        completedPeers.append(config.m_serverPublicKey);
     }
   }
 
-  // Check again if there were connections that haven't completed a handshake.
-  if (pendingHandshakes > 0) {
-    m_handshakeTimer.start(HANDSHAKE_POLL_MSEC);
+  bool recovering = false;
+  for (const ConnectionState &connection : m_connections) {
+      recovering |= connection.m_monitor.isRecovering();
   }
+  if (recoveryStarted) {
+      emit reconnecting();
+  }
+  if (!recovering && !pendingHandshake) {
+      for (const QString &pubkey : completedPeers) {
+          emit connected(pubkey);
+      }
+  }
+
+  if (pendingHandshake) {
+      m_handshakeTimer.start(HANDSHAKE_POLL_MSEC);
+  } else if (monitorConnections && !m_connections.isEmpty()) {
+      m_handshakeTimer.start(CONNECTION_POLL_MSEC);
+  }
+}
+
+qint64 Daemon::monotonicMsec() const
+{
+    return m_connectionClock.elapsed();
 }

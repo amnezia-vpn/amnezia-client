@@ -91,6 +91,7 @@ private:
 #endif
 
    Vpn::ConnectionState m_connectionState;
+   bool m_protocolRestartPending = false;
 
    void createProtocolConnections();
 

@@ -57,6 +57,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/iputils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardutils.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wireguardconnectionmonitor.h
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.h
 

@@ -409,6 +409,25 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   }
 
   if (type == "status") {
+      if (obj.value("reconnecting").toBool()) {
+          emit reconnecting();
+          return;
+      }
+      if (obj.value("connecting").toBool()) {
+          return;
+      }
+      if (obj.value("statusUnavailable").toBool()) {
+          return;
+      }
+      const QJsonValue connected = obj.value("connected");
+      if (!connected.isBool()) {
+          logger.error() << "Invalid JSON for status - connected expected";
+          return;
+      }
+      if (!connected.toBool()) {
+          disconnectInternal();
+          return;
+      }
 
     QJsonValue serverIpv4Gateway = obj.value("serverIpv4Gateway");
     if (!serverIpv4Gateway.isString()) {
@@ -438,6 +457,11 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
                        deviceIpv4Address.toString(), txBytes.toDouble(),
                        rxBytes.toDouble());
     return;
+  }
+
+  if (type == "reconnecting") {
+      emit reconnecting();
+      return;
   }
 
   if (type == "disconnected") {
