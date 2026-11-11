@@ -42,6 +42,7 @@ public:
     ErrorCode updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig);
 
     ErrorCode rebootServer(const QString &serverId);
+    ErrorCode updateServerPackages(const QString &serverId);
     ErrorCode removeAllContainers(const QString &serverId);
     ErrorCode removeContainer(const QString &serverId, DockerContainer container);
 

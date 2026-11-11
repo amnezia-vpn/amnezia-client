@@ -759,7 +759,7 @@ QStringList XrayConfigModel::transportOptions()
 
 QStringList XrayConfigModel::fingerprintOptions()
 {
-    return { "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
+    return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
 }
 
 QStringList XrayConfigModel::alpnOptions()

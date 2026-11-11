@@ -61,8 +61,6 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     serverConfig.maxHandshakeAttempts = protocols::awg::defaultMaxHandshakeAttempts;
     serverConfig.randomTrailers = protocols::awg::defaultRandomTrailers;
     serverConfig.disableCookies = protocols::awg::defaultDisableCookies;
-
-    serverConfig.specialJunk1 = protocols::awg::defaultSpecialJunk1;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,

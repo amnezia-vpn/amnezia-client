@@ -24,6 +24,7 @@ public:
     virtual bool localProxyUp(const QString &config) override;
     virtual bool localProxyDown() override;
     virtual bool isLocalProxyRunning() override;
+    virtual bool isTcpPortAvailable(int port) override;
 
 private:
     XtunController m_xtunController;

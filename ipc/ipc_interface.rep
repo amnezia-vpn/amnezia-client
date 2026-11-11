@@ -18,5 +18,7 @@ class IpcInterface
     SLOT( bool localProxyDown() );
     SLOT( bool isLocalProxyRunning() );
 
+    SLOT( bool isTcpPortAvailable(int port) );
+
     SIGNAL( tunnelStatusChanged(int status) );
 };

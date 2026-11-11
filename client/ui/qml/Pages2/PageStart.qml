@@ -72,13 +72,14 @@ PageType {
             tabBarStackView.pop()
         }
 
-        function onGoToPage(page, slide) {
+        function onGoToPage(page, slide, pageProperties) {
             var pagePath = PageController.getPagePath(page)
+            var properties = Object.assign({ "objectName" : pagePath }, pageProperties)
 
             if (slide) {
-                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+                tabBarStackView.push(pagePath, properties, StackView.PushTransition)
             } else {
-                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+                tabBarStackView.push(pagePath, properties, StackView.Immediate)
             }
         }
 

@@ -107,7 +107,7 @@ Popup {
         target: Qt.application
 
         function onStateChanged() {
-            if (Qt.application.state !== Qt.ApplicationActive) {
+            if (Qt.application.state === Qt.ApplicationHidden || Qt.application.state === Qt.ApplicationSuspended) {
                 root.close()
             }
         }
