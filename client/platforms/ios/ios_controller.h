@@ -19,10 +19,6 @@ using namespace amnezia;
 
 struct Action
 {
-    static const char *start;
-    static const char *restart;
-    static const char *stop;
-    static const char *getTunnelId;
     static const char *getStatus;
 };
 
@@ -30,13 +26,6 @@ struct MessageKey
 {
     static const char *action;
     static const char *tunnelId;
-    static const char *config;
-    static const char *errorCode;
-    static const char *host;
-    static const char *port;
-    static const char *isOnDemand;
-    static const char *SplitTunnelType;
-    static const char *SplitTunnelSites;
 };
 
 class IosController : public QObject
@@ -127,7 +116,6 @@ private:
     void sendVpnExtensionMessage(NSDictionary *message, std::function<void(NSDictionary *)> callback = nullptr);
 #endif
 
-    QJsonObject m_rawConfig;
     QString m_tunnelId;
     bool m_isTunnelConnected = false;
     Vpn::ConnectionState m_lastEmittedState = Vpn::ConnectionState::Unknown;

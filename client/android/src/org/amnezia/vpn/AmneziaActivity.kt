@@ -58,7 +58,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
 import org.amnezia.vpn.util.Log
@@ -120,12 +119,6 @@ class AmneziaActivity : QtActivity() {
                         if (isWaitingStatus) {
                             isWaitingStatus = false
                             msg.data?.getStatus()?.let { QtAndroidController.onStatus(it) }
-                        }
-                    }
-
-                    ServiceEvent.STATISTICS_UPDATE -> {
-                        msg.data?.getStatistics()?.let { (rxBytes, txBytes) ->
-                            QtAndroidController.onStatisticsUpdate(rxBytes, txBytes)
                         }
                     }
 

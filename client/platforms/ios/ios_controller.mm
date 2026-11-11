@@ -12,21 +12,10 @@
 #import "ios_controller_wrapper.h"
 #import "core/utils/swiftBridge.h"
 
-const char* Action::start = "start";
-const char* Action::restart = "restart";
-const char* Action::stop = "stop";
-const char* Action::getTunnelId = "getTunnelId";
 const char* Action::getStatus = "status";
 
 const char* MessageKey::action = "action";
 const char* MessageKey::tunnelId = "tunnelId";
-const char* MessageKey::config = "config";
-const char* MessageKey::errorCode = "errorCode";
-const char* MessageKey::host = "host";
-const char* MessageKey::port = "port";
-const char* MessageKey::isOnDemand = "is-on-demand";
-const char* MessageKey::SplitTunnelType = "SplitTunnelType";
-const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
 #if !MACOS_NE
 static UIViewController* getViewController() {
@@ -179,7 +168,6 @@ bool IosController::initialize()
 
 bool IosController::connectVpn(const QJsonObject& configuration)
 {
-    m_rawConfig = configuration;
     m_serverAddress = configuration.value(configKey::hostName).toString().toNSString();
 
     const QString serverDescription = configuration.value(configKey::description).toString().trimmed();

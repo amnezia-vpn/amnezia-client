@@ -43,7 +43,6 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_contro
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
 )
@@ -109,10 +108,7 @@ target_compile_options(${PROJECT} PRIVATE
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
-
 target_sources(${PROJECT} PRIVATE
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
     ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
