@@ -83,6 +83,8 @@ private slots:
     void realityIsDowngradedOnlyForMkcp();
     void udp443FlowStaysOnTheDevice();
     void mkcpTlsOutboundHasNoFingerprint();
+    void legacyDefaultFingerprintIsReplacedForRealityOnly_data();
+    void legacyDefaultFingerprintIsReplacedForRealityOnly();
     void xhttpPathGetsLeadingSlash();
 };
 
@@ -232,6 +234,39 @@ void TestXrayServerInbound::mkcpTlsOutboundHasNoFingerprint()
 
     QVERIFY2(outbound.contains(QStringLiteral("\"tlsSettings\"")), qPrintable(outbound));
     QVERIFY2(!outbound.contains(QStringLiteral("\"fingerprint\"")), qPrintable(outbound));
+}
+
+void TestXrayServerInbound::legacyDefaultFingerprintIsReplacedForRealityOnly_data()
+{
+    QTest::addColumn<QString>("security");
+    QTest::addColumn<QString>("fingerprint");
+    QTest::addColumn<QString>("expected");
+    QTest::newRow("reality, old default") << "reality" << "hellochrome_120" << "chrome";
+    QTest::newRow("reality, chosen") << "reality" << "firefox" << "firefox";
+    QTest::newRow("tls, old default") << "tls" << "hellochrome_120" << "hellochrome_120";
+}
+
+void TestXrayServerInbound::legacyDefaultFingerprintIsReplacedForRealityOnly()
+{
+    QFETCH(QString, security);
+    QFETCH(QString, fingerprint);
+    QFETCH(QString, expected);
+
+    XrayProtocolConfig cfg;
+    cfg.serverConfig = fullyConfigured();
+    cfg.serverConfig.transport = "raw";
+    cfg.serverConfig.security = security;
+    cfg.serverConfig.fingerprint = fingerprint;
+
+    QCOMPARE(XrayServerConfig::fromJson(cfg.serverConfig.toJson()).fingerprint, expected);
+
+    XrayClientOutboundInputs inputs;
+    inputs.serverAddress = "203.0.113.10";
+    inputs.clientId = "11111111-2222-3333-4444-555555555555";
+    const QString saved = compact(cfg.toClientOutboundJson(inputs));
+    QVERIFY2(saved.contains(QStringLiteral("\"fingerprint\":\"%1\"").arg(fingerprint)), qPrintable(saved));
+    const QString sanitized = sanitizeNativeConfig(saved);
+    QVERIFY2(sanitized.contains(QStringLiteral("\"fingerprint\":\"%1\"").arg(expected)), qPrintable(sanitized));
 }
 
 void TestXrayServerInbound::xhttpPathGetsLeadingSlash()

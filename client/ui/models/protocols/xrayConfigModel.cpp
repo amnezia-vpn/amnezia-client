@@ -762,6 +762,11 @@ QStringList XrayConfigModel::fingerprintOptions()
     return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
 }
 
+QStringList XrayConfigModel::realityFingerprintOptions()
+{
+    return { "chrome", "firefox", "safari" };
+}
+
 QStringList XrayConfigModel::alpnOptions()
 {
     return { "h2", "http/1.1", "h2,http/1.1" };
