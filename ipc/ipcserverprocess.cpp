@@ -2,7 +2,46 @@
 #include "ipc.h"
 #include <QProcess>
 
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#include <aclapi.h>
+#include <sddl.h>
+#endif
+
 #ifndef Q_OS_IOS
+
+namespace {
+bool restrictToOwner(const QString &path)
+{
+#ifdef Q_OS_WIN
+    constexpr const char *ownerOnlySddl = "D:P(A;;FA;;;SY)(A;;FA;;;BA)";
+
+    PSECURITY_DESCRIPTOR descriptor = nullptr;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorA(ownerOnlySddl, SDDL_REVISION_1, &descriptor, nullptr)) {
+        return false;
+    }
+
+    PACL dacl = nullptr;
+    BOOL present = FALSE;
+    BOOL defaulted = FALSE;
+    bool ok = GetSecurityDescriptorDacl(descriptor, &present, &dacl, &defaulted) && present
+            && SetNamedSecurityInfoW((LPWSTR)path.utf16(), SE_FILE_OBJECT,
+                                     DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION, nullptr, nullptr,
+                                     dacl, nullptr)
+                    == ERROR_SUCCESS;
+
+    LocalFree(descriptor);
+    return ok;
+#else
+    return QFile::setPermissions(path, QFile::ReadOwner | QFile::WriteOwner);
+#endif
+}
+
+QString quoteYamlScalar(const QString &value)
+{
+    return QString(value).replace("'", "''");
+}
+} // namespace
 
 IpcServerProcess::IpcServerProcess(QObject *parent) :
     IpcProcessInterfaceSource(parent),
@@ -19,6 +58,9 @@ IpcServerProcess::IpcServerProcess(QObject *parent) :
     connect(m_process.data(), &QProcess::errorOccurred, [&](QProcess::ProcessError error){
         qDebug() << "IpcServerProcess errorOccurred " << error;
     });
+
+    connect(m_process.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this]() { m_tun2socksConfig.reset(); });
 
 }
 
@@ -84,9 +126,50 @@ void IpcServerProcess::setProgram(int programId)
     m_process->setArguments({});
 }
 
+void IpcServerProcess::setTun2SocksConfig(const QString &device, const QString &proxy)
+{
+    if (m_program != amnezia::PermittedProcess::Tun2Socks) {
+        qWarning() << "Refusing a tun2socks config for another program";
+        return;
+    }
+    if (!device.startsWith("tun://") || !proxy.startsWith("socks5://")) {
+        qWarning() << "Refusing a malformed tun2socks config";
+        return;
+    }
+
+    m_tun2socksConfig = QSharedPointer<QTemporaryFile>(new QTemporaryFile());
+    if (!m_tun2socksConfig->open()) {
+        qWarning() << "Failed to create the tun2socks config file";
+        m_tun2socksConfig.reset();
+        return;
+    }
+
+    if (!restrictToOwner(m_tun2socksConfig->fileName())) {
+        qWarning() << "Failed to restrict the tun2socks config file";
+        m_tun2socksConfig.reset();
+        return;
+    }
+
+    m_tun2socksConfig->write(
+            QString("device: '%1'\nproxy: '%2'\n").arg(quoteYamlScalar(device), quoteYamlScalar(proxy)).toUtf8());
+    m_tun2socksConfig->close();
+
+    m_process->setArguments({ "-config", m_tun2socksConfig->fileName() });
+}
+
 void IpcServerProcess::setWorkingDirectory(const QString &dir)
 {
     m_process->setWorkingDirectory(dir);
+}
+
+void IpcServerProcess::write(const QByteArray &data)
+{
+    m_process->write(data);
+}
+
+void IpcServerProcess::closeWriteChannel()
+{
+    m_process->closeWriteChannel();
 }
 
 QByteArray IpcServerProcess::readAll()
