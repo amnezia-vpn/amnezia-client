@@ -249,7 +249,12 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
   if (!config.m_serverIpv4AddrIn.isNull()) {
-    out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
+    const QString host = config.m_serverIpv4AddrIn;
+    if (host.contains(':') && !host.startsWith('[')) {
+      out << "endpoint=[" << host << "]:";
+    } else {
+      out << "endpoint=" << host << ":";
+    }
   } else if (!config.m_serverIpv6AddrIn.isNull()) {
     out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
   } else {
