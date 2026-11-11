@@ -5,7 +5,6 @@ import android.net.IpPrefix
 import android.net.VpnService
 import android.net.VpnService.Builder
 import android.os.Build
-import android.system.OsConstants
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.util.Log
@@ -22,7 +21,6 @@ private const val SPLIT_TUNNEL_EXCLUDE = 2
 
 abstract class Protocol {
 
-    abstract val statistics: Statistics
     protected lateinit var context: Context
     protected lateinit var state: MutableStateFlow<ProtocolState>
     protected lateinit var onError: (String) -> Unit
@@ -45,12 +43,6 @@ abstract class Protocol {
     abstract fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean)
 
     protected fun ProtocolConfig.Builder.configSplitTunneling(config: JSONObject) {
-        if (!allowSplitTunneling) {
-            Log.i(TAG, "Global address split tunneling is prohibited, " +
-                "only tunneling from the protocol config is used")
-            return
-        }
-
         val splitTunnelType = config.optInt("splitTunnelType")
         if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
         val splitTunnelSites = config.getJSONArray("splitTunnelSites")
@@ -103,11 +95,6 @@ abstract class Protocol {
             }
         }
 
-        config.searchDomain?.let {
-            Log.d(TAG, "addSearchDomain: $it")
-            vpnBuilder.addSearchDomain(it)
-        }
-
         for ((inetNetwork, include) in config.routes) {
             if (include) {
                 Log.d(TAG, "addRoute: $inetNetwork")
@@ -134,19 +121,6 @@ abstract class Protocol {
 
         Log.d(TAG, "setMtu: ${config.mtu}")
         vpnBuilder.setMtu(config.mtu)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            config.httpProxy?.let {
-                Log.d(TAG, "setHttpProxy: $it")
-                vpnBuilder.setHttpProxy(it)
-            }
-        }
-
-        if (config.allowAllAF) {
-            Log.d(TAG, "allowFamily")
-            vpnBuilder.allowFamily(OsConstants.AF_INET)
-            vpnBuilder.allowFamily(OsConstants.AF_INET6)
-        }
 
         Log.d(TAG, "setBlocking: ${config.blockingMode}")
         vpnBuilder.setBlocking(config.blockingMode)

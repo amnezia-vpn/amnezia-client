@@ -34,7 +34,6 @@ namespace {
         return amnezia::xrayEffective::security(srv);
     }
 
-    // Desktop applies this in XrayProtocol::start(); iOS/Android pass JSON straight to libxray — same fixes here.
     void sanitizeXrayNativeConfig(amnezia::ProtocolConfig &pc)
     {
         const QString before = pc.nativeConfig();

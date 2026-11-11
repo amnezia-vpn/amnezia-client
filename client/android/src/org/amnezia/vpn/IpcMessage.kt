@@ -22,7 +22,6 @@ sealed interface IpcMessage {
 enum class ServiceEvent : IpcMessage {
     STATUS_CHANGED,
     STATUS,
-    STATISTICS_UPDATE,
     ERROR
 }
 

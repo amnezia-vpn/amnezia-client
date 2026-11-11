@@ -7,7 +7,6 @@ import org.amnezia.vpn.protocol.ProtocolConfig
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
-import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.asSequence
@@ -31,9 +30,6 @@ class Xtun : Protocol() {
     private var tunnel: XtunTunnel? = null
     @Volatile
     private var isTunnelConnected = false
-
-    override val statistics: Statistics
-        get() = Statistics.EMPTY_STATISTICS
 
     override fun internalInit() {}
 
