@@ -69,6 +69,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var protoType: TunnelProtoType?
     
     var activeIfaceIdx: UInt32 = 0
+    let hevSocksTunnelGroup = DispatchGroup()
 
     func openVPNPacketFlow() -> OpenVPNAdapterPacketFlow {
         openVPNPacketFlowAdapter
@@ -316,10 +317,11 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         updateActiveInterfaceIndex(for: changePath)
         reasserting = true
         xrayLog(.info, message: "Applying network change to xray tunnel")
-        stopXray { }
-        startXray { [weak self] error in
-            self?.reasserting = false
-            completion(error)
+        stopXray { [weak self] in
+            self?.startXray { [weak self] error in
+                self?.reasserting = false
+                completion(error)
+            }
         }
     }
 
