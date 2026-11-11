@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Git
-from conan.tools.files import copy, collect_libs, patch
+from conan.tools.files import copy, collect_libs
 from conan.internal.model.pkg_type import PackageType
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.apple import is_apple_os
@@ -25,8 +25,6 @@ class HevSocks5Tunnel(ConanFile):
         "shared": False,
         "as_framework": False
     }
-
-    exports = "patches/*"
 
     def config_options(self):
         if not is_apple_os(self):
@@ -54,7 +52,6 @@ class HevSocks5Tunnel(ConanFile):
         tc.generate()
 
     def build(self):
-        patch(self, patch_file=os.path.join(self.recipe_folder, "patches", "0001-wake-lwip-tasks-on-stop.patch"))
         autotools = Autotools(self)
         autotools.make("shared" if self.options.shared else "static")
 
@@ -97,7 +94,7 @@ class HevSocks5Tunnel(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "heiher::hev-socks5-tunnel")
         if self.options.get_safe("as_framework"):
             self.cpp_info.type = PackageType.STATIC
-            self.cpp_info.package_framework = "HevSocks5Tunnel"
+            self.cpp_info.package_framework = True
             self.cpp_info.location = os.path.join(self.package_folder, "HevSocks5Tunnel.xcframework")
         else:
             self.cpp_info.libraries = collect_libs(self)
