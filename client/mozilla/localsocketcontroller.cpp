@@ -138,8 +138,25 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
-  json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
-  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
+  QString deviceIpv4;
+  QString deviceIpv6;
+  const QStringList deviceAddresses =
+      wgConfig.value(amnezia::configKey::clientIp).toString().split(',', Qt::SkipEmptyParts);
+  for (const QString &rawAddress : deviceAddresses) {
+    const QString address = rawAddress.trimmed();
+    if (address.contains(':')) {
+      if (deviceIpv6.isEmpty()) {
+        deviceIpv6 = address;
+      }
+    } else if (deviceIpv4.isEmpty()) {
+      deviceIpv4 = address;
+    }
+  }
+
+  if (!deviceIpv4.isEmpty()) {
+    json.insert("deviceIpv4Address", deviceIpv4);
+  }
+  m_deviceIpv4 = deviceIpv4;
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
@@ -148,7 +165,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   // https://man7.org/linux/man-pages/man5/gai.conf.5.html
 
   // simply "dead::1" is globally-routable, don't use it
-  json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  json.insert("deviceIpv6Address", deviceIpv6.isEmpty() ? QStringLiteral("fd58:baa6:dead::1") : deviceIpv6);
 
   json.insert("serverPublicKey", wgConfig.value(amnezia::configKey::serverPubKey));
   json.insert("serverPskKey", wgConfig.value(amnezia::configKey::pskKey));
