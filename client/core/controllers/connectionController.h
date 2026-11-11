@@ -40,10 +40,6 @@ public:
 
     void closeConnection();
 
-#ifdef Q_OS_ANDROID
-    void restoreConnection();
-#endif
-
     void onKillSwitchModeChanged(bool enabled);
 
     ErrorCode lastConnectionError() const;
@@ -68,10 +64,6 @@ signals:
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
-
-#ifdef Q_OS_ANDROID
-    void restoreConnectionRequested();
-#endif
 
 private:
     ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;

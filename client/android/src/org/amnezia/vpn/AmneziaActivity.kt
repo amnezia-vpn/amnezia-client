@@ -61,7 +61,6 @@ import kotlinx.coroutines.runBlocking
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
-import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.json.JSONException
@@ -189,7 +188,6 @@ class AmneziaActivity : QtActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity")
-        loadLibs()
 
         // Configure window for edge-to-edge display
         configureWindowForEdgeToEdge()
@@ -216,14 +214,6 @@ class AmneziaActivity : QtActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
-    }
-
-    private fun loadLibs() {
-        listOf(
-            "rsapss"
-        ).forEach {
-            loadSharedLibrary(this.applicationContext, it)
-        }
     }
 
     private fun registerBroadcastReceivers() {
@@ -650,12 +640,13 @@ class AmneziaActivity : QtActivity() {
 
     private fun getVpnProto(vpnConfig: String): VpnProto? = try {
         require(vpnConfig.isNotBlank()) { "Blank VPN config" }
-        VpnProto.get(JSONObject(vpnConfig).getString("protocol"))
+        JSONObject(vpnConfig)
+        VpnProto.XTUN
     } catch (e: JSONException) {
         Log.e(TAG, "Invalid VPN config json format: ${e.message}")
         null
     } catch (e: IllegalArgumentException) {
-        Log.e(TAG, "Protocol not found: ${e.message}")
+        Log.e(TAG, "Invalid VPN config: ${e.message}")
         null
     }
 

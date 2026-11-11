@@ -504,13 +504,7 @@ open class AmneziaVpnService : VpnService() {
             return
         }
 
-        try {
-            vpnProto = VpnProto.get(config.getString("protocol"))
-        } catch (e: Exception) {
-            onError("Invalid VPN config: ${e.message}")
-            protocolState.value = DISCONNECTED
-            return
-        }
+        vpnProto = VpnProto.XTUN
 
         protocolState.value = CONNECTING
 

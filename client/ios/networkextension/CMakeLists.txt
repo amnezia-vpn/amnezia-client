@@ -46,9 +46,7 @@ endif()
 set_target_properties(${CLIENT_IOS_NE_TARGET_NAME} PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
     XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
     XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
-    XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
 )
 
 set_target_properties("${CLIENT_IOS_NE_TARGET_NAME}" PROPERTIES
@@ -68,40 +66,12 @@ target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${FW_LIBRESOLV})
 target_compile_options(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
-
 target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PacketTunnelSettingsGenerator.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSResolver.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardNetworkExtension/ErrorNotifier.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Keychain.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/NETunnelProviderProtocol+Extension.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/String+ArrayConversion.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/TunnelConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddressRange.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Endpoint.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSServer.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/InterfaceConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PeerConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/FileManager+Extension.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
 
 target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE
@@ -115,21 +85,5 @@ set_property(TARGET ${CLIENT_IOS_NE_TARGET_NAME} APPEND PROPERTY RESOURCE
 target_include_directories(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(openvpnadapter REQUIRED)
-# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
-set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
-set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
-target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE amnezia::openvpnadapter)
-
-find_package(awg-apple REQUIRED)
-target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE amnezia::awg-apple)
-
-find_package(hev-socks5-tunnel REQUIRED)
-# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
-set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
-set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
-target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE heiher::hev-socks5-tunnel)
+include(${CLIENT_ROOT_DIR}/cmake/xtunApple.cmake)
+target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${XTUN_APPLE_XCFRAMEWORK})

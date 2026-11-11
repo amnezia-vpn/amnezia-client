@@ -36,36 +36,15 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.h
     ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.cpp
 )
 
-
-find_package(awg-android REQUIRED)
-set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS
-    $<TARGET_FILE:amnezia::awg-android>
-    ${AMNEZIA_ANDROID_LIBWG_PATH}
-    ${AMNEZIA_ANDROID_LIBWG_QUICK_PATH}
-)
-
-find_package(amnezia-libxray REQUIRED)
-file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
-
-find_package(openvpn-pt-android REQUIRED)
-get_filename_component(OPENVPN_PT_ANDROID_LIB_DIR ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH} DIRECTORY)
-set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS
-    ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH}
-    ${OPENVPN_PT_ANDROID_LIB_DIR}/libovpn3.so
-    ${OPENVPN_PT_ANDROID_LIB_DIR}/libovpnutil.so
-    ${OPENVPN_PT_ANDROID_LIB_DIR}/librsapss.so
-)
 
 set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 

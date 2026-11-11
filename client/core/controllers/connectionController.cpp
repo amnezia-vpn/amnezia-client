@@ -32,9 +32,6 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::killSwitchModeChangedRequested, m_vpnConnection, &VpnConnection::onKillSwitchModeChanged, Qt::QueuedConnection);
-#ifdef Q_OS_ANDROID
-    connect(this, &ConnectionController::restoreConnectionRequested, m_vpnConnection, &VpnConnection::restoreConnection, Qt::QueuedConnection);
-#endif
 }
 
 bool ConnectionController::isConnected() const
@@ -231,15 +228,6 @@ void ConnectionController::closeConnection()
         emit closeConnectionRequested();
     }
 }
-
-#ifdef Q_OS_ANDROID
-void ConnectionController::restoreConnection()
-{
-    if (m_vpnConnection) {
-        emit restoreConnectionRequested();
-    }
-}
-#endif
 
 void ConnectionController::onKillSwitchModeChanged(bool enabled)
 {

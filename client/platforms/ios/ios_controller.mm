@@ -28,8 +28,6 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
-using namespace ProtocolUtils;
-
 #if !MACOS_NE
 static UIViewController* getViewController() {
     UIApplication *application = [UIApplication sharedApplication];
@@ -96,44 +94,12 @@ Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
 }
 
 namespace {
-constexpr int kHandshakeTimeoutMs = 12000;
-constexpr uint64_t kHandshakeRxThreshold = 4096;
-bool isWireGuardBasedProto(amnezia::Proto proto) {
-    return proto == amnezia::Proto::WireGuard || proto == amnezia::Proto::Awg;
-}
-
-uint64_t uint64FromResponse(NSDictionary *response, NSString *key, uint64_t fallback = 0) {
-    id value = response[key];
-    if (!value || value == [NSNull null]) {
-        return fallback;
+TunnelStatus tunnelStatusFromResponse(NSDictionary *response) {
+    id value = response[@"status"];
+    if (![value isKindOfClass:[NSNumber class]]) {
+        return TunnelStatus::Disconnected;
     }
-    if ([value isKindOfClass:[NSNumber class]]) {
-        return [(NSNumber *)value unsignedLongLongValue];
-    }
-    if ([value isKindOfClass:[NSString class]]) {
-        const char *str = [(NSString *)value UTF8String];
-        if (str && *str) {
-            return strtoull(str, nullptr, 10);
-        }
-    }
-    return fallback;
-}
-
-long long int64FromResponse(NSDictionary *response, NSString *key, long long fallback = 0) {
-    id value = response[key];
-    if (!value || value == [NSNull null]) {
-        return fallback;
-    }
-    if ([value isKindOfClass:[NSNumber class]]) {
-        return [(NSNumber *)value longLongValue];
-    }
-    if ([value isKindOfClass:[NSString class]]) {
-        const char *str = [(NSString *)value UTF8String];
-        if (str && *str) {
-            return strtoll(str, nullptr, 10);
-        }
-    }
-    return fallback;
+    return static_cast<TunnelStatus>([(NSNumber *)value intValue]);
 }
 }
 
@@ -211,21 +177,13 @@ bool IosController::initialize()
     return ok;
 }
 
-bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration)
+bool IosController::connectVpn(const QJsonObject& configuration)
 {
-    m_proto = proto;
     m_rawConfig = configuration;
     m_serverAddress = configuration.value(configKey::hostName).toString().toNSString();
 
     const QString serverDescription = configuration.value(configKey::description).toString().trimmed();
-    QString tunnelName;
-    if (serverDescription.isEmpty()) {
-        tunnelName = ProtocolUtils::protoToString(proto);
-    } else {
-        tunnelName = QString("%1 %2")
-          .arg(serverDescription)
-          .arg(ProtocolUtils::protoToString(proto));
-    }
+    const QString tunnelName = serverDescription.isEmpty() ? QStringLiteral("AmneziaVPN") : serverDescription;
 
     qDebug() << "IosController::connectVpn" << tunnelName;
 
@@ -291,24 +249,16 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
             name:NEVPNStatusDidChangeNotification
             object:m_currentTunnel.connection];
 
+    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
+    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
+    const QByteArray configJson = QJsonDocument(configuration).toJson(QJsonDocument::Compact);
+    NSData *configData = [NSData dataWithBytes:configJson.constData() length:configJson.size()];
+    tunnelProtocol.providerConfiguration = @{@"xtun": configData};
+    tunnelProtocol.serverAddress = m_serverAddress;
+    m_currentTunnel.protocolConfiguration = tunnelProtocol;
 
-    if (proto == amnezia::Proto::OpenVpn) {
-        return setupOpenVPN();
-    }
-    if (proto == amnezia::Proto::WireGuard) {
-        return setupWireGuard();
-    }
-    if (proto == amnezia::Proto::Awg) {
-        return setupAwg();
-    }
-    if (proto == amnezia::Proto::Xray) {
-        return setupXray();
-    }
-    if (proto == amnezia::Proto::SSXray) {
-        return setupSSXray();
-    }
-
-    return false;
+    startTunnel();
+    return true;
 }
 
 void IosController::disconnectVpn()
@@ -352,35 +302,16 @@ void IosController::checkStatus()
             return;
         }
 
-        const uint64_t txBytes = uint64FromResponse(response, @"tx_bytes");
-        const uint64_t rxBytes = uint64FromResponse(response, @"rx_bytes");
-        const long long last_handshake_time_sec = int64FromResponse(response, @"last_handshake_time_sec");
+        const TunnelStatus status = tunnelStatusFromResponse(response);
 
-        QMetaObject::invokeMethod(this, [this, txBytes, rxBytes, last_handshake_time_sec]() {
-            if (isWireGuardBasedProto(m_proto) && m_handshakeAwaiting) {
-                const bool hasHandshakeData = (last_handshake_time_sec >= 0);
-                const bool hasFreshHandshake = hasHandshakeData &&
-                        ((last_handshake_time_sec > 0) ||
-                         (rxBytes >= kHandshakeRxThreshold) ||
-                         (txBytes >= kHandshakeRxThreshold));
-
-                if (hasFreshHandshake) {
-                    m_handshakeConfirmed = true;
-                    m_handshakeAwaiting = false;
-                    m_handshakeTimer.invalidate();
-                    qDebug() << "IosController::checkStatus : handshake confirmed";
-                    emitConnectionStateIfChanged(Vpn::ConnectionState::Connected);
-                } else if (m_handshakeTimer.isValid() &&
-                           m_handshakeTimer.elapsed() > kHandshakeTimeoutMs) {
-                    m_handshakeTimer.restart();
-                    qDebug() << "IosController::checkStatus : handshake timed out, keeping tunnel alive";
-                    emitConnectionStateIfChanged(Vpn::ConnectionState::Reconnecting);
-                }
+        QMetaObject::invokeMethod(this, [this, status]() {
+            if (status == TunnelStatus::Connected) {
+                m_isTunnelConnected = true;
+                emitConnectionStateIfChanged(Vpn::ConnectionState::Connected);
+            } else if (m_isTunnelConnected) {
+                m_isTunnelConnected = false;
+                emitConnectionStateIfChanged(Vpn::ConnectionState::Reconnecting);
             }
-
-            emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
-            m_rxBytes = rxBytes;
-            m_txBytes = txBytes;
             m_statusRequestInFlight = false;
         }, Qt::QueuedConnection);
     });
@@ -497,18 +428,12 @@ void IosController::vpnStatusDidChange(void *pNotification)
         }
 
         Vpn::ConnectionState nextState = iosStatusToState(session.status);
-        if (session.status == NEVPNStatusConnected && isWireGuardBasedProto(m_proto)) {
-            if (!m_handshakeConfirmed) {
+        if (session.status == NEVPNStatusConnected) {
+            if (!m_isTunnelConnected) {
                 nextState = Vpn::ConnectionState::Connecting;
-                if (!m_handshakeAwaiting) {
-                    m_handshakeAwaiting = true;
-                    m_handshakeTimer.restart();
-                }
             }
-        } else if (session.status != NEVPNStatusConnected) {
-            m_handshakeAwaiting = false;
-            m_handshakeConfirmed = false;
-            m_handshakeTimer.invalidate();
+        } else {
+            m_isTunnelConnected = false;
             m_statusRequestInFlight = false;
         }
         emitConnectionStateIfChanged(nextState);
@@ -519,295 +444,8 @@ void IosController::vpnConfigurationDidChange(void *pNotification)
     qDebug() << "IosController::vpnConfigurationDidChange" << pNotification;
 }
 
-bool IosController::setupOpenVPN()
-{
-    QJsonObject ovpn = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
-    QString ovpnConfig = ovpn[configKey::config].toString();
-
-    QJsonObject openVPNConfig {};
-    openVPNConfig.insert(configKey::config, ovpnConfig);
-
-    if (ovpn.contains(configKey::mtu)) {
-        openVPNConfig.insert(configKey::mtu, ovpn[configKey::mtu]);
-    } else {
-        openVPNConfig.insert(configKey::mtu, protocols::openvpn::defaultMtu);
-    }
-
-    openVPNConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
-
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
-    }
-
-    openVPNConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
-
-    QJsonDocument openVPNConfigDoc(openVPNConfig);
-    QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
-
-    return startOpenVPN(openVPNConfigStr);
-}
-
-static void insertNonEmptyAwgParams(QJsonObject &wgConfig, const QJsonObject &config)
-{
-    const QStringList awgProtocolKeys = configKey::awgProtocolKeys();
-
-    for (const QString &key : awgProtocolKeys) {
-        const QJsonValue value = config.value(key);
-        if (value.isString() && !value.toString().isEmpty()) {
-            wgConfig.insert(key, value);
-        }
-    }
-}
-
-bool IosController::setupWireGuard()
-{
-    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
-
-    QJsonObject wgConfig {};
-    wgConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    wgConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
-
-    if (config.contains(configKey::mtu)) {
-        wgConfig.insert(configKey::mtu, config[configKey::mtu]);
-    } else {
-        wgConfig.insert(configKey::mtu, protocols::wireguard::defaultMtu);
-    }
-
-    wgConfig.insert(configKey::hostName, config[configKey::hostName]);
-    wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
-    wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
-    wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
-    wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
-    wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
-
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
-    }
-
-    wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
-
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
-    }
-
-    if (config.contains(configKey::persistentKeepAlive)) {
-        wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
-    }
-
-    insertNonEmptyAwgParams(wgConfig, config);
-
-    QJsonDocument wgConfigDoc(wgConfig);
-    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
-
-    return startWireGuard(wgConfigDocStr);
-}
-
-bool IosController::setupXray()
-{
-    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Xray)].toObject();
-    QString xrayConfigStr = config.value(configKey::config).toString();
-
-    QJsonObject finalConfig;
-    finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1].toString());
-    finalConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2].toString());
-    finalConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
-
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for (int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
-    }
-
-    finalConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
-    finalConfig.insert(configKey::config, xrayConfigStr);
-
-    QJsonDocument finalConfigDoc(finalConfig);
-    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
-
-    return startXray(finalConfigStr);
-}
-
-bool IosController::setupSSXray()
-{
-    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
-    QString ssXrayConfigStr = config.value(configKey::config).toString();
-
-    QJsonObject finalConfig;
-    finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    finalConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
-    finalConfig.insert(configKey::config, ssXrayConfigStr);
-
-    QJsonDocument finalConfigDoc(finalConfig);
-    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
-
-    return startXray(finalConfigStr);
-}
-
-bool IosController::setupAwg()
-{
-    QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Awg)].toObject();
-
-    QJsonObject wgConfig {};
-    wgConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    wgConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
-
-    if (config.contains(configKey::mtu)) {
-        wgConfig.insert(configKey::mtu, config[configKey::mtu]);
-    } else {
-        wgConfig.insert(configKey::mtu, protocols::awg::defaultMtu);
-    }
-
-    wgConfig.insert(configKey::hostName, config[configKey::hostName]);
-    wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
-    wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
-    wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
-    wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
-    wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
-
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
-    }
-
-    wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
-
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
-    }
-
-    if (config.contains(configKey::persistentKeepAlive)) {
-        wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
-    }
-
-    insertNonEmptyAwgParams(wgConfig, config);
-
-    QJsonDocument wgConfigDoc(wgConfig);
-    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
-
-    return startWireGuard(wgConfigDocStr);
-}
-
-bool IosController::startOpenVPN(const QString &config)
-{
-    qDebug() << "IosController::startOpenVPN";
-
-    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
-    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    QByteArray configUtf8 = config.toUtf8();
-    NSData *ovpnConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
-    tunnelProtocol.providerConfiguration = @{@"ovpn": ovpnConfigData};
-    tunnelProtocol.serverAddress = m_serverAddress;
-    if (@available(iOS 14.0, macOS 11.0, *)) {
-        int splitTunnelType = 0;
-        QJsonParseError parseError;
-        QJsonDocument doc = QJsonDocument::fromJson(config.toUtf8(), &parseError);
-        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
-            QJsonObject obj = doc.object();
-            splitTunnelType = obj.value(configKey::splitTunnelType).toInt(0);
-        }
-#if defined(MACOS_NE)
-        // On macOS NE use route-based full tunnel. includeAllNetworks enables
-        // policy-based drop-all mode and causes enforceRoutes to be ignored.
-        tunnelProtocol.includeAllNetworks = NO;
-        if (splitTunnelType == 0) {
-            tunnelProtocol.enforceRoutes = YES;
-            if (@available(iOS 14.2, macOS 11.0, *)) {
-                tunnelProtocol.excludeLocalNetworks = YES;
-            }
-        }
-#else
-        tunnelProtocol.includeAllNetworks = (splitTunnelType == 0);
-        if (@available(iOS 14.2, macOS 11.0, *)) {
-            // Keep existing iOS behavior.
-            if (splitTunnelType == 0) {
-                tunnelProtocol.excludeLocalNetworks = NO;
-            }
-        }
-#endif
-    }
-
-    m_currentTunnel.protocolConfiguration = tunnelProtocol;
-
-    NETunnelProviderProtocol *appliedProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
-    NSData *ovpnPayload = appliedProtocol.providerConfiguration[@"ovpn"];
-    NSString *payloadPreview = @"";
-    if (ovpnPayload != nil) {
-        NSString *decodedPayload = [[NSString alloc] initWithData:ovpnPayload encoding:NSUTF8StringEncoding];
-        if (decodedPayload != nil) {
-            payloadPreview = [decodedPayload substringToIndex:MIN((NSUInteger)512, decodedPayload.length)];
-        }
-    }
-
-    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration"
-                       << "bundleId=" << QString::fromNSString(appliedProtocol.providerBundleIdentifier ?: @"")
-                       << "serverAddress=" << QString::fromNSString(appliedProtocol.serverAddress ?: @"")
-                       << "providerKeys=" << QString::fromNSString([[appliedProtocol.providerConfiguration.allKeys description] copy])
-                       << "ovpnBytes=" << (ovpnPayload != nil ? ovpnPayload.length : 0);
-    qDebug().noquote() << "IosController::startOpenVPN protocolConfiguration payloadPreview="
-                       << QString::fromNSString(payloadPreview);
-
-    startTunnel();
-}
-
-bool IosController::startWireGuard(const QString &config)
-{
-    qDebug() << "IosController::startWireGuard";
-
-    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
-    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    QByteArray configUtf8 = config.toUtf8();
-    NSData *wgConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
-    tunnelProtocol.providerConfiguration = @{@"wireguard": wgConfigData};
-    tunnelProtocol.serverAddress = m_serverAddress;
-
-    m_currentTunnel.protocolConfiguration = tunnelProtocol;
-
-    startTunnel();
-}
-
-bool IosController::startXray(const QString &config)
-{
-    qDebug() << "IosController::startXray";
-
-    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
-    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    QByteArray configUtf8 = config.toUtf8();
-    NSData *xrayConfigData = [NSData dataWithBytes:configUtf8.constData() length:configUtf8.size()];
-    tunnelProtocol.providerConfiguration = @{@"xray": xrayConfigData};
-    tunnelProtocol.serverAddress = m_serverAddress;
-
-    m_currentTunnel.protocolConfiguration = tunnelProtocol;
-
-    startTunnel();
-}
-
 void IosController::startTunnel()
 {
-    NSString *protocolName = @"Unknown";
-
-    NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
-    if (tunnelProtocol.providerConfiguration[@"wireguard"] != nil) {
-        protocolName = @"WireGuard";
-    } else if (tunnelProtocol.providerConfiguration[@"ovpn"] != nil) {
-        protocolName = @"OpenVPN";
-    }
-
-    m_rxBytes = 0;
-    m_txBytes = 0;
-
     NETunnelProviderManager *tunnel = m_currentTunnel;
     [tunnel setEnabled:YES];
 
@@ -815,8 +453,8 @@ void IosController::startTunnel()
         [tunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if (saveError) {
-                    qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName
-                                       << " Tunnel Save Error" << saveError.localizedDescription.UTF8String << " domain:"
+                    qDebug().nospace() << "IosController::startTunnel : Tunnel Save Error"
+                                       << saveError.localizedDescription.UTF8String << " domain:"
                                        << saveError.domain.UTF8String << " code:" << saveError.code;
                     emit connectionStateChanged(Vpn::ConnectionState::Error);
                     return;
@@ -825,8 +463,8 @@ void IosController::startTunnel()
                 [tunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (loadError) {
-                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
-                                               << ": Connect " << protocolName << " Tunnel Load Error"
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription
+                                               << " : Tunnel Load Error"
                                                << loadError.localizedDescription.UTF8String;
                             emit connectionStateChanged(Vpn::ConnectionState::Error);
                             return;
@@ -838,12 +476,12 @@ void IosController::startTunnel()
                         BOOL started = [tunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                         if (!started || startError) {
-                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
-                                               << " : Connect " << protocolName << " Tunnel Start Error"
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription
+                                               << " : Tunnel Start Error"
                                                << (startError ? startError.localizedDescription.UTF8String : "");
                             emit connectionStateChanged(Vpn::ConnectionState::Error);
                         } else {
-                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription << protocolName
+                            qDebug().nospace() << "IosController::startTunnel :" << tunnel.localizedDescription
                                                << " : Starting the tunnel succeeded";
                         }
                     });

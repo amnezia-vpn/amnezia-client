@@ -1,54 +1,20 @@
 package org.amnezia.vpn
 
 import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.awg.Awg
-import org.amnezia.vpn.protocol.openvpn.OpenVpn
-import org.amnezia.vpn.protocol.wireguard.Wireguard
-import org.amnezia.vpn.protocol.xray.Xray
+import org.amnezia.vpn.protocol.VPN_SESSION_NAME
+import org.amnezia.vpn.protocol.xtun.Xtun
 
 enum class VpnProto(
     val label: String,
     val processName: String,
     val serviceClass: Class<out AmneziaVpnService>
 ) {
-    WIREGUARD(
-        "WireGuard",
-        "org.amnezia.vpn:amneziaAwgService",
-        AwgService::class.java
+    XTUN(
+        VPN_SESSION_NAME,
+        "org.amnezia.vpn:amneziaVpnService",
+        XtunService::class.java
     ) {
-        override fun createProtocol(): Protocol = Wireguard()
-    },
-
-    AWG(
-        "AmneziaWG",
-        "org.amnezia.vpn:amneziaAwgService",
-        AwgService::class.java
-    ) {
-        override fun createProtocol(): Protocol = Awg()
-    },
-
-    OPENVPN(
-        "OpenVPN",
-        "org.amnezia.vpn:amneziaOpenVpnService",
-        OpenVpnService::class.java
-    ) {
-        override fun createProtocol(): Protocol = OpenVpn()
-    },
-
-    XRAY(
-        "XRay",
-        "org.amnezia.vpn:amneziaXrayService",
-        XrayService::class.java
-    ) {
-        override fun createProtocol(): Protocol = Xray.instance
-    },
-
-    SSXRAY(
-        "SSXRay",
-        "org.amnezia.vpn:amneziaXrayService",
-        XrayService::class.java
-    ) {
-        override fun createProtocol(): Protocol = Xray.instance
+        override fun createProtocol(): Protocol = Xtun()
     };
 
     private var _protocol: Protocol? = null
@@ -59,8 +25,4 @@ enum class VpnProto(
         }
 
     protected abstract fun createProtocol(): Protocol
-
-    companion object {
-        fun get(protocolName: String): VpnProto = VpnProto.valueOf(protocolName.uppercase())
-    }
 }
