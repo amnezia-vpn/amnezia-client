@@ -17,6 +17,16 @@ PageType {
 
     property bool isServerWithWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
 
+    function rebootServer() {
+        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+        } else {
+            PageController.showBusyIndicator(true)
+            InstallController.rebootServer(ServersUiController.processedServerId)
+            PageController.showBusyIndicator(false)
+        }
+    }
+
     Connections {
         target: InstallController
 
@@ -33,6 +43,20 @@ PageType {
 
         function onRebootServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
+        }
+
+        function onUpdateServerPackagesFinished(finishedMessage) {
+            PageController.closePage()
+
+            var descriptionText = qsTr("Some updates, such as a new kernel, take effect only after a reboot. Do you want to reboot the server now?")
+            var yesButtonText = qsTr("Reboot")
+            var noButtonText = qsTr("Not now")
+
+            var noButtonFunction = function() {
+
+            }
+
+            Dialogs.askQuestion(finishedMessage, descriptionText, yesButtonText, noButtonText, root.rebootServer, noButtonFunction)
         }
     }
 
@@ -91,6 +115,38 @@ PageType {
 
                 visible: root.isServerWithWriteAccess
 
+                text: qsTr("Update server packages")
+                subtitle: qsTr("Install system updates with the distribution's package manager")
+                destructive: true
+
+                onClicked: {
+                    var headerText = qsTr("Do you want to update packages on the server?")
+                    var descriptionText = qsTr("The update may take several minutes. Amnezia services on the server may restart briefly. The server will not be rebooted.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        PageController.goToPage(PageEnum.PageDeinstalling, true, {
+                                                    "headerText": qsTr("Updating packages on %1"),
+                                                    "progressText": qsTr("It may take several minutes")
+                                                })
+                        InstallController.updateServerPackages(ServersUiController.processedServerId)
+                    }
+                    var noButtonFunction = function() {
+
+                    }
+
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: root.isServerWithWriteAccess
+
                 text: qsTr("Reboot server")
                 destructive: true
 
@@ -100,20 +156,11 @@ PageType {
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
-                    var yesButtonFunction = function() {
-                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
-                        } else {
-                            PageController.showBusyIndicator(true)
-                            InstallController.rebootServer(ServersUiController.processedServerId)
-                            PageController.showBusyIndicator(false)
-                        }
-                    }
                     var noButtonFunction = function() {
 
                     }
 
-                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, root.rebootServer, noButtonFunction)
                 }
             }
 

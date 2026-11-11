@@ -47,10 +47,10 @@ public:
 
     ErrorCode fetchServiceConfig(const QString &serverId, const QString &serviceProtocol, QJsonObject &serverConfigJson);
 
-    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &serverCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
 
-    ErrorCode resolveUpdateServiceCaptcha(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+    ErrorCode resolveUpdateServiceCaptcha(const QString &serverId, const QString &serverCountryCode, bool isConnectEvent,
                                           const ProtocolData &protocolData, const QString &captchaId,
                                           const QString &captchaSolution, CaptchaInfo *retryCaptchaOut = nullptr);
 

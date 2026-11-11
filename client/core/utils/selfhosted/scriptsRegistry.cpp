@@ -60,6 +60,7 @@ QString amnezia::scriptName(SharedScriptType type)
     case SharedScriptType::check_connection: return QLatin1String("check_connection.sh");
     case SharedScriptType::check_server_is_busy: return QLatin1String("check_server_is_busy.sh");
     case SharedScriptType::check_user_in_sudo: return QLatin1String("check_user_in_sudo.sh");
+    case SharedScriptType::update_server_packages: return QLatin1String("update_server_packages.sh");
     default: return QString();
     }
 }

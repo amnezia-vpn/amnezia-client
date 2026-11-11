@@ -1,6 +1,8 @@
 #include "ipcserver.h"
 
 #include <QDebug>
+#include <QHostAddress>
+#include <QTcpServer>
 
 #include "logger.h"
 
@@ -90,4 +92,20 @@ bool IpcServer::localProxyDown()
 bool IpcServer::isLocalProxyRunning()
 {
     return m_xtunController.isLocalProxyRunning();
+}
+
+bool IpcServer::isTcpPortAvailable(int port)
+{
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::isTcpPortAvailable" << port;
+#endif
+
+    if (port < 1 || port > 65535) {
+        return false;
+    }
+
+    QTcpServer server;
+    const bool available = server.listen(QHostAddress::LocalHost, static_cast<quint16>(port));
+    server.close();
+    return available;
 }
