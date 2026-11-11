@@ -95,6 +95,10 @@ if(APPLE)
     set_target_properties(${PROJECT} PROPERTIES
         INSTALL_RPATH "@executable_path/../Frameworks"
     )
+
+    # xtun's macOS DNS backend needs SystemConfiguration, but its conan package_info does not declare it
+    find_library(FW_SYSTEMCONFIG SystemConfiguration)
+    target_link_libraries(${PROJECT} PRIVATE ${FW_SYSTEMCONFIG})
 endif()
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)

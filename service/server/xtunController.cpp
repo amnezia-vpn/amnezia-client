@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "core/utils/protocolEnum.h"
-
 #ifdef Q_OS_MACOS
     #include <unistd.h>
 #endif
@@ -39,15 +37,14 @@ namespace
         return argv;
     }
 
-    std::optional<libxtun_proxy_proto> proxyProto(Proto proto)
+    std::optional<libxtun_proxy_proto> proxyProto(XtunProto proto)
     {
         switch (proto) {
-        case Proto::Awg:
-        case Proto::WireGuard: return LIBXTUN_PROXY_PROTO_AWG;
-        case Proto::Xray:
-        case Proto::SSXray: return LIBXTUN_PROXY_PROTO_VLESS;
-        default: return std::nullopt;
+        case XtunProto::Awg: return LIBXTUN_PROXY_PROTO_AWG;
+        case XtunProto::Xray: return LIBXTUN_PROXY_PROTO_XRAY;
+        case XtunProto::None: return std::nullopt;
         }
+        return std::nullopt;
     }
 
     libxtun_killswitch_mode xtunKillSwitchMode(KillSwitchMode mode)
@@ -88,7 +85,7 @@ ErrorCode XtunController::up(const TunnelConfig &config)
 {
     down();
 
-    const auto proto = proxyProto(static_cast<Proto>(config.proto()));
+    const auto proto = proxyProto(static_cast<XtunProto>(config.proto()));
     if (!proto) {
         qWarning() << "XtunController::up: xtun does not support protocol" << config.proto();
         return ErrorCode::NotImplementedError;
@@ -116,7 +113,7 @@ ErrorCode XtunController::up(const TunnelConfig &config)
 #endif
 
     if (const int error = libxtun_tunnel_new(&m_tunnel, &opts); error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to create tunnel, xtun error" << error;
+        qCritical() << "XtunController::up: failed to create tunnel:" << libxtun_strerror(error);
         return errorCode(error);
     }
 
@@ -127,19 +124,19 @@ ErrorCode XtunController::up(const TunnelConfig &config)
 
     if (const int error = libxtun_proxy_new(&m_proxy, *proto, config.config().toStdString().c_str());
         error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to create proxy, xtun error" << error;
+        qCritical() << "XtunController::up: failed to create proxy:" << libxtun_strerror(error);
         down();
         return errorCode(error);
     }
 
     if (const int error = libxtun_tunnel_attach_proxy(&m_tunnel, &m_proxy); error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to attach proxy, xtun error" << error;
+        qCritical() << "XtunController::up: failed to attach proxy:" << libxtun_strerror(error);
         down();
         return errorCode(error);
     }
 
     if (const int error = libxtun_tunnel_start(&m_tunnel); error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to start tunnel, xtun error" << error;
+        qCritical() << "XtunController::up: failed to start tunnel:" << libxtun_strerror(error);
         down();
         return errorCode(error);
     }

@@ -76,6 +76,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
+    ${CLIENT_ROOT_DIR}/core/utils/tunnelSettings.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -135,7 +136,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/mtProxyPublicHostInput.cpp
-    ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.cpp
@@ -157,6 +157,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
     ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/tunnelSettings.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -188,11 +189,13 @@ endif()
 set(COMMON_FILES_H
     ${CLIENT_ROOT_DIR}/amneziaApplication.h
     ${CLIENT_ROOT_DIR}/secureQSettings.h
+    ${CLIENT_ROOT_DIR}/vpnConnection.h
 )
 
 set(COMMON_FILES_CPP
     ${CLIENT_ROOT_DIR}/amneziaApplication.cpp
     ${CLIENT_ROOT_DIR}/secureQSettings.cpp
+    ${CLIENT_ROOT_DIR}/vpnConnection.cpp
 )
 
 file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/ui/pages_logic/*.h)
@@ -262,21 +265,11 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-        ${CLIENT_ROOT_DIR}/xtunVpnConnection.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-        ${CLIENT_ROOT_DIR}/xtunVpnConnection.cpp
-    )
-else()
-    set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/vpnConnection.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/vpnConnection.cpp
     )
 endif()
 

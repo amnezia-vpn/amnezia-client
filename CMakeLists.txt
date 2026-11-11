@@ -10,6 +10,9 @@ endif()
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
 include(${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_bootstrap.cmake)
+execute_process(
+    COMMAND ${CONAN_COMMAND} remote add recipes "https://artifactory.amnezia.org/artifactory/api/conan/recipes" --force -vquiet
+)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     ${CMAKE_SOURCE_DIR}/cmake/platform_settings.cmake
     ${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_provider.cmake

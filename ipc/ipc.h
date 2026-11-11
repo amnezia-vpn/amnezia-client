@@ -7,18 +7,6 @@
 
 namespace amnezia {
 
-enum class TunnelStatus {
-    Disconnected,
-    Connected,
-    NoNetwork
-};
-
-enum class KillSwitchMode {
-    Disabled,
-    Soft,
-    Hard
-};
-
 inline QString getIpcServiceUrl() {
 #ifdef Q_OS_WIN
     return IPC_SERVICE_URL;

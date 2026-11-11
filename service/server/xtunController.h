@@ -7,7 +7,7 @@
 #include <xtun.h>
 
 #include "core/utils/errorCodes.h"
-#include "ipc.h"
+#include "core/utils/tunnelSettings.h"
 #include "rep_ipc_interface_source.h"
 
 class XtunController : public QObject
