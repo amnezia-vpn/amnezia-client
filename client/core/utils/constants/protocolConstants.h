@@ -69,7 +69,7 @@ namespace amnezia
             constexpr char defaultSecurity[] = "reality";
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
-            constexpr char defaultFingerprint[] = "hellochrome_120";
+            constexpr char defaultFingerprint[] = "firefox";
             constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "h2";
 
