@@ -8,15 +8,12 @@
 #include <QStringList>
 #include <QList>
 #include <QElapsedTimer>
-#include <QMargins>
 #include <atomic>
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
 @class NETunnelProviderManager;
 #endif
-
-class QWindow;
 
 using namespace amnezia;
 
@@ -104,10 +101,6 @@ public:
 
     void requestInetAccess();
     bool isTestFlight();
-
-#ifdef Q_OS_IOS
-    QMargins windowSafeAreaMargins(QWindow *window) const;
-#endif
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);

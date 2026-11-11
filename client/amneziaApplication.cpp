@@ -29,7 +29,6 @@
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #ifdef Q_OS_IOS
-    #include "platforms/ios/ios_controller.h"
     #include "platforms/ios/ioscontextmenu.h"
 #endif
 
@@ -132,17 +131,8 @@ void AmneziaApplication::init()
 #endif
 #ifdef Q_OS_IOS
                 auto pageController = m_coreController->pageController();
-                const auto syncSafeAreaMargins = [pageController, win]() {
-                    pageController->setSafeAreaMargins(IosController::Instance()->windowSafeAreaMargins(win));
-                };
-                syncSafeAreaMargins();
-                QObject::connect(win, &QWindow::safeAreaMarginsChanged, pageController, syncSafeAreaMargins);
-                QObject::connect(qApp, &QGuiApplication::applicationStateChanged, pageController,
-                                 [syncSafeAreaMargins](Qt::ApplicationState state) {
-                                     if (state == Qt::ApplicationActive) {
-                                         syncSafeAreaMargins();
-                                     }
-                                 });
+                pageController->setSafeAreaMargins(win->safeAreaMargins());
+                QObject::connect(win, &QWindow::safeAreaMarginsChanged, pageController, &PageController::setSafeAreaMargins);
 #endif
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
                 win->show();
