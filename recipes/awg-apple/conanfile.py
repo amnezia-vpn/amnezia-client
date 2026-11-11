@@ -22,7 +22,13 @@ class AwgApple(ConanFile):
         return " ".join(arch_map.get(arch, arch) for arch in archs)
 
     @property
+    def _sdk(self):
+        return str(self.settings.get_safe("os.sdk", "macosx"))
+
+    @property
     def _deployment_target_vars(self):
+        if self._sdk == "iphonesimulator":
+            return "mios-simulator-version-min", "IPHONEOS_DEPLOYMENT_TARGET"
         if self.settings.os == "iOS":
             return "miphoneos-version-min", "IPHONEOS_DEPLOYMENT_TARGET"
         return "mmacosx-version-min", "MACOSX_DEPLOYMENT_TARGET"
@@ -50,10 +56,10 @@ class AwgApple(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        sdk = self.settings.get_safe("os.sdk", "macosx")
         tc.make_args = [
             f"ARCHS={self._goarch}",
-            f"PLATFORM_NAME={sdk}"
+            f"PLATFORM_NAME={self._sdk}",
+            "GOOS_iphonesimulator=ios"
         ]
         os_version = self.settings.get_safe("os.version")
         if os_version:

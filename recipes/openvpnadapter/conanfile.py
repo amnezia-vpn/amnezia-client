@@ -82,6 +82,6 @@ class OpenVPNAdapter(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpnadapter")
         self.cpp_info.type = PackageType.STATIC
-        self.cpp_info.package_framework = True
+        self.cpp_info.package_framework = "OpenVPNAdapter"
         self.cpp_info.location = os.path.join(self.package_folder, "OpenVPNAdapter.framework")
         self.cpp_info.frameworks = ["SystemConfiguration"]
