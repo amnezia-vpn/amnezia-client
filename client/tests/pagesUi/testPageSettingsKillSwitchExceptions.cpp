@@ -54,7 +54,7 @@ private slots:
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
 
         const auto buttons = m_fixture.itemsOfType("IconButtonType");
-        QCOMPARE(buttons.size(), 1);
+        QCOMPARE(buttons.size(), 2);
     }
 };
 
