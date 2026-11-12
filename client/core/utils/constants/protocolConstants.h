@@ -50,7 +50,7 @@ namespace amnezia
         {
             constexpr char dataDir[] = "/opt/amnezia/xray";
             constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
-            constexpr char expectedServerXrayRelease[] = "v26.7.28";
+            constexpr char expectedServerXrayRelease[] = "v26.10.31";
             constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
@@ -70,6 +70,7 @@ namespace amnezia
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "hellochrome_120";
+            constexpr char defaultRealityFingerprint[] = "chrome";
             constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "h2";
 
@@ -89,6 +90,13 @@ namespace amnezia
             constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
             constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
             constexpr char defaultXhttpScStreamUpServerSecsMax[] = "100";
+
+            constexpr char coreDefaultXhttpScMaxEachPostBytesMin[] = "1000000";
+            constexpr char coreDefaultXhttpScMaxEachPostBytesMax[] = "1000000";
+            constexpr char coreDefaultXhttpScMinPostsIntervalMsMin[] = "30";
+            constexpr char coreDefaultXhttpScMinPostsIntervalMsMax[] = "30";
+            constexpr char coreDefaultXhttpScStreamUpServerSecsMin[] = "20";
+            constexpr char coreDefaultXhttpScStreamUpServerSecsMax[] = "80";
 
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";

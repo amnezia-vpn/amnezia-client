@@ -48,6 +48,8 @@ private slots:
     void deviceOnlyChangesKeepServerView();
     void serverChangesChangeServerView_data();
     void serverChangesChangeServerView();
+    void realityFingerprintCarriesMlkem_data();
+    void realityFingerprintCarriesMlkem();
 };
 
 void TestXrayGeneratorMatrix::invariants_data()
@@ -113,7 +115,7 @@ void TestXrayGeneratorMatrix::invariants()
         QCOMPARE(str(rOut, "serverName"), srv.sni);
         QCOMPARE(str(rOut, "publicKey"), key32('\x02'));
         QCOMPARE(str(rOut, "shortId"), shortId());
-        QCOMPARE(str(rOut, "fingerprint"), srv.fingerprint);
+        QCOMPARE(str(rOut, "fingerprint"), xrayEffective::realityFingerprint(srv.fingerprint));
         QVERIFY(!sIn.contains("tlsSettings") && !sOut.contains("tlsSettings"));
     } else if (security == QLatin1String("tls")) {
         const QJsonObject tIn = sIn.value("tlsSettings").toObject();
@@ -152,9 +154,12 @@ void TestXrayGeneratorMatrix::invariants()
         QVERIFY(x.contains("xPaddingObfsMode"));
         QCOMPARE(x.value("xPaddingObfsMode").toBool(), srv.xhttp.xPadding.obfsMode);
         if (!srv.xhttp.xPadding.obfsMode) {
-            for (const char *key : { "xPaddingBytes", "xPaddingKey", "xPaddingHeader", "xPaddingPlacement", "xPaddingMethod" })
+            for (const char *key : { "xPaddingKey", "xPaddingHeader", "xPaddingPlacement", "xPaddingMethod" })
                 QVERIFY2(!x.contains(QString::fromLatin1(key)), qPrintable(compact(x)));
         }
+        if (!srv.xhttp.xPadding.bytesMin.isEmpty() && !srv.xhttp.xPadding.bytesMax.isEmpty())
+            QCOMPARE(str(x, "xPaddingBytes"),
+                     xrayEffective::range(srv.xhttp.xPadding.bytesMin, srv.xhttp.xPadding.bytesMax));
     }
 
     const XrayXmuxConfig &xmux = srv.xhttp.xmux;
@@ -242,6 +247,37 @@ void TestXrayGeneratorMatrix::serverChangesChangeServerView()
         after.xhttp.xPadding.obfsMode = !before.xhttp.xPadding.obfsMode;
 
     QVERIFY2(!before.hasEqualServerSettings(after), qPrintable(field + " must count as a server change"));
+}
+
+void TestXrayGeneratorMatrix::realityFingerprintCarriesMlkem_data()
+{
+    QTest::addColumn<QString>("security");
+    QTest::addColumn<QString>("fingerprint");
+    QTest::addColumn<bool>("thirdParty");
+    QTest::addColumn<QString>("expected");
+    QTest::newRow("reality hellochrome_120") << "reality" << "hellochrome_120" << false << "chrome";
+    QTest::newRow("reality ios") << "reality" << "ios" << false << "chrome";
+    QTest::newRow("reality random") << "reality" << "random" << false << "chrome";
+    QTest::newRow("reality empty") << "reality" << "" << false << "chrome";
+    QTest::newRow("reality firefox") << "reality" << "firefox" << false << "firefox";
+    QTest::newRow("reality safari") << "reality" << "safari" << false << "safari";
+    QTest::newRow("native reality hellochrome_120") << "reality" << "hellochrome_120" << true << "hellochrome_120";
+    QTest::newRow("tls hellochrome_120") << "tls" << "hellochrome_120" << false << "hellochrome_120";
+}
+
+void TestXrayGeneratorMatrix::realityFingerprintCarriesMlkem()
+{
+    QFETCH(QString, security);
+    QFETCH(QString, fingerprint);
+    QFETCH(bool, thirdParty);
+    QFETCH(QString, expected);
+
+    XrayServerConfig srv = baseConfig("raw", security, "");
+    srv.fingerprint = fingerprint;
+    srv.isThirdPartyConfig = thirdParty;
+    const QJsonObject stream = streamOf(vlessOutbound(clientJson(srv)));
+    const char *settings = security == QLatin1String("reality") ? "realitySettings" : "tlsSettings";
+    QCOMPARE(str(stream.value(QString::fromLatin1(settings)).toObject(), "fingerprint"), expected);
 }
 
 QTEST_APPLESS_MAIN(TestXrayGeneratorMatrix)

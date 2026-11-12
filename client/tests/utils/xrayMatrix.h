@@ -9,6 +9,8 @@
 #include <QString>
 #include <QStringList>
 
+#include <functional>
+
 #include "core/models/protocols/xrayProtocolConfig.h"
 
 namespace xraytest
@@ -19,6 +21,89 @@ namespace xraytest
         amnezia::XrayServerConfig srv;
         bool allowedByUi = true;
     };
+
+    enum class RealityHello {
+        Connects,
+        RealCertificate,
+        NoTls13,
+        ConfigRejected,
+        ClientPanics,
+        Unreliable,
+    };
+
+    struct RealityFingerprintCase
+    {
+        QString name;
+        RealityHello hello;
+    };
+
+    inline QList<RealityFingerprintCase> realityFingerprintCases()
+    {
+        QList<RealityFingerprintCase> cases;
+        auto add = [&cases](RealityHello hello, const QStringList &names) {
+            for (const QString &name : names)
+                cases.append({ name, hello });
+        };
+        add(RealityHello::Connects,
+            { "chrome", "firefox", "safari", "hellochrome_131", "hellochrome_133", "hellochrome_auto",
+              "hellofirefox_148", "hellofirefox_auto", "hellosafari_26_3", "hellosafari_auto" });
+        add(RealityHello::RealCertificate,
+            { "ios",              "edge",             "qq",               "hellofirefox_120",   "hellochrome_120",
+              "helloios_13",      "helloios_14",      "helloedge_106",    "hello360_11_0",      "helloqq_11_1",
+              "hellofirefox_63",  "hellofirefox_65",  "hellofirefox_99",  "hellofirefox_102",   "hellofirefox_105",
+              "hellochrome_70",   "hellochrome_72",   "hellochrome_83",   "hellochrome_87",     "hellochrome_96",
+              "hellochrome_100",  "hellochrome_102",  "hellochrome_106_shuffle", "helloios_auto", "helloedge_85",
+              "helloedge_auto",   "hellosafari_16_0", "helloqq_auto",     "hellochrome_115_pq", "hellochrome_120_pq" });
+        add(RealityHello::NoTls13,
+            { "android", "360", "hellofirefox_55", "hellofirefox_56", "hellochrome_58", "hellochrome_62",
+              "helloios_11_1", "helloios_12_1", "helloandroid_11_okhttp", "hello360_auto", "hello360_7_5" });
+        add(RealityHello::ConfigRejected, { "unsafe", "hellogolang" });
+        add(RealityHello::ClientPanics,
+            { "hellochrome_100_psk", "hellochrome_112_psk_shuf", "hellochrome_114_padding_psk_shuf",
+              "hellochrome_115_pq_psk" });
+        add(RealityHello::Unreliable,
+            { "random", "randomized", "randomizednoalpn", "hellorandomized", "hellorandomizedalpn",
+              "hellorandomizednoalpn" });
+        return cases;
+    }
+
+    inline QStringList legacyRealityFingerprints()
+    {
+        return { "hellochrome_120", "ios",    "android", "edge",    "360",     "qq",
+                 "random",          "",       " Chrome ", "hellogolang", "unsafe", "garbage",
+                 "hellochrome_100_psk" };
+    }
+
+    inline void editStream(QJsonObject &config, const char *bounds, const std::function<void(QJsonObject &)> &edit)
+    {
+        QJsonArray list = config.value(QString::fromLatin1(bounds)).toArray();
+        for (int i = 0; i < list.size(); ++i) {
+            QJsonObject bound = list.at(i).toObject();
+            if (bound.value("protocol").toString() != QLatin1String("vless"))
+                continue;
+            QJsonObject stream = bound.value("streamSettings").toObject();
+            edit(stream);
+            bound["streamSettings"] = stream;
+            list[i] = bound;
+        }
+        config[QString::fromLatin1(bounds)] = list;
+    }
+
+    inline void editSection(QJsonObject &config, const char *bounds, const char *section,
+                            const std::function<void(QJsonObject &)> &edit)
+    {
+        editStream(config, bounds, [&](QJsonObject &stream) {
+            QJsonObject settings = stream.value(QString::fromLatin1(section)).toObject();
+            edit(settings);
+            stream[QString::fromLatin1(section)] = settings;
+        });
+    }
+
+    inline void setClientRealityFingerprint(QJsonObject &client, const QString &fingerprint)
+    {
+        editSection(client, "outbounds", "realitySettings",
+                    [&fingerprint](QJsonObject &reality) { reality["fingerprint"] = fingerprint; });
+    }
 
     inline QString clientId()
     {
@@ -59,7 +144,7 @@ namespace xraytest
     inline QList<MatrixCase> matrix()
     {
         const QStringList transports = { "raw", "xhttp", "mkcp" };
-        const QStringList securities = { "none", "tls", "reality" };
+        const QStringList securities = { "tls", "reality" };
         const QStringList flows = { "", "xtls-rprx-vision", "xtls-rprx-vision-udp443" };
         const QStringList modes = { "Auto", "Packet-up", "Stream-up", "Stream-one" };
         const QStringList placements = { "Body", "Auto", "Header", "Cookie" };
@@ -71,7 +156,8 @@ namespace xraytest
                     const QString flowName = flow.isEmpty() ? QStringLiteral("noflow") : flow;
                     if (transport != QLatin1String("xhttp")) {
                         cases.append({ QStringLiteral("%1/%2/%3").arg(transport, security, flowName),
-                                       baseConfig(transport, security, flow), true });
+                                       baseConfig(transport, security, flow),
+                                       transport != QLatin1String("mkcp") || security != QLatin1String("reality") });
                         continue;
                     }
                     for (const QString &mode : modes) {
@@ -161,13 +247,18 @@ namespace xraytest
         return config.value(QStringLiteral("inbounds")).toArray().first().toObject();
     }
 
-    inline QJsonObject vlessOutbound(const QJsonObject &config)
+    inline QJsonObject vlessEntry(const QJsonObject &config, const QString &list)
     {
-        for (const QJsonValue &v : config.value(QStringLiteral("outbounds")).toArray()) {
+        for (const QJsonValue &v : config.value(list).toArray()) {
             if (v.toObject().value(QStringLiteral("protocol")).toString() == QLatin1String("vless"))
                 return v.toObject();
         }
         return {};
+    }
+
+    inline QJsonObject vlessOutbound(const QJsonObject &config)
+    {
+        return vlessEntry(config, QStringLiteral("outbounds"));
     }
 
     inline QJsonObject streamOf(const QJsonObject &bound)

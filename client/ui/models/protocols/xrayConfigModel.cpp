@@ -74,6 +74,11 @@ void XrayConfigModel::setTransport(const QString &value)
     srv.transport = value;
     if (value == QLatin1String(protocols::xray::transportXhttp)) {
         srv.applyDefaults(false);
+        srv.xhttp.applyRangeDefaults();
+    }
+    if (value == QLatin1String(protocols::xray::transportMkcp)
+        && srv.security == QLatin1String(protocols::xray::securityReality)) {
+        srv.security = QString::fromLatin1(protocols::xray::securityTls);
     }
     emitChanged(wasUnsavedChanges);
 }
@@ -106,6 +111,12 @@ QString XrayConfigModel::fingerprint() const
 void XrayConfigModel::setFingerprint(const QString &value)
 {
     assignField(m_protocolConfig.serverConfig.fingerprint, value);
+}
+
+QString XrayConfigModel::realityFingerprint() const
+{
+    const auto &srv = m_protocolConfig.serverConfig;
+    return srv.isThirdPartyConfig ? srv.fingerprint : xrayEffective::realityFingerprint(srv.fingerprint);
 }
 
 QString XrayConfigModel::sni() const
@@ -585,6 +596,11 @@ void XrayConfigModel::setXmuxHKeepAlivePeriod(const QString &value)
     assignField(m_protocolConfig.serverConfig.xhttp.xmux.hKeepAlivePeriod, value);
 }
 
+bool XrayConfigModel::xmuxKeepAliveApplies() const
+{
+    return !xrayEffective::xhttpUsesHttp11(m_protocolConfig.serverConfig);
+}
+
 void XrayConfigModel::assignField(QString &field, const QString &value)
 {
     if (field == value) {
@@ -722,6 +738,7 @@ void XrayConfigModel::resetToDefaults()
 
     m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
     applyDefaultsToServerConfig(m_protocolConfig.serverConfig, true);
+    m_protocolConfig.serverConfig.xhttp.applyRangeDefaults();
 
     emitChanged(wasUnsavedChanges);
 }
@@ -749,7 +766,7 @@ QStringList XrayConfigModel::flowOptions()
 
 QStringList XrayConfigModel::securityOptions()
 {
-    return { "none", "tls", "reality" };
+    return { "tls", "reality" };
 }
 
 QStringList XrayConfigModel::transportOptions()
@@ -760,6 +777,11 @@ QStringList XrayConfigModel::transportOptions()
 QStringList XrayConfigModel::fingerprintOptions()
 {
     return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
+}
+
+QStringList XrayConfigModel::realityFingerprintOptions()
+{
+    return { "chrome", "firefox", "safari" };
 }
 
 QStringList XrayConfigModel::alpnOptions()
@@ -779,12 +801,12 @@ QStringList XrayConfigModel::xhttpUplinkMethodOptions()
 
 QStringList XrayConfigModel::xhttpSessionPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "Query", "None" };
+    return { "Path", "Header", "Cookie", "Query" };
 }
 
 QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "Query", "None" };
+    return { "Path", "Header", "Cookie", "Query" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
@@ -850,32 +872,32 @@ QString XrayConfigModel::xhttpUplinkChunkSizeDefault()
 
 QString XrayConfigModel::scMaxEachPostBytesMinDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMin);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScMaxEachPostBytesMin);
 }
 
 QString XrayConfigModel::scMaxEachPostBytesMaxDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMax);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScMaxEachPostBytesMax);
 }
 
 QString XrayConfigModel::scMinPostsIntervalMsMinDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMin);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScMinPostsIntervalMsMin);
 }
 
 QString XrayConfigModel::scMinPostsIntervalMsMaxDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMax);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScMinPostsIntervalMsMax);
 }
 
 QString XrayConfigModel::scStreamUpServerSecsMinDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMin);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScStreamUpServerSecsMin);
 }
 
 QString XrayConfigModel::scStreamUpServerSecsMaxDefault()
 {
-    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMax);
+    return QString::fromLatin1(protocols::xray::coreDefaultXhttpScStreamUpServerSecsMax);
 }
 
 QString XrayConfigModel::xPaddingKeyDefault()
@@ -899,6 +921,22 @@ QString XrayConfigModel::xPaddingBytesMaxDefault()
 }
 
 namespace {
+    bool isValidDomainName(const QString &t)
+    {
+        static const QRegularExpression label(QStringLiteral(R"(^[A-Za-z0-9_]([A-Za-z0-9_-]{0,61}[A-Za-z0-9])?$)"));
+        static const QRegularExpression topLevel(QStringLiteral(R"(^([A-Za-z]{2,63}|xn--[A-Za-z0-9-]{1,59})$)"));
+        const QStringList labels = t.split(QLatin1Char('.'));
+        if (labels.size() < 2) {
+            return false;
+        }
+        for (int i = 0; i < labels.size() - 1; ++i) {
+            if (!label.match(labels.at(i)).hasMatch()) {
+                return false;
+            }
+        }
+        return topLevel.match(labels.last()).hasMatch();
+    }
+
     bool isValidSingleHost(const QString &t)
     {
         if (t.isEmpty() || t.length() > 253) {
@@ -915,9 +953,7 @@ namespace {
         if (onlyDigits.match(t).hasMatch()) {
             return false;
         }
-        QRegExp re = NetworkUtilities::domainRegExp();
-        re.setCaseSensitivity(Qt::CaseInsensitive);
-        return re.exactMatch(t);
+        return isValidDomainName(t);
     }
 }
 
@@ -927,7 +963,7 @@ bool XrayConfigModel::isValidHost(const QString &host)
     if (t.isEmpty()) {
         return true;
     }
-    return isValidSingleHost(t);
+    return QHostAddress(t).protocol() != QHostAddress::IPv6Protocol && isValidSingleHost(t);
 }
 
 bool XrayConfigModel::isValidSni(const QString &sni)
@@ -960,18 +996,199 @@ QStringList XrayConfigModel::validationErrors() const
         if (!isValidSni(srv.sni)) {
             errs << tr("SNI: enter a valid IP address or domain name");
         }
+    } else if (!srv.isThirdPartyConfig) {
+        if (srv.transport == QLatin1String("mkcp") && srv.security == QLatin1String("reality")) {
+            errs << tr("mKCP does not work with REALITY. Choose TLS.");
+        } else if (security.isEmpty() || security == QLatin1String("none")) {
+            errs << tr("None is not supported by Xray 26.10. Choose TLS or REALITY.");
+        }
+    }
+
+    const QString fingerprint = srv.fingerprint.trimmed().toLower();
+    const bool tls12OnlyFingerprint = fingerprint == QLatin1String("android") || fingerprint == QLatin1String("360");
+    if (security == QLatin1String("reality")) {
+        if (tls12OnlyFingerprint) {
+            errs << tr("Fingerprints android and 360 do not support TLS 1.3 and do not work with REALITY");
+        }
+        const QHostAddress sniAddress(srv.sni.trimmed());
+        if (sniAddress.protocol() == QHostAddress::IPv4Protocol || sniAddress.protocol() == QHostAddress::IPv6Protocol) {
+            errs << tr("REALITY needs a domain name in SNI, not an IP address");
+        }
+    }
+    if (security == QLatin1String("tls") && tls12OnlyFingerprint && !xrayEffective::clientFlow(srv).isEmpty()) {
+        errs << tr("Fingerprints android and 360 do not support TLS 1.3 and do not work with xtls-rprx-vision");
+    }
+
+    if (!srv.isThirdPartyConfig) {
+        auto checkValue = [&errs](const QString &field, const QString &value, const QStringList &allowed) {
+            if (!allowed.contains(value)) {
+                errs << tr("%1: unsupported value \"%2\"").arg(field, value);
+            }
+        };
+        checkValue(QStringLiteral("Transport"), srv.transport, { "", "raw", "xhttp", "mkcp" });
+        checkValue(QStringLiteral("Security"), srv.security, { "", "none", "tls", "reality" });
+        checkValue(QStringLiteral("Flow"), srv.flow, flowOptions());
+        if (!fingerprint.isEmpty()) {
+            checkValue(QStringLiteral("Fingerprint"), fingerprint, fingerprintOptions());
+        }
+        if (security == QLatin1String("tls")) {
+            const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(protocols::xray::defaultAlpn) : srv.alpn;
+            for (const QString &a : xrayEffective::alpnList(alpnEff)) {
+                checkValue(QStringLiteral("ALPN"), a, { "h2", "http/1.1" });
+            }
+        }
+        if (srv.transport == QLatin1String("xhttp")) {
+            const auto &x = srv.xhttp;
+            const QString modeEff = xrayEffective::xhttpMode(x.mode);
+            checkValue(QStringLiteral("Mode"), modeEff, { "auto", "packet-up", "stream-up", "stream-one" });
+            QString method = x.uplinkMethod.toUpper();
+            if (method == QLatin1String("GET") && modeEff == QLatin1String("packet-up"))
+                method.clear();
+            checkValue(QStringLiteral("UplinkHTTPMethod"), method, { "", "POST", "PUT", "PATCH" });
+            checkValue(QStringLiteral("SessionPlacement"), xrayEffective::sessionSeqPlacement(x.sessionPlacement),
+                       { "", "path", "header", "cookie", "query" });
+            checkValue(QStringLiteral("SeqPlacement"), xrayEffective::sessionSeqPlacement(x.seqPlacement),
+                       { "", "path", "header", "cookie", "query" });
+            checkValue(QStringLiteral("UplinkDataPlacement"), xrayEffective::uplinkDataPlacement(x.uplinkDataPlacement),
+                       { "body", "auto", "header", "cookie" });
+            if (x.xPadding.obfsMode) {
+                checkValue(QStringLiteral("xPaddingPlacement"), xrayEffective::xPaddingPlacement(x.xPadding.placement),
+                           { "cookie", "header", "query", "queryInHeader" });
+                checkValue(QStringLiteral("xPaddingMethod"), xrayEffective::xPaddingMethod(x.xPadding.method),
+                           { "repeat-x", "tokenish" });
+            }
+        }
     }
 
     if (srv.transport == QLatin1String("xhttp")) {
+        if (security == QLatin1String("tls") && tls12OnlyFingerprint && !xrayEffective::xhttpUsesHttp11(srv)) {
+            errs << tr("Fingerprints android and 360 do not offer HTTP/2; with XHTTP use ALPN http/1.1");
+        }
         if (!isValidHost(srv.xhttp.host)) {
             errs << tr("Host: enter a valid IP address or domain name");
         }
+        auto isWholeNumber = [](const QString &v, bool allowNegative) {
+            static const QRegularExpression unsignedNumber(QStringLiteral(R"(^\d+$)"));
+            static const QRegularExpression signedNumber(QStringLiteral(R"(^-?\d+$)"));
+            return v.isEmpty() || (allowNegative ? signedNumber : unsignedNumber).match(v).hasMatch();
+        };
+        auto checkNumber = [&errs, &isWholeNumber](const QString &field, const QString &v, bool allowNegative) {
+            if (isWholeNumber(v, allowNegative)) {
+                return true;
+            }
+            errs << (allowNegative ? tr("%1: enter a whole number").arg(field)
+                                   : tr("%1: enter a whole number, 0 or more").arg(field));
+            return false;
+        };
+        auto checkRange = [&errs, &isWholeNumber](const QString &field, const QString &from, const QString &to,
+                                                  bool allowNegative) {
+            if (isWholeNumber(from, allowNegative) && isWholeNumber(to, allowNegative)) {
+                return true;
+            }
+            errs << (allowNegative ? tr("%1: enter whole numbers").arg(field)
+                                   : tr("%1: enter whole numbers, 0 or more").arg(field));
+            return false;
+        };
+        static const QRegularExpression keyName(QStringLiteral(R"(^[A-Za-z0-9_-]+$)"));
+        auto checkKey = [&errs](const QString &field, const QString &v) {
+            if (!v.isEmpty() && !keyName.match(v).hasMatch()) {
+                errs << tr("%1: use only Latin letters, digits, hyphen and underscore").arg(field);
+            }
+        };
+        const auto &x = srv.xhttp;
+        checkKey(QStringLiteral("sessionKey"), x.sessionKey);
+        checkKey(QStringLiteral("seqKey"), x.seqKey);
+        checkKey(QStringLiteral("uplinkDataKey"), x.uplinkDataKey);
+        checkKey(QStringLiteral("xPaddingKey"), x.xPadding.key);
+        checkKey(QStringLiteral("xPaddingHeader"), x.xPadding.header);
+        checkNumber(QStringLiteral("uplinkChunkSize"), x.uplinkChunkSize, true);
+        const bool scMaxBufferedPostsValid =
+                checkNumber(QStringLiteral("scMaxBufferedPosts"), x.scMaxBufferedPosts, false);
+        const bool xPaddingBytesValid =
+                checkRange(QStringLiteral("xPaddingBytes"), x.xPadding.bytesMin, x.xPadding.bytesMax, false);
+        const bool scMaxEachPostBytesValid = checkRange(QStringLiteral("scMaxEachPostBytes"), x.scMaxEachPostBytesMin,
+                                                        x.scMaxEachPostBytesMax, false);
+        checkRange(QStringLiteral("scMinPostsIntervalMs"), x.scMinPostsIntervalMsMin, x.scMinPostsIntervalMsMax, true);
+        const bool scStreamUpServerSecsValid = checkRange(QStringLiteral("scStreamUpServerSecs"),
+                                                          x.scStreamUpServerSecsMin, x.scStreamUpServerSecsMax, true);
+
         const auto &xmux = srv.xhttp.xmux;
+        if (xmux.enabled) {
+            checkRange(QStringLiteral("maxConcurrency"), xmux.maxConcurrencyMin, xmux.maxConcurrencyMax, true);
+            checkRange(QStringLiteral("maxConnections"), xmux.maxConnectionsMin, xmux.maxConnectionsMax, true);
+            checkRange(QStringLiteral("cMaxReuseTimes"), xmux.cMaxReuseTimesMin, xmux.cMaxReuseTimesMax, true);
+            checkRange(QStringLiteral("hMaxRequestTimes"), xmux.hMaxRequestTimesMin, xmux.hMaxRequestTimesMax, true);
+            checkRange(QStringLiteral("hMaxReusableSecs"), xmux.hMaxReusableSecsMin, xmux.hMaxReusableSecsMax, true);
+            checkNumber(QStringLiteral("hKeepAlivePeriod"), xmux.hKeepAlivePeriod, true);
+        }
         auto isSet = [](const QString &v) { return !v.isEmpty() && v != QLatin1String("0"); };
         if (xmux.enabled && (isSet(xmux.maxConcurrencyMin) || isSet(xmux.maxConcurrencyMax))
             && (isSet(xmux.maxConnectionsMin) || isSet(xmux.maxConnectionsMax))) {
             errs << tr("XMux: set either maxConcurrency or maxConnections, not both");
         }
+
+        auto rangeValue = [](const QString &v, const char *fallback) {
+            return (v.isEmpty() ? QString::fromLatin1(fallback) : v).toLongLong();
+        };
+        const auto &pad = srv.xhttp.xPadding;
+        if (xPaddingBytesValid && (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty())) {
+            const qint64 from = rangeValue(pad.bytesMin, protocols::xray::defaultXPaddingBytesMin);
+            const qint64 to = qMax(from, rangeValue(pad.bytesMax, protocols::xray::defaultXPaddingBytesMax));
+            if (from == 0 && to > 0) {
+                errs << tr("xPaddingBytes: Min can be 0 only if Max is 0 too (0–0 = core default 100–1000)");
+            }
+        }
+        const QString mode = xrayEffective::xhttpMode(srv.xhttp.mode);
+        const bool packetUpEffective = mode == QLatin1String("packet-up")
+                || (mode == QLatin1String("auto") && security != QLatin1String("reality"));
+        if (packetUpEffective && scMaxEachPostBytesValid
+            && (!srv.xhttp.scMaxEachPostBytesMin.isEmpty() || !srv.xhttp.scMaxEachPostBytesMax.isEmpty())) {
+            const qint64 from = rangeValue(srv.xhttp.scMaxEachPostBytesMin,
+                                           protocols::xray::coreDefaultXhttpScMaxEachPostBytesMin);
+            const qint64 to = rangeValue(srv.xhttp.scMaxEachPostBytesMax,
+                                         protocols::xray::coreDefaultXhttpScMaxEachPostBytesMax);
+            if (qMin(from, to) == 0 && qMax(from, to) > 0) {
+                errs << tr("scMaxEachPostBytes: Min can be 0 only if Max is 0 too (0–0 = core default 1000000)");
+            } else if (qMin(from, to) > 0 && qMin(from, to) < 1000) {
+                errs << tr("scMaxEachPostBytes: minimum is 1000 (0–0 = core default 1000000)");
+            }
+        }
+        if (mode == QLatin1String("stream-up") && scStreamUpServerSecsValid
+            && (!srv.xhttp.scStreamUpServerSecsMin.isEmpty() || !srv.xhttp.scStreamUpServerSecsMax.isEmpty())) {
+            const qint64 from = rangeValue(srv.xhttp.scStreamUpServerSecsMin,
+                                           protocols::xray::coreDefaultXhttpScStreamUpServerSecsMin);
+            const qint64 to = rangeValue(srv.xhttp.scStreamUpServerSecsMax,
+                                         protocols::xray::coreDefaultXhttpScStreamUpServerSecsMax);
+            if (qMin(from, to) == 0 && qMax(from, to) > 0) {
+                errs << tr("scStreamUpServerSecs: Min can be 0 only if Max is 0 too (0–0 = core default 20–80)");
+            }
+        }
+        if (scMaxBufferedPostsValid && srv.xhttp.scMaxBufferedPosts.toLongLong() > 100000) {
+            errs << tr("scMaxBufferedPosts: maximum is 100000 (Packet-up settings)");
+        }
+    }
+
+    if (srv.transport == QLatin1String("mkcp")) {
+        auto checkInt = [&errs](const QString &field, const QString &value, qint64 lo, qint64 hi) -> qint64 {
+            if (value.isEmpty()) {
+                return -1;
+            }
+            bool ok = false;
+            const qint64 n = value.toLongLong(&ok);
+            if (!ok || n < lo || n > hi) {
+                errs << tr("%1: allowed range is %2–%3").arg(field).arg(lo).arg(hi);
+                return -1;
+            }
+            return n;
+        };
+        const auto &k = srv.mkcp;
+        checkInt(QStringLiteral("TTI"), k.tti, 10, 100);
+        const qint64 mtu = checkInt(QStringLiteral("mtu"), k.mtu, 576, 1460);
+        checkInt(QStringLiteral("uplinkCapacity"), k.uplinkCapacity, 0, 4095);
+        checkInt(QStringLiteral("downlinkCapacity"), k.downlinkCapacity, 0, 4095);
+        checkInt(QStringLiteral("cwndMultiplier"), k.cwndMultiplier, 1, 5000);
+        const qint64 mtuEff = mtu > 0 ? mtu : QString::fromLatin1(protocols::xray::defaultMkcpMtu).toLongLong();
+        checkInt(QStringLiteral("maxSendingWindow"), k.maxSendingWindow, mtuEff, 2147483647);
     }
 
     return errs;

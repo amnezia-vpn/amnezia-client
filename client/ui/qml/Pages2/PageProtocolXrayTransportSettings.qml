@@ -19,6 +19,19 @@ PageType {
         var m = XrayConfigModel.xhttpMode.toLowerCase()
         return m === "packet-up" || ((m === "" || m === "auto") && XrayConfigModel.security !== "reality")
     }
+    readonly property bool packetUpExplicit: XrayConfigModel.xhttpMode.toLowerCase() === "packet-up"
+    readonly property bool streamUpExplicit: XrayConfigModel.xhttpMode.toLowerCase() === "stream-up"
+    readonly property bool streamOneEffective: {
+        var m = XrayConfigModel.xhttpMode.toLowerCase()
+        return m === "stream-one" || ((m === "" || m === "auto") && XrayConfigModel.security === "reality")
+    }
+    readonly property string uplinkDataPlacementEffective: XrayConfigModel.xhttpUplinkDataPlacement === ""
+                                                         ? "body" : XrayConfigModel.xhttpUplinkDataPlacement.toLowerCase()
+    readonly property bool uplinkDataUsesKey: uplinkDataPlacementEffective === "header" || uplinkDataPlacementEffective === "cookie"
+    function placementUsesKey(placement) {
+        var p = placement.toLowerCase()
+        return p === "header" || p === "cookie" || p === "query"
+    }
 
     function clampInt(text, lo, hi) {
         if (text === "")
@@ -119,14 +132,14 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("uplinkCapacity")
-                    helperText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647.")
+                    helperText: qsTr("Uplink capacity (MB/s). Maximum: 4095.")
                     placeholderText: XrayConfigModel.mkcpDefaultUplinkCapacity()
                     textField.text: XrayConfigModel.mkcpUplinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                     textField.onTextEdited: XrayConfigModel.mkcpUplinkCapacity = textField.text
                     textField.onEditingFinished: {
-                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        var v = root.clampInt(textField.text, 0, 4095)
                         if (v !== XrayConfigModel.mkcpUplinkCapacity) XrayConfigModel.mkcpUplinkCapacity = v
                     }
                 }
@@ -134,14 +147,14 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("downlinkCapacity")
-                    helperText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647.")
+                    helperText: qsTr("Downlink capacity (MB/s). Maximum: 4095.")
                     placeholderText: XrayConfigModel.mkcpDefaultDownlinkCapacity()
                     textField.text: XrayConfigModel.mkcpDownlinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                     textField.onTextEdited: XrayConfigModel.mkcpDownlinkCapacity = textField.text
                     textField.onEditingFinished: {
-                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        var v = root.clampInt(textField.text, 0, 4095)
                         if (v !== XrayConfigModel.mkcpDownlinkCapacity) XrayConfigModel.mkcpDownlinkCapacity = v
                     }
                 }
@@ -170,14 +183,14 @@ PageType {
                 TextFieldType {
                     Layout.fillWidth: true
                     headerText: qsTr("cwndMultiplier")
-                    helperText: qsTr("Congestion window multiplier. Minimum: 1.")
+                    helperText: qsTr("Congestion window multiplier. Range: 1–5000.")
                     placeholderText: XrayConfigModel.mkcpDefaultCwndMultiplier()
                     textField.text: XrayConfigModel.mkcpCwndMultiplier
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                     textField.onTextEdited: XrayConfigModel.mkcpCwndMultiplier = textField.text
                     textField.onEditingFinished: {
-                        var v = root.clampInt(textField.text, 1, 2147483647)
+                        var v = root.clampInt(textField.text, 1, 5000)
                         if (v !== XrayConfigModel.mkcpCwndMultiplier) XrayConfigModel.mkcpCwndMultiplier = v
                     }
                 }
@@ -310,6 +323,7 @@ PageType {
                 SwitchRowType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: !root.packetUpEffective
                     text: qsTr("Disable gRPC Header")
                     descriptionText: qsTr("noGRPCHeader")
                     checked: XrayConfigModel.xhttpDisableGrpc
@@ -328,11 +342,13 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: !root.streamOneEffective
                     text: qsTr("Session & Sequence")
                 }
 
                 DropDownType {
                     id: sessionPlacementDropDown
+                    visible: !root.streamOneEffective
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xhttpSessionPlacement
@@ -365,6 +381,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    visible: !root.streamOneEffective && root.placementUsesKey(XrayConfigModel.xhttpSessionPlacement)
                     headerText: qsTr("SessionKey")
                     textField.text: XrayConfigModel.xhttpSessionKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -410,7 +427,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
-                    visible: root.packetUpEffective
+                    visible: root.packetUpEffective && root.placementUsesKey(XrayConfigModel.xhttpSeqPlacement)
                     headerText: qsTr("SeqKey")
                     textField.text: XrayConfigModel.xhttpSeqKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -423,7 +440,7 @@ PageType {
 
                 DropDownType {
                     id: uplinkDataPlacementDropDown
-                    visible: root.packetUpEffective
+                    visible: root.packetUpExplicit
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xhttpUplinkDataPlacement
@@ -456,7 +473,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
-                    visible: root.packetUpEffective
+                    visible: root.packetUpExplicit && root.uplinkDataUsesKey
                     headerText: qsTr("UplinkDataKey")
                     textField.text: XrayConfigModel.xhttpUplinkDataKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -470,13 +487,15 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: !root.streamOneEffective
                     text: qsTr("Traffic Shaping")
                 }
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    visible: root.packetUpExplicit && root.uplinkDataUsesKey
                     headerText: qsTr("UplinkChunkSize")
-                    helperText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.")
+                    helperText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = core default (2–3 KB in cookie, 3–4 KB in header). Values below 64 are raised to 64.")
                     placeholderText: XrayConfigModel.xhttpUplinkChunkSizeDefault()
                     textField.text: XrayConfigModel.xhttpUplinkChunkSize
                     textField.maximumLength: 10
@@ -490,14 +509,15 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    visible: root.packetUpEffective
                     headerText: qsTr("scMaxBufferedPosts")
-                    helperText: qsTr("Max buffered POSTs. Range: 0–2147483647.")
+                    helperText: qsTr("Max buffered POSTs. Range: 0–100000.")
                     textField.text: XrayConfigModel.xhttpScMaxBufferedPosts
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                     textField.onTextEdited: XrayConfigModel.xhttpScMaxBufferedPosts = textField.text
                     textField.onEditingFinished: {
-                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        var v = root.clampInt(textField.text, 0, 100000)
                         if (v !== XrayConfigModel.xhttpScMaxBufferedPosts) XrayConfigModel.xhttpScMaxBufferedPosts = v
                     }
                 }
@@ -505,11 +525,14 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: root.packetUpEffective
                     text: qsTr("scMaxEachPostBytes")
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
+                    visible: root.packetUpEffective
                     minValue: XrayConfigModel.xhttpScMaxEachPostBytesMin
+                    helperText: qsTr("≤ 2147483647. Empty = core default (1000000).")
                     maxValue: XrayConfigModel.xhttpScMaxEachPostBytesMax
                     minPlaceholder: XrayConfigModel.scMaxEachPostBytesMinDefault()
                     maxPlaceholder: XrayConfigModel.scMaxEachPostBytesMaxDefault()
@@ -520,11 +543,14 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: root.streamUpExplicit
                     text: qsTr("scStreamUpServerSecs")
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
+                    visible: root.streamUpExplicit
                     minValue: XrayConfigModel.xhttpScStreamUpServerSecsMin
+                    helperText: qsTr("≤ 2147483647. Empty = core default (20–80).")
                     maxValue: XrayConfigModel.xhttpScStreamUpServerSecsMax
                     minPlaceholder: XrayConfigModel.scStreamUpServerSecsMinDefault()
                     maxPlaceholder: XrayConfigModel.scStreamUpServerSecsMaxDefault()
@@ -535,11 +561,14 @@ PageType {
                 SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
+                    visible: root.packetUpEffective
                     text: qsTr("scMinPostsIntervalMs")
                 }
                 MinMaxRowType {
                     Layout.fillWidth: true
+                    visible: root.packetUpEffective
                     minValue: XrayConfigModel.xhttpScMinPostsIntervalMsMin
+                    helperText: qsTr("Min 0 = no pause between POSTs. Empty or 0–0 = core default (30 ms).")
                     maxValue: XrayConfigModel.xhttpScMinPostsIntervalMsMax
                     minPlaceholder: XrayConfigModel.scMinPostsIntervalMsMinDefault()
                     maxPlaceholder: XrayConfigModel.scMinPostsIntervalMsMaxDefault()
@@ -570,7 +599,7 @@ PageType {
                     ListItemType {
                         Layout.fillWidth: true
                         text: qsTr("XMux")
-                        subtitle: XrayConfigModel.xmuxEnabled ? qsTr("On") : qsTr("Off")
+                        subtitle: XrayConfigModel.xmuxEnabled ? qsTr("Custom") : qsTr("Core defaults")
                         trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                         onClicked: {
                             PageController.goToPage(PageEnum.PageProtocolXrayXmuxSettings)

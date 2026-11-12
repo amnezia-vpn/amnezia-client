@@ -19,6 +19,7 @@ class XrayConfigModel : public QObject
     Q_PROPERTY(QString security READ security WRITE setSecurity NOTIFY changed)
     Q_PROPERTY(QString flow READ flow WRITE setFlow NOTIFY changed)
     Q_PROPERTY(QString fingerprint READ fingerprint WRITE setFingerprint NOTIFY changed)
+    Q_PROPERTY(QString realityFingerprint READ realityFingerprint NOTIFY changed)
     Q_PROPERTY(QString sni READ sni WRITE setSni NOTIFY changed)
     Q_PROPERTY(QString alpn READ alpn WRITE setAlpn NOTIFY changed)
     Q_PROPERTY(QString xhttpMode READ xhttpMode WRITE setXhttpMode NOTIFY changed)
@@ -66,6 +67,7 @@ class XrayConfigModel : public QObject
     Q_PROPERTY(QString xmuxHMaxReusableSecsMin READ xmuxHMaxReusableSecsMin WRITE setXmuxHMaxReusableSecsMin NOTIFY changed)
     Q_PROPERTY(QString xmuxHMaxReusableSecsMax READ xmuxHMaxReusableSecsMax WRITE setXmuxHMaxReusableSecsMax NOTIFY changed)
     Q_PROPERTY(QString xmuxHKeepAlivePeriod READ xmuxHKeepAlivePeriod WRITE setXmuxHKeepAlivePeriod NOTIFY changed)
+    Q_PROPERTY(bool xmuxKeepAliveApplies READ xmuxKeepAliveApplies NOTIFY changed)
 
 public:
     explicit XrayConfigModel(QObject* parent = nullptr);
@@ -87,6 +89,7 @@ public:
 
     QString fingerprint() const;
     void setFingerprint(const QString &value);
+    QString realityFingerprint() const;
 
     QString sni() const;
     void setSni(const QString &value);
@@ -227,6 +230,7 @@ public:
     void setXmuxHMaxReusableSecsMax(const QString &value);
 
     QString xmuxHKeepAlivePeriod() const;
+    bool xmuxKeepAliveApplies() const;
     void setXmuxHKeepAlivePeriod(const QString &value);
 
     // ── Static option lists (for QML DropDown models) ─────────────────
@@ -234,6 +238,7 @@ public:
     Q_INVOKABLE static QStringList securityOptions();
     Q_INVOKABLE static QStringList transportOptions();
     Q_INVOKABLE static QStringList fingerprintOptions();
+    Q_INVOKABLE static QStringList realityFingerprintOptions();
     Q_INVOKABLE static QStringList alpnOptions();
     Q_INVOKABLE static QStringList xhttpModeOptions();
     Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();

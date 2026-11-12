@@ -16,6 +16,7 @@ PageType {
     id: root
 
     readonly property bool realityAllowed: XrayConfigModel.transport !== "mkcp"
+    readonly property bool securityIsNone: XrayConfigModel.security === "none" || (XrayConfigModel.security === "reality" && !realityAllowed)
 
     FlickableType {
         id: flickable
@@ -47,15 +48,6 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                text: qsTr("None")
-                checked: XrayConfigModel.security === "none" || (XrayConfigModel.security === "reality" && !root.realityAllowed)
-                onClicked: XrayConfigModel.security = "none"
-            }
-
-            RadioItemType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
                 text: qsTr("TLS")
                 checked: XrayConfigModel.security === "tls"
                 onClicked: XrayConfigModel.security = "tls"
@@ -78,7 +70,17 @@ PageType {
                 Layout.topMargin: 12
                 visible: !root.realityAllowed
                 color: AmneziaStyle.color.textAccent
-                text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
+                text: qsTr("REALITY is not supported with the mKCP transport. Use TLS.")
+            }
+
+            SmallTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+                visible: root.securityIsNone
+                color: AmneziaStyle.color.textAccent
+                text: qsTr("None is not supported by Xray 26.10. Choose TLS or REALITY.")
             }
 
             ColumnLayout {
@@ -161,7 +163,7 @@ PageType {
                     headerText: qsTr("Server Name (SNI)")
                     placeholderText: XrayConfigModel.sniDefault()
                     textField.text: XrayConfigModel.sni
-                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._-]*$/ }
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._:-]*$/ }
                     textField.onTextEdited: XrayConfigModel.sni = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
@@ -184,26 +186,26 @@ PageType {
                     id: realityFingerprintDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    text: XrayConfigModel.fingerprint
+                    text: XrayConfigModel.realityFingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
                     listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
-                                var opts = XrayConfigModel.fingerprintOptions()
+                                var opts = XrayConfigModel.realityFingerprintOptions()
                                 for (var i = 0; i < opts.length; i++) {
                                     append({name: opts[i]})
                                 }
                             }
                         }
-                        currentValue: XrayConfigModel.fingerprint
+                        currentValue: XrayConfigModel.realityFingerprint
                         onActivated: {
                             XrayConfigModel.fingerprint = selectedText
                             realityFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === XrayConfigModel.fingerprint) {
+                                if (model.get(i).name === XrayConfigModel.realityFingerprint) {
                                     selectedIndex = i;
                                     break
                                 }

@@ -80,6 +80,8 @@ struct XrayXhttpConfig {
     QJsonObject toJson() const;
     /// Reads only keys present in JSON (no Amnezia UI defaults). Use XrayConfigModel::applyDefaultsToServerConfig for UI.
     static XrayXhttpConfig fromJson(const QJsonObject &json);
+
+    void applyRangeDefaults();
 };
 
 // ── mKCP transport ────────────────────────────────────────────────────────────
@@ -182,14 +184,18 @@ namespace xrayEffective
     QString xPaddingPlacement(const QString &placement);
     QString xPaddingMethod(const QString &method);
     QString range(const QString &minV, const QString &maxV);
+    QStringList alpnList(const QString &alpn);
     void putRangeIfAny(QJsonObject &obj, const char *key, QString minV, QString maxV, const char *fallbackMin,
                        const char *fallbackMax);
 
     QString security(const XrayServerConfig &srv);
+    QString realityFingerprint(const QString &fingerprint);
+    QString realityServerName(const XrayServerConfig &srv);
     QString clientFlow(const XrayServerConfig &srv);
     QString serverFlow(const XrayServerConfig &srv);
     QString network(const XrayServerConfig &srv);
     QString xhttpModeSent(const XrayServerConfig &srv);
+    bool xhttpUsesHttp11(const XrayServerConfig &srv);
 }
 
 QString sanitizeNativeConfig(const QString &nativeConfig);
