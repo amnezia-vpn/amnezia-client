@@ -170,6 +170,15 @@ if(NOT ANDROID)
         test_common
     )
 
+    add_executable(test_shadowsocks_serialization
+        testShadowSocksSerialization.cpp
+    )
+
+    target_link_libraries(test_shadowsocks_serialization PRIVATE
+        Qt6::Test
+        test_common
+    )
+
     add_executable(test_xray_generator_matrix
         testXrayGeneratorMatrix.cpp
     )
@@ -479,6 +488,7 @@ if(NOT ANDROID)
     add_test(NAME UiServersModelAndControllerTest  COMMAND test_ui_servers_model_and_controller)
     add_test(NAME XraySerializationTest            COMMAND test_xray_serialization)
     add_test(NAME XrayServerInboundTest            COMMAND test_xray_server_inbound)
+    add_test(NAME ShadowSocksSerializationTest     COMMAND test_shadowsocks_serialization)
     add_test(NAME XrayGeneratorMatrixTest          COMMAND test_xray_generator_matrix)
     add_test(NAME XrayConfigModelTest              COMMAND test_xray_config_model)
     add_test(NAME XrayCoreAcceptsTest              COMMAND test_xray_core_accepts)
