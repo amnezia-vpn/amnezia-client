@@ -136,6 +136,8 @@ Window  {
 
         closable: true
         duration: 0
+
+        onClosed: PageController.onErrorMessageClosed()
     }
 
     CaptchaDialogType {
