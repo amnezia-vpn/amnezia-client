@@ -486,17 +486,72 @@ bool AwgServerConfig::hasAwg3Params() const
     return hasAwg3Markers(*this);
 }
 
+namespace
+{
+    bool parseHeaderRange(const QString &header, quint64 &lo, quint64 &hi)
+    {
+        const QStringList parts = header.trimmed().split('-');
+        if (parts.size() > 2) {
+            return false;
+        }
+
+        bool ok = false;
+        lo = parts.first().trimmed().toULongLong(&ok);
+        if (!ok) {
+            return false;
+        }
+        hi = lo;
+        if (parts.size() == 2) {
+            hi = parts.last().trimmed().toULongLong(&ok);
+            if (!ok) {
+                return false;
+            }
+        }
+        if (lo > hi) {
+            std::swap(lo, hi);
+        }
+        return true;
+    }
+}
+
 bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
 {
+    QList<QPair<quint64, quint64>> ranges;
     QSet<QString> uniqueHeaders;
     int filledHeaders = 0;
+    bool allParsed = true;
+
     for (const QString &header : { h1, h2, h3, h4 }) {
-        if (!header.trimmed().isEmpty()) {
-            ++filledHeaders;
-            uniqueHeaders.insert(header);
+        if (header.trimmed().isEmpty()) {
+            continue;
+        }
+        ++filledHeaders;
+        uniqueHeaders.insert(header.trimmed());
+
+        quint64 lo = 0;
+        quint64 hi = 0;
+        if (parseHeaderRange(header, lo, hi)) {
+            ranges.append({ lo, hi });
+        } else {
+            allParsed = false;
         }
     }
-    return uniqueHeaders.size() != filledHeaders;
+
+    if (uniqueHeaders.size() != filledHeaders) {
+        return true;
+    }
+    if (!allParsed) {
+        return false;
+    }
+
+    for (int i = 0; i < ranges.size(); ++i) {
+        for (int j = i + 1; j < ranges.size(); ++j) {
+            if (ranges[i].first <= ranges[j].second && ranges[j].first <= ranges[i].second) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool AwgProtocolConfig::isPacketSizeEqual(int s1, int s2, int s3, int s4)
