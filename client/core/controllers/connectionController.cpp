@@ -289,6 +289,15 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
                     ContainerUtils::isAwgContainer(container) ? protocols::awg::defaultMtu :
                     protocols::wireguard::defaultMtu;
         }
+
+        const QString cascadeEndpoint = vpnConfigData.value(configKey::cascadeEndpoint).toString();
+        if (!cascadeEndpoint.isEmpty()) {
+            vpnConfigData[configKey::hostName] = cascadeEndpoint;
+        }
+        const QString cascadePort = vpnConfigData.value(configKey::cascadePort).toString();
+        if (!cascadePort.isEmpty()) {
+            vpnConfigData[configKey::port] = cascadePort.toInt();
+        }
     }
 
     vpnConfiguration.insert(ProtocolUtils::key_proto_config_data(proto), vpnConfigData);

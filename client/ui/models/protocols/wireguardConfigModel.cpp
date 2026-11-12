@@ -40,6 +40,73 @@ void WireGuardConfigModel::setPort(const QString &value)
     emit changed();
 }
 
+QString WireGuardConfigModel::cascadeEndpoint() const
+{
+    return m_protocolConfig.serverConfig.cascadeEndpoint;
+}
+
+void WireGuardConfigModel::setCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadeEndpoint = value;
+    emit changed();
+}
+
+QString WireGuardConfigModel::cascadePort() const
+{
+    return m_protocolConfig.serverConfig.cascadePort;
+}
+
+void WireGuardConfigModel::setCascadePort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadePort = value;
+    emit changed();
+}
+
+QString WireGuardConfigModel::clientHostName() const
+{
+    return m_protocolConfig.clientConfig->hostName;
+}
+
+QString WireGuardConfigModel::clientPort() const
+{
+    const int port = m_protocolConfig.clientConfig->port;
+    return port > 0 ? QString::number(port) : QString();
+}
+
+QString WireGuardConfigModel::clientCascadeEndpoint() const
+{
+    return m_protocolConfig.clientConfig->cascadeEndpoint;
+}
+
+void WireGuardConfigModel::setClientCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(value, m_protocolConfig.clientConfig->cascadePort);
+    emit changed();
+}
+
+QString WireGuardConfigModel::clientCascadePort() const
+{
+    return m_protocolConfig.clientConfig->cascadePort;
+}
+
+void WireGuardConfigModel::setClientCascadePort(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(m_protocolConfig.clientConfig->cascadeEndpoint, value);
+    emit changed();
+}
+
 QString WireGuardConfigModel::clientMtu() const
 {
     if (m_protocolConfig.clientConfig.has_value()) {
@@ -96,8 +163,15 @@ amnezia::WireGuardProtocolConfig WireGuardConfigModel::getProtocolConfig()
 {
     bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
     
+    const auto &serverConfig = m_protocolConfig.serverConfig;
+    const auto &originalServerConfig = m_originalProtocolConfig.serverConfig;
+    const bool cascadeChanged = serverConfig.cascadeEndpoint != originalServerConfig.cascadeEndpoint
+            || serverConfig.cascadePort != originalServerConfig.cascadePort;
+
     if (serverSettingsChanged) {
         m_protocolConfig.clearClientConfig();
+    } else if (cascadeChanged) {
+        m_protocolConfig.clientConfig->setCascade(serverConfig.cascadeEndpoint, serverConfig.cascadePort);
     }
     
     return m_protocolConfig;

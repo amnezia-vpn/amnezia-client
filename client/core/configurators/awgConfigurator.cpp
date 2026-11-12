@@ -66,6 +66,8 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.nativeConfig = awgConfig;
     newClientConfig.hostName = wgConfig->clientConfig->hostName;
     newClientConfig.port = wgConfig->clientConfig->port;
+    newClientConfig.cascadeEndpoint = wgConfig->clientConfig->cascadeEndpoint;
+    newClientConfig.cascadePort = wgConfig->clientConfig->cascadePort;
     newClientConfig.clientIp = wgConfig->clientConfig->clientIp;
     newClientConfig.clientPrivateKey = wgConfig->clientConfig->clientPrivateKey;
     newClientConfig.clientPublicKey = wgConfig->clientConfig->clientPublicKey;

@@ -266,6 +266,11 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     clientConfig.nativeConfig = config;
     clientConfig.hostName = connData.host;
     clientConfig.port = connData.port.toInt();
+    if (wireguardServerConfig) {
+        clientConfig.setCascade(wireguardServerConfig->cascadeEndpoint, wireguardServerConfig->cascadePort);
+    } else if (awgServerConfig) {
+        clientConfig.setCascade(awgServerConfig->cascadeEndpoint, awgServerConfig->cascadePort);
+    }
     clientConfig.clientIp = connData.clientIP;
     clientConfig.clientPrivateKey = connData.clientPrivKey;
     clientConfig.clientPublicKey = connData.clientPubKey;
