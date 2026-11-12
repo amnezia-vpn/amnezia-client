@@ -202,9 +202,11 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
     logger.debug() << "NMStateChanged " << state;
 
-    if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
-        emit wakeup();
-    } else if (state == NM_STATE_CONNECTED_GLOBAL) {
+    // Reconnect only once the uplink is back. Reconnecting on ASLEEP/DISABLED
+    // brings the tunnel up right after resume, before there is a default
+    // gateway, so the endpoint exclusion routes are skipped and the handshake
+    // is routed into the tunnel itself.
+    if (state == NM_STATE_CONNECTED_GLOBAL) {
         emit networkChanged();
     }
 }
