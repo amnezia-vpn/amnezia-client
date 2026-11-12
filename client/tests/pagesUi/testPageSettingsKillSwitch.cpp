@@ -2,20 +2,29 @@
 
 #include "pagesUiTestFixture.h"
 
-class PageSettingsKillSwitchTest : public PagesUiTestFixture
+class PageSettingsKillSwitchTest : public QObject
 {
     Q_OBJECT
 
+private:
+    PagesUiTestFixture m_fixture;
+
 private slots:
+    void initTestCase()
+    {
+        QVERIFY(m_fixture.initialize(this));
+    }
+
+    void cleanupTestCase()
+    {
+        m_fixture.cleanup();
+    }
+
     void pageLoads()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
-        QVERIFY(page() != nullptr);
-        QVERIFY(visibleItem("text", "KillSwitch"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(m_fixture.page() != nullptr);
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("KillSwitch")) != nullptr);
     }
 
     void killSwitchDescriptionIsVisible()

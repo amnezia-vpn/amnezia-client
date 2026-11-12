@@ -1,19 +1,30 @@
-#include <QtTest>
+#include <QTest>
 
-class PageSettingsKillSwitchExceptionsTest : public PagesUiTestFixture
+#include "pagesUiTestFixture.h"
+
+class PageSettingsKillSwitchExceptionsTest : public QObject
 {
     Q_OBJECT
 
+private:
+    PagesUiTestFixture m_fixture;
+
 private slots:
+    void init()
+    {
+        QVERIFY(m_fixture.initialize(this));
+    }
+
+    void cleanup()
+    {
+        m_fixture.cleanup();
+    }
+
     void pageLoads()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
-        QVERIFY(page() != nullptr);
-        QVERIFY(visibleItem("text", "DNS Exceptions"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
+        QVERIFY(m_fixture.page() != nullptr);
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("DNS Exceptions")) != nullptr);
     }
 
     void descriptionIsVisible()
