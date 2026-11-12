@@ -337,6 +337,10 @@ if(NOT ANDROID)
         pagesUi/testPageHome.cpp
         pagesUi/testPageSettingsConnection.cpp
         pagesUi/testPageSettingsDns.cpp
+        pagesUi/testPageSettingsSplitTunneling.cpp
+        pagesUi/testPageSettingsAppSplitTunneling.cpp
+        pagesUi/testPageSettingsKillSwitch.cpp
+        pagesUi/testPageSettingsKillSwitchExceptions.cpp
         ${PAGES_UI_QRC}
     )
 
