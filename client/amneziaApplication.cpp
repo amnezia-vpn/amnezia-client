@@ -22,6 +22,7 @@
 #include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
+#include "ui/controllers/serverLatencyUiController.h"
 #include "ui/models/installedAppsModel.h"
 #include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
@@ -257,6 +258,7 @@ void AmneziaApplication::registerTypes()
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
     UpdateState::declareQmlUpdateStateEnum();
+    ServerLatencyUiController::declareQmlServerQualityEnum();
 }
 
 void AmneziaApplication::loadFonts()

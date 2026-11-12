@@ -215,6 +215,7 @@ struct XrayClientConfig {
 
     static QString idFromNativeJson(const QJsonObject &nativeJson);
     static QString localPortFromNativeJson(const QJsonObject &nativeJson);
+    static QString serverPortFromNativeJson(const QJsonObject &nativeJson);
 };
 
 // ── Top-level protocol config ──────────────────────────────────────────────────

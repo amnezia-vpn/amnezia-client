@@ -1,6 +1,7 @@
 #include "openVpnProtocolConfig.h"
 
 #include <QJsonDocument>
+#include <QRegularExpression>
 
 #include "../../../core/utils/protocolEnum.h"
 #include "../../../core/protocols/protocolUtils.h"
@@ -114,6 +115,40 @@ OpenVpnClientConfig OpenVpnClientConfig::fromJson(const QJsonObject& json)
     config.blockOutsideDns = json.value(configKey::blockOutsideDns).toBool(false);
     
     return config;
+}
+
+QString OpenVpnClientConfig::remotePort() const
+{
+    static const QRegularExpression remotePortRegExp(QStringLiteral("^\\s*remote\\s+\\S+\\s+(\\d+)"),
+                                                     QRegularExpression::MultilineOption);
+    static const QRegularExpression portRegExp(QStringLiteral("^\\s*r?port\\s+(\\d+)"),
+                                               QRegularExpression::MultilineOption);
+
+    for (const QRegularExpression *regExp : { &remotePortRegExp, &portRegExp }) {
+        const QRegularExpressionMatch match = regExp->match(nativeConfig);
+        if (match.hasMatch()) {
+            return match.captured(1);
+        }
+    }
+    return protocols::openvpn::defaultPort;
+}
+
+QString OpenVpnClientConfig::remoteTransportProto() const
+{
+    static const QRegularExpression remoteProtoRegExp(QStringLiteral("^\\s*remote\\s+\\S+\\s+\\d+\\s+(udp|tcp)"),
+                                                      QRegularExpression::MultilineOption
+                                                              | QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression protoRegExp(QStringLiteral("^\\s*proto\\s+(udp|tcp)"),
+                                                QRegularExpression::MultilineOption
+                                                        | QRegularExpression::CaseInsensitiveOption);
+
+    for (const QRegularExpression *regExp : { &remoteProtoRegExp, &protoRegExp }) {
+        const QRegularExpressionMatch match = regExp->match(nativeConfig);
+        if (match.hasMatch()) {
+            return match.captured(1).toLower();
+        }
+    }
+    return protocols::openvpn::defaultTransportProto;
 }
 
 QJsonObject OpenVpnProtocolConfig::toJson() const

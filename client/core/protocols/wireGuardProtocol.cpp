@@ -16,6 +16,7 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
     connect(m_impl.get(), &ControllerImpl::connected, this,
             [this](const QString &pubkey, const QDateTime &connectionTimestamp) {
                 setConnectionState(Vpn::ConnectionState::Connected);
+                startTunnelTrafficPolling();
             });
     connect(m_impl.get(), &ControllerImpl::statusUpdated, this,
             [this](const QString& serverIpv4Gateway,
