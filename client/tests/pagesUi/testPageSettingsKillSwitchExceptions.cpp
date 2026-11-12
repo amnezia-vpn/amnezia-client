@@ -29,48 +29,32 @@ private slots:
 
     void descriptionIsVisible()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
-        QVERIFY(visibleItem("text", "DNS servers listed here will remain accessible when KillSwitch is active"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("DNS servers listed here will remain accessible when KillSwitch is active")) != nullptr);
     }
 
     void addressListIsPresent()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
 
-        const auto listViews = itemsOfType("ListViewType");
+        const auto listViews = m_fixture.itemsOfType("ListViewType");
         QCOMPARE(listViews.size(), 1);
-
-        closePage();
-        cleanup();
     }
 
     void addressInputIsPresent()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
 
-        const auto textFields = itemsOfType("TextFieldType");
+        const auto textFields = m_fixture.itemsOfType("TextFieldType");
         QCOMPARE(textFields.size(), 1);
-
-        closePage();
-        cleanup();
     }
 
     void importExportButtonIsPresent()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitchExceptions")));
 
-        const auto buttons = itemsOfType("IconButtonType");
+        const auto buttons = m_fixture.itemsOfType("IconButtonType");
         QCOMPARE(buttons.size(), 1);
-
-        closePage();
-        cleanup();
     }
 };
 

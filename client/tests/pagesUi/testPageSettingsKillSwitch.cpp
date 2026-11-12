@@ -29,59 +29,40 @@ private slots:
 
     void killSwitchDescriptionIsVisible()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
-        QVERIFY(visibleItem("text",
-                            "Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental "
-                            "exposure of your IP and DNS queries if the connection drops"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"),
+                                      QStringLiteral("Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental "
+                                                     "exposure of your IP and DNS queries if the connection drops")) != nullptr);
     }
 
     void killSwitchSwitchIsPresent()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(m_fixture.initialize(this));
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
 
-        const auto switches = itemsOfType("SwitchType");
+        const auto switches = m_fixture.itemsOfType("SwitchType");
 
         QCOMPARE(switches.size(), 1);
-
-        closePage();
-        cleanup();
     }
 
     void softKillSwitchOptionIsVisible()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
-        QVERIFY(visibleItem("text", "Soft KillSwitch"));
-        QVERIFY(visibleItem("text", "Internet access is blocked if the VPN disconnects unexpectedly"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Soft KillSwitch")) != nullptr);
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Internet access is blocked if the VPN disconnects unexpectedly")) != nullptr);
     }
 
     void strictKillSwitchOptionIsHidden()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
-        QVERIFY(!visibleItem("text", "Strict KillSwitch"));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(!m_fixture.visibleItem("text", "Strict KillSwitch"));
     }
 
     void dnsExceptionsEntryIsVisible()
     {
-        QVERIFY(initialize(this));
-        QVERIFY(loadPage(QStringLiteral("PageSettingsKillSwitch")));
-        QVERIFY(visibleItem("text", "DNS Exceptions"));
-        QVERIFY(visibleItem("text", "DNS servers listed here will remain accessible when KillSwitch is active."));
-
-        closePage();
-        cleanup();
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("DNS Exceptions")) != nullptr);
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("DNS servers listed here will remain accessible when KillSwitch is active.")) != nullptr);
     }
 };
 
