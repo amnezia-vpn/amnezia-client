@@ -127,6 +127,7 @@ if(IS_CI)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/appleLiveRouting.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/sources.cmake)
 
 set(_client_include_dirs

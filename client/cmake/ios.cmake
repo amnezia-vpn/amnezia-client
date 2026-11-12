@@ -113,7 +113,7 @@ target_compile_options(${PROJECT} PRIVATE
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${AMNEZIA_WG_APPLE_SOURCE_DIR})
 
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift

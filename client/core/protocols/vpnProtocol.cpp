@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QTimer>
 
+#include "core/utils/constants/configKeys.h"
 #include "core/utils/errorStrings.h"
 #include "vpnProtocol.h"
 
@@ -34,6 +35,13 @@ bool VpnProtocol::guardStop()
     }
     m_stopped = true;
     return false;
+}
+
+void VpnProtocol::setSplitTunnelingConfig(const QJsonObject &configuration)
+{
+    m_rawConfig.insert(configKey::splitTunnelSessionId, configuration.value(configKey::splitTunnelSessionId));
+    m_rawConfig.insert(configKey::splitTunnelType, configuration.value(configKey::splitTunnelType));
+    m_rawConfig.insert(configKey::splitTunnelSites, configuration.value(configKey::splitTunnelSites));
 }
 
 void VpnProtocol::resetStopGuard()

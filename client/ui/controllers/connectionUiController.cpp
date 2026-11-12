@@ -18,6 +18,8 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
       m_connectionController(connectionController),
       m_serversController(serversController)
 {
+    connect(m_connectionController, &ConnectionController::liveSplitTunnelingUpdatesAvailableChanged, this,
+            &ConnectionUiController::liveSplitTunnelingUpdatesAvailableChanged);
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
@@ -200,4 +202,9 @@ bool ConnectionUiController::isRevokeBlockedDuringActiveConnection(const QString
     }
 
     return connectionClientId == clientId || connectionClientId.contains(clientId);
+}
+
+bool ConnectionUiController::liveSplitTunnelingUpdatesAvailable() const
+{
+    return m_connectionController->liveSplitTunnelingUpdatesAvailable();
 }

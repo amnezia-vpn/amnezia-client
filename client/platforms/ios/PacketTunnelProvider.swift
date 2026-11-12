@@ -38,6 +38,9 @@ struct Constants {
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
     var wgAdapter: WireGuardAdapter?
+    #if AMNEZIA_APPLE_LIVE_ROUTING
+    let wireguardRoutingSession = WireguardRoutingSession()
+    #endif
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
     private let pathMonitorQueue = DispatchQueue(label: Constants.processQueueName + ".path-monitor")
@@ -191,6 +194,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       if action != Constants.kActionStatus {
           neLog(.info, title: "App said: ", message: "action=\(action)")
       }
+
+      #if AMNEZIA_APPLE_LIVE_ROUTING
+      if action == "updateSplitTunneling" {
+          updateWireguardSplitTunneling(messageData, completionHandler: completionHandler)
+          return
+      }
+      #endif
 
       if action == Constants.kActionStatus {
           handleStatusAppMessage(messageData,

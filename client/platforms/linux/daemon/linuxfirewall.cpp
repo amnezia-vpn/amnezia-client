@@ -540,3 +540,11 @@ void LinuxFirewall::teardownTrafficSplitting()
     execute(QStringLiteral("ip route flush table %1 2>/dev/null || true").arg(kRtableName));
     execute(QStringLiteral("ip route flush cache"));
 }
+
+SplitTunnelingUpdateResult LinuxFirewall::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (!isInstalled()) {
+        return SplitTunnelingUpdateResult::NotApplied;
+    }
+    return SplitTunnelingFirewall::apply(SplitTunnelingFirewall::Platform::Linux, config);
+}

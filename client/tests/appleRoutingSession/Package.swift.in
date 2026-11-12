@@ -1,0 +1,8 @@
+// swift-tools-version:5.5
+import PackageDescription
+let package = Package(name: "AppleRoutingIntegration", platforms: [.macOS(.v12)],
+    dependencies: [.package(path: "@AMNEZIA_WG_APPLE_CHECKOUT@")],
+    targets: [
+        .target(name: "AppleRoutingIntegration", dependencies: [.product(name: "WireGuardKit", package: "amneziawg-apple")]),
+        .testTarget(name: "AppleRoutingIntegrationTests", dependencies: ["AppleRoutingIntegration"])
+    ])

@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QSocketNotifier>
 
+#include "daemon/routemutation.h"
 #include "ipaddress.h"
 
 struct if_msghdr;
@@ -25,6 +26,8 @@ class MacosRouteMonitor final : public QObject {
   ~MacosRouteMonitor();
 
   bool insertRoute(const IPAddress& prefix, int flags = 0);
+  RouteMutationResult createRoute(const IPAddress &prefix, int flags = 0);
+  RouteCreationResult createExclusionRoute(const IPAddress &prefix);
   bool deleteRoute(const IPAddress& prefix, int flags = 0);
   int interfaceFlags() { return m_ifflags; }
 
@@ -36,6 +39,8 @@ class MacosRouteMonitor final : public QObject {
   void handleRtmDelete(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleRtmUpdate(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleIfaceInfo(const struct if_msghdr* msg, const QByteArray& payload);
+  RouteMutationResult rtmSendRouteWithResult(int action, const IPAddress &prefix, unsigned int ifindex,
+                                             const void *gateway, int flags = 0);
   bool rtmSendRoute(int action, const IPAddress& prefix, unsigned int ifindex,
                     const void* gateway, int flags = 0);
   bool rtmFetchRoutes(int family);

@@ -136,6 +136,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonObject json;
   json.insert("type", "activate");
+  json.insert(amnezia::configKey::splitTunnelSessionId, rawConfig.value(amnezia::configKey::splitTunnelSessionId));
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));

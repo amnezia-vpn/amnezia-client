@@ -147,6 +147,7 @@ namespace amnezia
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
+        constexpr QLatin1String splitTunnelSessionId("splitTunnelSessionId");
 
         constexpr QLatin1String splitTunnelApps("splitTunnelApps");
         constexpr QLatin1String appSplitTunnelType("appSplitTunnelType");

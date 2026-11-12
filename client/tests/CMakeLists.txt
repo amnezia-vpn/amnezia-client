@@ -62,6 +62,73 @@ target_include_directories(test_common PUBLIC
 )
 
 if(NOT ANDROID)
+    if(WIN32)
+        add_executable(test_windows_route_monitor
+            testWindowsRouteMonitor.cpp
+            ../platforms/windows/daemon/windowsroutemonitor.cpp
+            ../platforms/windows/daemon/windowsroutemonitor.h
+        )
+        target_include_directories(test_windows_route_monitor PRIVATE .. ../mozilla/shared ../../common/logger)
+        target_link_libraries(test_windows_route_monitor PRIVATE Qt6::Test test_common Iphlpapi Ws2_32)
+    endif()
+
+    add_executable(test_split_tunneling_unsupported_backend
+        testSplitTunnelingUnsupportedBackend.cpp
+        ../core/controllers/splitTunnelingUpdateController.cpp
+        ../core/splitTunneling/splitTunnelingUpdateBackend.cpp
+        ../core/splitTunneling/splitTunnelingUpdateBackendFactory.cpp
+        ../core/protocols/protocolUtils.cpp
+        ../core/utils/protocolEnum.h
+    )
+    target_include_directories(test_split_tunneling_unsupported_backend PRIVATE ..)
+    target_compile_definitions(test_split_tunneling_unsupported_backend PRIVATE MACOS_NE)
+    if(MSVC)
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE /UAMNEZIA_DESKTOP /UAMNEZIA_APPLE_LIVE_ROUTING)
+    else()
+        target_compile_options(test_split_tunneling_unsupported_backend PRIVATE -UAMNEZIA_DESKTOP -UAMNEZIA_APPLE_LIVE_ROUTING)
+    endif()
+    target_link_libraries(test_split_tunneling_unsupported_backend PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+
+    add_executable(test_split_tunneling_firewall
+        testSplitTunnelingFirewall.cpp
+        ../daemon/splitTunnelingFirewall.cpp
+        ../mozilla/shared/ipaddress.cpp
+    )
+    target_include_directories(test_split_tunneling_firewall PRIVATE .. ../mozilla/shared)
+    target_link_libraries(test_split_tunneling_firewall PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+
+    add_executable(test_windows_firewall_peer_transaction
+        testWindowsFirewallPeerTransaction.cpp
+        ../platforms/windows/daemon/windowsfirewallpeertransaction.cpp
+        ../platforms/windows/daemon/windowsfirewallpeertransaction.h
+    )
+    target_include_directories(test_windows_firewall_peer_transaction PRIVATE ..)
+    target_link_libraries(test_windows_firewall_peer_transaction PRIVATE Qt6::Core Qt6::Test)
+
+    add_executable(test_split_tunneling_updates
+        testSplitTunnelingUpdates.cpp
+        ../core/controllers/splitTunnelingUpdateController.cpp
+        ../core/controllers/splitTunnelingUpdateController.h
+        ../core/splitTunneling/splitTunnelingUpdateBackend.cpp
+        ../core/splitTunneling/splitTunnelingUpdateBackend.h
+        ../core/protocols/protocolUtils.cpp
+        ../core/utils/protocolEnum.h
+        ../core/models/protocols/awgProtocolConfig.cpp
+        ../core/models/protocols/wireGuardProtocolConfig.cpp
+    )
+    target_include_directories(test_split_tunneling_updates PRIVATE ..)
+    target_link_libraries(test_split_tunneling_updates PRIVATE Qt6::Core Qt6::Network Qt6::Test)
+
+    add_executable(test_split_tunneling_daemon
+        testSplitTunnelingDaemon.cpp
+        ../daemon/daemon.cpp
+        ../daemon/daemon.h
+        ../daemon/dnsutils.h
+        ../daemon/interfaceconfig.h
+        ../daemon/wireguardutils.h
+    )
+    target_link_libraries(test_split_tunneling_daemon PRIVATE Qt6::Test test_common)
+
     add_executable(test_multiple_imports
         testMultipleImports.cpp
     )
@@ -468,6 +535,17 @@ endif()
 enable_testing()
 
 if(NOT ANDROID)
+    if(WIN32)
+        add_test(NAME WindowsRouteMonitorTest COMMAND test_windows_route_monitor)
+    endif()
+    add_test(NAME SplitTunnelingUnsupportedBackendTest COMMAND test_split_tunneling_unsupported_backend)
+    add_test(NAME SplitTunnelingFirewallTest COMMAND test_split_tunneling_firewall)
+    add_test(NAME WindowsFirewallPeerTransactionTest COMMAND test_windows_firewall_peer_transaction)
+    add_test(NAME SplitTunnelingUpdatesTest COMMAND test_split_tunneling_updates)
+    add_test(NAME SplitTunnelingDaemonTest COMMAND test_split_tunneling_daemon)
+endif()
+
+if(NOT ANDROID)
     add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
     add_test(NAME ServerEditTest                   COMMAND test_server_edit)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)
@@ -498,3 +576,20 @@ endif()
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
 
 amnezia_copy_runtime_dlls()
+
+if(APPLE AND NOT IOS AND AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
+    find_program(SWIFT_EXECUTABLE swift REQUIRED)
+    get_filename_component(AMNEZIA_WG_APPLE_CHECKOUT "${AMNEZIA_WG_APPLE_SOURCE_DIR}" DIRECTORY)
+    get_filename_component(_apple_go_library_dir "${AMNEZIA_WG_APPLE_GO_LIBRARY}" DIRECTORY)
+    set(_apple_routing_tests "${CMAKE_CURRENT_BINARY_DIR}/apple-routing-session")
+    configure_file(appleRoutingSession/Package.swift.in "${_apple_routing_tests}/Package.swift" @ONLY)
+    configure_file(../platforms/ios/WireguardRoutingSession.swift
+        "${_apple_routing_tests}/Sources/AppleRoutingIntegration/WireguardRoutingSession.swift" COPYONLY)
+    configure_file(appleRoutingSession/RoutingSessionTests.swift
+        "${_apple_routing_tests}/Tests/AppleRoutingIntegrationTests/RoutingSessionTests.swift" COPYONLY)
+    add_test(NAME AppleRoutingSessionTest COMMAND "${CMAKE_COMMAND}" -E env
+        "CLANG_MODULE_CACHE_PATH=${_apple_routing_tests}/modules"
+        "${SWIFT_EXECUTABLE}" test --disable-sandbox
+        --package-path "${_apple_routing_tests}" --cache-path "${_apple_routing_tests}/cache"
+        -Xlinker "-L${_apple_go_library_dir}")
+endif()

@@ -53,6 +53,11 @@ extension PacketTunnelProvider {
             wg_log(.info, message: "Starting tunnel from the " +
                    (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
 
+            #if AMNEZIA_APPLE_LIVE_ROUTING
+            wireguardRoutingSession.start(id: wgConfig.splitTunnelSessionId, mode: wgConfig.splitTunnelType,
+                                          sites: wgConfig.splitTunnelSites, configuration: tunnelConfiguration)
+            #endif
+
             // Start the tunnel
             wgAdapter = WireGuardAdapter(with: self) { logLevel, message in
                 wg_log(logLevel.osLogLevel, message: message)
@@ -89,6 +94,9 @@ extension PacketTunnelProvider {
                     completionHandler(PacketTunnelProviderError.couldNotStartBackend)
                 case .invalidState:
                     fatalError()
+                default:
+                    errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
+                    completionHandler(PacketTunnelProviderError.couldNotStartBackend)
                 }
             }
         } catch {
@@ -98,6 +106,30 @@ extension PacketTunnelProvider {
             return
         }
     }
+
+    #if AMNEZIA_APPLE_LIVE_ROUTING
+    func updateWireguardSplitTunneling(_ data: Data, completionHandler: @escaping (Data?) -> Void) {
+        guard protoType == .wireguard,
+              let request = try? JSONDecoder().decode(WireguardRoutingRequest.self, from: data),
+              let adapter = wgAdapter else {
+            completionHandler(nil)
+            return
+        }
+        wireguardRoutingSession.update(request, apply: { configuration, complete in
+            adapter.updateRouting(tunnelConfiguration: configuration, completionHandler: complete)
+        }) { result in
+            let code: Int
+            switch result {
+            case .applied: code = 1
+            case .notApplied: code = 2
+            case .stateUnknown: code = 0
+            }
+            let response: [String: Any] = ["result": code, "requestId": request.requestId,
+                                            "splitTunnelSessionId": request.splitTunnelSessionId]
+            completionHandler(try? JSONSerialization.data(withJSONObject: response))
+        }
+    }
+    #endif
 
     func handleWireguardStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
@@ -184,6 +216,9 @@ extension PacketTunnelProvider {
     }
 
     func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+        #if AMNEZIA_APPLE_LIVE_ROUTING
+        wireguardRoutingSession.stop()
+        #endif
         wg_log(.info, message: "Stopping tunnel: reason: \(reason.amneziaDescription)")
 
         wgAdapter?.stop { error in

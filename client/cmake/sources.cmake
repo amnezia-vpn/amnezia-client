@@ -40,6 +40,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingUpdateController.h
+    ${CLIENT_ROOT_DIR}/core/splitTunneling/splitTunnelingUpdateBackend.h
+    ${CLIENT_ROOT_DIR}/core/splitTunneling/splitTunnelingUpdateResult.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
@@ -130,6 +133,9 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingUpdateController.cpp
+    ${CLIENT_ROOT_DIR}/core/splitTunneling/splitTunnelingUpdateBackend.cpp
+    ${CLIENT_ROOT_DIR}/core/splitTunneling/splitTunnelingUpdateBackendFactory.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp
@@ -288,6 +294,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
 
     set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/core/splitTunneling/desktopSplitTunnelingUpdateBackend.h
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
@@ -298,6 +305,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     )
 
     set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/core/splitTunneling/desktopSplitTunnelingUpdateBackend.cpp
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
@@ -317,4 +325,9 @@ if(APPLE AND MACOS_NE)
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
     )
+endif()
+
+if((IOS OR MACOS_NE) AND AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
+    list(APPEND HEADERS ${CLIENT_ROOT_DIR}/core/splitTunneling/appleSplitTunnelingUpdateBackend.h)
+    list(APPEND SOURCES ${CLIENT_ROOT_DIR}/core/splitTunneling/appleSplitTunnelingUpdateBackend.cpp)
 endif()

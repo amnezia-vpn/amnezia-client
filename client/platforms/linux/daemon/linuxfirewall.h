@@ -33,6 +33,7 @@
 #ifndef LINUXFIREWALL_H
 #define LINUXFIREWALL_H
 
+#include "daemon/splitTunnelingFirewall.h"
 
 #include <QString>
 #include <QStringList>
@@ -88,6 +89,7 @@ private:
     static QString kOutputChain, kRootChain, kPostRoutingChain, kPreRoutingChain;
 
 public:
+    static SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config);
     static void install();
     static void uninstall();
     static bool isInstalled();
