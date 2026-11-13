@@ -417,6 +417,7 @@ jobs:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+        CONFIGURE_ONLY: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || '' }}
       shell: bash
       run: |
         sh deploy/build.sh -t ios | sed -f deploy/hide_secrets.sed
@@ -720,10 +721,12 @@ jobs:
     - name: 'Build project'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
+        CONFIGURE_ONLY: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || '' }}
       shell: bash
       run: deploy/build.sh -t macos-ne | sed -f deploy/hide_secrets.sed
 
     - name: 'Upload unpacked artifact'
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_unpacked
