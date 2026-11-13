@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+.[0-9]+'
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
@@ -1654,3 +1656,49 @@ jobs:
           disable-animations: true
           script: bash ci_run_android_tests.sh
 
+# ------------------------------------------------------
+
+  Pre-Release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [Build-Linux-Ubuntu, Build-MacOS, Build-Android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: 'Get release notes template'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: .github/release-notes.md
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download Android APKs'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_{android11+,android9-10}_{arm64-v8a,armeabi-v7a,x86,x86_64}.apk'
+        path: dist
+        merge-multiple: true
+
+    - name: 'Download desktop installers'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_{linux_x64.run,macos_x64.pkg}'
+        path: dist
+        merge-multiple: true
+
+    - name: 'Publish pre-release'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        ls -l dist
+        if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+        else
+          export VERSION="$TAG"
+          export PREVIOUS_TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName)
+          envsubst '$VERSION $PREVIOUS_TAG' < .github/release-notes.md > release-notes.md
+
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" --notes-file release-notes.md --draft --prerelease --verify-tag
+        fi
