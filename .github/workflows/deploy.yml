@@ -421,15 +421,19 @@ jobs:
       run: |
         sh deploy/build.sh -t ios | sed -f deploy/hide_secrets.sed
 
-    - name: 'Archive and upload to TestFlight'
+    - name: 'Archive for App Store'
       if: startsWith(github.ref, 'refs/tags/')
       working-directory: deploy
       shell: bash
-      env:
-        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-      run: fastlane ios testflight_upload 2>&1 | sed -f hide_secrets.sed
+      run: fastlane ios archive 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload App Store package'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/ios/AmneziaVPN.ipa
+        archive: false
+        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -726,15 +730,19 @@ jobs:
         path: deploy/build/client/Release/AmneziaVPN.app
         retention-days: 7
 
-    - name: 'Archive and upload to TestFlight'
+    - name: 'Archive for App Store'
       if: startsWith(github.ref, 'refs/tags/')
       working-directory: deploy
       shell: bash
-      env:
-        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-      run: fastlane mac testflight_upload 2>&1 | sed -f hide_secrets.sed
+      run: fastlane mac archive 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload App Store package'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/osx/AmneziaVPN.pkg
+        archive: false
+        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -1727,3 +1735,47 @@ jobs:
           gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" --notes-file release-notes.md --draft --prerelease --verify-tag
         fi
+
+# ------------------------------------------------------
+
+  TestFlight:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
+    runs-on: macos-26
+
+    env:
+      APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+      APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+      APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+
+    defaults:
+      run:
+        working-directory: deploy
+        shell: bash
+
+    steps:
+    - name: 'Get fastlane config'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          deploy/fastlane
+          deploy/hide_secrets.sed
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download iOS package'
+      uses: actions/download-artifact@v8
+      with:
+        name: AmneziaVPN.ipa
+        path: deploy/build/ios
+
+    - name: 'Download macOS package'
+      uses: actions/download-artifact@v8
+      with:
+        name: AmneziaVPN.pkg
+        path: deploy/build/osx
+
+    - name: 'Upload iOS build to TestFlight'
+      run: fastlane ios testflight_upload 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload macOS build to TestFlight'
+      run: fastlane mac testflight_upload 2>&1 | sed -f hide_secrets.sed
