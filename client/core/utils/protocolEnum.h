@@ -34,6 +34,7 @@ namespace amnezia
             MtProxy,
             Telemt,
             TProxy,
+            WhatsAppProxy,
         };
         Q_ENUM_NS(Proto)
 

@@ -57,6 +57,7 @@ public:
     QString fetchDockerContainerSecret(const QString &serverId, DockerContainer container);
 
     void setTProxyInstallHints(const QString &hostname, const QString &email);
+    void setWhatsAppProxyInstallHints(const QString &mediaPort);
 
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);
@@ -136,6 +137,7 @@ private:
     bool m_cancelInstallation = false;
     QString m_tproxyInstallHostname;
     QString m_tproxyInstallEmail;
+    QString m_whatsAppProxyInstallMediaPort;
 
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;

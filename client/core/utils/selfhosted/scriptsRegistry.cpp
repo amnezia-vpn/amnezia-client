@@ -22,6 +22,7 @@
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
 #include "core/models/protocols/tProxyProtocolConfig.h"
+#include "core/models/protocols/whatsAppProxyProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -43,6 +44,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::MtProxy: return QLatin1String("mtproxy");
     case DockerContainer::Telemt: return QLatin1String("telemt");
     case DockerContainer::TProxy: return QLatin1String("tproxy");
+    case DockerContainer::WhatsAppProxy: return QLatin1String("whatsapp_proxy");
     default: return QString();
     }
 }
@@ -428,6 +430,18 @@ amnezia::ScriptVars amnezia::genTProxyVars(const ContainerConfig &containerConfi
     return vars;
 }
 
+amnezia::ScriptVars amnezia::genWhatsAppProxyVars(const ContainerConfig &containerConfig)
+{
+    ScriptVars vars;
+
+    if (auto *whatsAppProxyConfig = containerConfig.getWhatsAppProxyProtocolConfig()) {
+        vars.append({ { "$WHATSAPP_PROXY_CHAT_PORT", whatsAppProxyConfig->effectivePort() } });
+        vars.append({ { "$WHATSAPP_PROXY_MEDIA_PORT", whatsAppProxyConfig->effectiveMediaPort() } });
+    }
+
+    return vars;
+}
+
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
@@ -460,6 +474,9 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         break;
     case Proto::TProxy:
         vars.append(genTProxyVars(containerConfig));
+        break;
+    case Proto::WhatsAppProxy:
+        vars.append(genWhatsAppProxyVars(containerConfig));
         break;
     default:
         break;

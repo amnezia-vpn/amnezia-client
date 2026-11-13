@@ -25,6 +25,7 @@
 #include "core/installers/mtProxyInstaller.h"
 #include "core/installers/telemtInstaller.h"
 #include "core/installers/tProxyInstaller.h"
+#include "core/installers/whatsAppProxyInstaller.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
 #include "core/installers/xrayInstaller.h"
@@ -145,6 +146,7 @@ namespace
         return container == DockerContainer::MtProxy
                 || container == DockerContainer::Telemt
                 || container == DockerContainer::TProxy
+                || container == DockerContainer::WhatsAppProxy
                 || container == DockerContainer::Xray;
     }
 
@@ -315,6 +317,8 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             ServerCredentials credentials = adminConfig->credentials();
             SshSession sshSession;
             TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
+        } else if (container == DockerContainer::WhatsAppProxy) {
+            WhatsAppProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
@@ -372,6 +376,8 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         } else if (container == DockerContainer::TProxy) {
             TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
+        } else if (container == DockerContainer::WhatsAppProxy) {
+            WhatsAppProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
         if (reinstallRequired) {
             if (container != DockerContainer::Xray) {
@@ -729,6 +735,8 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
         TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
     } else if (container == DockerContainer::TProxy) {
         TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
+    } else if (container == DockerContainer::WhatsAppProxy) {
+        WhatsAppProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
     }
 
     return ErrorCode::NoError;
@@ -910,6 +918,14 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
             }
         }
     }
+    if (container == DockerContainer::WhatsAppProxy) {
+        if (const auto *whatsAppProxyConfig = config.getWhatsAppProxyProtocolConfig()) {
+            const QString mediaPort = whatsAppProxyConfig->effectiveMediaPort();
+            if (!fixedPorts.contains(mediaPort) && mediaPort != port) {
+                fixedPorts.append(mediaPort);
+            }
+        }
+    }
     QString transportProto = config.protocolConfig.transportProto();
     if (transportProto.isEmpty()) {
         transportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
@@ -1085,6 +1101,14 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         }
     }
 
+    if (container == DockerContainer::WhatsAppProxy) {
+        const auto *oldW = oldConfig.getWhatsAppProxyProtocolConfig();
+        const auto *newW = newConfig.getWhatsAppProxyProtocolConfig();
+        if (oldW && newW && !oldW->equalsDockerDeploymentSettings(*newW)) {
+            return true;
+        }
+    }
+
     if (container == DockerContainer::Socks5Proxy) {
         return true;
     }
@@ -1122,7 +1146,7 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
     if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
-            || container == DockerContainer::TProxy) {
+            || container == DockerContainer::TProxy || container == DockerContainer::WhatsAppProxy) {
         QString conntrackOut;
         auto cbConntrack = [&](const QString &data, libssh::Client &) {
             conntrackOut += data + "\n";
@@ -1422,6 +1446,7 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
     case DockerContainer::MtProxy: return QScopedPointer<InstallerBase>(new MtProxyInstaller(this));
     case DockerContainer::Telemt: return QScopedPointer<InstallerBase>(new TelemtInstaller(this));
     case DockerContainer::TProxy: return QScopedPointer<InstallerBase>(new TProxyInstaller(this));
+    case DockerContainer::WhatsAppProxy: return QScopedPointer<InstallerBase>(new WhatsAppProxyInstaller(this));
     default: return QScopedPointer<InstallerBase>(new InstallerBase(this));
     }
 }
@@ -1456,6 +1481,14 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
             return ErrorCode::InternalError;
         }
     }
+    if (container == DockerContainer::WhatsAppProxy) {
+        if (auto *whatsAppProxyConfig = config.getWhatsAppProxyProtocolConfig()) {
+            if (!m_whatsAppProxyInstallMediaPort.isEmpty()) {
+                whatsAppProxyConfig->mediaPort = m_whatsAppProxyInstallMediaPort;
+            }
+        }
+        m_whatsAppProxyInstallMediaPort.clear();
+    }
     return setupContainer(credentials, container, config, false);
 }
 
@@ -1463,6 +1496,11 @@ void InstallController::setTProxyInstallHints(const QString &hostname, const QSt
 {
     m_tproxyInstallHostname = hostname;
     m_tproxyInstallEmail = email;
+}
+
+void InstallController::setWhatsAppProxyInstallHints(const QString &mediaPort)
+{
+    m_whatsAppProxyInstallMediaPort = mediaPort;
 }
 
 
@@ -1514,6 +1552,13 @@ bool InstallController::isUpdateDockerContainerRequired(DockerContainer containe
             return true;
         }
         return !oldP->equalsDockerDeploymentSettings(*newP);
+    } else if (container == DockerContainer::WhatsAppProxy) {
+        const auto *oldW = oldConfig.getWhatsAppProxyProtocolConfig();
+        const auto *newW = newConfig.getWhatsAppProxyProtocolConfig();
+        if (!oldW || !newW) {
+            return true;
+        }
+        return !oldW->equalsDockerDeploymentSettings(*newW);
     }
 
     return true;
@@ -1945,6 +1990,11 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     TProxyInstaller::applyDockerPublishedPorts(containerInfo, *tProxyConfig);
                 }
             }
+            if (container == DockerContainer::WhatsAppProxy) {
+                if (auto *whatsAppProxyConfig = config.getWhatsAppProxyProtocolConfig()) {
+                    WhatsAppProxyInstaller::applyDockerPublishedPorts(containerInfo, *whatsAppProxyConfig);
+                }
+            }
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
@@ -1975,6 +2025,11 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     TProxyInstaller::applyDockerPublishedPorts(containerInfo, *tProxyConfig);
                 }
             }
+            if (container == DockerContainer::WhatsAppProxy) {
+                if (auto *whatsAppProxyConfig = config.getWhatsAppProxyProtocolConfig()) {
+                    WhatsAppProxyInstaller::applyDockerPublishedPorts(containerInfo, *whatsAppProxyConfig);
+                }
+            }
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
@@ -1991,7 +2046,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 ErrorCode InstallController::setDockerContainerEnabledState(const QString &serverId, DockerContainer container, bool enabled)
 {
     if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
-            && container != DockerContainer::TProxy) {
+            && container != DockerContainer::TProxy && container != DockerContainer::WhatsAppProxy) {
         return ErrorCode::InternalError;
     }
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
@@ -2020,6 +2075,9 @@ ErrorCode InstallController::setDockerContainerEnabledState(const QString &serve
         persist = true;
     } else if (auto *tProxyConfig = currentConfig.getTProxyProtocolConfig()) {
         tProxyConfig->isEnabled = enabled;
+        persist = true;
+    } else if (auto *whatsAppProxyConfig = currentConfig.getWhatsAppProxyProtocolConfig()) {
+        whatsAppProxyConfig->isEnabled = enabled;
         persist = true;
     }
     if (persist) {

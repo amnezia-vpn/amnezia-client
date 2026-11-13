@@ -71,6 +71,7 @@ ScriptVars genSocks5ProxyVars(const ContainerConfig &containerConfig);
 ScriptVars genMtProxyVars(const ContainerConfig &containerConfig);
 ScriptVars genTelemtVars(const ContainerConfig &containerConfig);
 ScriptVars genTProxyVars(const ContainerConfig &containerConfig);
+ScriptVars genWhatsAppProxyVars(const ContainerConfig &containerConfig);
 
 ScriptVars genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig);
 }
