@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "daemon/logprivacy.h"
 #include "linuxroutemonitor.h"
 
 #include <QNetworkInterface>
@@ -91,14 +92,14 @@ static int memcmpzero(const void* data, size_t len) {
 }
 
 bool LinuxRouteMonitor::insertRoute(const IPAddress& prefix) {
-    logger.debug() << "Adding route to" << prefix.toString();
+    logger.debug() << "Adding route to" << LogPrivacy::address(prefix.toString());
 
     const int flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     return rtmSendRoute(RTM_NEWROUTE, flags, RTN_UNICAST, prefix);
 }
 
 bool LinuxRouteMonitor::deleteRoute(const IPAddress& prefix) {
-    logger.debug() << "Removing route to" << prefix.toString();
+    logger.debug() << "Removing route to" << LogPrivacy::address(prefix.toString());
 
     const int flags = NLM_F_REQUEST | NLM_F_ACK;
     return rtmSendRoute(RTM_DELROUTE, flags, RTN_UNICAST, prefix);
@@ -106,14 +107,14 @@ bool LinuxRouteMonitor::deleteRoute(const IPAddress& prefix) {
 
 bool LinuxRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     logger.debug() << "Adding exclusion route for"
-                   << prefix.toString();
+                   << LogPrivacy::address(prefix.toString());
     const int flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     return rtmSendRoute(RTM_NEWROUTE, flags, RTN_THROW, prefix);
 }
 
 bool LinuxRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
     logger.debug() << "Removing exclusion route for"
-                   << prefix.toString();
+                   << LogPrivacy::address(prefix.toString());
     const int flags = NLM_F_REQUEST | NLM_F_ACK;
     return rtmSendRoute(RTM_DELROUTE, flags, RTN_THROW, prefix);
 }

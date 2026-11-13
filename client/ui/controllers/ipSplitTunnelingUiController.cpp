@@ -18,21 +18,42 @@ IpSplitTunnelingUiController::IpSplitTunnelingUiController(IpSplitTunnelingContr
 
 void IpSplitTunnelingUiController::addSite(QString hostname)
 {
-    if (m_ipSplitTunnelingController->addSite(hostname)) {
-        emit finished(tr("New site added: %1").arg(hostname));
-        return;
-    }
-    if (hostname.trimmed().startsWith(QStringLiteral("*."))) {
-        if (m_ipSplitTunnelingController->getRouteMode() != RouteMode::VpnAllExceptSites) {
-            emit errorOccurred(tr("A wildcard such as %1 only works in the "
-                                  "Directly mode, where listed addresses are "
-                                  "not accessed via the VPN.")
-                                       .arg(hostname));
-            return;
-        }
+    using Result = IpSplitTunnelingController::AddSiteResult;
+
+    QString normalized;
+    const Result result = m_ipSplitTunnelingController->addSite(hostname, &normalized);
+    const QString shown = normalized.isEmpty() ? hostname.trimmed() : normalized;
+
+    switch (result) {
+    case Result::Added:
+        emit finished(tr("New site added: %1").arg(shown));
+        break;
+    case Result::AddedWildcard:
+        emit finished(tr("New site added: %1. Wildcard sites apply to WireGuard and "
+                         "AmneziaWG connections.")
+                              .arg(shown));
+        break;
+    case Result::Duplicate:
+        emit errorOccurred(tr("%1 is already in the list").arg(shown));
+        break;
+    case Result::Invalid:
+        break;
+    case Result::InvalidWildcard:
         emit errorOccurred(tr("%1 is not a usable wildcard. Use a form like "
                               "*.example.com, with no path.")
-                                   .arg(hostname));
+                                   .arg(shown));
+        break;
+    case Result::WildcardNeedsBypassMode:
+        emit errorOccurred(tr("A wildcard such as %1 only works in the "
+                              "Directly mode, where listed addresses are "
+                              "not accessed via the VPN.")
+                                   .arg(shown));
+        break;
+    case Result::WildcardUnsupportedHere:
+        emit errorOccurred(tr("Wildcard sites such as %1 are supported only on the "
+                              "desktop app with WireGuard/AmneziaWG.")
+                                   .arg(shown));
+        break;
     }
 }
 
@@ -61,7 +82,11 @@ void IpSplitTunnelingUiController::importSites(const QString &fileName, bool rep
 
     QString errorMessage;
     if (m_ipSplitTunnelingController->importSitesFromJson(jsonData, replaceExisting, errorMessage)) {
-        emit finished(tr("Import completed"));
+        if (errorMessage.isEmpty()) {
+            emit finished(tr("Import completed"));
+        } else {
+            emit finished(tr("Import completed. %1").arg(errorMessage));
+        }
     } else {
         emit errorOccurred(errorMessage);
     }

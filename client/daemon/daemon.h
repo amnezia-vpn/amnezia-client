@@ -60,8 +60,8 @@ class Daemon : public QObject {
   void reconcileDnsWildcardRouter(const InterfaceConfig& config);
   void onWildcardAddressesResolved(const QString& name,
                                    const QList<DnsWildcardRouter::Record>& records);
-  void onWildcardSweep();
   void withdrawWildcardRoutes();
+  void withdrawWildcardAddress(const QHostAddress& address);
   void stopDnsWildcardRouter();
 
  protected:
@@ -85,6 +85,22 @@ class Daemon : public QObject {
     Q_UNUSED(prefix);
     return true;
   }
+
+  // Withdraws every bypass permit at once. Returns false when the platform has
+  // no bulk operation, and the caller then revokes address by address.
+  virtual bool revokeAllBypassAddresses() { return false; }
+
+  // Puts back the permits of addresses that are still routed, after the
+  // firewall may have been rebuilt underneath them. Only needed where a
+  // rebuild drops them; must be idempotent.
+  virtual void reassertBypassPermits(const QList<IPAddress>& addresses,
+                                     const QHostAddress& resolver) {
+    Q_UNUSED(addresses);
+    Q_UNUSED(resolver);
+  }
+
+  // Whether an exclusion route can be installed for an IPv6 address.
+  virtual bool supportsIPv6ExclusionRoutes() const { return true; }
 
   virtual bool allowResolverEndpoint(const QHostAddress& address) {
     Q_UNUSED(address);
@@ -112,7 +128,7 @@ class Daemon : public QObject {
   QTimer m_handshakeTimer;
   DnsWildcardRouter* m_dnsWildcardRouter = nullptr;
   WildcardRouteTable m_wildcardRoutes;
-  QTimer m_wildcardSweep;
+  QStringList m_wildcardPatterns;
 };
 
 #endif  // DAEMON_H

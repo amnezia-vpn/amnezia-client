@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "daemon/logprivacy.h"
 #include "windowsroutemonitor.h"
 
 #include <QScopeGuard>
@@ -258,7 +259,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
 
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
-  if (error != NO_ERROR) {
+  if (error == NO_ERROR) {
     updateCapturedRoutes(family, table);
     FreeMibTable(table);
   }
@@ -366,7 +367,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 }
 
 bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for" << prefix.toString();
+  logger.debug() << "Adding exclusion route for" << LogPrivacy::address(prefix.toString());
 
   // Silently ignore non-routeable addresses.
   QHostAddress addr = prefix.address();
@@ -434,7 +435,7 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
-                 << prefix.address().toString();
+                 << LogPrivacy::address(prefix.address().toString());
 
   MIB_IPFORWARD_ROW2* data = m_exclusionRoutes.take(prefix);
   if (data == nullptr) {
@@ -444,7 +445,7 @@ bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   DWORD result = DeleteIpForwardEntry2(data);
   if ((result != ERROR_NOT_FOUND) && (result != NO_ERROR)) {
     logger.error() << "Failed to delete route to"
-                   << prefix.toString()
+                   << LogPrivacy::address(prefix.toString())
                    << "result:" << result;
   }
 

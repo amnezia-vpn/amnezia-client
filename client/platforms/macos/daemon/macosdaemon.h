@@ -28,6 +28,13 @@ class MacOSDaemon final : public Daemon {
   bool revokeBypassAddress(const IPAddress& prefix) override {
     return m_wgutils ? m_wgutils->revokeBypassTraffic(prefix) : true;
   }
+  bool revokeAllBypassAddresses() override {
+    return m_wgutils ? m_wgutils->revokeAllBypassTraffic() : true;
+  }
+  void reassertBypassPermits(const QList<IPAddress>& addresses,
+                             const QHostAddress& resolver) override {
+    if (m_wgutils) m_wgutils->reassertBypassTraffic(addresses, resolver);
+  }
   bool allowResolverEndpoint(const QHostAddress& address) override {
     return m_wgutils ? m_wgutils->allowResolverEndpoint(address) : true;
   }

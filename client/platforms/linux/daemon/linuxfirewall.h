@@ -100,6 +100,13 @@ public:
     static void updateDNSServers(const QStringList& servers);
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
+    // The 240.allowWildcard anchor: one rule per learned address, added and
+    // removed individually so a new DNS answer costs one iptables call.
+    static bool allowWildcardAddress(const QString& address);
+    static bool revokeWildcardAddress(const QString& address);
+    static bool allowWildcardResolver(const QString& address);
+    static bool revokeWildcardResolver(const QString& address);
+    static void flushWildcard();
 };
 
 #endif // LINUXFIREWALL_H

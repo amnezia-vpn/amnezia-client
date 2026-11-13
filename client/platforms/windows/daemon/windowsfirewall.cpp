@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "daemon/logprivacy.h"
 #include "windowsfirewall.h"
 
 #include <comdef.h>
@@ -410,7 +411,7 @@ bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {
     return false;
   }
 
-  logger.info() << "Disabling traffic for peer" << pubkey;
+  logger.info() << "Disabling traffic for peer" << LogPrivacy::address(pubkey);
   for (const auto& filterID : m_peerRules.values(pubkey)) {
     FwpmFilterDeleteById0(m_sessionHandle, filterID);
     m_peerRules.remove(pubkey, filterID);
@@ -1026,10 +1027,11 @@ bool WindowsFirewall::enableFilter(FWPM_FILTER0* filter, const QString& title,
   auto result = FwpmFilterAdd0(m_sessionHandle, filter, NULL, &filterID);
   if (result != ERROR_SUCCESS) {
     logger.error() << "Failed to enable filter: " << title << " "
-                   << description;
+                   << LogPrivacy::address(description);
     return false;
   }
-  logger.info() << "Filter added: " << title << ":" << description;
+  logger.info() << "Filter added: " << title << ":"
+                << LogPrivacy::address(description);
   if (peer.isEmpty()) {
     m_activeRules.append(filterID);
   } else {

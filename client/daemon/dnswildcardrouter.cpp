@@ -38,7 +38,13 @@ constexpr int DNS_MAX_TCP_SIZE = 65535;
 constexpr int DNS_MAX_PENDING = 512;
 constexpr int DNS_MAX_TCP_SESSIONS = 64;
 constexpr int DNS_MAX_OUTSTANDING_PER_SESSION = 32;
+// A UDP query is retransmitted, cycling through the upstreams, every
+// attempt interval until one answers or the budget runs out. The answer to
+// any attempt is taken, so a slow resolver is not cut off by a retransmit.
+constexpr int DNS_UDP_ATTEMPT_MSEC = 1000;
+constexpr int DNS_UDP_BUDGET_MSEC = 5000;
 constexpr int DNS_UPSTREAM_TIMEOUT_MSEC = 3000;
+constexpr int DNS_LOCAL_SNAPSHOT_MIN_AGE_MSEC = 5000;
 constexpr int DNS_TCP_IDLE_TIMEOUT_MSEC = 10000;
 
 qint64 monotonicNowMsec() {
@@ -441,7 +447,8 @@ bool DnsWildcardRouter::start(const QStringList& canonicalPatterns,
   m_patterns = patterns;
   m_listenAddress = listenAddress;
   m_upstreamPort = upstreamPort;
-  m_localAddresses = QNetworkInterface::allAddresses();
+  m_preferredUpstream = 0;
+  refreshLocalSnapshot();
 
   connect(m_udp, &QUdpSocket::readyRead, this, &DnsWildcardRouter::onUdpQuery);
   connect(m_tcp, &QTcpServer::newConnection, this,
@@ -452,11 +459,12 @@ bool DnsWildcardRouter::start(const QStringList& canonicalPatterns,
 }
 
 void DnsWildcardRouter::stop() {
-  const QList<QUdpSocket*> sockets = m_udpRequests.keys();
-  for (QUdpSocket* socket : sockets) {
-    std::unique_ptr<UdpRequest> request = takeUdp(socket);
+  const QList<UdpRequest*> requests = m_udpRequests.values();
+  for (UdpRequest* request : requests) {
+    finishUdp(request);
   }
   m_udpRequests.clear();
+  m_udpSockets.clear();
 
   const QList<QTcpSocket*> clients = m_tcpSessions.keys();
   for (QTcpSocket* client : clients) {
@@ -478,7 +486,10 @@ void DnsWildcardRouter::stop() {
   m_patterns.clear();
   m_listenAddress = QHostAddress();
   m_upstreamPort = 53;
+  m_preferredUpstream = 0;
   m_localAddresses.clear();
+  m_attachedSubnets.clear();
+  m_localSnapshotMsec = 0;
 }
 
 bool DnsWildcardRouter::matchesConfiguration(
@@ -498,16 +509,93 @@ bool DnsWildcardRouter::matchesConfiguration(
          listenAddress == m_listenAddress;
 }
 
-bool DnsWildcardRouter::isAcceptableClient(const QHostAddress& address) const {
-  if (address.isLoopback() || address.isEqual(m_listenAddress)) {
+// static
+bool DnsWildcardRouter::isLocalSource(const QHostAddress& source,
+                                      const QHostAddress& listenAddress,
+                                      const QList<QHostAddress>& localAddresses,
+                                      const QList<Subnet>& attachedSubnets) {
+  if (source.isNull()) {
+    return false;
+  }
+  if (source.isLoopback() || source.isEqual(listenAddress)) {
     return true;
   }
-  for (const QHostAddress& candidate : m_localAddresses) {
-    if (candidate.isEqual(address)) {
+  for (const QHostAddress& candidate : localAddresses) {
+    if (candidate.isEqual(source)) {
+      return true;
+    }
+  }
+  for (const Subnet& subnet : attachedSubnets) {
+    if (subnet.first.protocol() != source.protocol()) {
+      continue;
+    }
+    if (source.isInSubnet(subnet.first, subnet.second)) {
       return true;
     }
   }
   return false;
+}
+
+void DnsWildcardRouter::refreshLocalSnapshot() {
+  m_localAddresses.clear();
+  m_attachedSubnets.clear();
+  m_localSnapshotMsec = monotonicNowMsec();
+
+  const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+  for (const QNetworkInterface& iface : interfaces) {
+    const QList<QNetworkAddressEntry> entries = iface.addressEntries();
+
+    bool ownsListenAddress = false;
+    for (const QNetworkAddressEntry& entry : entries) {
+      if (entry.ip().isEqual(m_listenAddress)) {
+        ownsListenAddress = true;
+        break;
+      }
+    }
+
+    // The interface that owns the listen address is the tunnel: its subnet
+    // is the far side, and a peer there is not this machine.
+    const bool attachable =
+        !ownsListenAddress &&
+        iface.flags().testFlag(QNetworkInterface::IsUp) &&
+        !iface.flags().testFlag(QNetworkInterface::IsLoopBack);
+
+    for (const QNetworkAddressEntry& entry : entries) {
+      const QHostAddress ip = entry.ip();
+      if (ip.isNull()) {
+        continue;
+      }
+      m_localAddresses.append(ip);
+      if (!attachable) {
+        continue;
+      }
+      const int prefix = entry.prefixLength();
+      const int width =
+          ip.protocol() == QAbstractSocket::IPv6Protocol ? 128 : 32;
+      // A host route says nothing about a neighbour, and an unknown or zero
+      // prefix would make the whole Internet "attached".
+      if (prefix <= 0 || prefix >= width) {
+        continue;
+      }
+      m_attachedSubnets.append(Subnet(ip, prefix));
+    }
+  }
+}
+
+bool DnsWildcardRouter::isAcceptableClient(const QHostAddress& address) {
+  if (isLocalSource(address, m_listenAddress, m_localAddresses,
+                    m_attachedSubnets)) {
+    return true;
+  }
+  // An interface that came up after start, a container bridge for example,
+  // is picked up on the first query from it, at most once per interval.
+  if (monotonicNowMsec() - m_localSnapshotMsec <
+      DNS_LOCAL_SNAPSHOT_MIN_AGE_MSEC) {
+    return false;
+  }
+  refreshLocalSnapshot();
+  return isLocalSource(address, m_listenAddress, m_localAddresses,
+                       m_attachedSubnets);
 }
 
 void DnsWildcardRouter::learn(const Message& message) {
@@ -565,76 +653,110 @@ void DnsWildcardRouter::onUdpQuery() {
       continue;
     }
 
-    auto request = std::make_unique<UdpRequest>();
+    auto request = new UdpRequest;
     request->transaction.envelope = envelope;
     request->transaction.query = query;
-    request->transaction.upstreamIndex = 0;
     request->clientAddress = clientAddress;
     request->clientPort = clientPort;
+    request->budgetDeadlineMsec = monotonicNowMsec() + DNS_UDP_BUDGET_MSEC;
+    request->nextUpstream =
+        m_upstreams.isEmpty() ? 0 : m_preferredUpstream % m_upstreams.count();
 
-    if (!sendUdp(request)) {
-      failUdp(std::move(request));
+    request->timer = new QTimer(this);
+    request->timer->setSingleShot(true);
+    connect(request->timer, &QTimer::timeout, this,
+            [this, request]() { onUdpAttemptTimeout(request); });
+    m_udpRequests.insert(request);
+
+    if (!sendUdpAttempt(request)) {
+      failUdp(request);
+      continue;
     }
+    armUdpAttempt(request);
   }
 }
 
-bool DnsWildcardRouter::sendUdp(std::unique_ptr<UdpRequest>& request) {
-  while (request->transaction.upstreamIndex < m_upstreams.count()) {
+bool DnsWildcardRouter::sendUdpAttempt(UdpRequest* request) {
+  const int count = m_upstreams.count();
+  for (int tried = 0; tried < count; ++tried) {
+    const int index = request->nextUpstream % count;
+    request->nextUpstream = (index + 1) % count;
+
     auto socket = new QUdpSocket(this);
     socket->setProxy(QNetworkProxy::NoProxy);
-    socket->connectToHost(m_upstreams.at(request->transaction.upstreamIndex),
-                          m_upstreamPort);
+    socket->connectToHost(m_upstreams.at(index), m_upstreamPort);
     if (socket->write(request->transaction.query) !=
         request->transaction.query.size()) {
       logger.warning() << "Failed to send a query upstream";
       socket->deleteLater();
-      ++request->transaction.upstreamIndex;
       continue;
     }
 
-    auto timer = new QTimer(socket);
-    timer->setSingleShot(true);
-    timer->setInterval(DNS_UPSTREAM_TIMEOUT_MSEC);
-
-    request->socket = socket;
-    request->timer = timer;
-    m_udpRequests.insert(socket, request.release());
-
+    request->attempts.insert(socket, index);
+    m_udpSockets.insert(socket, request);
     connect(socket, &QUdpSocket::readyRead, this,
             [this, socket]() { onUdpReply(socket); });
-    connect(timer, &QTimer::timeout, this,
-            [this, socket]() { onUdpTimeout(socket); });
-    timer->start();
     return true;
   }
   return false;
 }
 
-std::unique_ptr<DnsWildcardRouter::UdpRequest> DnsWildcardRouter::takeUdp(
-    QUdpSocket* socket) {
-  std::unique_ptr<UdpRequest> request(m_udpRequests.take(socket));
-  if (!request) {
-    return request;
-  }
-  if (request->socket) {
-    request->socket->disconnect(this);
-    request->socket->deleteLater();
-    request->socket = nullptr;
-  }
-  request->timer = nullptr;
-  return request;
+void DnsWildcardRouter::armUdpAttempt(UdpRequest* request) {
+  const qint64 remaining = request->budgetDeadlineMsec - monotonicNowMsec();
+  const qint64 wait = qMin<qint64>(DNS_UDP_ATTEMPT_MSEC, remaining);
+  request->timer->start(wait > 0 ? static_cast<int>(wait) : 0);
 }
 
-void DnsWildcardRouter::failUdp(std::unique_ptr<UdpRequest> request) {
+void DnsWildcardRouter::onUdpAttemptTimeout(UdpRequest* request) {
+  if (!m_udpRequests.contains(request)) {
+    return;
+  }
+  if (request->budgetDeadlineMsec - monotonicNowMsec() <= 0) {
+    failUdp(request);
+    return;
+  }
+  // Retransmit to the next upstream, or to the same one when it is the only
+  // one; the earlier attempts stay open for a late answer.
+  if (!sendUdpAttempt(request) && request->attempts.isEmpty()) {
+    failUdp(request);
+    return;
+  }
+  armUdpAttempt(request);
+}
+
+void DnsWildcardRouter::finishUdp(UdpRequest* request) {
+  if (!m_udpRequests.remove(request)) {
+    return;
+  }
+  for (auto i = request->attempts.constBegin();
+       i != request->attempts.constEnd(); ++i) {
+    QUdpSocket* socket = i.key();
+    m_udpSockets.remove(socket);
+    socket->disconnect(this);
+    socket->deleteLater();
+  }
+  request->attempts.clear();
+  if (request->timer) {
+    request->timer->stop();
+    request->timer->disconnect(this);
+    request->timer->deleteLater();
+    request->timer = nullptr;
+  }
+  delete request;
+}
+
+void DnsWildcardRouter::failUdp(UdpRequest* request) {
   const QByteArray servfail = buildServFail(request->transaction.query);
   if (m_udp && !servfail.isEmpty()) {
     m_udp->writeDatagram(servfail, request->clientAddress,
                          request->clientPort);
   }
+  finishUdp(request);
 }
 
 void DnsWildcardRouter::onUdpReply(QUdpSocket* socket) {
-  if (!m_udpRequests.contains(socket)) {
+  UdpRequest* request = m_udpSockets.value(socket, nullptr);
+  if (!request) {
     return;
   }
 
@@ -647,22 +769,18 @@ void DnsWildcardRouter::onUdpReply(QUdpSocket* socket) {
     }
     response.truncate(static_cast<int>(read));
 
-    const UdpRequest* peek = m_udpRequests.value(socket, nullptr);
-    if (!peek) {
-      return;
-    }
-
     Envelope replyEnvelope;
     if (!parseEnvelope(response, &replyEnvelope) ||
-        !answers(replyEnvelope, peek->transaction.envelope)) {
+        !answers(replyEnvelope, request->transaction.envelope)) {
       logger.warning() << "Discarding a DNS reply that does not match";
       continue;
     }
 
-    std::unique_ptr<UdpRequest> request = takeUdp(socket);
-    if (!request) {
-      return;
-    }
+    // The upstream that answered is asked first next time.
+    m_preferredUpstream = request->attempts.value(socket, m_preferredUpstream);
+    const QHostAddress clientAddress = request->clientAddress;
+    const quint16 clientPort = request->clientPort;
+    finishUdp(request);
 
     Message message;
     if (parseMessage(response, &message)) {
@@ -670,24 +788,10 @@ void DnsWildcardRouter::onUdpReply(QUdpSocket* socket) {
     }
 
     if (m_udp) {
-      m_udp->writeDatagram(response, request->clientAddress,
-                           request->clientPort);
+      m_udp->writeDatagram(response, clientAddress, clientPort);
     }
     return;
   }
-}
-
-void DnsWildcardRouter::onUdpTimeout(QUdpSocket* socket) {
-  std::unique_ptr<UdpRequest> request = takeUdp(socket);
-  if (!request) {
-    return;
-  }
-
-  ++request->transaction.upstreamIndex;
-  if (sendUdp(request)) {
-    return;
-  }
-  failUdp(std::move(request));
 }
 
 void DnsWildcardRouter::onTcpConnection() {
@@ -710,7 +814,6 @@ void DnsWildcardRouter::onTcpConnection() {
     session->idle->setInterval(DNS_TCP_IDLE_TIMEOUT_MSEC);
     session->deadline = new QTimer(client);
     session->deadline->setSingleShot(true);
-    session->deadline->setInterval(DNS_UPSTREAM_TIMEOUT_MSEC);
     m_tcpSessions.insert(client, session);
 
     connect(client, &QTcpSocket::readyRead, this, [this, client]() {
@@ -797,16 +900,23 @@ void DnsWildcardRouter::onTcpDeadline(TcpSession* session) {
     return;
   }
   logger.warning() << "A TCP resolver went silent, trying the next one";
+  failoverTcp(session);
+}
 
-  QTcpSocket* client = session->client;
-  dropTcpUpstream(session);
-  ++session->upstreamIndex;
-
+void DnsWildcardRouter::resetTcpDeadlines(TcpSession* session) {
   const qint64 next = monotonicNowMsec() + DNS_UPSTREAM_TIMEOUT_MSEC;
   for (Transaction& transaction : session->outstanding) {
     transaction.deadlineMsec = next;
     transaction.upstreamIndex = session->upstreamIndex;
   }
+}
+
+void DnsWildcardRouter::failoverTcp(TcpSession* session) {
+  QTcpSocket* client = session->client;
+  dropTcpUpstream(session);
+  ++session->upstreamIndex;
+  session->reconnected = false;
+  resetTcpDeadlines(session);
 
   if (!openTcpUpstream(session)) {
     if (sessionFor(client)) {
@@ -815,6 +925,40 @@ void DnsWildcardRouter::onTcpDeadline(TcpSession* session) {
     return;
   }
   armTcpDeadline(session);
+}
+
+void DnsWildcardRouter::onTcpUpstreamError(QTcpSocket* client, int attempt,
+                                           QAbstractSocket::SocketError error) {
+  TcpSession* session = sessionFor(client);
+  if (!session || session->attempt != attempt) {
+    return;
+  }
+  if (session->outstanding.isEmpty()) {
+    dropTcpUpstream(session);
+    return;
+  }
+
+  // A resolver may close a connection with queries outstanding when it runs
+  // short of resources; that is a reason to reconnect to it, not to give up
+  // on it (RFC 7766, section 6.2.4). One reconnect per round of progress, so
+  // a server that closes without ever answering is still failed over.
+  if (error == QAbstractSocket::RemoteHostClosedError &&
+      !session->reconnected) {
+    logger.debug() << "A TCP resolver closed the connection, reconnecting";
+    dropTcpUpstream(session);
+    session->reconnected = true;
+    resetTcpDeadlines(session);
+    if (!openTcpUpstream(session)) {
+      if (sessionFor(client)) {
+        failTcp(session);
+      }
+      return;
+    }
+    armTcpDeadline(session);
+    return;
+  }
+
+  failoverTcp(session);
 }
 
 bool DnsWildcardRouter::openTcpUpstream(TcpSession* session) {
@@ -849,25 +993,10 @@ bool DnsWildcardRouter::openTcpUpstream(TcpSession* session) {
   });
   connect(upstream, &QTcpSocket::errorOccurred, this,
           [this, client, attempt](QAbstractSocket::SocketError error) {
-            TcpSession* s = sessionFor(client);
-            if (!s || s->attempt != attempt) {
-              return;
-            }
-            if (error == QAbstractSocket::RemoteHostClosedError &&
-                s->outstanding.isEmpty()) {
-              dropTcpUpstream(s);
-              return;
-            }
-            QTimer::singleShot(0, this, [this, client, attempt]() {
-              TcpSession* later = sessionFor(client);
-              if (!later || later->attempt != attempt) {
-                return;
-              }
-              dropTcpUpstream(later);
-              ++later->upstreamIndex;
-              if (!openTcpUpstream(later) && sessionFor(client)) {
-                failTcp(later);
-              }
+            // Deferred, so answers that arrived together with the close are
+            // read before the outstanding list is judged.
+            QTimer::singleShot(0, this, [this, client, attempt, error]() {
+              onTcpUpstreamError(client, attempt, error);
             });
           });
 
@@ -911,6 +1040,7 @@ void DnsWildcardRouter::onTcpUpstreamData(TcpSession* session) {
       continue;
     }
     session->outstanding.removeAt(matched);
+    session->reconnected = false;
 
     if (mayLearnFrom(replyEnvelope)) {
       Message message;

@@ -2,11 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include <functional>
+#include <memory>
+
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QHostAddress>
 #include <QSignalSpy>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QTest>
+#include <QTimer>
 #include <QUdpSocket>
 
 #include "daemon/dnswildcardrouter.h"
@@ -73,6 +79,58 @@ constexpr quint16 TYPE_CNAME = 5;
 constexpr quint16 TYPE_OPT = 41;
 constexpr quint16 CLASS_IN = 1;
 
+// A NOERROR answer to `query` with one A record for the queried name.
+QByteArray answerFor(const QByteArray &query)
+{
+    DnsWildcardRouter::Envelope envelope;
+    if (!DnsWildcardRouter::parseEnvelope(query, &envelope)) {
+        return QByteArray();
+    }
+    QByteArray owner;
+    for (const QByteArray &label : envelope.qname) {
+        owner.append(static_cast<char>(label.size()));
+        owner.append(label);
+    }
+    owner.append('\0');
+
+    QByteArray reply = query.left(envelope.questionEnd);
+    reply[2] = static_cast<char>(0x81);
+    reply[3] = static_cast<char>(0x80);
+    reply[6] = 0;
+    reply[7] = 1;
+    reply[10] = 0;
+    reply[11] = 0;
+    reply.append(record(owner, TYPE_A, CLASS_IN, 300, ipv4(203, 0, 113, 7)));
+    return reply;
+}
+
+QByteArray queryFor(quint16 id, const QByteArray &first)
+{
+    return header(id, FLAGS_QUERY, 1, 0, 0, 0) + encodeName({ first, "watched", "example" })
+            + u16(TYPE_A) + u16(CLASS_IN);
+}
+
+// Starts `router` on a free loopback port that forwards to `upstreamPort`.
+quint16 startOnLoopback(DnsWildcardRouter &router, quint16 upstreamPort)
+{
+    for (quint16 candidate = 15453; candidate < 15553; ++candidate) {
+        if (router.start({ "*.watched.example" }, { QHostAddress::LocalHost },
+                         QHostAddress::LocalHost, candidate, upstreamPort)) {
+            return candidate;
+        }
+    }
+    return 0;
+}
+
+void waitFor(const std::function<bool()> &done, int msec)
+{
+    QElapsedTimer elapsed;
+    elapsed.start();
+    while (!done() && elapsed.elapsed() < msec) {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+    }
+}
+
 }
 
 class TestDnsWildcardRouter : public QObject
@@ -104,9 +162,15 @@ private slots:
 
     void testRouteTableInstallRenewAndExpiry();
     void testRouteTableRefusesReservedAndCaps();
+    void testRouteTableBudgetsArePerPattern();
 
     void testLiveUdpPathLearnsAndDelivers();
     void testLiveUdpPathRefusesExtendedRcode();
+    void testLiveUdpRetransmitsToASilentUpstream();
+    void testLiveUdpTakesALateAnswerToAnEarlierAttempt();
+    void testLiveTcpReconnectsWhenTheUpstreamCloses();
+
+    void testLocalSourceAcceptsAttachedSubnetsOnly();
 
 private:
     bool runLiveQuery(quint8 extendedRcode, int *learned, QByteArray *delivered);
@@ -408,43 +472,93 @@ void TestDnsWildcardRouter::testBuildServFail()
 
 void TestDnsWildcardRouter::testRouteTableInstallRenewAndExpiry()
 {
+    // A learned route outlives the TTL: past it the entry is only stale, a
+    // candidate for eviction, so an open connection is never cut by a timer.
     WildcardRouteTable table;
+    const QString pattern = QStringLiteral("example.com");
     const QHostAddress address("203.0.113.7");
     const qint64 start = 1000;
 
-    QCOMPARE(table.add(address, 30, start), WildcardRouteTable::AddResult::Install);
-    QCOMPARE(table.add(address, 30, start), WildcardRouteTable::AddResult::Renew);
+    QCOMPARE(table.add(address, pattern, 30, start), WildcardRouteTable::AddResult::Install);
+    QCOMPARE(table.add(address, pattern, 30, start), WildcardRouteTable::AddResult::Renew);
+    QVERIFY(table.contains(address));
+    // Stale only after the TTL plus the grace period.
+    const qint64 staleAt = start + 30000 + WildcardRouteTable::StaleGraceMsec;
+    QVERIFY(!table.isStale(address, staleAt - 1));
+    QVERIFY(table.isStale(address, staleAt));
     QVERIFY(table.contains(address));
 
-    QVERIFY(table.expire(start + 29000).isEmpty());
-    const QList<QHostAddress> gone = table.expire(start + 31000);
-    QCOMPARE(gone.size(), 1);
-    QCOMPARE(gone.at(0), address);
-    QVERIFY(!table.contains(address));
+    // A renewal makes it fresh again; a TTL of 0 is clamped up to the minimum.
+    QCOMPARE(table.add(address, pattern, 0, staleAt), WildcardRouteTable::AddResult::Renew);
+    QVERIFY(!table.isStale(address, staleAt + 1000));
 
-    QCOMPARE(table.add(address, 0, start), WildcardRouteTable::AddResult::Install);
-    QVERIFY(table.expire(start + 1000).isEmpty());
+    // A long TTL is not cut down: a day-long record stays fresh for a day.
+    const QHostAddress longLived("203.0.113.8");
+    QCOMPARE(table.add(longLived, pattern, 86400, start), WildcardRouteTable::AddResult::Install);
+    QVERIFY(!table.isStale(longLived, start + 86400LL * 1000));
 }
 
 void TestDnsWildcardRouter::testRouteTableRefusesReservedAndCaps()
 {
+    const QString pattern = QStringLiteral("example.com");
     WildcardRouteTable table(2);
-    table.setReserved({ QHostAddress("10.8.1.1") });
+    table.setReserved({ QHostAddress("1.1.1.1") },
+                      { qMakePair(QHostAddress("10.8.1.2"), 24) });
 
-    QCOMPARE(table.add(QHostAddress("10.8.1.1"), 60, 0),
+    // The resolver and anything inside the tunnel's own network are refused.
+    QCOMPARE(table.add(QHostAddress("1.1.1.1"), pattern, 60, 0),
              WildcardRouteTable::AddResult::Rejected);
-    QCOMPARE(table.add(QHostAddress("0.0.0.0"), 60, 0),
+    QCOMPARE(table.add(QHostAddress("10.8.1.1"), pattern, 60, 0),
              WildcardRouteTable::AddResult::Rejected);
-    QCOMPARE(table.add(QHostAddress("127.0.0.1"), 60, 0),
+    QCOMPARE(table.add(QHostAddress("0.0.0.0"), pattern, 60, 0),
+             WildcardRouteTable::AddResult::Rejected);
+    QCOMPARE(table.add(QHostAddress("127.0.0.1"), pattern, 60, 0),
              WildcardRouteTable::AddResult::Rejected);
 
-    QCOMPARE(table.add(QHostAddress("198.51.100.1"), 60, 0),
+    QCOMPARE(table.add(QHostAddress("198.51.100.1"), pattern, 60, 0),
              WildcardRouteTable::AddResult::Install);
-    QCOMPARE(table.add(QHostAddress("198.51.100.2"), 60, 0),
+    QCOMPARE(table.add(QHostAddress("198.51.100.2"), pattern, 60, 0),
              WildcardRouteTable::AddResult::Install);
-    QCOMPARE(table.add(QHostAddress("198.51.100.3"), 60, 0),
+    // Full and nothing stale yet: refused.
+    QCOMPARE(table.add(QHostAddress("198.51.100.3"), pattern, 60, 0),
              WildcardRouteTable::AddResult::AtCapacity);
+
+    // Once stale, the least recently seen entry makes room.
+    const qint64 later = 60000 + WildcardRouteTable::StaleGraceMsec;
+    QCOMPARE(table.add(QHostAddress("198.51.100.2"), pattern, 60, later - 1000),
+             WildcardRouteTable::AddResult::Renew);
+    QHostAddress evicted;
+    QCOMPARE(table.add(QHostAddress("198.51.100.3"), pattern, 60, later, &evicted),
+             WildcardRouteTable::AddResult::Install);
+    QCOMPARE(evicted, QHostAddress("198.51.100.1"));
+    QVERIFY(!table.contains(QHostAddress("198.51.100.1")));
     QCOMPARE(table.takeAll().size(), 2);
+}
+
+void TestDnsWildcardRouter::testRouteTableBudgetsArePerPattern()
+{
+    // One busy pattern cannot use up the room of another.
+    WildcardRouteTable table(10, 2);
+    const QString broad = QStringLiteral("ru");
+    const QString bank = QStringLiteral("mybank.example");
+
+    QCOMPARE(table.add(QHostAddress("198.51.100.1"), broad, 3600, 0),
+             WildcardRouteTable::AddResult::Install);
+    QCOMPARE(table.add(QHostAddress("198.51.100.2"), broad, 3600, 0),
+             WildcardRouteTable::AddResult::Install);
+    QCOMPARE(table.add(QHostAddress("198.51.100.3"), broad, 3600, 0),
+             WildcardRouteTable::AddResult::AtCapacity);
+    QCOMPARE(table.add(QHostAddress("203.0.113.1"), bank, 3600, 0),
+             WildcardRouteTable::AddResult::Install);
+    QCOMPARE(table.countForPattern(broad), 2);
+    QCOMPARE(table.countForPattern(bank), 1);
+
+    // Evicting for one pattern never takes another pattern's entry.
+    QHostAddress evicted;
+    QCOMPARE(table.add(QHostAddress("198.51.100.3"), broad, 60, 8000000, &evicted),
+             WildcardRouteTable::AddResult::Install);
+    QVERIFY(evicted == QHostAddress("198.51.100.1") || evicted == QHostAddress("198.51.100.2"));
+    QVERIFY(table.contains(QHostAddress("203.0.113.1")));
 }
 
 bool TestDnsWildcardRouter::runLiveQuery(quint8 extendedRcode, int *learned,
@@ -566,6 +680,213 @@ void TestDnsWildcardRouter::testLiveUdpPathRefusesExtendedRcode()
     DnsWildcardRouter::Envelope envelope;
     QVERIFY(DnsWildcardRouter::parseEnvelope(delivered, &envelope));
     QCOMPARE(envelope.id, quint16(0x2468));
+}
+
+// One upstream that drops the first datagram: the query is retransmitted to
+// it after the attempt interval and answered, instead of failing outright.
+void TestDnsWildcardRouter::testLiveUdpRetransmitsToASilentUpstream()
+{
+    QUdpSocket resolver;
+    QVERIFY(resolver.bind(QHostAddress::LocalHost, 0));
+
+    DnsWildcardRouter router;
+    const quint16 listenPort = startOnLoopback(router, resolver.localPort());
+    QVERIFY(listenPort != 0);
+
+    int seen = 0;
+    QObject::connect(&resolver, &QUdpSocket::readyRead, &resolver, [&]() {
+        while (resolver.hasPendingDatagrams()) {
+            QByteArray query;
+            query.resize(static_cast<int>(resolver.pendingDatagramSize()));
+            QHostAddress from;
+            quint16 fromPort = 0;
+            resolver.readDatagram(query.data(), query.size(), &from, &fromPort);
+            if (++seen == 1) {
+                continue;
+            }
+            resolver.writeDatagram(answerFor(query), from, fromPort);
+        }
+    });
+
+    QUdpSocket client;
+    QVERIFY(client.bind(QHostAddress::LocalHost, 0));
+    QByteArray response;
+    QObject::connect(&client, &QUdpSocket::readyRead, &client, [&]() {
+        while (client.hasPendingDatagrams()) {
+            QByteArray datagram;
+            datagram.resize(static_cast<int>(client.pendingDatagramSize()));
+            client.readDatagram(datagram.data(), datagram.size());
+            response = datagram;
+        }
+    });
+
+    client.writeDatagram(queryFor(0x1357, "a"), QHostAddress::LocalHost, listenPort);
+    waitFor([&]() { return !response.isEmpty(); }, 7000);
+
+    QVERIFY(!response.isEmpty());
+    QVERIFY(seen >= 2);
+    DnsWildcardRouter::Envelope envelope;
+    QVERIFY(DnsWildcardRouter::parseEnvelope(response, &envelope));
+    QCOMPARE(envelope.id, quint16(0x1357));
+    QCOMPARE(envelope.rcode, quint8(0));
+}
+
+// The first attempt is answered only after the retransmit went out; that
+// answer still reaches the client, because earlier attempts stay open.
+void TestDnsWildcardRouter::testLiveUdpTakesALateAnswerToAnEarlierAttempt()
+{
+    QUdpSocket resolver;
+    QVERIFY(resolver.bind(QHostAddress::LocalHost, 0));
+
+    DnsWildcardRouter router;
+    const quint16 listenPort = startOnLoopback(router, resolver.localPort());
+    QVERIFY(listenPort != 0);
+    QSignalSpy spy(&router, &DnsWildcardRouter::addressesResolved);
+
+    int seen = 0;
+    QHostAddress firstFrom;
+    quint16 firstPort = 0;
+    QByteArray firstQuery;
+    QObject::connect(&resolver, &QUdpSocket::readyRead, &resolver, [&]() {
+        while (resolver.hasPendingDatagrams()) {
+            QByteArray query;
+            query.resize(static_cast<int>(resolver.pendingDatagramSize()));
+            QHostAddress from;
+            quint16 fromPort = 0;
+            resolver.readDatagram(query.data(), query.size(), &from, &fromPort);
+            if (++seen == 1) {
+                firstQuery = query;
+                firstFrom = from;
+                firstPort = fromPort;
+                QTimer::singleShot(1500, &resolver, [&]() {
+                    resolver.writeDatagram(answerFor(firstQuery), firstFrom, firstPort);
+                });
+            }
+        }
+    });
+
+    QUdpSocket client;
+    QVERIFY(client.bind(QHostAddress::LocalHost, 0));
+    QByteArray response;
+    QObject::connect(&client, &QUdpSocket::readyRead, &client, [&]() {
+        while (client.hasPendingDatagrams()) {
+            QByteArray datagram;
+            datagram.resize(static_cast<int>(client.pendingDatagramSize()));
+            client.readDatagram(datagram.data(), datagram.size());
+            response = datagram;
+        }
+    });
+
+    client.writeDatagram(queryFor(0x2469, "b"), QHostAddress::LocalHost, listenPort);
+    waitFor([&]() { return !response.isEmpty(); }, 7000);
+    QCoreApplication::processEvents();
+
+    QVERIFY(!response.isEmpty());
+    QVERIFY(seen >= 2);
+    DnsWildcardRouter::Envelope envelope;
+    QVERIFY(DnsWildcardRouter::parseEnvelope(response, &envelope));
+    QCOMPARE(envelope.id, quint16(0x2469));
+    QCOMPARE(envelope.rcode, quint8(0));
+    QCOMPARE(spy.count(), 1);
+}
+
+// The upstream answers the first of two pipelined queries and closes. The
+// forwarder reconnects to the same resolver and the second one is answered,
+// rather than failed as if the resolver were dead.
+void TestDnsWildcardRouter::testLiveTcpReconnectsWhenTheUpstreamCloses()
+{
+    QTcpServer resolver;
+    QVERIFY(resolver.listen(QHostAddress::LocalHost, 0));
+
+    DnsWildcardRouter router;
+    const quint16 listenPort = startOnLoopback(router, resolver.serverPort());
+    QVERIFY(listenPort != 0);
+
+    int connections = 0;
+    QObject::connect(&resolver, &QTcpServer::newConnection, &resolver, [&]() {
+        while (resolver.hasPendingConnections()) {
+            QTcpSocket *upstream = resolver.nextPendingConnection();
+            const int number = ++connections;
+            auto buffer = std::make_shared<QByteArray>();
+            QObject::connect(upstream, &QTcpSocket::readyRead, upstream,
+                             [upstream, buffer, number]() {
+                buffer->append(upstream->readAll());
+                QByteArray query;
+                while (DnsWildcardRouter::takeFrame(*buffer, &query)
+                       == DnsWildcardRouter::FrameResult::Taken) {
+                    upstream->write(DnsWildcardRouter::frame(answerFor(query)));
+                    if (number == 1) {
+                        // Short of buffers: one answer, then the door.
+                        upstream->disconnectFromHost();
+                        return;
+                    }
+                }
+            });
+            QObject::connect(upstream, &QTcpSocket::disconnected, upstream,
+                             &QObject::deleteLater);
+        }
+    });
+
+    QTcpSocket client;
+    client.connectToHost(QHostAddress::LocalHost, listenPort);
+    QVERIFY(client.waitForConnected(3000));
+    client.write(DnsWildcardRouter::frame(queryFor(0x0101, "c"))
+                 + DnsWildcardRouter::frame(queryFor(0x0202, "d")));
+
+    QByteArray stream;
+    QList<QByteArray> answers;
+    QObject::connect(&client, &QTcpSocket::readyRead, &client, [&]() {
+        stream.append(client.readAll());
+        QByteArray message;
+        while (DnsWildcardRouter::takeFrame(stream, &message)
+               == DnsWildcardRouter::FrameResult::Taken) {
+            answers.append(message);
+        }
+    });
+    waitFor([&]() { return answers.size() >= 2; }, 7000);
+
+    QCOMPARE(answers.size(), 2);
+    QVERIFY(connections >= 2);
+    QList<quint16> ids;
+    for (const QByteArray &answer : answers) {
+        DnsWildcardRouter::Envelope envelope;
+        QVERIFY(DnsWildcardRouter::parseEnvelope(answer, &envelope));
+        QCOMPARE(envelope.rcode, quint8(0));
+        ids.append(envelope.id);
+    }
+    QVERIFY(ids.contains(quint16(0x0101)));
+    QVERIFY(ids.contains(quint16(0x0202)));
+}
+
+void TestDnsWildcardRouter::testLocalSourceAcceptsAttachedSubnetsOnly()
+{
+    const QHostAddress listen("10.8.1.2");
+    const QList<QHostAddress> local = { QHostAddress("192.168.1.20"),
+                                        QHostAddress("172.17.0.1"), listen };
+    // docker0 and the LAN are attached; the tunnel's own subnet is not listed,
+    // as refreshLocalSnapshot() leaves it out.
+    const QList<DnsWildcardRouter::Subnet> attached = {
+        { QHostAddress("172.17.0.1"), 16 },
+        { QHostAddress("192.168.1.20"), 24 },
+    };
+
+    auto accepts = [&](const char *source) {
+        return DnsWildcardRouter::isLocalSource(QHostAddress(source), listen, local, attached);
+    };
+
+    QVERIFY(accepts("127.0.0.1"));
+    QVERIFY(accepts("::1"));
+    QVERIFY(accepts("10.8.1.2"));
+    QVERIFY(accepts("192.168.1.20"));
+    QVERIFY(accepts("172.17.0.5"));
+    QVERIFY(accepts("172.17.255.254"));
+
+    QVERIFY(!accepts("10.8.1.1"));
+    QVERIFY(!accepts("10.8.1.7"));
+    QVERIFY(!accepts("172.18.0.5"));
+    QVERIFY(!accepts("203.0.113.9"));
+    QVERIFY(!accepts("2001:db8::1"));
+    QVERIFY(!DnsWildcardRouter::isLocalSource(QHostAddress(), listen, local, attached));
 }
 
 QTEST_MAIN(TestDnsWildcardRouter)

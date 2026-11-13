@@ -94,7 +94,8 @@ private:
 
    void createProtocolConnections();
 
-   void appendSplitTunnelingConfig();
+   void appendSplitTunnelingConfig(DockerContainer container);
+   static bool consumesWildcardSites(DockerContainer container);
    void appendKillSwitchConfig();
 };
 

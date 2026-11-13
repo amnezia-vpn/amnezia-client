@@ -31,6 +31,16 @@ class LinuxDaemon final : public Daemon {
   bool revokeBypassAddress(const IPAddress& prefix) override {
     return m_wgutils ? m_wgutils->revokeBypassTraffic(prefix) : true;
   }
+  bool revokeAllBypassAddresses() override {
+    return m_wgutils ? m_wgutils->revokeAllBypassTraffic() : true;
+  }
+  void reassertBypassPermits(const QList<IPAddress>& addresses,
+                             const QHostAddress& resolver) override {
+    if (m_wgutils) m_wgutils->reassertBypassTraffic(addresses, resolver);
+  }
+  // The route monitor builds IPv4 exclusion routes only (its gateway lookup
+  // and RTA_GATEWAY are IPv4), so learned IPv6 addresses stay in the tunnel.
+  bool supportsIPv6ExclusionRoutes() const override { return false; }
   bool allowResolverEndpoint(const QHostAddress& address) override {
     return m_wgutils ? m_wgutils->allowResolverEndpoint(address) : true;
   }

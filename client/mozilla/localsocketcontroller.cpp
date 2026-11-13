@@ -24,6 +24,7 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "daemon/daemonerrors.h"
+#include "daemon/wildcardsite.h"
 
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -218,7 +219,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
               QString ipRange = v.toString();
-              if (ipRange.startsWith("*.")) {
+              if (WildcardSite::isPattern(ipRange)) {
                   continue;
               }
               if (ipRange.split('/').size() > 1){
@@ -245,7 +246,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
-          if (ipRange.startsWith("*.")) {
+          if (WildcardSite::isPattern(ipRange)) {
               continue;
           }
           jsExcludedAddresses.append(ipRange);

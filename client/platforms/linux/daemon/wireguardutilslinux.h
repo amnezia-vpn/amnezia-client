@@ -42,6 +42,8 @@ public:
 
     bool allowBypassTraffic(const IPAddress& prefix);
     bool revokeBypassTraffic(const IPAddress& prefix);
+    bool revokeAllBypassTraffic();
+    void reassertBypassTraffic(const QList<IPAddress>& prefixes, const QHostAddress& resolver);
     bool allowResolverEndpoint(const QHostAddress& address);
     bool revokeResolverEndpoint(const QHostAddress& address);
 signals:
@@ -56,15 +58,13 @@ private:
     static int uapiErrno(const QString& command);
     QString waitForTunnelName(const QString& filename);
 
-    void refreshDynamicFirewall();
+    bool wildcardFirewallActive();
 
     QString m_ifname;
     QProcess m_tunnel;
     LinuxRouteMonitor* m_rtmonitor = nullptr;
-    FirewallParams m_firewallParams {};
+    // True while the kill switch firewall installed by this interface is up.
     bool m_firewallActive = false;
-    QStringList m_dynamicAllowAddrs;
-    QStringList m_dynamicDnsServers;
 };
 
 #endif  // WIREGUARDUTILSLINUX_H

@@ -24,6 +24,12 @@ PageType {
     
     property bool pageEnabled
 
+    // The filter below builds a regular expression from the typed text; a
+    // wildcard such as *.example.com must match literally, not as a pattern.
+    function escapeRegExp(text) {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    }
+
     Component.onCompleted: {
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
@@ -70,12 +76,12 @@ PageType {
                 AnyOf {
                     RegExpFilter {
                         roleName: "url"
-                        pattern: ".*" + addSitePanel.textField.text + ".*"
+                        pattern: ".*" + root.escapeRegExp(addSitePanel.textField.text) + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                     RegExpFilter {
                         roleName: "ip"
-                        pattern: ".*" + addSitePanel.textField.text + ".*"
+                        pattern: ".*" + root.escapeRegExp(addSitePanel.textField.text) + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }

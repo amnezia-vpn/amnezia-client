@@ -11,16 +11,40 @@ qint64 WildcardRouteTable::monotonicNowMsec() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
 }
 
-WildcardRouteTable::WildcardRouteTable(int maxEntries)
-    : m_maxEntries(maxEntries > 0 ? maxEntries : 1) {}
+WildcardRouteTable::WildcardRouteTable(int maxEntries, int maxEntriesPerPattern)
+    : m_maxEntries(maxEntries > 0 ? maxEntries : 1),
+      m_maxEntriesPerPattern(maxEntriesPerPattern > 0 ? maxEntriesPerPattern
+                                                      : 1) {}
 
-void WildcardRouteTable::setReserved(const QList<QHostAddress>& reserved) {
+void WildcardRouteTable::setReserved(
+    const QList<QHostAddress>& reserved,
+    const QList<QPair<QHostAddress, int>>& reservedSubnets) {
   m_reserved.clear();
+  m_reservedSubnets.clear();
+  for (const QPair<QHostAddress, int>& subnet : reservedSubnets) {
+    if (!subnet.first.isNull() && subnet.second >= 0) {
+      m_reservedSubnets.append(subnet);
+    }
+  }
   for (const QHostAddress& address : reserved) {
-    if (!address.isNull()) {
+    if (!address.isNull() && !isReserved(address)) {
       m_reserved.append(address);
     }
   }
+}
+
+bool WildcardRouteTable::isReserved(const QHostAddress& address) const {
+  for (const QHostAddress& reserved : m_reserved) {
+    if (reserved.isEqual(address)) {
+      return true;
+    }
+  }
+  for (const QPair<QHostAddress, int>& subnet : m_reservedSubnets) {
+    if (address.isInSubnet(subnet)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool WildcardRouteTable::isRoutable(const QHostAddress& address) {
@@ -36,63 +60,105 @@ bool WildcardRouteTable::isRoutable(const QHostAddress& address) {
 }
 
 WildcardRouteTable::AddResult WildcardRouteTable::add(
-    const QHostAddress& address, quint32 ttlSeconds, qint64 nowMsec) {
-  if (!isRoutable(address)) {
+    const QHostAddress& address, const QString& pattern, quint32 ttlSeconds,
+    qint64 nowMsec, QHostAddress* evicted) {
+  if (evicted) {
+    *evicted = QHostAddress();
+  }
+  if (!isRoutable(address) || isReserved(address)) {
     return AddResult::Rejected;
   }
-  for (const QHostAddress& reserved : m_reserved) {
-    if (reserved.isEqual(address)) {
-      return AddResult::Rejected;
-    }
-  }
 
-  quint32 lifetime = ttlSeconds;
-  if (lifetime < MinimumTtlSeconds) {
-    lifetime = MinimumTtlSeconds;
-  } else if (lifetime > MaximumTtlSeconds) {
-    lifetime = MaximumTtlSeconds;
-  }
-  const qint64 expiry = nowMsec + static_cast<qint64>(lifetime) * 1000;
+  const quint32 lifetime = qMax(ttlSeconds, MinimumTtlSeconds);
+  const qint64 freshUntil =
+      nowMsec + static_cast<qint64>(lifetime) * 1000 + StaleGraceMsec;
 
   auto existing = m_entries.find(address);
   if (existing != m_entries.end()) {
-    if (expiry > existing.value()) {
-      existing.value() = expiry;
+    if (freshUntil > existing->freshUntilMsec) {
+      existing->freshUntilMsec = freshUntil;
     }
+    existing->lastSeenMsec = nowMsec;
     return AddResult::Renew;
   }
 
-  if (isAtCapacity()) {
-    return AddResult::AtCapacity;
+  // Make room: first within the pattern's own budget, then in the table.
+  QHostAddress victim;
+  if (m_perPattern.value(pattern) >= m_maxEntriesPerPattern) {
+    victim = findEvictable(pattern, nowMsec);
+    if (victim.isNull()) {
+      return AddResult::AtCapacity;
+    }
+  } else if (count() >= m_maxEntries) {
+    victim = findEvictable(QString(), nowMsec);
+    if (victim.isNull()) {
+      return AddResult::AtCapacity;
+    }
+  }
+  if (!victim.isNull()) {
+    erase(victim);
+    if (evicted) {
+      *evicted = victim;
+    }
   }
 
-  m_entries.insert(address, expiry);
+  m_entries.insert(address, Entry{pattern, freshUntil, nowMsec});
+  m_perPattern[pattern] += 1;
   return AddResult::Install;
 }
 
-QList<QHostAddress> WildcardRouteTable::expire(qint64 nowMsec) {
-  QList<QHostAddress> gone;
-  for (auto i = m_entries.begin(); i != m_entries.end();) {
-    if (i.value() <= nowMsec) {
-      gone.append(i.key());
-      i = m_entries.erase(i);
-    } else {
-      ++i;
+QHostAddress WildcardRouteTable::findEvictable(const QString& pattern,
+                                               qint64 nowMsec) const {
+  QHostAddress best;
+  qint64 bestSeen = 0;
+  for (auto i = m_entries.constBegin(); i != m_entries.constEnd(); ++i) {
+    if (!pattern.isEmpty() && i->pattern != pattern) {
+      continue;
+    }
+    if (i->freshUntilMsec > nowMsec) {
+      continue;
+    }
+    if (best.isNull() || i->lastSeenMsec < bestSeen) {
+      best = i.key();
+      bestSeen = i->lastSeenMsec;
     }
   }
-  return gone;
+  return best;
+}
+
+void WildcardRouteTable::erase(const QHostAddress& address) {
+  auto i = m_entries.find(address);
+  if (i == m_entries.end()) {
+    return;
+  }
+  auto counter = m_perPattern.find(i->pattern);
+  if (counter != m_perPattern.end() && --counter.value() <= 0) {
+    m_perPattern.erase(counter);
+  }
+  m_entries.erase(i);
 }
 
 QList<QHostAddress> WildcardRouteTable::takeAll() {
   const QList<QHostAddress> all = m_entries.keys();
   m_entries.clear();
+  m_perPattern.clear();
   return all;
 }
 
 bool WildcardRouteTable::remove(const QHostAddress& address) {
-  return m_entries.remove(address) > 0;
+  if (!m_entries.contains(address)) {
+    return false;
+  }
+  erase(address);
+  return true;
 }
 
 bool WildcardRouteTable::contains(const QHostAddress& address) const {
   return m_entries.contains(address);
+}
+
+bool WildcardRouteTable::isStale(const QHostAddress& address,
+                                 qint64 nowMsec) const {
+  auto i = m_entries.constFind(address);
+  return i != m_entries.constEnd() && i->freshUntilMsec <= nowMsec;
 }
