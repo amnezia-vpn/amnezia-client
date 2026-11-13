@@ -13,6 +13,7 @@
 #include <QLocalSocket>
 #include <QTimer>
 
+#include "daemon/wireguardaddressutils.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -178,6 +179,8 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   } else {
     if (config.m_killSwitchEnabled) {
       FirewallParams params { };
+      params.serverIpv6Address = config.m_serverIpv6AddrIn;
+      params.serverPort = config.m_serverPort;
       params.dnsServers.append(config.m_primaryDnsServer);
       if (!config.m_secondaryDnsServer.isEmpty()) {
           params.dnsServers.append(config.m_secondaryDnsServer);
@@ -248,15 +251,13 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   if (!config.m_serverPskKey.isNull()) {
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
-    out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
-    out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
-  } else {
-    logger.warning() << "Failed to create peer with no endpoints";
-    return false;
+  const QString serverAddress =
+          config.m_serverIpv4AddrIn.isNull() ? config.m_serverIpv6AddrIn : config.m_serverIpv4AddrIn;
+  if (serverAddress.isEmpty()) {
+      logger.warning() << "Failed to create peer with no endpoints";
+      return false;
   }
-  out << config.m_serverPort << "\n";
+  out << "endpoint=" << WireguardAddressUtils::formatEndpoint(serverAddress, config.m_serverPort) << "\n";
 
   out << "replace_allowed_ips=true\n";
   if (!config.m_persistentKeepalive.isEmpty()) {
@@ -514,7 +515,8 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
                                 QStringLiteral("blocknets"), params.blockAddrs);
 
   MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+  MacOSFirewall::setAnchorWithRules(QStringLiteral("250.blockIPv6"), true,
+                                    MacOSFirewall::ipv6Rules(params.serverIpv6Address, params.serverPort));
   MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);

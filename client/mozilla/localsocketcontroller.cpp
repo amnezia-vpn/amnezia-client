@@ -21,9 +21,10 @@
 #include <QStringList>
 #include <QTimer>
 
+#include "daemon/daemonerrors.h"
+#include "daemon/wireguardaddressutils.h"
 #include "leakdetector.h"
 #include "logger.h"
-#include "daemon/daemonerrors.h"
 
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -134,12 +135,20 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
+  const auto deviceAddresses =
+          WireguardAddressUtils::parseDeviceAddresses(wgConfig.value(amnezia::configKey::clientIp).toString());
+  if (!deviceAddresses || deviceAddresses->ipv4.isNull()) {
+      logger.error() << "Invalid WireGuard device addresses";
+      emit disconnected();
+      return;
+  }
+
   QJsonObject json;
   json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
-  json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
-  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
+  json.insert("deviceIpv4Address", deviceAddresses->ipv4);
+  m_deviceIpv4 = deviceAddresses->ipv4;
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
@@ -148,17 +157,18 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   // https://man7.org/linux/man-pages/man5/gai.conf.5.html
 
   // simply "dead::1" is globally-routable, don't use it
-  json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  json.insert("deviceIpv6Address",
+              deviceAddresses->ipv6.isNull() ? QStringLiteral("fd58:baa6:dead::1") : deviceAddresses->ipv6);
 
   json.insert("serverPublicKey", wgConfig.value(amnezia::configKey::serverPubKey));
   json.insert("serverPskKey", wgConfig.value(amnezia::configKey::pskKey));
-  json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::configKey::hostName));
-  //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
+  const QString serverAddress = wgConfig.value(amnezia::configKey::hostName).toString();
+  const bool serverIsIpv6 = QHostAddress(serverAddress).protocol() == QAbstractSocket::IPv6Protocol;
+  json.insert(serverIsIpv6 ? "serverIpv6AddrIn" : "serverIpv4AddrIn", serverAddress);
   json.insert("deviceMTU", wgConfig.value(amnezia::configKey::mtu));
 
   json.insert("serverPort", wgConfig.value(amnezia::configKey::port).toInt());
-  json.insert("serverIpv4Gateway", wgConfig.value(amnezia::configKey::hostName));
-  //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
+  json.insert(serverIsIpv6 ? "serverIpv6Gateway" : "serverIpv4Gateway", serverAddress);
 
   if (wgConfig.contains(amnezia::configKey::persistentKeepAlive)) {
     json.insert("persistentKeepalive",
