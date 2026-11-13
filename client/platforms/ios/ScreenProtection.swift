@@ -54,8 +54,7 @@ class ScreenProtection {
     assert(Thread.isMainThread)
 
     guard let desiredScreenshotsEnabled else { return }
-    guard let window = UIApplication.shared.keyWindows.first,
-          let rootView = window.rootViewController?.view else {
+    guard let window = UIApplication.shared.keyWindows.first else {
       retryCount += 1
       guard retryCount <= 50 else { return } // ~5s total
 
@@ -73,21 +72,19 @@ class ScreenProtection {
     retryCount = 0
 
     if desiredScreenshotsEnabled {
-      disable(for: rootView)
+      disable()
     } else {
-      enable(for: rootView)
+      enable(for: window)
     }
   }
 
-  public func enable(for view: UIView) {
+  public func enable(for window: UIWindow) {
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-      view.subviews.forEach {
-        self.pairs.append(ProtectionPair(from: $0))
-      }
+      self.pairs.append(ProtectionPair(from: window))
     }
   }
 
-  public func disable(for view: UIView) {
+  public func disable() {
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
       self.pairs.forEach {
         $0.removeProtection()
@@ -101,34 +98,31 @@ class ScreenProtection {
 struct ProtectionPair {
   let textField: UITextField
   let layer: CALayer
+  let originalSuperlayer: CALayer?
 
   init(from view: UIView) {
     let secureTextField = UITextField()
     secureTextField.backgroundColor = .clear
-    secureTextField.translatesAutoresizingMaskIntoConstraints = false
     secureTextField.isSecureTextEntry = true
 
     view.insertSubview(secureTextField, at: 0)
     secureTextField.isUserInteractionEnabled = false
 
-    view.layer.superlayer?.addSublayer(secureTextField.layer)
+    let originalSuperlayer = view.layer.superlayer
+    originalSuperlayer?.addSublayer(secureTextField.layer)
     secureTextField.layer.sublayers?.last?.addSublayer(view.layer)
 
-    secureTextField.topAnchor.constraint(equalTo: view.topAnchor, constant: 0).isActive = true
-    secureTextField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
-    secureTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
-    secureTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
-
-    self.init(textField: secureTextField, layer: view.layer)
+    self.init(textField: secureTextField, layer: view.layer, originalSuperlayer: originalSuperlayer)
   }
 
-  init(textField: UITextField, layer: CALayer) {
+  init(textField: UITextField, layer: CALayer, originalSuperlayer: CALayer?) {
     self.textField = textField
     self.layer = layer
+    self.originalSuperlayer = originalSuperlayer
   }
 
   func removeProtection() {
-    textField.superview?.superview?.layer.addSublayer(layer)
+    originalSuperlayer?.addSublayer(layer)
     textField.layer.removeFromSuperlayer()
     textField.removeFromSuperview()
   }
