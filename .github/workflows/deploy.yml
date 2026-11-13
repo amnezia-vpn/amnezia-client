@@ -1782,3 +1782,36 @@ jobs:
 
     - name: 'Upload macOS build to TestFlight'
       run: fastlane mac testflight_upload 2>&1 | sed -f hide_secrets.sed
+
+# ------------------------------------------------------
+
+  Google-Play:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: deploy
+        shell: bash
+
+    steps:
+    - name: 'Get fastlane config'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          deploy/fastlane
+          deploy/hide_secrets.sed
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download Play AABs'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_play.aab'
+        path: deploy/build/android
+        merge-multiple: true
+
+    - name: 'Upload to Google Play beta'
+      env:
+        GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      run: fastlane android play_upload 2>&1 | sed -f hide_secrets.sed
