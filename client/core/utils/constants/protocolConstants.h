@@ -57,7 +57,22 @@ namespace amnezia
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
             constexpr char tlsCertPath[] = "/opt/amnezia/xray/tls_cert.pem";
             constexpr char tlsKeyPath[] = "/opt/amnezia/xray/tls_key.pem";
-            constexpr char defaultSite[] = "www.googletagmanager.com";
+            constexpr const char *defaultSites[] = {
+                "www.microsoft.com",
+                "www.apple.com",
+                "www.icloud.com",
+                "dl.google.com",
+                "www.bing.com",
+                "www.samsung.com",
+                "www.nvidia.com",
+                "www.cisco.com",
+                "www.asus.com",
+                "www.logitech.com",
+                "www.dropbox.com",
+                "www.mozilla.org",
+                "addons.mozilla.org",
+                "www.speedtest.net",
+            };
 
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
@@ -69,8 +84,7 @@ namespace amnezia
             constexpr char defaultSecurity[] = "reality";
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
-            constexpr char defaultFingerprint[] = "hellochrome_120";
-            constexpr char defaultSni[] = "www.googletagmanager.com";
+            constexpr char defaultFingerprint[] = "firefox";
             constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Stream-one";

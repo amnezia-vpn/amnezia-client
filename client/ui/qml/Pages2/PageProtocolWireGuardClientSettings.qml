@@ -60,6 +60,18 @@ PageType {
                 checkEmptyText: true
             }
 
+            CascadeSettings {
+                Layout.fillWidth: true
+
+                endpoint: WireGuardConfigModel.clientCascadeEndpoint
+                port: WireGuardConfigModel.clientCascadePort
+                endpointPlaceholder: WireGuardConfigModel.clientHostName
+                portPlaceholder: WireGuardConfigModel.clientPort
+
+                onEndpointEdited: (text) => { WireGuardConfigModel.clientCascadeEndpoint = text }
+                onPortEdited: (text) => { WireGuardConfigModel.clientCascadePort = text }
+            }
+
             H2TextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 40

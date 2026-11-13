@@ -21,13 +21,30 @@ PageType {
     readonly property int pageSettingsServerServices: 1
     readonly property int pageSettingsServerData: 2
 
+    readonly property var tabTitles: [qsTr("Protocols"), qsTr("Services"), qsTr("Management")]
+    readonly property var availableTabs: {
+        const tabs = []
+        if (protocolsPage.installedProtocolsCount > 0) {
+            tabs.push(root.pageSettingsServerProtocols)
+        }
+        if (servicesPage.installedServicesCount > 0) {
+            tabs.push(root.pageSettingsServerServices)
+        }
+        tabs.push(root.pageSettingsServerData)
+        return tabs
+    }
+
+    property int currentTab: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+                              && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
+                                 root.pageSettingsServerData : root.pageSettingsServerProtocols
+
     property var processedServer
 
     Connections {
         target: PageController
 
         function onGoToPageSettingsServerServices() {
-            tabBar.setCurrentIndex(root.pageSettingsServerServices)
+            root.currentTab = root.pageSettingsServerServices
         }
     }
 
@@ -111,25 +128,18 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
-                           && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
-                              root.pageSettingsServerData : root.pageSettingsServerProtocols
+            currentIndex: root.availableTabs.indexOf(root.currentTab)
 
-            TabButtonType {
-                id: protocolsTab
-                visible: protocolsPage.installedProtocolsCount > 0
-                text: qsTr("Protocols")
-            }
+            Repeater {
+                model: root.availableTabs
 
-            TabButtonType {
-                id: servicesTab
-                visible: servicesPage.installedServicesCount > 0
-                text: qsTr("Services")
-            }
+                TabButtonType {
+                    required property int modelData
 
-            TabButtonType {
-                id: dataTab
-                text: qsTr("Management")
+                    text: root.tabTitles[modelData]
+
+                    onClicked: root.currentTab = modelData
+                }
             }
         }
 
@@ -140,7 +150,7 @@ PageType {
             Layout.fillHeight: true
             Layout.topMargin: 24
 
-            currentIndex: tabBar.currentIndex
+            currentIndex: root.currentTab
 
             PageSettingsServerProtocols {
                 id: protocolsPage

@@ -14,7 +14,13 @@ class AwgConfigModel : public QObject
 
     Q_PROPERTY(QString subnetAddress READ subnetAddress WRITE setSubnetAddress NOTIFY changed)
     Q_PROPERTY(QString port READ port WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString cascadeEndpoint READ cascadeEndpoint WRITE setCascadeEndpoint NOTIFY changed)
+    Q_PROPERTY(QString cascadePort READ cascadePort WRITE setCascadePort NOTIFY changed)
     Q_PROPERTY(QString clientMtu READ clientMtu WRITE setClientMtu NOTIFY changed)
+    Q_PROPERTY(QString clientHostName READ clientHostName NOTIFY changed)
+    Q_PROPERTY(QString clientPort READ clientPort NOTIFY changed)
+    Q_PROPERTY(QString clientCascadeEndpoint READ clientCascadeEndpoint WRITE setClientCascadeEndpoint NOTIFY changed)
+    Q_PROPERTY(QString clientCascadePort READ clientCascadePort WRITE setClientCascadePort NOTIFY changed)
     Q_PROPERTY(QString clientJunkPacketCount READ clientJunkPacketCount WRITE setClientJunkPacketCount NOTIFY changed)
     Q_PROPERTY(QString clientJunkPacketMinSize READ clientJunkPacketMinSize WRITE setClientJunkPacketMinSize NOTIFY changed)
     Q_PROPERTY(QString clientJunkPacketMaxSize READ clientJunkPacketMaxSize WRITE setClientJunkPacketMaxSize NOTIFY changed)
@@ -68,6 +74,21 @@ public:
 
     QString port() const;
     void setPort(const QString &value);
+
+    QString cascadeEndpoint() const;
+    void setCascadeEndpoint(const QString &value);
+
+    QString cascadePort() const;
+    void setCascadePort(const QString &value);
+
+    QString clientHostName() const;
+    QString clientPort() const;
+
+    QString clientCascadeEndpoint() const;
+    void setClientCascadeEndpoint(const QString &value);
+
+    QString clientCascadePort() const;
+    void setClientCascadePort(const QString &value);
 
     QString clientMtu() const;
     void setClientMtu(const QString &value);

@@ -72,6 +72,12 @@ QJsonObject AwgServerConfig::toJson() const
     if (!port.isEmpty()) {
         obj[configKey::port] = this->port;
     }
+    if (!cascadeEndpoint.isEmpty()) {
+        obj[configKey::cascadeEndpoint] = cascadeEndpoint;
+    }
+    if (!cascadePort.isEmpty()) {
+        obj[configKey::cascadePort] = cascadePort;
+    }
     if (!transportProto.isEmpty()) {
         obj[configKey::transportProto] = transportProto;
     }
@@ -166,6 +172,8 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     AwgServerConfig config;
     
     config.port = json.value(configKey::port).toString();
+    config.cascadeEndpoint = json.value(configKey::cascadeEndpoint).toString();
+    config.cascadePort = json.value(configKey::cascadePort).toString();
     config.transportProto = json.value(configKey::transportProto).toString();
     config.protocolVersion = json.value(configKey::protocolVersion).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
@@ -217,6 +225,12 @@ QJsonObject AwgClientConfig::toJson() const
     }
     if (port > 0) {
         obj[configKey::port] = port;
+    }
+    if (!cascadeEndpoint.isEmpty()) {
+        obj[configKey::cascadeEndpoint] = cascadeEndpoint;
+    }
+    if (!cascadePort.isEmpty()) {
+        obj[configKey::cascadePort] = cascadePort;
     }
     if (!clientIp.isEmpty()) {
         obj[configKey::clientIp] = clientIp;
@@ -333,6 +347,14 @@ QJsonObject AwgClientConfig::toJson() const
     return obj;
 }
 
+void AwgClientConfig::setCascade(const QString &newEndpoint, const QString &newPort)
+{
+    cascadeEndpoint = newEndpoint;
+    cascadePort = newPort;
+    nativeConfig = replaceWireGuardEndpoint(nativeConfig, newEndpoint.isEmpty() ? hostName : newEndpoint,
+                                            newPort.isEmpty() ? port : newPort.toInt());
+}
+
 AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
 {
     AwgClientConfig config;
@@ -340,6 +362,8 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.nativeConfig = json.value(configKey::config).toString();
     config.hostName = json.value(configKey::hostName).toString();
     config.port = json.value(configKey::port).toInt(0);
+    config.cascadeEndpoint = json.value(configKey::cascadeEndpoint).toString();
+    config.cascadePort = json.value(configKey::cascadePort).toString();
     config.clientIp = json.value(configKey::clientIp).toString();
     config.clientPrivateKey = json.value(configKey::clientPrivKey).toString();
     config.clientPublicKey = json.value(configKey::clientPubKey).toString();

@@ -58,6 +58,73 @@ void AwgConfigModel::setPort(const QString &value)
     emit changed();
 }
 
+QString AwgConfigModel::cascadeEndpoint() const
+{
+    return m_protocolConfig.serverConfig.cascadeEndpoint;
+}
+
+void AwgConfigModel::setCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadeEndpoint = value;
+    emit changed();
+}
+
+QString AwgConfigModel::cascadePort() const
+{
+    return m_protocolConfig.serverConfig.cascadePort;
+}
+
+void AwgConfigModel::setCascadePort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadePort = value;
+    emit changed();
+}
+
+QString AwgConfigModel::clientHostName() const
+{
+    return m_protocolConfig.clientConfig->hostName;
+}
+
+QString AwgConfigModel::clientPort() const
+{
+    const int port = m_protocolConfig.clientConfig->port;
+    return port > 0 ? QString::number(port) : QString();
+}
+
+QString AwgConfigModel::clientCascadeEndpoint() const
+{
+    return m_protocolConfig.clientConfig->cascadeEndpoint;
+}
+
+void AwgConfigModel::setClientCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(value, m_protocolConfig.clientConfig->cascadePort);
+    emit changed();
+}
+
+QString AwgConfigModel::clientCascadePort() const
+{
+    return m_protocolConfig.clientConfig->cascadePort;
+}
+
+void AwgConfigModel::setClientCascadePort(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(m_protocolConfig.clientConfig->cascadeEndpoint, value);
+    emit changed();
+}
+
 QString AwgConfigModel::clientMtu() const
 {
     return m_protocolConfig.clientConfig->mtu;
@@ -709,8 +776,15 @@ amnezia::AwgProtocolConfig AwgConfigModel::getProtocolConfig()
 {
     bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
     
+    const auto &serverConfig = m_protocolConfig.serverConfig;
+    const auto &originalServerConfig = m_originalProtocolConfig.serverConfig;
+    const bool cascadeChanged = serverConfig.cascadeEndpoint != originalServerConfig.cascadeEndpoint
+            || serverConfig.cascadePort != originalServerConfig.cascadePort;
+
     if (serverSettingsChanged) {
         m_protocolConfig.clearClientConfig();
+    } else if (cascadeChanged) {
+        m_protocolConfig.clientConfig->setCascade(serverConfig.cascadeEndpoint, serverConfig.cascadePort);
     }
     
     return m_protocolConfig;
