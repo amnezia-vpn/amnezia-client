@@ -16,6 +16,8 @@ int runPageSettingsSplitTunnelingTests(int argc, char *argv[]);
 int runPageSettingsAppSplitTunnelingTests(int argc, char *argv[]);
 int runPageSettingsKillSwitchTests(int argc, char *argv[]);
 int runPageSettingsKillSwitchExceptionsTests(int argc, char *argv[]);
+int runPageSettingsApplicationTests(int argc, char *argv[]);
+int runPageSettingsLoggingTests(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +44,8 @@ int main(int argc, char *argv[])
     result |= runPageSettingsAppSplitTunnelingTests(argc, argv);
     result |= runPageSettingsKillSwitchTests(argc, argv);
     result |= runPageSettingsKillSwitchExceptionsTests(argc, argv);
+    result |= runPageSettingsApplicationTests(argc, argv);
+    result |= runPageSettingsLoggingTests(argc, argv);
 
     return result;
 }

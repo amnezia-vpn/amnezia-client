@@ -341,6 +341,8 @@ if(NOT ANDROID)
         pagesUi/testPageSettingsAppSplitTunneling.cpp
         pagesUi/testPageSettingsKillSwitch.cpp
         pagesUi/testPageSettingsKillSwitchExceptions.cpp
+        pagesUi/testPageSettingsApplication.cpp
+        pagesUi/testPageSettingsLogging.cpp
         ${PAGES_UI_QRC}
     )
 
