@@ -54,6 +54,7 @@ android {
             storePassword = providers.environmentVariable("QT_ANDROID_KEYSTORE_STORE_PASS").orNull
             keyAlias = providers.environmentVariable("QT_ANDROID_KEYSTORE_ALIAS").orNull
             keyPassword = providers.environmentVariable("QT_ANDROID_KEYSTORE_STORE_PASS").orNull
+            enableV3Signing = true
         }
     }
 
@@ -111,7 +112,7 @@ android {
             isEnable = abiList.size > 1
             reset()
             include(*abiList.toTypedArray())
-            isUniversalApk = false
+            isUniversalApk = true
         }
     }
 
@@ -122,7 +123,8 @@ android {
             outputs.map { it as BaseVariantOutputImpl }
                 .forEach { output ->
                     if (output.outputFileName.endsWith(".apk")) {
-                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                        output.outputFileName = listOfNotNull(outputBaseName, output.getFilter("ABI"), buildType.name)
+                            .joinToString("-", postfix = ".apk")
                     }
                 }
         }
@@ -143,14 +145,15 @@ android {
             val base = outputBaseName.ifEmpty { "android-build" }
             val unsignedSuffix = if (buildTypeName == "release") "-unsigned" else ""
 
+            val universalOutput = outputs.map { it as BaseVariantOutputImpl }.first { it.getFilter("ABI") == null }
+
             packageApplicationProvider.configure {
                 doLast {
                     val srcDir = layout.buildDirectory.dir("outputs/apk/oss/$buildTypeName").get().asFile
                     val dstDir = layout.buildDirectory.dir("outputs/apk").get().asFile
                     dstDir.mkdirs()
-                    srcDir.listFiles()?.filter { it.name.endsWith(".apk") }?.forEach { apk ->
-                        apk.copyTo(File(dstDir, "$base-$buildTypeName$unsignedSuffix.apk"), overwrite = true)
-                    }
+                    File(srcDir, universalOutput.outputFileName)
+                        .copyTo(File(dstDir, "$base-$buildTypeName$unsignedSuffix.apk"), overwrite = true)
                 }
             }
 

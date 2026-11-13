@@ -802,6 +802,8 @@ jobs:
       APP_ANDROID_MIN_SDK: ${{ matrix.min_sdk }}
       APP_ANDROID_MAX_SDK: ${{ matrix.max_sdk }}
       APP_ANDROID_VERSION_CODE_OFFSET: ${{ matrix.version_code_offset }}
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -896,6 +898,12 @@ jobs:
     - name: 'Install conan'
       run: pip install "conan==2.28.0"
 
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: android-${{ matrix.label }}
+        max-size: 1G
+
     - name: 'Decode keystore secret to file'
       env:
         KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
@@ -933,8 +941,7 @@ jobs:
         fi
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
-          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
-          mv deploy/build/${abi}/client/android-build/AmneziaVPN.apk \
+          mv deploy/build/client/android-build/build/outputs/apk/oss/release/*-${abi}-release.apk \
              $OUT/AmneziaVPN_${VERSION}_${LABEL}_${abi}.apk
         done
 
@@ -953,9 +960,9 @@ jobs:
         OUT=deploy/artifacts
         VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
 
-        deploy/build.sh -t android --sign --aab --play --build ./deploy/build/play
+        deploy/build.sh -t android --sign --aab --play
 
-        mv deploy/build/play/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
+        mv deploy/build/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
            $OUT/AmneziaVPN_${VERSION}_${LABEL}_play.aab
 
     - name: 'Upload universal APK'
