@@ -34,6 +34,7 @@ namespace libssh {
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr);
         ErrorCode writeResponse(const QString &data);
+        static QString posixShellCommand(const QString &command);
         ErrorCode scpFileCopy(const ScpOverwriteMode overwriteMode,
                                const QString &localPath,
                                const QString &remotePath,
