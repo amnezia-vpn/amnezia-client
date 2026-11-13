@@ -1,9 +1,21 @@
-def archive_build(app_platform)
+def cmake_cache_value(name)
+  File.read("../build/CMakeCache.txt")[/^#{name}:\w+=(.*)$/, 1]
+end
+
+def archive_build(app_platform, profile_platform)
+  app_identifier = cmake_cache_value("BUILD_IOS_APP_IDENTIFIER")
   build_app(
     project: "build/AmneziaVPN.xcodeproj",
     scheme: "AmneziaVPN",
     configuration: "Release",
     export_method: "app-store",
+    export_options: {
+      signingStyle: "manual",
+      provisioningProfiles: {
+        app_identifier => cmake_cache_value("CLIENT_#{profile_platform}_PROVISIONING_PROFILE_SPECIFIER"),
+        "#{app_identifier}.network-extension" => cmake_cache_value("CLIENT_#{profile_platform}_NE_PROVISIONING_PROFILE_SPECIFIER")
+      }
+    },
     output_directory: "build/#{app_platform}",
     output_name: "AmneziaVPN"
   )
@@ -21,7 +33,7 @@ end
 
 platform :ios do
   lane :archive do
-    archive_build("ios")
+    archive_build("ios", "IOS")
   end
 
   lane :testflight_upload do
@@ -32,7 +44,7 @@ end
 
 platform :mac do
   lane :archive do
-    archive_build("osx")
+    archive_build("osx", "MACOS")
   end
 
   lane :testflight_upload do
