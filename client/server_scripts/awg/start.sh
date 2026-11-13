@@ -2,6 +2,11 @@
 
 # This scripts copied from Amnezia client to Docker container to /opt/amnezia and launched every time container starts
 
+STARTUP_LOG="/opt/amnezia/awg/startup.log"
+mkdir -p "$(dirname "$STARTUP_LOG")"
+: > "$STARTUP_LOG"
+exec >>"$STARTUP_LOG" 2>&1
+
 echo "Container startup"
 #ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
@@ -9,7 +14,12 @@ echo "Container startup"
 awg-quick down /opt/amnezia/awg/awg0.conf
 
 # start daemons if configured
-if [ -f /opt/amnezia/awg/awg0.conf ]; then (awg-quick up /opt/amnezia/awg/awg0.conf); fi
+if [ -f /opt/amnezia/awg/awg0.conf ]; then
+    if ! awg-quick up /opt/amnezia/awg/awg0.conf; then
+        echo "AMNEZIA_AWG_STARTUP_FAILED"
+        tail -f /dev/null
+    fi
+fi
 
 # Allow traffic on the TUN interface.
 iptables -A INPUT -i awg0 -j ACCEPT
