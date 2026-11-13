@@ -1,0 +1,31 @@
+def archive_and_upload(app_platform)
+  key = ENV.fetch("APPSTORE_CONNECT_PRIVATE_KEY")
+  app_store_connect_api_key(
+    key_id: ENV.fetch("APPSTORE_CONNECT_KEY_ID"),
+    issuer_id: ENV.fetch("APPSTORE_CONNECT_ISSUER_ID"),
+    key_content: key,
+    is_key_content_base64: !key.include?("PRIVATE KEY")
+  )
+
+  build_app(
+    project: "build/AmneziaVPN.xcodeproj",
+    scheme: "AmneziaVPN",
+    configuration: "Release",
+    export_method: "app-store",
+    output_directory: "build/#{app_platform}"
+  )
+
+  upload_to_testflight(app_platform: app_platform, skip_waiting_for_build_processing: true)
+end
+
+platform :ios do
+  lane :testflight_upload do
+    archive_and_upload("ios")
+  end
+end
+
+platform :mac do
+  lane :testflight_upload do
+    archive_and_upload("osx")
+  end
+end

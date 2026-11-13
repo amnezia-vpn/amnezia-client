@@ -417,12 +417,19 @@ jobs:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+      shell: bash
       run: |
-        sh deploy/build.sh -t ios | \
-          sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
+        sh deploy/build.sh -t ios | sed -f deploy/hide_secrets.sed
+
+    - name: 'Archive and upload to TestFlight'
+      if: startsWith(github.ref, 'refs/tags/')
+      working-directory: deploy
+      shell: bash
+      env:
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+      run: fastlane ios testflight_upload 2>&1 | sed -f hide_secrets.sed
 
 # ------------------------------------------------------
 
@@ -631,12 +638,7 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
-
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+      KEYCHAIN_PASSWORD: ""
 
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -654,13 +656,37 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - uses: ./.github/actions/apple-setup-provisioning-profile
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
       with:
-        provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
 
-    - uses: ./.github/actions/apple-setup-provisioning-profile
+    - name: 'Install signing certificate'
+      uses: ./.github/actions/apple-install-cert
       with:
-        provisioning_profile_base64: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+
+    - name: 'Install installer certificate'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.MAC_APPSTORE_INSTALLER_CERT_BASE64 }}
+        cert-password: ${{ secrets.MAC_APPSTORE_INSTALLER_CERT_PASSWORD }}
+
+    - name: 'Install app provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.APPSTORE_CONNECT_MAC_PROVISIONING }}
+
+    - name: 'Install NE provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.APPSTORE_CONNECT_MAC_NE_PROVISIONING }}
 
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
@@ -679,18 +705,6 @@ jobs:
         set-env: 'true'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
-
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
-
     - name: 'Setup python'
       uses: actions/setup-python@v6
       with:
@@ -700,16 +714,27 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos_ne.sh
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+      shell: bash
+      run: deploy/build.sh -t macos-ne | sed -f deploy/hide_secrets.sed
 
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
+        path: deploy/build/client/Release/AmneziaVPN.app
         retention-days: 7
+
+    - name: 'Archive and upload to TestFlight'
+      if: startsWith(github.ref, 'refs/tags/')
+      working-directory: deploy
+      shell: bash
+      env:
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+      run: fastlane mac testflight_upload 2>&1 | sed -f hide_secrets.sed
 
 # ------------------------------------------------------
 
