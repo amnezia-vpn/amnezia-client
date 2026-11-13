@@ -1,5 +1,7 @@
 #include "wireguardConfigurator.h"
 
+#include <algorithm>
+
 #include <QDebug>
 #include <QJsonDocument>
 #include <QProcess>
@@ -150,7 +152,10 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         if (ips.empty()) {
             lastIp.setAddress(subnetAddress);
         } else {
-            lastIp = ips.last();
+            // Peer order can change after manual edits or client re-imports.
+            lastIp = *std::max_element(ips.cbegin(), ips.cend(), [](const QHostAddress &a, const QHostAddress &b) {
+                return a.toIPv4Address() < b.toIPv4Address();
+            });
         }
         quint8 lastOctet = static_cast<quint8>(lastIp.toIPv4Address());
         switch (lastOctet) {
