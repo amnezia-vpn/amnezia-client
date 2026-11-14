@@ -71,6 +71,24 @@ if(NOT ANDROID)
         test_common
     )
 
+    # wildcardsite.cpp arrives through test_common, which builds the client
+    # sources; listing it again here would define its symbols twice.
+    add_executable(test_dns_wildcard_router
+        testDnsWildcardRouter.cpp
+        ../daemon/dnswildcardrouter.cpp
+        ../daemon/wildcardroutetable.cpp
+    )
+
+    target_link_libraries(test_dns_wildcard_router PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    target_include_directories(test_dns_wildcard_router PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../mozilla/shared
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../common/logger
+    )
+
     add_executable(test_server_edit
         testServerEdit.cpp
     )
@@ -492,6 +510,7 @@ if(NOT ANDROID)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
+    add_test(NAME DnsWildcardRouterTest            COMMAND test_dns_wildcard_router)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).

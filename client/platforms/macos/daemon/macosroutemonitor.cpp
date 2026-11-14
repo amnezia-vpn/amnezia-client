@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "daemon/logprivacy.h"
 #include "macosroutemonitor.h"
 
 #include <arpa/inet.h>
@@ -143,8 +144,7 @@ void MacosRouteMonitor::handleRtmDelete(const struct rt_msghdr* rtm,
                  << logger.sensitive(addrToString(addrlist[1]));
   for (const IPAddress& prefix : m_exclusionRoutes) {
     if (prefix.address().protocol() == protocol) {
-      logger.debug() << "Removing exclusion route to"
-                     << prefix.toString();
+      logger.debug() << "Removing an exclusion route";
       rtmSendRoute(RTM_DELETE, prefix, rtm->rtm_index, nullptr);
     }
   }
@@ -258,8 +258,7 @@ void MacosRouteMonitor::handleRtmUpdate(const struct rt_msghdr* rtm,
                  << addrToString(addrlist[1]);
   for (const IPAddress& prefix : m_exclusionRoutes) {
     if (prefix.address().protocol() == protocol) {
-      logger.debug() << "Updating exclusion route to"
-                     << prefix.toString();
+      logger.debug() << "Updating an exclusion route";
       rtmSendRoute(rtm_type, prefix, ifindex, addrlist[1].constData());
     }
   }
@@ -510,7 +509,7 @@ bool MacosRouteMonitor::deleteRoute(const IPAddress& prefix, int flags) {
 }
 
 bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for" << prefix.toString();
+  logger.debug() << "Adding exclusion route for" << LogPrivacy::address(prefix.toString());
 
   if (m_exclusionRoutes.contains(prefix)) {
     logger.warning() << "Exclusion route already exists";
@@ -535,7 +534,7 @@ bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 }
 
 bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Deleting exclusion route for" << prefix.toString();
+  logger.debug() << "Deleting exclusion route for" << LogPrivacy::address(prefix.toString());
 
   m_exclusionRoutes.removeAll(prefix);
   if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {

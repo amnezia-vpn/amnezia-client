@@ -28,6 +28,10 @@ class WindowsDaemon final : public Daemon {
 
  protected:
   bool run(Op op, const InterfaceConfig& config) override;
+  bool allowBypassAddress(const IPAddress& prefix) override;
+  bool revokeBypassAddress(const IPAddress& prefix) override;
+  bool allowResolverEndpoint(const QHostAddress& address) override;
+  bool revokeResolverEndpoint(const QHostAddress& address) override;
   WireguardUtils* wgutils() const override { return m_wgutils.get(); }
   DnsUtils* dnsutils() override { return m_dnsutils; }
 

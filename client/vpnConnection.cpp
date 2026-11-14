@@ -32,6 +32,7 @@
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/serverConfigUtils.h"
+#include "daemon/wildcardsite.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -217,6 +218,12 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
     QStringList sites;
     const QVariantMap &m = m_appSettingsRepository->vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
+        if (WildcardSite::isPattern(i.key())) {
+            // A wildcard is matched only by the daemon's DNS observer
+            // (WireGuard/AmneziaWG). Its stored addresses are never routed
+            // here: the kill switch allow list does not carry them either.
+            continue;
+        }
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
@@ -348,7 +355,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     appendKillSwitchConfig();
 #endif
 
-    appendSplitTunnelingConfig();
+    appendSplitTunnelingConfig(container);
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
@@ -402,7 +409,22 @@ void VpnConnection::appendKillSwitchConfig()
     m_vpnConfiguration.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
 }
 
-void VpnConnection::appendSplitTunnelingConfig()
+// static
+bool VpnConnection::consumesWildcardSites(DockerContainer container)
+{
+    // Wildcard site entries are matched by the DNS observer of the desktop
+    // daemon, which only the WireGuard / AmneziaWG protocol talks to (through
+    // LocalSocketController). Every other platform and protocol would accept
+    // the entry and silently do nothing with it.
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
+    Q_UNUSED(container);
+    return false;
+#else
+    return container == DockerContainer::WireGuard || ContainerUtils::isAwgContainer(container);
+#endif
+}
+
+void VpnConnection::appendSplitTunnelingConfig(DockerContainer container)
 {
     if (!m_appSettingsRepository) {
         qCritical() << "VpnConnection::appendSplitTunnelingConfig: repositories not initialized";
@@ -461,15 +483,19 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
+    QJsonArray wildcardsJsonArray;
     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
         routeMode = m_appSettingsRepository->routeMode();
 
         if (allowSiteBasedSplitTunneling) {
             QStringList sites;
+            QStringList wildcards;
             const QVariantMap &m = m_appSettingsRepository->vpnSites(routeMode);
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
                 if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
                     sites.append(i.key());
+                } else if (WildcardSite::isPattern(i.key())) {
+                    wildcards.append(i.key());
                 } else {
                     const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
                     for (const QString &ip : siteIps) {
@@ -484,7 +510,23 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(site);
             }
 
-            if (sitesJsonArray.isEmpty()) {
+            if (!wildcards.isEmpty()) {
+                if (routeMode != amnezia::RouteMode::VpnAllExceptSites) {
+                    qWarning() << "Wildcard sites are only supported in the bypass"
+                                  " mode and were left out of this configuration";
+                } else if (!consumesWildcardSites(container)) {
+                    qWarning() << "Wildcard sites are only applied by the desktop"
+                                  " WireGuard/AmneziaWG connection and were left out"
+                                  " of this configuration";
+                } else {
+                    wildcards.removeDuplicates();
+                    for (const auto &wildcard : wildcards) {
+                        wildcardsJsonArray.append(wildcard);
+                    }
+                }
+            }
+
+            if (sitesJsonArray.isEmpty() && wildcardsJsonArray.isEmpty()) {
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
@@ -496,6 +538,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
+    m_vpnConfiguration.insert(configKey::wildcardSites, wildcardsJsonArray);
 
     amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;

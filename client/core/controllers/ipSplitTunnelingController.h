@@ -22,9 +22,24 @@ class IpSplitTunnelingController : public QObject
     Q_OBJECT
 
 public:
+    enum class AddSiteResult {
+        Added,
+        AddedWildcard,
+        Duplicate,
+        Invalid,
+        InvalidWildcard,
+        WildcardNeedsBypassMode,
+        WildcardUnsupportedHere
+    };
+
     explicit IpSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
 
-    bool addSite(const QString &hostname);
+    // Wildcard entries are applied only by the desktop daemon (WireGuard /
+    // AmneziaWG). Android, iOS and the macOS network extension cannot use them.
+    static bool platformSupportsWildcards();
+
+    // `normalized` receives the form that was (or would have been) stored.
+    AddSiteResult addSite(const QString &hostname, QString *normalized = nullptr);
     void addSites(const QMap<QString, QStringList> &sites, bool replaceExisting);
     bool removeSite(const QString &hostname);
     void removeSites();
@@ -45,6 +60,7 @@ private:
     void fillSites();
     bool addSiteInternal(const QString &hostname, const QStringList &ips);
     QString normalizeHostname(const QString &hostname) const;
+    static QString stripScheme(const QString &hostname);
     bool validateHostname(const QString &hostname) const;
     void processSiteAfterResolve(const QString &hostname, const QStringList &ips);
     void processSite(const QString &hostname, const QStringList &ips);

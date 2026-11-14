@@ -40,6 +40,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.h
+    ${CLIENT_ROOT_DIR}/daemon/wildcardsite.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
@@ -130,6 +131,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.cpp
+    ${CLIENT_ROOT_DIR}/daemon/wildcardsite.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp

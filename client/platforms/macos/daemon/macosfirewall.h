@@ -82,6 +82,8 @@ public:
     static bool isAnchorEnabled(const QString &anchor);
     static void setAnchorEnabled(const QString &anchor, bool enable);
     static void setAnchorTable(const QString &anchor, bool enabled, const QString &table, const QStringList &items);
+    // One pfctl call: op is "add", "delete" or "flush" (item empty for flush).
+    static bool updateAnchorTable(const QString &anchor, const QString &table, const QString &op, const QString &item = QString());
     static void setAnchorWithRules(const QString &anchor, bool enabled, const QStringList &rules);
     static void ensureRootAnchorPriority();
     static void installRootAnchors();

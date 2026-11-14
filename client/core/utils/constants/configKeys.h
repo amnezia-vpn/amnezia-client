@@ -148,6 +148,7 @@ namespace amnezia
         constexpr QLatin1String tproxy("tproxy");
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
+        constexpr QLatin1String wildcardSites("wildcardSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
 
         constexpr QLatin1String splitTunnelApps("splitTunnelApps");
