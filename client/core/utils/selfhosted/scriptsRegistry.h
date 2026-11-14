@@ -26,6 +26,7 @@ enum SharedScriptType {
     remove_container,
     remove_all_containers,
     setup_host_firewall,
+    setup_host_firewall_service,
     check_connection,
     check_server_is_busy,
     check_user_in_sudo,

@@ -3,4 +3,7 @@ sudo docker ps -a | grep amnezia | awk '{print $1}' | xargs sudo docker rm -fv;\
 sudo docker images -a --format table | grep amnezia | awk '{print $3, $1 ":" $2}' | xargs sudo docker rmi;\
 sudo docker volume ls --format '{{.Name}}' | grep '^amnezia-' | xargs -r sudo docker volume rm -f;\
 sudo docker network ls | grep amnezia-dns-net | awk '{print $1}' | xargs sudo docker network rm;\
+sudo systemctl disable --now amnezia-host-firewall.service 2>/dev/null;\
+sudo rm -f /etc/systemd/system/amnezia-host-firewall.service;\
+sudo systemctl daemon-reload;\
 sudo rm -frd /opt/amnezia
