@@ -147,6 +147,7 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
             : credentials.hostName;
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
+        vars.append({ { "$SERVER_ENDPOINT_HOST", NetworkUtilities::endpointHost(serverIp) } });
     } else {
         qWarning() << "amnezia::genBaseVars unable to resolve address for credentials.hostName";
     }

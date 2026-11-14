@@ -34,14 +34,8 @@ namespace
 
     bool parseEndpoint(const QString &endpoint, QString &host, quint16 &port)
     {
-        const int separatorIndex = endpoint.lastIndexOf(QLatin1Char(':'));
-        if (separatorIndex <= 0 || separatorIndex == endpoint.size() - 1) {
-            return false;
-        }
-        host = endpoint.left(separatorIndex);
-        bool ok = false;
-        const uint parsedPort = endpoint.mid(separatorIndex + 1).toUInt(&ok);
-        if (!ok || parsedPort == 0 || parsedPort > 65535) {
+        int parsedPort = -1;
+        if (!NetworkUtilities::parseHostPort(endpoint, host, parsedPort) || parsedPort == -1) {
             return false;
         }
         port = static_cast<quint16>(parsedPort);

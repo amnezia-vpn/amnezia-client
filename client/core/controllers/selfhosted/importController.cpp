@@ -10,7 +10,6 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
-#include <QUrl>
 #include <algorithm>
 
 #include "core/utils/containerEnum.h"
@@ -22,6 +21,7 @@
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
+#include "core/utils/networkUtilities.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -553,24 +553,19 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject lastConfig;
     lastConfig[configKey::config] = data;
 
-    auto url { QUrl::fromUserInput(configMap.value(protocols::wireguard::Endpoint)) };
     QString hostName;
-    QString port;
-    if (!url.host().isEmpty()) {
-        hostName = url.host();
-    } else {
+    int port = -1;
+    if (!NetworkUtilities::parseHostPort(configMap.value(protocols::wireguard::Endpoint), hostName, port)) {
         qDebug() << "Key parameter" << protocols::wireguard::Endpoint << "is missing or has an invalid format";
         return QJsonObject();
     }
 
-    if (url.port() != -1) {
-        port = QString::number(url.port());
-    } else {
-        port = protocols::wireguard::defaultPort;
+    if (port == -1) {
+        port = QString(protocols::wireguard::defaultPort).toInt();
     }
 
     lastConfig[configKey::hostName] = hostName;
-    lastConfig[configKey::port] = port.toInt();
+    lastConfig[configKey::port] = port;
 
     if (!configMap.value(protocols::wireguard::PrivateKey).isEmpty()
             && !configMap.value(protocols::wireguard::Address).isEmpty()
@@ -633,7 +628,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject wireguardConfig;
     wireguardConfig[configKey::lastConfig] = QString(QJsonDocument(lastConfig).toJson());
     wireguardConfig[configKey::isThirdPartyConfig] = true;
-    wireguardConfig[configKey::port] = port;
+    wireguardConfig[configKey::port] = QString::number(port);
     wireguardConfig[configKey::transportProto] = protocols::openvpn::defaultTransportProto;
 
     QJsonObject containers;

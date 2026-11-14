@@ -139,6 +139,7 @@ void MacOSFirewall::uninstall()
 {
     logger.info() << "Uninstalling PF root anchor";
 
+    execute(QStringLiteral("for anchor in $(pfctl -q -a '%1' -sA); do pfctl -q -a \"$anchor\" -F all; done").arg(kRootAnchor), true);
     execute(QStringLiteral("pfctl -q -a '%1' -F all").arg(kRootAnchor));
     execute(QStringLiteral("test -f '%1/pf.token' && pfctl -X `cat '%1/pf.token'` && rm '%1/pf.token'").arg(DaemonDataDir));
     execute(QStringLiteral("test -f /etc/pf.conf && pfctl -F all -f /etc/pf.conf"));
