@@ -6,6 +6,7 @@
 #define DAEMON_H
 
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QTimer>
 
 #include "daemon/daemonerrors.h"
@@ -13,6 +14,7 @@
 #include "dnsutils.h"
 #include "interfaceconfig.h"
 #include "iputils.h"
+#include "wireguardconnectionmonitor.h"
 #include "wireguardutils.h"
 
 class Daemon : public QObject {
@@ -47,6 +49,7 @@ class Daemon : public QObject {
 
  signals:
   void connected(const QString& pubkey);
+  void reconnecting();
   /**
    * Can be fired if a call to activate() was unsucessfull
    * and connected systems should rollback
@@ -77,17 +80,23 @@ class Daemon : public QObject {
                               QStringList& list);
 
   void checkHandshake();
+  virtual qint64 monotonicMsec() const;
 
   class ConnectionState {
    public:
     ConnectionState(){};
-    ConnectionState(const InterfaceConfig& config) { m_config = config; }
+    ConnectionState(const InterfaceConfig &config)
+        : m_config(config), m_monitor(config.m_rejectAfterTime, config.m_rekeyTimeout)
+    {
+    }
     QDateTime m_date;
     InterfaceConfig m_config;
+    WireguardConnectionMonitor m_monitor;
   };
   QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
   QHash<IPAddress, int> m_excludedAddrSet;
   QTimer m_handshakeTimer;
+  QElapsedTimer m_connectionClock;
 };
 
 #endif  // DAEMON_H

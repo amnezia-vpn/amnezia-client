@@ -33,6 +33,11 @@ DaemonLocalServerConnection::DaemonLocalServerConnection(QObject* parent,
   Daemon* daemon = Daemon::instance();
   connect(daemon, &Daemon::connected, this,
           &DaemonLocalServerConnection::connected);
+  connect(daemon, &Daemon::reconnecting, this, [this] {
+      QJsonObject obj;
+      obj.insert("type", "reconnecting");
+      write(obj);
+  });
   connect(daemon, &Daemon::disconnected, this,
           &DaemonLocalServerConnection::disconnected);
   connect(daemon, &Daemon::backendFailure, this,
