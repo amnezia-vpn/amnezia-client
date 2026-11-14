@@ -141,6 +141,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/wireguardutilswindows.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowstunnellogger.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsroutemonitor.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowswcmsuspender.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsutils.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowspingsender.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsnetworkwatcher.h
@@ -162,6 +163,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/wireguardutilswindows.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowstunnellogger.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsroutemonitor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowswcmsuspender.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowspingsender.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsnetworkwatcher.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsutils.cpp
