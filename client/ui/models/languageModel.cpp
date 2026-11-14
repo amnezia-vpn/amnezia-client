@@ -53,6 +53,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::French: strLanguage = "Français"; break;
     case LanguageSettings::AvailableLanguageEnum::Thai: strLanguage = "ไทย"; break;
     case LanguageSettings::AvailableLanguageEnum::Indonesian: strLanguage = "Bahasa Indonesia"; break;
+    case LanguageSettings::AvailableLanguageEnum::Belarusian: strLanguage = "Беларуская"; break;
     default: break;
     }
 

@@ -34,6 +34,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
     case QLocale::French: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::French); break;
     case QLocale::Thai: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Thai); break;
     case QLocale::Indonesian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Indonesian); break;
+    case QLocale::Belarusian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Belarusian); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
@@ -71,6 +72,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
     case QLocale::French: return LanguageSettings::AvailableLanguageEnum::French;
     case QLocale::Thai: return LanguageSettings::AvailableLanguageEnum::Thai;
     case QLocale::Indonesian: return LanguageSettings::AvailableLanguageEnum::Indonesian;
+    case QLocale::Belarusian: return LanguageSettings::AvailableLanguageEnum::Belarusian;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
 }
@@ -122,6 +124,7 @@ QString LanguageUiController::getLocalLanguageName(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::French: strLanguage = "Français"; break;
     case LanguageSettings::AvailableLanguageEnum::Thai: strLanguage = "ไทย"; break;
     case LanguageSettings::AvailableLanguageEnum::Indonesian: strLanguage = "Bahasa Indonesia"; break;
+    case LanguageSettings::AvailableLanguageEnum::Belarusian: strLanguage = "Беларуская"; break;
     default: break;
     }
 
@@ -145,6 +148,7 @@ QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::French: return QLocale::French;
     case LanguageSettings::AvailableLanguageEnum::Thai: return QLocale::Thai;
     case LanguageSettings::AvailableLanguageEnum::Indonesian: return QLocale::Indonesian;
+    case LanguageSettings::AvailableLanguageEnum::Belarusian: return QLocale::Belarusian;
     default: return QLocale::English;
     }
 }
