@@ -27,6 +27,8 @@ class DnsUtilsLinux final : public DnsUtils {
   void setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
   void setLinkDefaultRoute(int ifindex, bool enable);
   void updateLinkDomains();
+  void updateResolvConf(const QList<QHostAddress>& resolvers);
+  void removeResolvconfEntry();
 
  private slots:
   void dnsCallCompleted(QDBusPendingCallWatcher*);
@@ -36,6 +38,7 @@ class DnsUtilsLinux final : public DnsUtils {
   int m_ifindex = 0;
   QMap<int, DnsLinkDomainList> m_linkDomains;
   QDBusInterface* m_resolver = nullptr;
+  QString m_resolvconfIface;
 };
 
 #endif  // DNSUTILSLINUX_H
