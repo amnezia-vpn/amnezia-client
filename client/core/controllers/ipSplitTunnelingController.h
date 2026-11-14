@@ -25,6 +25,7 @@ public:
     explicit IpSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
 
     bool addSite(const QString &hostname);
+
     void addSites(const QMap<QString, QStringList> &sites, bool replaceExisting);
     bool removeSite(const QString &hostname);
     void removeSites();
@@ -33,20 +34,26 @@ public:
 
     RouteMode getRouteMode() const;
     bool isSplitTunnelingEnabled() const;
+
     QVector<QPair<QString, QStringList>> getCurrentSites() const;
 
     bool importSitesFromJson(const QByteArray& jsonData, bool replaceExisting, QString &errorMessage);
-    QByteArray exportSitesToJson() const;
 
-private slots:
-    void onHostResolved(const QHostInfo &hostInfo);
+    QByteArray exportSitesToJson() const;
 
 private:
     void fillSites();
+
     bool addSiteInternal(const QString &hostname, const QStringList &ips);
+
     QString normalizeHostname(const QString &hostname) const;
+
     bool validateHostname(const QString &hostname) const;
-    void processSiteAfterResolve(const QString &hostname, const QStringList &ips);
+
+    bool validateIpv4Cidr(const QString &value) const;
+
+    void processSiteAfterResolve(RouteMode routeMode, const QString &hostname, const QStringList &ips);
+
     void processSite(const QString &hostname, const QStringList &ips);
 
     SecureAppSettingsRepository* m_appSettingsRepository;
@@ -55,4 +62,3 @@ private:
 };
 
 #endif // IPSPLITTUNNELINGCONTROLLER_H
-
