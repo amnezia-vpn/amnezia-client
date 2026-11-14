@@ -97,7 +97,8 @@ public:
     static bool isAnchorEnabled(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
     static void setAnchorEnabled(IPVersion ip, const QString& anchor, bool enabled, const QString& tableName = kFilterTable);
     static void replaceAnchor(LinuxFirewall::IPVersion ip, const QString &anchor, const QString &newRule, const QString& tableName);
-    static void updateDNSServers(const QStringList& servers);
+    static void updateDNSServers(const QStringList& servers,
+                                 const QStringList& systemServers = {});
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
 };

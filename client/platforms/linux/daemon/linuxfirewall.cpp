@@ -418,7 +418,8 @@ void LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPVersion ip, const QString 
     }
 }
 
-void LinuxFirewall::updateDNSServers(const QStringList& servers)
+void LinuxFirewall::updateDNSServers(const QStringList& servers,
+                                     const QStringList& systemServers)
 {
     static QStringList existingServers {};
 
@@ -439,6 +440,23 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
                  QStringLiteral("-d"), server, QStringLiteral("-p"), QStringLiteral("tcp"),
                  QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
         }
+    }
+    // Servers the system is currently configured with (e.g. the nameservers
+    // from /etc/resolv.conf) have to stay reachable through the physical
+    // interface too: queries to them do not leave via the tunnel interfaces
+    // above, and rejecting them breaks name resolution entirely.
+    for (const QString& server : systemServers) {
+        if (servers.contains(server)) {
+            continue;
+        }
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-p"), QStringLiteral("udp"),
+             QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-p"), QStringLiteral("tcp"),
+             QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
     }
 }
 
