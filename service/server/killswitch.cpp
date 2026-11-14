@@ -302,7 +302,8 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     if (configStr.value("splitTunnelType").toInt() != 0) {
         WindowsFirewall::create(this)->allowAllTraffic();
     }
-    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
+    return WindowsFirewall::create(this)->enableInterface(
+            vpnAdapterIndex, configStr.value(amnezia::configKey::domainRoutingEnabled).toBool());
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

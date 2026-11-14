@@ -62,6 +62,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/utils/domainRouting.h
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.h
     ${CLIENT_ROOT_DIR}/core/utils/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/utils/serialization/transfer.h
@@ -148,6 +149,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/domainRouting.cpp
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/inbound.cpp
@@ -272,10 +274,12 @@ set(SOURCES ${SOURCES}
 if(WIN32)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
+        ${CLIENT_ROOT_DIR}/core/protocols/domainRoutingProtocol.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
+        ${CLIENT_ROOT_DIR}/core/protocols/domainRoutingProtocol.cpp
     )
 
     set(RESOURCES ${RESOURCES}

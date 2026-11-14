@@ -38,8 +38,13 @@ public:
 
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode);
+
     bool addVpnSite(RouteMode mode, const QString &site, const QStringList &ips = {});
+
     void addVpnSites(RouteMode mode, const QMap<QString, QStringList> &sites);
+
+    void replaceVpnSiteIps(RouteMode mode, const QMap<QString, QStringList> &sites);
+
     void removeVpnSite(RouteMode mode, const QString &site);
     void removeAllVpnSites(RouteMode mode);
     QVariantMap vpnSites(RouteMode mode) const;
@@ -49,6 +54,13 @@ public:
     static QStringList siteIpList(const QVariant &value);
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
+
+    /// <summary>Возвращает состояние обработки динамических доменов.</summary>
+    /// <returns>Признак явного включения доменной маршрутизации.</returns>
+    bool isDynamicDomainRoutingEnabled() const;
+    /// <summary>Сохраняет состояние обработки динамических доменов.</summary>
+    /// <param name="enabled">Новое состояние настройки.</param>
+    void setDynamicDomainRoutingEnabled(bool enabled);
 
     AppsRouteMode appsRouteMode() const;
     void setAppsRouteMode(AppsRouteMode mode);
