@@ -36,6 +36,28 @@
 
 using namespace ProtocolUtils;
 
+#ifdef AMNEZIA_DESKTOP
+namespace {
+void watchServiceReply(const QRemoteObjectPendingReply<bool> &reply, const char *operation, QObject *parent)
+{
+    auto *watcher = new QRemoteObjectPendingCallWatcher(reply, parent);
+    QObject::connect(watcher, &QRemoteObjectPendingCallWatcher::finished, watcher,
+                     [watcher, operation]() {
+                         if (watcher->error() != QRemoteObjectPendingCall::NoError || !watcher->returnValue().toBool()) {
+                             qWarning() << "VPN service failed to" << operation;
+                         }
+                         watcher->deleteLater();
+                     });
+    QTimer::singleShot(5000, watcher, [watcher, operation]() {
+        if (!watcher->isFinished()) {
+            qWarning() << "VPN service timed out trying to" << operation;
+        }
+        watcher->deleteLater();
+    });
+}
+}
+#endif
+
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository),
@@ -75,6 +97,11 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 #ifdef AMNEZIA_DESKTOP
+    if (state != Vpn::ConnectionState::Connected && state != Vpn::ConnectionState::Disconnected &&
+        state != Vpn::ConnectionState::Error) {
+        return;
+    }
+
     if (!m_serversRepository || !m_appSettingsRepository) {
         qCritical() << "VpnConnection::onConnectionStateChanged: repositories not initialized";
         return;
@@ -126,11 +153,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             case Vpn::ConnectionState::Connected: {
                 iface->resetIpStack();
 
-                auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
+                watchServiceReply(iface->flushDns(), "flush DNS", this);
 
                 if (!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard) {
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
@@ -165,17 +188,10 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             } break;
             case Vpn::ConnectionState::Disconnected:
             case Vpn::ConnectionState::Error: {
-                auto flushDns = iface->flushDns();
-                if (flushDns.waitForFinished() && flushDns.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
-
-                auto clearSavedRoutes = iface->clearSavedRoutes();
-                if (clearSavedRoutes.waitForFinished() && clearSavedRoutes.returnValue())
-                    qDebug() << "VpnConnection::onConnectionStateChanged: Successfully cleared saved routes";
-                else
-                    qWarning() << "VpnConnection::onConnectionStateChanged: Failed to clear saved routes";
+                // Cleanup must not delay the state update or re-enter the VPN
+                // controller while a disconnect/reconnect is being processed.
+                watchServiceReply(iface->flushDns(), "flush DNS", this);
+                watchServiceReply(iface->clearSavedRoutes(), "clear saved routes", this);
             } break;
             default:
                 break;
@@ -385,8 +401,9 @@ void VpnConnection::createProtocolConnections()
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        const auto connectionType = static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection);
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, connectionType);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, connectionType);
     });
 #endif
 }

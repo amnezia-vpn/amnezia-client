@@ -6,6 +6,7 @@
 #define LOCALSOCKETCONTROLLER_H
 
 #include <QHostAddress>
+#include <QJsonObject>
 #include <QLocalSocket>
 #include <QTimer>
 #include <functional>
@@ -19,7 +20,8 @@ class LocalSocketController final : public ControllerImpl {
   Q_DISABLE_COPY_MOVE(LocalSocketController)
 
  public:
-  LocalSocketController();
+  explicit LocalSocketController(const QString& serverName = QString(),
+                                 int connectionTimeoutMsec = 30000);
   ~LocalSocketController();
 
   void initialize(const Device* device, const Keys* keys) override;
@@ -56,13 +58,18 @@ class LocalSocketController final : public ControllerImpl {
   } m_daemonState = eUnknown;
 
   QLocalSocket* m_socket = nullptr;
+  const QString m_serverName;
 
   QByteArray m_buffer;
+  QJsonObject m_pendingActivation;
+  bool m_activationRequested = false;
+  bool m_deactivating = false;
 
   QString m_deviceIpv4;
   std::function<void(const QString&)> m_logCallback = nullptr;
 
   QTimer m_initializingTimer;
+  QTimer m_connectionTimer;
   uint32_t m_initializingRetry = 0;
 };
 

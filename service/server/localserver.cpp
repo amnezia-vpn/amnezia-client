@@ -24,6 +24,8 @@ Logger logger("WgDaemonServer");
 LocalServer::LocalServer(QObject *parent) : QObject(parent),
     m_ipcServer(this)
 {
+    connect(qApp, &QCoreApplication::aboutToQuit, this, &LocalServer::shutdown);
+
     // Create the server and listen outside of QtRO
     m_server = QSharedPointer<QLocalServer>(new QLocalServer(this));
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
@@ -53,28 +55,24 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     connect(&m_networkWatcher, &NetworkWatcher::networkChanged, &m_ipcServer, &IpcServer::networkChanged);
     connect(&m_networkWatcher, &NetworkWatcher::wakeup, &m_ipcServer, &IpcServer::wakeup);
     KillSwitch::instance()->init();
-
-#ifdef Q_OS_LINUX
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_MAC
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
-#endif
-
-#ifdef Q_OS_WIN
-    // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { WindowsDaemon::instance()->deactivate(); });
-#endif
+    m_needsCleanup = true;
 }
 
 LocalServer::~LocalServer()
 {
+    // QtService deletes this object before emitting aboutToQuit. Clean up while
+    // the daemon and its platform helpers are still alive.
+    shutdown();
     qDebug() << "Local server stopped";
 }
 
+void LocalServer::shutdown()
+{
+    if (!m_needsCleanup) {
+        return;
+    }
+    m_needsCleanup = false;
+    if (!daemon.deactivate()) {
+        qWarning() << "Failed to deactivate the tunnel during service shutdown";
+    }
+}
