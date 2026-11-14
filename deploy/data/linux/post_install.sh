@@ -40,10 +40,8 @@ sudo ln -sf $APP_PATH/bin/$APP_NAME /usr/local/sbin/$APP_NAME >> $LOG_FILE
 sudo ln -sf $APP_PATH/bin/$APP_NAME /usr/local/bin/$APP_NAME >> $LOG_FILE
 
 echo "user desktop creation loop started" >> $LOG_FILE
-sudo cp $APP_PATH/$APP_NAME.desktop /usr/share/applications/ >> $LOG_FILE
-sudo cp $APP_PATH/$APP_NAME.png /usr/share/pixmaps/ >> $LOG_FILE
-sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
-
+sudo mkdir -p /usr/local/share/applications >> $LOG_FILE
+sudo ln -sf $APP_PATH/$APP_NAME.desktop /usr/local/share/applications/ >> $LOG_FILE
 echo "user desktop creation loop ended" >> $LOG_FILE
 
 if command -v steamos-readonly &> /dev/null; then
