@@ -31,14 +31,23 @@ def authorize_app_store_connect
   )
 end
 
+def upload_to_external_testers(package)
+  authorize_app_store_connect
+  upload_to_testflight(
+    **package,
+    distribute_external: true,
+    groups: ["test"],
+    changelog: "Improve stability"
+  )
+end
+
 platform :ios do
   lane :archive do
     archive_build("ios", "IOS")
   end
 
   lane :testflight_upload do
-    authorize_app_store_connect
-    upload_to_testflight(ipa: "build/ios/AmneziaVPN.ipa", skip_waiting_for_build_processing: true)
+    upload_to_external_testers(ipa: "build/ios/AmneziaVPN.ipa")
   end
 end
 
@@ -48,8 +57,7 @@ platform :mac do
   end
 
   lane :testflight_upload do
-    authorize_app_store_connect
-    upload_to_testflight(app_platform: "osx", pkg: "build/osx/AmneziaVPN.pkg", skip_waiting_for_build_processing: true)
+    upload_to_external_testers(app_platform: "osx", pkg: "build/osx/AmneziaVPN.pkg")
   end
 end
 
