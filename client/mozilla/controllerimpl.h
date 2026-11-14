@@ -84,6 +84,11 @@ class ControllerImpl : public QObject {
   void statusUpdated(const QString& serverIpv4Gateway,
                      const QString& deviceIpv4Address, uint64_t txBytes,
                      uint64_t rxBytes);
+
+  // Emitted together with statusUpdated() when the backend reports the
+  // peer's latest handshake. "lastHandshakeMsecs" is milliseconds since the
+  // epoch (0 - never), "txBytes" is the total sent to the peer.
+  void peerStatusUpdated(qint64 lastHandshakeMsecs, quint64 txBytes);
 };
 
 #endif  // CONTROLLERIMPL_H

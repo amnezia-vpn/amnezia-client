@@ -78,6 +78,9 @@ signals:
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
     void tunnelAddressesUpdated(const QString& gateway, const QString& localAddress);
+    // The protocol's tunnel is up but no longer reaches the server; a
+    // reconnect resolves the server's host name again (see WireguardProtocol).
+    void reconnectRequested();
 
 public slots:
     virtual void onTimeout(); // todo: remove?

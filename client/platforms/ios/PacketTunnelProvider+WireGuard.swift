@@ -1,6 +1,9 @@
 import Foundation
 import NetworkExtension
 
+private let endpointWatchQueue = DispatchQueue(label: Constants.processQueueName + ".endpoint-watch")
+private let endpointPollSeconds = 20
+
 extension PacketTunnelProvider {
     func startWireguard(activationAttemptId: String?,
                         errorNotifier: ErrorNotifier,
@@ -54,6 +57,7 @@ extension PacketTunnelProvider {
                    (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
 
             // Start the tunnel
+            wgTunnelConfiguration = tunnelConfiguration
             wgAdapter = WireGuardAdapter(with: self) { logLevel, message in
                 wg_log(logLevel.osLogLevel, message: message)
             }
@@ -62,6 +66,7 @@ extension PacketTunnelProvider {
                 guard let adapterError else {
                     let interfaceName = self?.wgAdapter?.interfaceName ?? "unknown"
                     wg_log(.info, message: "Tunnel interface is \(interfaceName)")
+                    self?.startEndpointWatch()
                     completionHandler(nil)
                     return
                 }
@@ -167,6 +172,9 @@ extension PacketTunnelProvider {
                         return
                     }
 
+                    self?.wgTunnelConfiguration = tunnelConfiguration
+                    self?.startEndpointWatch()
+
                     self?.wgAdapter?.getRuntimeConfiguration { settings in
                         var data: Data?
                         if let settings {
@@ -186,6 +194,7 @@ extension PacketTunnelProvider {
     func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         wg_log(.info, message: "Stopping tunnel: reason: \(reason.amneziaDescription)")
 
+        stopEndpointWatch()
         wgAdapter?.stop { error in
             ErrorNotifier.removeLastErrorFile()
 
@@ -201,5 +210,96 @@ extension PacketTunnelProvider {
             exit(0)
 #endif
         }
+    }
+
+    /// Watches the peer while the tunnel is up. When the server stops answering,
+    /// resolves its host name again and, if the address changed, applies the
+    /// configuration anew. The adapter resolves host names only in start() and
+    /// update(); a path update re-resolves the already resolved IP (for NAT64),
+    /// not the name, so without this a server that moved to another IP is not
+    /// reached again until the tunnel is restarted by hand.
+    func startEndpointWatch() {
+        stopEndpointWatch()
+        guard let endpoint = wgTunnelConfiguration?.peers.first?.endpoint,
+              case .name = endpoint.host else { return }
+
+        endpointWatchQueue.async { [weak self] in
+            guard let self else { return }
+            self.wgEndpointWatchdog.tunnelStarted(nowMs: Self.nowMs())
+            // Baseline to compare with: the address the name had at start
+            self.wgResolvedEndpoint = Self.resolve(endpoint)
+        }
+
+        let timer = DispatchSource.makeTimerSource(queue: endpointWatchQueue)
+        timer.schedule(deadline: .now() + .seconds(endpointPollSeconds), repeating: .seconds(endpointPollSeconds))
+        timer.setEventHandler { [weak self] in
+            self?.checkEndpoint(endpoint)
+        }
+        wgEndpointTimer = timer
+        timer.resume()
+    }
+
+    func stopEndpointWatch() {
+        wgEndpointTimer?.cancel()
+        wgEndpointTimer = nil
+    }
+
+    private func checkEndpoint(_ endpoint: Endpoint) {
+        wgAdapter?.getRuntimeConfiguration { [weak self] settings in
+            guard let settings else { return }
+            endpointWatchQueue.async {
+                self?.evaluateEndpoint(endpoint, runtimeSettings: settings)
+            }
+        }
+    }
+
+    private func evaluateEndpoint(_ endpoint: Endpoint, runtimeSettings: String) {
+        var handshakeSec: Int64 = 0
+        var handshakeNsec: Int64 = 0
+        var txBytes: UInt64 = 0
+        for line in runtimeSettings.split(separator: "\n") {
+            let pair = line.split(separator: "=", maxSplits: 1)
+            guard pair.count == 2 else { continue }
+            switch pair[0] {
+            case "last_handshake_time_sec": handshakeSec = Int64(pair[1]) ?? 0
+            case "last_handshake_time_nsec": handshakeNsec = Int64(pair[1]) ?? 0
+            case "tx_bytes": txBytes = UInt64(pair[1]) ?? 0
+            default: break
+            }
+        }
+
+        let now = Self.nowMs()
+        let handshakeMs = handshakeSec * 1000 + handshakeNsec / 1_000_000
+        guard wgEndpointWatchdog.observe(nowMs: now, lastHandshakeMs: handshakeMs, txBytes: txBytes) else { return }
+        wgEndpointWatchdog.refreshAttempted(nowMs: now)
+
+        let name = endpoint.stringRepresentation
+        guard let resolved = Self.resolve(endpoint) else {
+            wg_log(.info, message: "No handshake with \(name), resolving it failed")
+            return
+        }
+        guard resolved != wgResolvedEndpoint else {
+            wg_log(.info, message: "No handshake with \(name), its address is unchanged")
+            return
+        }
+        guard let tunnelConfiguration = wgTunnelConfiguration else { return }
+
+        wg_log(.info, message: "No handshake with \(name), it moved to \(resolved): applying the configuration again")
+        wgResolvedEndpoint = resolved
+        wgAdapter?.update(tunnelConfiguration: tunnelConfiguration) { error in
+            if let error {
+                wg_log(.error, message: "Failed to apply the new server address: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private static func resolve(_ endpoint: Endpoint) -> String? {
+        let results = DNSResolver.resolveSync(endpoints: [endpoint])
+        guard let result = results.first ?? nil, case .success(let resolved) = result else { return nil }
+        return resolved.stringRepresentation
+    }
+
+    private static func nowMs() -> Int64 {
+        return Int64(Date().timeIntervalSince1970 * 1000)
     }
 }

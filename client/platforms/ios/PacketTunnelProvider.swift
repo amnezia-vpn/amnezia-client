@@ -38,6 +38,11 @@ struct Constants {
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
     var wgAdapter: WireGuardAdapter?
+    // Server address watch, see PacketTunnelProvider+WireGuard.swift
+    var wgTunnelConfiguration: TunnelConfiguration?
+    var wgEndpointTimer: DispatchSourceTimer?
+    var wgEndpointWatchdog = EndpointWatchdog(firstRetryMs: 60_000, maxRetryMs: 60_000)
+    var wgResolvedEndpoint: String?
     var ovpnAdapter: OpenVPNAdapter?
     private lazy var openVPNPacketFlowAdapter = PacketTunnelFlowAdapter(flow: packetFlow)
     private let pathMonitorQueue = DispatchQueue(label: Constants.processQueueName + ".path-monitor")

@@ -607,6 +607,9 @@ QJsonObject Daemon::getStatus() {
     json.insert("date", connection.m_date.toString());
     json.insert("txBytes", QJsonValue(status.m_txBytes));
     json.insert("rxBytes", QJsonValue(status.m_rxBytes));
+    // Milliseconds since the epoch, 0 if the peer never completed a handshake.
+    // Lets the client notice a tunnel that stopped reaching its server.
+    json.insert("lastHandshake", QJsonValue(status.m_handshake));
     return json;
   }
 
