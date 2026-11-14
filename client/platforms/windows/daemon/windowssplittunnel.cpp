@@ -265,24 +265,18 @@ bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
     }
   }
 
-  DWORD bytesReturned;
-  auto ok = DeviceIoControl(driverIO, IOCTL_INITIALIZE, nullptr, 0, nullptr, 0,
-                            &bytesReturned, nullptr);
-  if (!ok) {
-    auto err = GetLastError();
-    logger.error() << "Driver init failed err -" << err;
-    logger.error() << "State:" << getState(driverIO);
-
-    return false;
-  }
-  logger.debug() << "Driver initialized" << getState(driverIO);
+  // IOCTL_INITIALIZE is deferred to start(): once initialized, the driver
+  // queues an event for every process start/exit in paged pool, and only
+  // drains that queue after IOCTL_REGISTER_PROCESSES. Initializing here, while
+  // app split tunneling is unused, leaks pool until reboot (#3216).
+  logger.debug() << "Driver ready for lazy init" << getState(driverIO);
   return true;
 }
 
 WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO) : m_driver(driverIO) {
   logger.debug() << "Connected to the Driver";
 
-  Q_ASSERT(getState() == STATE_INITIALIZED);
+  Q_ASSERT(getState() == STATE_STARTED);
 }
 
 WindowsSplitTunnel::~WindowsSplitTunnel() {
@@ -379,6 +373,18 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
 }
 
 void WindowsSplitTunnel::stop() {
+  auto state = getState();
+  if (state == STATE_STARTED) {
+    // Never initialized, nothing to clear.
+    return;
+  }
+  if (state == STATE_INITIALIZED) {
+    // start() failed before IOCTL_REGISTER_PROCESSES. The driver rejects
+    // IOCTL_CLEAR_CONFIGURATION here and keeps queueing process events,
+    // so reset it back to STATE_STARTED.
+    resetDriver(m_driver);
+    return;
+  }
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_CLEAR_CONFIGURATION, nullptr, 0,
                             nullptr, 0, &bytesReturned, nullptr);

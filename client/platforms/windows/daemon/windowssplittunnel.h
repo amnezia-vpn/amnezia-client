@@ -35,7 +35,7 @@ class WindowsSplitTunnel final {
    * @brief Construct a new Windows Split Tunnel object
    *
    * @param driverIO - The Handle to the Driver's IO file, it assumes the driver
-   * is in STATE_INITIALIZED and the Firewall has been setup.
+   * is in STATE_STARTED and the Firewall has been setup; start() initializes it.
    * Prefer using create() to get to this state.
    */
   WindowsSplitTunnel(HANDLE driverIO);
