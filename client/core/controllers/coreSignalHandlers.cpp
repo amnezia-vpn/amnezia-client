@@ -537,7 +537,7 @@ void CoreSignalHandlers::initNotificationHandler()
 
     connect(m_coreController->m_notificationHandler, &NotificationHandler::raiseRequested, m_coreController->m_pageController, &PageController::raiseMainWindow);
     connect(m_coreController->m_notificationHandler, &NotificationHandler::connectRequested, m_coreController->m_connectionUiController,
-            static_cast<void (ConnectionUiController::*)()>(&ConnectionUiController::openConnection));
+            &ConnectionUiController::toggleConnection);
     connect(m_coreController->m_notificationHandler, &NotificationHandler::disconnectRequested, m_coreController->m_connectionUiController,
             &ConnectionUiController::closeConnection);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
