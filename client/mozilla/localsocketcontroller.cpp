@@ -23,6 +23,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "ipaddress.h"
 #include "daemon/daemonerrors.h"
 
 #include "core/utils/protocolEnum.h"
@@ -175,62 +176,28 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
-  QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
+  const QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
+  const bool allowSiteSplitTunneling = plainAllowedIP.isEmpty()
+      || plainAllowedIP.contains(QStringLiteral("0.0.0.0/0"));
+  // Use AllowedIP list from WG config because of higher priority
+  QJsonArray effectiveAllowedIP = plainAllowedIP;
 
-  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
-    // Use AllowedIP list from WG config because of higher priority
-    for (auto v : plainAllowedIP) {
-      QString ipRange = v.toString();
-      if (ipRange.split('/').size() > 1){
-          QJsonObject range;
-          range.insert("address", ipRange.split('/')[0]);
-          range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      } else {
-          QJsonObject range;
-          range.insert("address",ipRange);
-          range.insert("range", 32);
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      }
-    }
-  } else {
-
+  if (splitTunnelType == 1 && allowSiteSplitTunneling) {
     // Use APP split tunnel
-      if (splitTunnelType == 0 || splitTunnelType == 2) {
-          QJsonObject range_ipv4;
-          range_ipv4.insert("address", "0.0.0.0");
-          range_ipv4.insert("range", 0);
-          range_ipv4.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range_ipv4);
+    effectiveAllowedIP = splitTunnelSites;
+  } else if (effectiveAllowedIP.isEmpty()) {
+    effectiveAllowedIP = QJsonArray { "0.0.0.0/0", "::/0" };
+  }
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
-      }
-
-      if (splitTunnelType == 1) {
-          for (auto v : splitTunnelSites) {
-              QString ipRange = v.toString();
-              if (ipRange.split('/').size() > 1){
-                  QJsonObject range;
-                  range.insert("address", ipRange.split('/')[0]);
-                  range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              } else {
-                  QJsonObject range;
-                  range.insert("address",ipRange);
-                  range.insert("range", 32);
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              }
-          }
-      }
+  for (const QJsonValue& value : effectiveAllowedIP) {
+    const IPAddress prefix(value.toString());
+    QJsonObject range;
+    range.insert("address", prefix.address().toString());
+    range.insert("range", prefix.prefixLength());
+    range.insert("isIpv6", prefix.type() == QAbstractSocket::IPv6Protocol);
+    if (!jsAllowedIPAddesses.contains(range)) {
+      jsAllowedIPAddesses.append(range);
+    }
   }
 
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
