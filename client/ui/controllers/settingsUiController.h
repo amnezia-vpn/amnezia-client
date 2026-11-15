@@ -25,7 +25,9 @@ public:
     Q_PROPERTY(bool strictKillSwitchEnabled READ isStrictKillSwitchEnabled WRITE toggleStrictKillSwitch NOTIFY strictKillSwitchEnabledChanged)
 
     Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
-    Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
+    Q_PROPERTY(QString devGatewayEndpoint READ getDevGatewayEndpoint NOTIFY devGatewayConfigChanged)
+    Q_PROPERTY(QString devGatewayProxyStorages READ getDevGatewayProxyStorages NOTIFY devGatewayConfigChanged)
+    Q_PROPERTY(QString devGatewayPublicKey READ getDevGatewayPublicKey NOTIFY devGatewayConfigChanged)
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
@@ -90,9 +92,10 @@ public slots:
     void enableDevMode();
     bool isDevModeEnabled();
 
-    void resetGatewayEndpoint();
-    void setGatewayEndpoint(const QString &endpoint);
-    QString getGatewayEndpoint();
+    QString getDevGatewayEndpoint();
+    QString getDevGatewayProxyStorages();
+    QString getDevGatewayPublicKey();
+    void saveDevGatewayConfig(const QString &endpoint, const QString &proxyStorages, const QString &publicKey);
     bool isDevGatewayEnv();
     void toggleDevGatewayEnv(bool enabled);
 
@@ -126,7 +129,7 @@ signals:
     void onNotificationStateChanged();
 
     void devModeEnabled();
-    void gatewayEndpointChanged(const QString &endpoint);
+    void devGatewayConfigChanged();
     void devGatewayEnvChanged(bool enabled);
 
     void activityPaused();
