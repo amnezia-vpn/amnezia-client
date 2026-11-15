@@ -85,7 +85,8 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled),
       m_appSettingsRepository(appSettingsRepository)
 {
-    const QByteArray publicKey = isDevEnvironment ? QByteArray(DEV_AGW_PUBLIC_KEY) : QByteArray(PROD_AGW_PUBLIC_KEY);
+    const QByteArray publicKey =
+            QByteArray::fromBase64(isDevEnvironment ? DEV_AGW_PUBLIC_KEY_B64 : PROD_AGW_PUBLIC_KEY_B64);
     m_publicKeyMissing = publicKey.isEmpty();
 
     QStringList primaryEndpoints;

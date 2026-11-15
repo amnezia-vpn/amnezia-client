@@ -15,10 +15,10 @@ jobs:
     env:
       QT_VERSION: 6.4.1
       QIF_VERSION: 4.5
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY_B64: ${{ secrets.DEV_AGW_PUBLIC_KEY_B64 }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
