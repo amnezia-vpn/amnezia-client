@@ -92,7 +92,6 @@ namespace apiDefs
         constexpr QLatin1String improvements("improvements");
         constexpr QLatin1String bugFixes("bug_fixes");
         constexpr QLatin1String downloadBaseUrl("download_base_url");
-        constexpr QLatin1String releasePageUrl("release_page_url");
 
         constexpr QLatin1String publicKeyInfo("public_key");
         constexpr QLatin1String publicKey("public_key");
