@@ -1,6 +1,8 @@
 #include <QTest>
 #include <QQuickItem>
+#include <QSignalSpy>
 
+#include "core/controllers/selfhosted/importController.h"
 #include "core/models/serverDescription.h"
 #include "ui/models/serversModel.h"
 #include "ui/controllers/serversUiController.h"
@@ -105,15 +107,25 @@ private slots:
         QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Second server")));
     }
 
-    void clickingServerSetsProcessedServerId()
+    
+void clickingServerSetsProcessedServerId()
     {
-        const QString serverId = QStringLiteral("test-server-id");
+        QSignalSpy importFinishedSpy(m_fixture.core()->m_importCoreController, &ImportController::importFinished);
 
-        addServer(serverId, QStringLiteral("Test server"), QStringLiteral("test.example.com"));
+        m_fixture.core()->m_importCoreController->importConfig(createAwg2Config());
 
-        QVERIFY(m_fixture.loadPage( QStringLiteral("PageSettingsServersList")));
+        QCOMPARE(importFinishedSpy.count(), 1);
 
-        QQuickItem *serverItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Test server"));
+        m_fixture.core()->m_serversUiController->updateModel();
+
+        QCOMPARE(m_fixture.core()->m_serversModel->rowCount(), 1);
+
+        const QString serverId = m_fixture.core()->m_serversUiController->getServerId(0);
+
+        QVERIFY2(!serverId.isEmpty(), "Imported server ID is empty");
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsServersList")));
+
+        QQuickItem *serverItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("AWG2 Test Server"));
 
         QVERIFY2(serverItem, "Server item was not found");
         QCOMPARE(m_fixture.core()->m_serversUiController->getProcessedServerId(), QString());

@@ -128,27 +128,31 @@ private slots:
 
     void clickingUnreadNewsMarksItAsRead()
     {
-        prepareNews();
-
-        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsNewsNotifications")));
-
         NewsModel *model = newsModel();
 
         QVERIFY(model);
 
-        const int newsIndex = 0;
+        const QString newsId = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
-        QCOMPARE(model->data(model->index(newsIndex, 0), NewsModel::IsReadRole).toBool(), false);
+        model->setNewsList(QJsonArray { makeNews(newsId, QStringLiteral("Unread test news"),
+                                                 QStringLiteral("Unread test news content"),
+                                                 QStringLiteral("2026-11-16T10:00:00Z")) });
 
-        QQuickItem *newsItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Third test news"));
+        QVERIFY(model->hasUnread());
+        QCOMPARE(model->rowCount(), 1);
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsNewsNotifications")));
+        QCOMPARE(model->data(model->index(0, 0), NewsModel::IsReadRole).toBool(), false);
+
+        QQuickItem *newsItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Unread test news"));
 
         QVERIFY2(newsItem, "News item was not found");
 
         m_fixture.click(newsItem);
 
-        QTRY_VERIFY(model->data(model->index(newsIndex, 0), NewsModel::IsReadRole).toBool());
-        QVERIFY(!model->hasUnread());
+        QTRY_VERIFY(model->data(model->index(0, 0), NewsModel::IsReadRole).toBool());
+        QTRY_VERIFY(!model->hasUnread());
     }
+
 
     void clickingNewsUpdatesProcessedIndex()
     {
