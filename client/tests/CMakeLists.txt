@@ -335,6 +335,7 @@ if(NOT ANDROID)
         pagesUi/pagesUiTestFixture.h
         pagesUi/testPageSetupWizardConfigSource.cpp
         pagesUi/testPageHome.cpp
+        pagesUi/testPageSettingsServersList.cpp
         pagesUi/testPageSettingsConnection.cpp
         pagesUi/testPageSettingsDns.cpp
         pagesUi/testPageSettingsSplitTunneling.cpp
