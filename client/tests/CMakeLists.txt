@@ -343,6 +343,9 @@ if(NOT ANDROID)
         pagesUi/testPageSettingsKillSwitchExceptions.cpp
         pagesUi/testPageSettingsApplication.cpp
         pagesUi/testPageSettingsLogging.cpp
+        pagesUi/testPageSettingsNewsNotifications.cpp
+        pagesUi/testPageSettingsBackup.cpp
+        pagesUi/testPageSettingsAbout.cpp
         ${PAGES_UI_QRC}
     )
 

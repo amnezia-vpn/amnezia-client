@@ -18,6 +18,9 @@ int runPageSettingsKillSwitchTests(int argc, char *argv[]);
 int runPageSettingsKillSwitchExceptionsTests(int argc, char *argv[]);
 int runPageSettingsApplicationTests(int argc, char *argv[]);
 int runPageSettingsLoggingTests(int argc, char *argv[]);
+int runPageSettingsNewsNotificationsTests(int argc, char *argv[]);
+int runPageSettingsBackupTests(int argc, char *argv[]);
+int runPageSettingsAboutTests(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +49,9 @@ int main(int argc, char *argv[])
     result |= runPageSettingsKillSwitchExceptionsTests(argc, argv);
     result |= runPageSettingsApplicationTests(argc, argv);
     result |= runPageSettingsLoggingTests(argc, argv);
+    result |= runPageSettingsNewsNotificationsTests(argc, argv);
+    result |= runPageSettingsBackupTests(argc, argv);
+    result |= runPageSettingsAboutTests(argc, argv);
 
     return result;
 }
