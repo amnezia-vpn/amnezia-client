@@ -1695,7 +1695,7 @@ jobs:
 # ------------------------------------------------------
 
   Pre-Release:
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'skipped') }}
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
     runs-on: ubuntu-latest
     permissions:
@@ -1742,7 +1742,7 @@ jobs:
 # ------------------------------------------------------
 
   TestFlight:
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'skipped') }}
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
     runs-on: macos-26
 
@@ -1786,7 +1786,7 @@ jobs:
 # ------------------------------------------------------
 
   Google-Play:
-    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'skipped') }}
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
     runs-on: ubuntu-24.04
 
