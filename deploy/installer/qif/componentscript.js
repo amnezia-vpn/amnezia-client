@@ -79,8 +79,7 @@ Component.prototype.componentLoaded = function ()
         return;
     }
 
-    var pageTitle = installer.value("ClosingApplicationsPageTitle");
-    if (pageTitle === "") {
+    if (installer.value("ClosingApplicationsPageRequested") !== "true") {
         return;
     }
 
@@ -89,8 +88,9 @@ Component.prototype.componentLoaded = function ()
         return;
     }
 
-    widget.windowTitle = pageTitle;
-    widget.descriptionLabel.text = installer.value("ClosingApplicationsPageDescription");
+    var description = qsTr("%1 is running and is using files that need to be updated. Setup will close it and start it again when the installation is complete.");
+
+    widget.descriptionLabel.text = description.arg(appName());
     widget.applicationsBrowser.html = appName();
 
     installer.addWizardPage(component, "ClosingApplicationsWidget", QInstaller.ReadyForInstallation);
