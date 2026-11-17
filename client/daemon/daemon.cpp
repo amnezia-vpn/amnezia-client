@@ -132,9 +132,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // Configure routing for excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(config.m_excludedAddresses);
 
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
@@ -209,26 +207,41 @@ bool Daemon::parseStringList(const QJsonObject& obj, const QString& name,
   return true;
 }
 
-bool Daemon::addExclusionRoute(const IPAddress& prefix) {
-  if (m_excludedAddrSet.contains(prefix)) {
-    m_excludedAddrSet[prefix]++;
-    return true;
-  }
-  if (!wgutils()->addExclusionRoute(prefix)) {
-    return false;
-  }
-  m_excludedAddrSet[prefix] = 1;
-  return true;
+void Daemon::addExclusionRoutes(const QStringList &addresses)
+{
+    QList<IPAddress> pending;
+    QHash<IPAddress, int> pendingRefs;
+    for (const QString &address : addresses) {
+        IPAddress prefix(address);
+        if (m_excludedAddrSet.contains(prefix)) {
+            m_excludedAddrSet[prefix]++;
+            continue;
+        }
+        if (!pendingRefs.contains(prefix)) {
+            pending.append(prefix);
+        }
+        pendingRefs[prefix]++;
+    }
+    for (const IPAddress &prefix : wgutils()->addExclusionRoutes(pending)) {
+        m_excludedAddrSet[prefix] = pendingRefs.value(prefix);
+    }
 }
 
-bool Daemon::delExclusionRoute(const IPAddress& prefix) {
-  Q_ASSERT(m_excludedAddrSet.contains(prefix));
-  if (m_excludedAddrSet[prefix] > 1) {
-    m_excludedAddrSet[prefix]--;
-    return true;
-  }
-  m_excludedAddrSet.remove(prefix);
-  return wgutils()->deleteExclusionRoute(prefix);
+void Daemon::delExclusionRoutes(const QStringList &addresses)
+{
+    QList<IPAddress> pending;
+    for (const QString &address : addresses) {
+        IPAddress prefix(address);
+        auto i = m_excludedAddrSet.find(prefix);
+        if (i == m_excludedAddrSet.end()) {
+            continue;
+        }
+        if (--i.value() == 0) {
+            m_excludedAddrSet.erase(i);
+            pending.append(prefix);
+        }
+    }
+    wgutils()->deleteExclusionRoutes(pending);
 }
 
 // static
@@ -505,10 +518,7 @@ bool Daemon::deactivate(bool emitSignals) {
   }
 
   // Cleanup routing for excluded addresses.
-  for (auto iterator = m_excludedAddrSet.constBegin();
-       iterator != m_excludedAddrSet.constEnd(); ++iterator) {
-    wgutils()->deleteExclusionRoute(iterator.key());
-  }
+  wgutils()->deleteExclusionRoutes(m_excludedAddrSet.keys());
   m_excludedAddrSet.clear();
 
   m_connections.clear();
@@ -546,9 +556,7 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
       m_connections.value(config.m_hopType).m_config;
 
   // Configure routing for new excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(config.m_excludedAddresses);
 
   // Activate the new peer and its routes.
   if (!wgutils()->updatePeer(config)) {
@@ -563,9 +571,7 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
   }
 
   // Remove routing entries for the old peer.
-  for (const QString& i : lastConfig.m_excludedAddresses) {
-    delExclusionRoute(QHostAddress(i));
-  }
+  delExclusionRoutes(lastConfig.m_excludedAddresses);
   for (const IPAddress& ip : lastConfig.m_allowedIPAddressRanges) {
     if (!config.m_allowedIPAddressRanges.contains(ip)) {
       wgutils()->deleteRoutePrefix(ip);

@@ -11,6 +11,7 @@
 #include <winsock2.h>
 #include <ws2ipdef.h>
 
+#include <QAtomicInt>
 #include <QHash>
 #include <QMap>
 #include <QObject>
@@ -27,10 +28,13 @@ class WindowsRouteMonitor final : public QObject {
   void setDetaultRouteCapture(bool enable);
 
   bool addExclusionRoute(const IPAddress& prefix);
+  QList<IPAddress> addExclusionRoutes(const QList<IPAddress> &prefixes);
   bool deleteExclusionRoute(const IPAddress& prefix);
+  void deleteExclusionRoutes(const QList<IPAddress> &prefixes);
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
   quint64 getLuid() const { return m_luid; }
+  void scheduleRouteChanged();
 
  public slots:
   void routeChanged();
@@ -42,6 +46,7 @@ class WindowsRouteMonitor final : public QObject {
   static QHostAddress prefixToAddress(const IP_ADDRESS_PREFIX* dest);
 
   void flushRouteTable(QHash<IPAddress, MIB_IPFORWARD_ROW2*>& table);
+  void setRouteChangeNotificationsEnabled(bool enable);
   void updateExclusionRoute(MIB_IPFORWARD_ROW2* data, void* table);
   void updateInterfaceMetrics(int family);
   void updateCapturedRoutes(int family);
@@ -57,6 +62,7 @@ class WindowsRouteMonitor final : public QObject {
 
   const quint64 m_luid = 0;
   HANDLE m_routeHandle = INVALID_HANDLE_VALUE;
+  QAtomicInt m_routeChangePending = 0;
 };
 
 #endif /* WINDOWSROUTEMONITOR_H */
