@@ -85,6 +85,7 @@ private slots:
 
     void init()
     {
+        m_fixture.core()->m_serversUiController->setProcessedServerId(QString());
         m_fixture.core()->m_serversModel->updateModel(QVector<ServerDescription>(), QString());
     }
 
