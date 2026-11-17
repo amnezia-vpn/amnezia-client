@@ -53,6 +53,7 @@
         <file>socks5_proxy/Dockerfile</file>
         <file>socks5_proxy/run_container.sh</file>
         <file>socks5_proxy/start.sh</file>
+        <file>update_server_packages.sh</file>
         <file>website_tor/configure_container.sh</file>
         <file>website_tor/Dockerfile</file>
         <file>website_tor/run_container.sh</file>

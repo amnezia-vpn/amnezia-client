@@ -1,6 +1,7 @@
 #include "protocolUtils.h"
 
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QJsonObject>
 #include <QObject>
 
@@ -216,3 +217,10 @@ QString ProtocolUtils::key_proto_config_path(Proto p)
     return protoToString(p) + "_config_path";
 }
 
+QString ProtocolUtils::replaceWireGuardEndpoint(QString nativeConfig, const QString &host, int port)
+{
+    static const QRegularExpression endpointLine(QString(R"(^(\s*%1\s*=\s*).*$)").arg(protocols::wireguard::Endpoint),
+                                                 QRegularExpression::MultilineOption);
+    const QString endpointHost = host.contains(':') ? QString("[%1]").arg(host) : host;
+    return nativeConfig.replace(endpointLine, QString("\\1%1:%2").arg(endpointHost).arg(port));
+}

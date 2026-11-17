@@ -271,6 +271,20 @@ PageType {
                 }
             }
 
+            CascadeSettings {
+                Layout.fillWidth: true
+
+                scroller: smartScroll
+
+                endpoint: AwgConfigModel.clientCascadeEndpoint
+                port: AwgConfigModel.clientCascadePort
+                endpointPlaceholder: AwgConfigModel.clientHostName
+                portPlaceholder: AwgConfigModel.clientPort
+
+                onEndpointEdited: (text) => { AwgConfigModel.clientCascadeEndpoint = text }
+                onPortEdited: (text) => { AwgConfigModel.clientCascadePort = text }
+            }
+
             H2TextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 28

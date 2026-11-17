@@ -1300,6 +1300,43 @@ ErrorCode InstallController::rebootServer(const QString &serverId)
     return sshSession.runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
+ErrorCode InstallController::updateServerPackages(const QString &serverId)
+{
+    const auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
+    SshSession sshSession;
+
+    ErrorCode errorCode = isServerDpkgBusy(credentials, sshSession);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    errorCode = sshSession.runScript(credentials, amnezia::scriptData(SharedScriptType::update_server_packages),
+                                     cbReadStdOut, cbReadStdOut);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (!stdOut.contains("Packages update finished")) {
+        qDebug().noquote() << "InstallController::updateServerPackages" << stdOut;
+        return ErrorCode::ServerPacketManagerError;
+    }
+
+    return ErrorCode::NoError;
+}
+
 ErrorCode InstallController::removeAllContainers(const QString &serverId)
 {
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
