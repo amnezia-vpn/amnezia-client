@@ -24,7 +24,7 @@ endif()
 
 # -- signing
 if(NOT CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER)
-    set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.AmneziaVPN" CACHE STRING "macOS app provisioning profile specifier for release")
+    set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.amneziaVPN" CACHE STRING "macOS app provisioning profile specifier for release")
 endif()
 if(NOT CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER_DEBUG)
     set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER_DEBUG "dev macos.org.amnezia.AmneziaVPN" CACHE STRING "macOS app provisioning profile specifier for debug")

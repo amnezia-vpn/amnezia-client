@@ -833,11 +833,6 @@ QString XrayConfigModel::portDefault()
     return QString::fromLatin1(protocols::xray::defaultPort);
 }
 
-QString XrayConfigModel::sniDefault()
-{
-    return QString::fromLatin1(protocols::xray::defaultSni);
-}
-
 QString XrayConfigModel::xhttpHostDefault()
 {
     return QString::fromLatin1(protocols::xray::defaultXhttpHost);
@@ -933,10 +928,7 @@ bool XrayConfigModel::isValidHost(const QString &host)
 bool XrayConfigModel::isValidSni(const QString &sni)
 {
     const QString t = sni.trimmed();
-    if (t.isEmpty()) {
-        return true;
-    }
-    if (t.contains(QLatin1Char('*'))) {
+    if (t.isEmpty() || t.contains(QLatin1Char('*'))) {
         return false;
     }
     return isValidSingleHost(t);

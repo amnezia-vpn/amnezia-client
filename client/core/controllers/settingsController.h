@@ -76,9 +76,10 @@ public:
     QString nextAvailableServerName() const;
     bool isDevModeEnabled() const;
 
-    void resetGatewayEndpoint();
-    void setGatewayEndpoint(const QString &endpoint);
-    QString getGatewayEndpoint() const;
+    QString devGatewayEndpoint() const;
+    QString devGatewayProxyStorages() const;
+    QString devGatewayPublicKey() const;
+    void setDevGatewayConfig(const QString &endpoint, const QString &proxyStorages, const QString &publicKey);
     bool isDevGatewayEnv() const;
     void toggleDevGatewayEnv(bool enabled);
 

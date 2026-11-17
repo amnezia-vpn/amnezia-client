@@ -156,6 +156,12 @@ message(${QtCore_location})
 
 get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
 
+set(MACDEPLOYQT_ARGS -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR})
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.11)
+    list(APPEND MACDEPLOYQT_ARGS -no-codesign)
+endif()
+
+# $<TARGET_BUNDLE_DIR> points to the build tree; xcodebuild archive builds the bundle elsewhere
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:${PROJECT}> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR} -no-codesign
+    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt \${TARGET_BUILD_DIR}/\${WRAPPER_NAME} ${MACDEPLOYQT_ARGS}
 )

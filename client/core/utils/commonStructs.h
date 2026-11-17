@@ -39,6 +39,15 @@ namespace amnezia
         QString secondaryDns;
     };
 
+    struct GatewayEnvironment
+    {
+        QString endpoint;
+        QByteArray publicKey;
+        QString primaryProxyStorages;
+        QString fallbackProxyStorages;
+        bool isDev = false;
+    };
+
     struct SplitTunnelingSettings
     {
         bool isSitesSplitTunnelingEnabled;

@@ -77,6 +77,20 @@ PageType {
 
                 checkEmptyText: true
             }
+
+            CascadeSettings {
+                Layout.fillWidth: true
+
+                warningVisible: true
+
+                endpoint: WireGuardConfigModel.cascadeEndpoint
+                port: WireGuardConfigModel.cascadePort
+                endpointPlaceholder: ServersUiController.serverHostName(ServersUiController.processedServerId)
+                portPlaceholder: WireGuardConfigModel.port
+
+                onEndpointEdited: (text) => { WireGuardConfigModel.cascadeEndpoint = text }
+                onPortEdited: (text) => { WireGuardConfigModel.cascadePort = text }
+            }
         }
     }
 

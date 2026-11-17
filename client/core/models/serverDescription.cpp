@@ -161,12 +161,15 @@ ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /
     row.hasWriteAccess = false;
 
     row.serverName = server.displayName;
-    row.baseDescription = server.apiConfig.serverCountryCode.isEmpty() ? server.description : server.apiConfig.serverCountryName;
+    const bool showServerCountry = !server.isFree() && !server.apiConfig.serverCountryCode.isEmpty();
+    row.baseDescription = showServerCountry ? server.apiConfig.serverCountryName : server.description;
 
-    row.isCountrySelectionAvailable = !server.apiConfig.availableCountries.isEmpty();
+    row.isCountrySelectionAvailable = !server.isFree() && !server.apiConfig.availableCountries.isEmpty();
     row.apiAvailableCountries = server.apiConfig.availableCountries;
-    row.apiServerCountryCode = server.apiConfig.serverCountryCode;
-    row.apiServerCountryCodeL10n = server.apiConfig.serverCountryCodeL10n;
+    if (showServerCountry) {
+        row.apiServerCountryCode = server.apiConfig.serverCountryCode;
+        row.apiServerCountryCodeL10n = server.apiConfig.serverCountryCodeL10n;
+    }
 
     row.isAdVisible = server.apiConfig.serviceInfo.isAdVisible;
     row.adHeader = server.apiConfig.serviceInfo.adHeader;
