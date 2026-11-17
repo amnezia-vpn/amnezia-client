@@ -1722,6 +1722,14 @@ jobs:
         path: dist
         merge-multiple: true
 
+    - name: 'Compute SHA-256 checksums'
+      working-directory: dist
+      run: |
+        for f in *; do
+          sha256sum "$f" > "$f.sha256"
+        done
+        cat *.sha256
+
     - name: 'Publish pre-release'
       env:
         GH_TOKEN: ${{ github.token }}

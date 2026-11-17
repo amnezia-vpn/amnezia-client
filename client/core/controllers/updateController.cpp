@@ -1,6 +1,5 @@
 #include "updateController.h"
 
-#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDesktopServices>
 #include <QDir>
@@ -53,9 +52,6 @@ namespace
         return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
     }
 #elif defined(Q_OS_ANDROID)
-    const QLatin1String kGithubReleaseApiUrl("https://api.github.com/repos/amnezia-vpn/amnezia-client/releases/tags/%1");
-    const QLatin1String kGithubSha256DigestPrefix("sha256:");
-
     #if defined(Q_PROCESSOR_ARM_64)
     const QLatin1String kAndroidAbi("arm64-v8a");
     #elif defined(Q_PROCESSOR_ARM_32)
@@ -78,6 +74,11 @@ namespace
     {
         return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/update/AmneziaVPN.apk";
     }
+
+    bool isSha256Hex(const QByteArray &hash)
+    {
+        return hash.size() == 64 && QByteArray::fromHex(hash).toHex() == hash;
+    }
 #elif defined(Q_OS_LINUX)
     QString installerRemoteFileName(const QString &version)
     {
@@ -96,7 +97,6 @@ namespace
         QNetworkRequest request;
         request.setTransferTimeout(30000);
         request.setUrl(QUrl(url));
-        request.setHeader(QNetworkRequest::UserAgentHeader, QCoreApplication::applicationName());
         return amnApp->networkManager()->get(request);
     }
 #endif
@@ -241,6 +241,14 @@ void UpdateController::checkForUpdates()
                 if (m_downloadBaseUrl.endsWith('/')) {
                     m_downloadBaseUrl.chop(1);
                 }
+#if defined(Q_OS_ANDROID)
+                m_installerSha256 = gatewayData.value(apiDefs::key::checksums)
+                                            .toObject()
+                                            .value(installerRemoteFileName(m_version))
+                                            .toString()
+                                            .toLower()
+                                            .toLatin1();
+#endif
 
                 if (m_version.isEmpty()) {
                     logger.error() << "Update response has no version, ignoring";
@@ -281,11 +289,11 @@ void UpdateController::startUpdate()
 
 QString UpdateController::composeDownloadUrl() const
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_downloadBaseUrl.isEmpty() || m_version.isEmpty()) {
         return QString();
     }
-    return m_downloadBaseUrl + "/" + installerRemoteFileName(m_version);
+    return m_downloadBaseUrl + "/" + QString::fromLatin1(QUrl::toPercentEncoding(installerRemoteFileName(m_version)));
 #else
     return QString();
 #endif
@@ -293,51 +301,7 @@ QString UpdateController::composeDownloadUrl() const
 
 void UpdateController::downloadInstaller()
 {
-#if defined(Q_OS_ANDROID)
-    if (m_updateState == UpdateState::State::Downloading) {
-        return;
-    }
-
-    setUpdateState(UpdateState::State::Downloading);
-
-    QNetworkReply *reply = requestDownload(QString(kGithubReleaseApiUrl).arg(m_version));
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        reply->deleteLater();
-
-        if (reply->error() != QNetworkReply::NoError) {
-            logger.error() << "Release info request failed, network error:" << static_cast<int>(reply->error())
-                           << reply->errorString();
-            logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            setUpdateState(UpdateState::State::DownloadError);
-            return;
-        }
-
-        const QString assetName = installerRemoteFileName(m_version);
-        const QJsonArray assets = QJsonDocument::fromJson(reply->readAll()).object().value("assets").toArray();
-        for (const QJsonValue &value : assets) {
-            const QJsonObject asset = value.toObject();
-            if (asset.value("name").toString() != assetName) {
-                continue;
-            }
-
-            const QString digest = asset.value("digest").toString();
-            const QString downloadUrl = asset.value("browser_download_url").toString();
-            if (!digest.startsWith(kGithubSha256DigestPrefix) || digest.size() != kGithubSha256DigestPrefix.size() + 64
-                || downloadUrl.isEmpty()) {
-                logger.error() << "Release asset has no sha256 digest or download URL:" << assetName;
-                setUpdateState(UpdateState::State::DownloadError);
-                return;
-            }
-
-            downloadInstallerFile(downloadUrl, digest.mid(kGithubSha256DigestPrefix.size()).toLatin1().toLower());
-            return;
-        }
-
-        logger.error() << "Release has no asset" << assetName;
-        setUpdateState(UpdateState::State::DownloadError);
-    });
-#elif !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_updateState == UpdateState::State::Downloading) {
         return;
     }
@@ -349,9 +313,16 @@ void UpdateController::downloadInstaller()
         return;
     }
 
-    setUpdateState(UpdateState::State::Downloading);
+    #if defined(Q_OS_ANDROID)
+    if (!isSha256Hex(m_installerSha256)) {
+        logger.error() << "Update response has no valid checksum for the installer";
+        setUpdateState(UpdateState::State::DownloadError);
+        return;
+    }
+    #endif
 
-    downloadInstallerFile(downloadUrl, QByteArray());
+    setUpdateState(UpdateState::State::Downloading);
+    downloadInstallerFile(downloadUrl, m_installerSha256);
 #endif
 }
 

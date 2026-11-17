@@ -72,6 +72,7 @@ private:
     QStringList m_improvements;
     QStringList m_bugFixes;
     QString m_downloadBaseUrl;
+    QByteArray m_installerSha256;
 
     UpdateState::State m_updateState = UpdateState::State::Idle;
     bool m_updateCheckRunning = false;
