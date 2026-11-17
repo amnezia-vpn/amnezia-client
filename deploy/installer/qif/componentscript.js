@@ -9,6 +9,11 @@ function serviceName()
     return (appName() + "-service")
 }
 
+function tunnelServiceName()
+{
+    return ("AmneziaWGTunnel$" + appName())
+}
+
 function appExecutableFileName()
 {
     if (runningOnWindows()) {
@@ -41,13 +46,54 @@ function vcRuntimeIsInstalled()
 function Component()
 {
     component.loaded.connect(this, Component.prototype.componentLoaded);
+    installer.installationStarted.connect(this, Component.prototype.installationStarted);
     installer.installationFinished.connect(this, Component.prototype.installationFinishedPageIsShown);
     installer.finishButtonClicked.connect(this, Component.prototype.installationFinished);
 }
 
+Component.prototype.installationStarted = function()
+{
+    if (!installer.isInstaller() || !runningOnWindows()) {
+        return;
+    }
+
+    if (!installer.gainAdminRights()) {
+        console.log("Fatal error! Cannot get admin rights!")
+        return;
+    }
+
+    var commands = ["sc stop " + tunnelServiceName(),
+                    "sc delete " + tunnelServiceName(),
+                    "sc stop " + serviceName(),
+                    "taskkill /F /IM " + serviceName() + ".exe",
+                    "sc delete " + serviceName(),
+                    "exit 0"];
+
+    var status = installer.execute("cmd", ["/c", commands.join(" & ")]);
+    console.log(("Removed installed services with status: %1").arg(status))
+}
+
 Component.prototype.componentLoaded = function ()
 {
+    if (!installer.isInstaller() || !runningOnWindows()) {
+        return;
+    }
 
+    var pageTitle = installer.value("ClosingApplicationsPageTitle");
+    if (pageTitle === "") {
+        return;
+    }
+
+    var widget = component.userInterface("ClosingApplicationsWidget");
+    if (widget === null) {
+        return;
+    }
+
+    widget.windowTitle = pageTitle;
+    widget.descriptionLabel.text = installer.value("ClosingApplicationsPageDescription");
+    widget.applicationsBrowser.html = appName();
+
+    installer.addWizardPage(component, "ClosingApplicationsWidget", QInstaller.ReadyForInstallation);
 }
 
 Component.prototype.installationFinishedPageIsShown = function()
