@@ -1,15 +1,59 @@
 #include <QTest>
 #include <QQuickItem>
 #include <QSignalSpy>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
 
 #include "core/controllers/selfhosted/importController.h"
 #include "core/models/serverDescription.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "ui/models/serversModel.h"
 #include "ui/controllers/serversUiController.h"
 
 #include "pagesUiTestFixture.h"
 
 using namespace amnezia;
+
+namespace
+{
+
+    QJsonObject createAwg2Config()
+    {
+        QJsonObject clientConfig;
+        clientConfig[configKey::clientPrivKey] = "test_client_private_key";
+        clientConfig[configKey::clientPubKey] = "test_client_public_key";
+        clientConfig[configKey::serverPubKey] = "test_server_public_key";
+        clientConfig[configKey::pskKey] = "test_psk_key";
+        clientConfig[configKey::clientIp] = "10.8.1.2";
+        clientConfig[configKey::allowedIps] = QJsonArray::fromStringList({ "0.0.0.0/0" });
+
+        QJsonObject awgConfig;
+        awgConfig[configKey::lastConfig] = QString(QJsonDocument(clientConfig).toJson());
+        awgConfig[configKey::port] = protocols::awg::defaultPort;
+        awgConfig[configKey::transportProto] = "udp";
+        awgConfig[configKey::protocolVersion] = protocols::awg::awgV2;
+        awgConfig[configKey::subnetAddress] = protocols::wireguard::defaultSubnetAddress;
+        awgConfig[configKey::isThirdPartyConfig] = true;
+
+        QJsonObject container;
+        container[configKey::container] = "amnezia-awg";
+        container[configKey::awg] = awgConfig;
+
+        QJsonArray containers;
+        containers.append(container);
+
+        QJsonObject config;
+        config[configKey::containers] = containers;
+        config[configKey::defaultContainer] = "amnezia-awg";
+        config[configKey::description] = "AWG2 Test Server";
+        config[configKey::hostName] = "test.example.com";
+
+        return config;
+    }
+
+} // namespace
 
 class TestPageSettingsServersList : public QObject
 {
