@@ -5,6 +5,7 @@
 #include <QTest>
 
 #include "ui/models/containerProps.h"
+#include "ui/models/installedAppsModel.h"
 #include "ui/utils/pageEnum.h"
 #include "core/utils/protocolEnum.h"
 
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", &containerProps);
     qmlRegisterSingletonType(QUrl(QStringLiteral("qrc:/ui/qml/Filters/ContainersModelFilters.qml")), "ContainersModelFilters", 1, 0, "ContainersModelFilters");
+    qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
 
     int result = 0;
 
