@@ -85,7 +85,6 @@ private slots:
 
     void init()
     {
-        m_fixture.core()->m_serversUiController->setProcessedServerId(QString());
         m_fixture.core()->m_serversModel->updateModel(QVector<ServerDescription>(), QString());
     }
 
@@ -171,8 +170,10 @@ void clickingServerSetsProcessedServerId()
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsServersList")));
 
         QQuickItem *serverItem = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("AWG2 Test Server"));
-
         QVERIFY2(serverItem, "Server item was not found");
+
+        m_fixture.core()->m_serversUiController->setProcessedServerId(QString());
+
         QCOMPARE(m_fixture.core()->m_serversUiController->getProcessedServerId(), QString());
 
         m_fixture.click(serverItem);
