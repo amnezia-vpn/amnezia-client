@@ -127,10 +127,19 @@ private slots:
     void opensAppSplitTunnelingSettings()
     {
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsConnection")));
+        QVERIFY(m_fixture.page());
+
+        const QVariant appSplitTunnelingEnabled = m_fixture.page()->property("isAppSplitTinnelingEnabled");
+
+        QVERIFY2(appSplitTunnelingEnabled.isValid(), "Could not read isAppSplitTinnelingEnabled property");
+
+        if (!appSplitTunnelingEnabled.toBool()) {
+            QSKIP("App-based split tunneling is not available on this platform");
+        }
 
         QQuickItem *appSplitTunnelingButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("App-based split tunneling"));
 
-        QVERIFY(appSplitTunnelingButton);
+        QVERIFY2(appSplitTunnelingButton, "App-based split tunneling button was not found");
         QVERIFY(verifyNavigation(appSplitTunnelingButton, PageLoader::PageEnum::PageSettingsAppSplitTunneling));
     }
 
