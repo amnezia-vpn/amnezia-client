@@ -14,7 +14,6 @@ import "Pages2"
 
 Window  {
     id: root
-    objectName: "mainWindow"
 
     Connections {
         target: Qt.application
@@ -22,7 +21,6 @@ Window  {
             if (Qt.platform.os === "android") {
                 if (Qt.application.state === Qt.ApplicationActive) {
                     root.visible = true
-                    refreshTimer.restart()
                 }
             }
         }
@@ -39,17 +37,6 @@ Window  {
         }
         function onActivityResumed() {
             if (Qt.platform.os === "android") root.visible = true
-        }
-    }
-
-    Timer {
-        id: refreshTimer
-        interval: 150
-        repeat: false
-        onTriggered: {
-            if (Qt.platform.os === "android" && PageController.isEdgeToEdgeEnabled()) {
-                console.log("QML: Application resumed with edge-to-edge")
-            }
         }
     }
 
@@ -70,12 +57,6 @@ Window  {
         PageController.closeWindow()
     }
 
-    onActiveFocusItemChanged: {
-        if (activeFocusItem === contentItem) {
-            pageStart.forceActiveFocus()
-        }
-    }
-
     onSceneGraphError: function(error, message) {
         // Prevent qFatal crash on Android when EGL context is lost
         console.warn("Scene graph error:", error, message)
@@ -85,12 +66,10 @@ Window  {
 
     Loader {
         active: Qt.platform.os === "android"
-        source: Qt.platform.os === "android" ? "Components/GamepadLoader.qml" : ""
+        source: "Components/GamepadLoader.qml"
     }
 
     Connections {
-        objectName: "pageControllerConnections"
-
         target: PageController
 
         function onRaiseMainWindow() {
@@ -127,8 +106,6 @@ Window  {
     }
 
     Connections {
-        objectName: "settingsControllerConnections"
-
         target: SettingsController
 
         function onChangeSettingsFinished(finishedMessage) {
@@ -138,7 +115,6 @@ Window  {
 
     PageStart {
         id: pageStart
-        objectName: "pageStart"
         width: root.width
         height: root.height
 
@@ -147,7 +123,6 @@ Window  {
 
     SnackbarType {
         id: popupNotificationMessage
-        objectName: "popupNotificationMessage"
 
         bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
@@ -156,33 +131,25 @@ Window  {
 
     SnackbarType {
         id: popupErrorMessage
-        objectName: "popupErrorMessage"
 
         bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        variant: SnackbarType.Destructive
         closable: true
         duration: 0
     }
 
-    Item {
-        objectName: "captchaDialogItem"
+    CaptchaDialogType {
+        id: captchaDialog
 
-        anchors.fill: parent
+        onCaptchaSolved: function(captchaId, solution) {
+            PageController.showBusyIndicator(true)
+            Qt.callLater(function() {
+                SubscriptionUiController.onCaptchaSolved(captchaId, solution)
+            })
+        }
 
-        CaptchaDialogType {
-            id: captchaDialog
-
-            onCaptchaSolved: function(captchaId, solution) {
-                PageController.showBusyIndicator(true)
-                Qt.callLater(function() {
-                    SubscriptionUiController.onCaptchaSolved(captchaId, solution)
-                })
-            }
-
-            onRefreshCaptchaRequested: function() {
-                SubscriptionUiController.onRefreshCaptchaRequested()
-            }
+        onRefreshCaptchaRequested: function() {
+            SubscriptionUiController.onRefreshCaptchaRequested()
         }
     }
 
@@ -299,18 +266,13 @@ Window  {
         }
     }
 
-    Item {
-        objectName: "busyIndicatorItem"
+    LoadingOverlayType {
+        id: busyIndicator
 
-        anchors.fill: parent
+        anchors.centerIn: parent
+        z: 1
 
-        LoadingOverlayType {
-            id: busyIndicator
-            anchors.centerIn: parent
-            z: 1
-
-            blurSource: pageStart
-        }
+        blurSource: pageStart
     }
 
     function showUnsupportedConnectDrawer() {
@@ -333,6 +295,14 @@ Window  {
         }
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
+
+    Connections {
+        target: Dialogs
+
+        function onQuestionRequested(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
+            root.showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
     }
 
     function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {

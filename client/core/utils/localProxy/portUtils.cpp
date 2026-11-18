@@ -21,12 +21,12 @@ bool portUtils::isPortAvailable(int port)
     return success;
 }
 
-bool portUtils::waitForPort(int port, int timeoutMs)
+bool portUtils::waitForPort(int port, int timeoutMs, const PortCheck &isAvailable)
 {
     QElapsedTimer timer;
     timer.start();
 
-    while (!isPortAvailable(port)) {
+    while (!isAvailable(port)) {
         if (timer.elapsed() >= timeoutMs) {
             return false;
         }
@@ -36,13 +36,13 @@ bool portUtils::waitForPort(int port, int timeoutMs)
     return true;
 }
 
-std::optional<int> portUtils::findFirstAvailablePort(int startPort, int endPort)
+std::optional<int> portUtils::findFirstAvailablePort(int startPort, int endPort, const PortCheck &isAvailable)
 {
     startPort = qMax(startPort, localProxy::proxyPortMin);
     endPort = qMin(endPort, localProxy::proxyPortMax);
 
     for (int port = startPort; port <= endPort; ++port) {
-        if (isPortAvailable(port)) {
+        if (isAvailable(port)) {
             return port;
         }
     }

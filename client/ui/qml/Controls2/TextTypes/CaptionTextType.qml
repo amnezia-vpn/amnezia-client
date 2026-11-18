@@ -7,12 +7,19 @@ Text {
 
     readonly property real halfLeading: (root.lineHeight - fontMetrics.height) / 2
     readonly property real overflow: Math.max(0, Math.ceil(fontMetrics.height) - root.lineHeight)
+    readonly property real alignmentShift: {
+        const extra = Math.ceil(fontMetrics.height) - root.lineHeight - root.overflow
+        if (root.verticalAlignment === Text.AlignVCenter) {
+            return extra / 2
+        }
+        return root.verticalAlignment === Text.AlignBottom ? extra : 0
+    }
 
     lineHeight: 14 + LanguageUiController.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
-    topPadding: root.halfLeading
-    bottomPadding: -root.halfLeading - root.overflow
+    topPadding: root.halfLeading + root.alignmentShift
+    bottomPadding: -root.halfLeading - root.alignmentShift - root.overflow
 
     color: AmneziaStyle.color.textTertiary
     font.pixelSize: 12

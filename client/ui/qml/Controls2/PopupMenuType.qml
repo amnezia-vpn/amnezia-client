@@ -21,6 +21,15 @@ Popup {
         root.open()
     }
 
+    function openBelow(anchorItem) {
+        root.openerItem = anchorItem
+        root.openFocusReason = anchorItem.visualFocus ? Qt.TabFocusReason : Qt.OtherFocusReason
+        const point = anchorItem.mapToItem(root.parent, anchorItem.width, anchorItem.height)
+        root.x = Math.max(16, Math.round(point.x - root.width))
+        root.y = Math.round(point.y + 4)
+        root.open()
+    }
+
     parent: Overlay.overlay
 
     width: Math.min(301, parent ? parent.width - 32 : 301)

@@ -122,13 +122,24 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift
 )
 
-set_source_files_properties(
-    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
-    PROPERTIES MACOSX_PACKAGE_LOCATION Resources
-)
+select_macos_app_icon(${CLIENT_MACOS_APP_ICON_PATH} ${CLIENT_MACOS_APP_ICNS_PATH} USE_ICON_COMPOSER)
+
+if(USE_ICON_COMPOSER)
+    set(APP_ICON_SOURCE ${CLIENT_MACOS_APP_ICON_PATH})
+    set_source_files_properties(
+        ${APP_ICON_SOURCE}
+        PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources
+        XCODE_LAST_KNOWN_FILE_TYPE folder.iconcomposer.icon
+    )
+else()
+    set(APP_ICON_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/appicon/AppIcon.icns)
+    configure_file(${CLIENT_MACOS_APP_ICNS_PATH} ${APP_ICON_SOURCE} COPYONLY)
+    set_source_files_properties(${APP_ICON_SOURCE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
 
 target_sources(${PROJECT} PRIVATE
-    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
+    ${APP_ICON_SOURCE}
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
@@ -145,6 +156,12 @@ message(${QtCore_location})
 
 get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
 
+set(MACDEPLOYQT_ARGS -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR})
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.11)
+    list(APPEND MACDEPLOYQT_ARGS -no-codesign)
+endif()
+
+# $<TARGET_BUNDLE_DIR> points to the build tree; xcodebuild archive builds the bundle elsewhere
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:${PROJECT}> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR} -no-codesign
+    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt \${TARGET_BUILD_DIR}/\${WRAPPER_NAME} ${MACDEPLOYQT_ARGS}
 )

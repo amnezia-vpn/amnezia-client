@@ -25,13 +25,13 @@ execute_process(
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
-add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
+add_definitions(-DPROD_AGW_PUBLIC_KEY_B64="$ENV{PROD_AGW_PUBLIC_KEY_B64}")
 add_definitions(-DPROD_S3_ENDPOINT="$ENV{PROD_S3_ENDPOINT}")
 add_definitions(-DFALLBACK_S3_ENDPOINT="$ENV{FALLBACK_S3_ENDPOINT}")
 
-add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")
-add_definitions(-DDEV_AGW_ENDPOINT="$ENV{DEV_AGW_ENDPOINT}")
-add_definitions(-DDEV_S3_ENDPOINT="$ENV{DEV_S3_ENDPOINT}")
+add_definitions(-DSANDBOX_AGW_PUBLIC_KEY_B64="$ENV{SANDBOX_AGW_PUBLIC_KEY_B64}")
+add_definitions(-DSANDBOX_AGW_ENDPOINT="$ENV{SANDBOX_AGW_ENDPOINT}")
+add_definitions(-DSANDBOX_S3_ENDPOINT="$ENV{SANDBOX_S3_ENDPOINT}")
 
 add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
@@ -104,6 +104,7 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ko_KR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fr_FR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_th_TH.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_id_ID.ts
     )
 endif()
 
@@ -224,6 +225,10 @@ endif()
 
 if(ANDROID)
     include(cmake/android.cmake)
+endif()
+
+if(APPLE)
+    include(cmake/appleAppIcon.cmake)
 endif()
 
 if(IOS)

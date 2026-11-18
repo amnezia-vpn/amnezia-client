@@ -14,112 +14,32 @@ namespace {
     const QRegularExpression kHex32Re(QStringLiteral("^[0-9a-fA-F]{32}$"));
 }
 
-TProxyConfigModel::TProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {}
+TProxyConfigModel::TProxyConfigModel(QObject *parent) : QObject(parent) {}
 
-int TProxyConfigModel::rowCount(const QModelIndex &parent) const
+QString TProxyConfigModel::tgLink() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.tgLink;
 }
 
-bool TProxyConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+QString TProxyConfigModel::tmeLink() const
 {
-    if (!index.isValid() || index.row() != 0) {
-        return false;
-    }
-
-    switch (role) {
-    case Roles::PortRole:
-        m_protocolConfig.port = value.toString();
-        break;
-    case Roles::HttpPortRole:
-        m_protocolConfig.httpPort = value.toString();
-        break;
-    case Roles::SecretRole:
-        m_protocolConfig.secret = value.toString();
-        break;
-    case Roles::HostnameRole: {
-        const QString h = sanitizeHostnameFieldText(value.toString());
-        if (!isValidHostname(h)) {
-            return false;
-        }
-        m_protocolConfig.hostname = h;
-        break;
-    }
-    case Roles::AcmeEmailRole: {
-        const QString e = sanitizeAcmeEmailFieldText(value.toString());
-        if (!isValidAcmeEmail(e)) {
-            return false;
-        }
-        m_protocolConfig.acmeEmail = e;
-        break;
-    }
-    case Roles::CarrierModeRole: {
-        const QString m = value.toString();
-        if (!isValidCarrierMode(m)) {
-            return false;
-        }
-        m_protocolConfig.carrierMode = m;
-        break;
-    }
-    case Roles::WorkersRole:
-        m_protocolConfig.workers = sanitizeWorkersFieldText(value.toString());
-        break;
-    case Roles::IsEnabledRole:
-        m_protocolConfig.isEnabled = value.toBool();
-        break;
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList{role});
-    return true;
+    return m_protocolConfig.tmeLink;
 }
 
-QVariant TProxyConfigModel::data(const QModelIndex &index, int role) const
+bool TProxyConfigModel::isEnabled() const
 {
-    if (!index.isValid() || index.row() != 0) {
-        return QVariant();
-    }
-
-    switch (role) {
-    case Roles::PortRole:
-        return m_protocolConfig.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : m_protocolConfig.port;
-    case Roles::HttpPortRole:
-        return m_protocolConfig.httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : m_protocolConfig.httpPort;
-    case Roles::SecretRole:
-        return m_protocolConfig.secret;
-    case Roles::HostnameRole:
-        return m_protocolConfig.hostname;
-    case Roles::AcmeEmailRole:
-        return m_protocolConfig.acmeEmail;
-    case Roles::CarrierModeRole:
-        return m_protocolConfig.carrierMode.isEmpty() ? QString(protocols::tProxy::carrierModeHttps)
-                                                      : m_protocolConfig.carrierMode;
-    case Roles::WorkersRole:
-        return m_protocolConfig.workers.isEmpty() ? QString(protocols::tProxy::defaultWorkers)
-                                                  : m_protocolConfig.workers;
-    case Roles::TgLinkRole:
-        return m_protocolConfig.tgLink;
-    case Roles::TmeLinkRole:
-        return m_protocolConfig.tmeLink;
-    case Roles::IsEnabledRole:
-        return m_protocolConfig.isEnabled;
-    }
-    return QVariant();
+    return m_protocolConfig.isEnabled;
 }
 
 void TProxyConfigModel::updateModel(DockerContainer container, const TProxyProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     m_protocolConfig = protocolConfig;
-    endResetModel();
+    emit changed();
 }
 
 void TProxyConfigModel::updateModel(const QJsonObject &config)
 {
-    beginResetModel();
     m_fullConfig = config;
     m_protocolConfig = TProxyProtocolConfig::fromJson(config.value(configKey::tproxy).toObject());
     if (m_protocolConfig.port.isEmpty()) {
@@ -134,7 +54,7 @@ void TProxyConfigModel::updateModel(const QJsonObject &config)
     if (m_protocolConfig.workers.isEmpty()) {
         m_protocolConfig.workers = protocols::tProxy::defaultWorkers;
     }
-    endResetModel();
+    emit changed();
 }
 
 QJsonObject TProxyConfigModel::getConfig()
@@ -156,15 +76,16 @@ void TProxyConfigModel::generateSecret()
         secret += QStringLiteral("%1").arg(byte, 2, 16, QChar('0'));
     }
     m_protocolConfig.secret = secret;
-    emit dataChanged(index(0), index(0), QList<int>{SecretRole});
+    emit changed();
 }
 
 void TProxyConfigModel::setSecret(const QString &secret)
 {
-    if (secret.isEmpty()) {
+    if (secret.isEmpty() || m_protocolConfig.secret == secret) {
         return;
     }
-    setData(index(0), secret, SecretRole);
+    m_protocolConfig.secret = secret;
+    emit changed();
 }
 
 bool TProxyConfigModel::validateAndSetSecret(const QString &rawSecret)
@@ -172,42 +93,79 @@ bool TProxyConfigModel::validateAndSetSecret(const QString &rawSecret)
     if (!kHex32Re.match(rawSecret).hasMatch()) {
         return false;
     }
-    return setData(index(0), rawSecret, SecretRole);
+    if (m_protocolConfig.secret != rawSecret) {
+        m_protocolConfig.secret = rawSecret;
+        emit changed();
+    }
+    return true;
 }
 
 void TProxyConfigModel::setPort(const QString &port)
 {
-    setData(index(0), sanitizePortFieldText(port), PortRole);
+    const QString p = sanitizePortFieldText(port);
+    if (m_protocolConfig.port == p) {
+        return;
+    }
+    m_protocolConfig.port = p;
+    emit changed();
 }
 
 void TProxyConfigModel::setHttpPort(const QString &port)
 {
-    setData(index(0), sanitizePortFieldText(port), HttpPortRole);
+    const QString p = sanitizePortFieldText(port);
+    if (m_protocolConfig.httpPort == p) {
+        return;
+    }
+    m_protocolConfig.httpPort = p;
+    emit changed();
 }
 
 void TProxyConfigModel::setHostname(const QString &hostname)
 {
-    setData(index(0), hostname, HostnameRole);
+    const QString h = sanitizeHostnameFieldText(hostname);
+    if (!isValidHostname(h) || m_protocolConfig.hostname == h) {
+        return;
+    }
+    m_protocolConfig.hostname = h;
+    emit changed();
 }
 
 void TProxyConfigModel::setAcmeEmail(const QString &email)
 {
-    setData(index(0), email, AcmeEmailRole);
+    const QString e = sanitizeAcmeEmailFieldText(email);
+    if (!isValidAcmeEmail(e) || m_protocolConfig.acmeEmail == e) {
+        return;
+    }
+    m_protocolConfig.acmeEmail = e;
+    emit changed();
 }
 
 void TProxyConfigModel::setCarrierMode(const QString &mode)
 {
-    setData(index(0), mode, CarrierModeRole);
+    if (!isValidCarrierMode(mode) || m_protocolConfig.carrierMode == mode) {
+        return;
+    }
+    m_protocolConfig.carrierMode = mode;
+    emit changed();
 }
 
 void TProxyConfigModel::setWorkers(const QString &workers)
 {
-    setData(index(0), workers, WorkersRole);
+    const QString w = sanitizeWorkersFieldText(workers);
+    if (m_protocolConfig.workers == w) {
+        return;
+    }
+    m_protocolConfig.workers = w;
+    emit changed();
 }
 
 void TProxyConfigModel::setEnabled(bool enabled)
 {
-    setData(index(0), enabled, IsEnabledRole);
+    if (m_protocolConfig.isEnabled == enabled) {
+        return;
+    }
+    m_protocolConfig.isEnabled = enabled;
+    emit changed();
 }
 
 QString TProxyConfigModel::getHostname() const
@@ -403,20 +361,4 @@ QString TProxyConfigModel::sanitizePortFieldText(const QString &input) const
         }
     }
     return out;
-}
-
-QHash<int, QByteArray> TProxyConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-    roles[PortRole] = "port";
-    roles[HttpPortRole] = "httpPort";
-    roles[SecretRole] = "secret";
-    roles[HostnameRole] = "hostname";
-    roles[AcmeEmailRole] = "acmeEmail";
-    roles[CarrierModeRole] = "carrierMode";
-    roles[WorkersRole] = "workers";
-    roles[TgLinkRole] = "tgLink";
-    roles[TmeLinkRole] = "tmeLink";
-    roles[IsEnabledRole] = "isEnabled";
-    return roles;
 }

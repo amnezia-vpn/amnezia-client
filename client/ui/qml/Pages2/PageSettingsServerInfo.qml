@@ -21,17 +21,34 @@ PageType {
     readonly property int pageSettingsServerServices: 1
     readonly property int pageSettingsServerData: 2
 
+    readonly property var tabTitles: [qsTr("Protocols"), qsTr("Services"), qsTr("Management")]
+    readonly property var availableTabs: {
+        const tabs = []
+        if (protocolsPage.installedProtocolsCount > 0) {
+            tabs.push(root.pageSettingsServerProtocols)
+        }
+        if (servicesPage.installedServicesCount > 0) {
+            tabs.push(root.pageSettingsServerServices)
+        }
+        tabs.push(root.pageSettingsServerData)
+        return tabs
+    }
+
+    property int currentTab: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+                              && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
+                                 root.pageSettingsServerData : root.pageSettingsServerProtocols
+
     property var processedServer
 
     Connections {
         target: PageController
 
         function onGoToPageSettingsServerServices() {
-            tabBar.setCurrentIndex(root.pageSettingsServerServices)
+            root.currentTab = root.pageSettingsServerServices
         }
-        
+
         function onGoToPageSettingsServerManagement() {
-            tabBar.setCurrentIndex(root.pageSettingsServerData)
+            root.currentTab = root.pageSettingsServerData
         }
     }
 
@@ -53,7 +70,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -69,15 +85,12 @@ PageType {
     }
 
     ColumnLayout {
-        objectName: "mainLayout"
-
         anchors.fill: parent
 
         spacing: 0
 
         NavigationBarType {
             id: headerContent
-            objectName: "headerContent"
 
             Layout.fillWidth: true
 
@@ -97,9 +110,7 @@ PageType {
 
             IconButtonType {
                 id: editButton
-                objectName: "editButton"
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/edit-3.svg"
 
                 onClicked: serverNameEditDrawer.open()
@@ -118,31 +129,21 @@ PageType {
             id: tabBar
 
             Layout.fillWidth: true
-            Layout.topMargin: 16
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
-                           && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
-                              root.pageSettingsServerData : root.pageSettingsServerProtocols
+            currentIndex: root.availableTabs.indexOf(root.currentTab)
 
-            TabButtonType {
-                id: protocolsTab
-                visible: protocolsPage.installedProtocolsCount
-                width: protocolsPage.installedProtocolsCount ? undefined : 0
-                text: qsTr("Protocols")
-            }
+            Repeater {
+                model: root.availableTabs
 
-            TabButtonType {
-                id: servicesTab
-                visible: servicesPage.installedServicesCount
-                width: servicesPage.installedServicesCount ? undefined : 0
-                text: qsTr("Services")
-            }
+                TabButtonType {
+                    required property int modelData
 
-            TabButtonType {
-                id: dataTab
-                text: qsTr("Management")
+                    text: root.tabTitles[modelData]
+
+                    onClicked: root.currentTab = modelData
+                }
             }
         }
 
@@ -153,7 +154,7 @@ PageType {
             Layout.fillHeight: true
             Layout.topMargin: 24
 
-            currentIndex: tabBar.currentIndex
+            currentIndex: root.currentTab
 
             PageSettingsServerProtocols {
                 id: protocolsPage

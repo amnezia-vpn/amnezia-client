@@ -402,10 +402,11 @@ bool ServersUiController::serverHasOutdatedAwgContainer(const QString &serverId)
 
     const QMap<DockerContainer, ContainerConfig> containers = m_serversController->getServerContainersMap(serverId);
     for (DockerContainer container : { DockerContainer::Awg, DockerContainer::Awg2 }) {
-        if (!containers.contains(container)) {
+        const auto it = containers.constFind(container);
+        if (it == containers.cend()) {
             continue;
         }
-        if (const auto* awgConfig = containers.value(container).getAwgProtocolConfig()) {
+        if (const auto* awgConfig = it->getAwgProtocolConfig()) {
             if (awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3) {
                 return true;
             }
@@ -431,10 +432,11 @@ bool ServersUiController::isContainerOutdatedAwg(int containerIndex) const
     }
 
     const QMap<DockerContainer, ContainerConfig> containers = m_serversController->getServerContainersMap(m_processedServerId);
-    if (!containers.contains(container)) {
+    const auto it = containers.constFind(container);
+    if (it == containers.cend()) {
         return false;
     }
-    if (const auto* awgConfig = containers.value(container).getAwgProtocolConfig()) {
+    if (const auto* awgConfig = it->getAwgProtocolConfig()) {
         return awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3;
     }
     return false;

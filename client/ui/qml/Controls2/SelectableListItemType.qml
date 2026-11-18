@@ -18,6 +18,7 @@ RadioDelegate {
     leftPadding: 16
     verticalPadding: 14
 
+    checkable: false
     hoverEnabled: true
     focusPolicy: Qt.StrongFocus
     opacity: enabled ? 1.0 : 0.4

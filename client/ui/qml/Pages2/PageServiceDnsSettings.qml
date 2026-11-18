@@ -14,31 +14,34 @@ import "../Components"
 PageType {
     id: root
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
+        anchors.top: parent.top
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: "AmneziaDNS"
-            description: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n").trim() + " " +
-                         qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
-        }
+        ColumnLayout {
+            id: content
 
-        model: 1
-
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: "AmneziaDNS"
+                description: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n").trim() + " " +
+                             qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
+            }
 
             ListItemType {
                 id: removeButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -62,7 +65,7 @@ PageType {
                     }
                     var noButtonFunction = function() {}
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 

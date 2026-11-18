@@ -68,6 +68,7 @@ private:
     bool startXrayEngine(const QString &config);
     bool stopXrayEngine();
     bool isXrayEngineRunning() const;
+    bool isPortAvailable(int port) const;
 
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;

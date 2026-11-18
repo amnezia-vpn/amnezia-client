@@ -1,30 +1,53 @@
 #ifndef WIREGUARDCONFIGMODEL_H
 #define WIREGUARDCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 
-class WireGuardConfigModel : public QAbstractListModel
+class WireGuardConfigModel : public QObject
 {
     Q_OBJECT
 
-public:
-    enum Roles {
-        SubnetAddressRole = Qt::UserRole + 1,
-        PortRole,
-        ClientMtuRole
-    };
+    Q_PROPERTY(QString subnetAddress READ subnetAddress WRITE setSubnetAddress NOTIFY changed)
+    Q_PROPERTY(QString port READ port WRITE setPort NOTIFY changed)
+    Q_PROPERTY(QString cascadeEndpoint READ cascadeEndpoint WRITE setCascadeEndpoint NOTIFY changed)
+    Q_PROPERTY(QString cascadePort READ cascadePort WRITE setCascadePort NOTIFY changed)
+    Q_PROPERTY(QString clientMtu READ clientMtu WRITE setClientMtu NOTIFY changed)
+    Q_PROPERTY(QString clientHostName READ clientHostName NOTIFY changed)
+    Q_PROPERTY(QString clientPort READ clientPort NOTIFY changed)
+    Q_PROPERTY(QString clientCascadeEndpoint READ clientCascadeEndpoint WRITE setClientCascadeEndpoint NOTIFY changed)
+    Q_PROPERTY(QString clientCascadePort READ clientCascadePort WRITE setClientCascadePort NOTIFY changed)
 
+public:
     explicit WireGuardConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QString subnetAddress() const;
+    void setSubnetAddress(const QString &value);
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString port() const;
+    void setPort(const QString &value);
+
+    QString cascadeEndpoint() const;
+    void setCascadeEndpoint(const QString &value);
+
+    QString cascadePort() const;
+    void setCascadePort(const QString &value);
+
+    QString clientHostName() const;
+    QString clientPort() const;
+
+    QString clientCascadeEndpoint() const;
+    void setClientCascadeEndpoint(const QString &value);
+
+    QString clientCascadePort() const;
+    void setClientCascadePort(const QString &value);
+
+    QString clientMtu() const;
+    void setClientMtu(const QString &value);
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::WireGuardProtocolConfig &protocolConfig);
@@ -32,8 +55,8 @@ public slots:
 
     bool isServerSettingsEqual();
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     amnezia::DockerContainer m_container;

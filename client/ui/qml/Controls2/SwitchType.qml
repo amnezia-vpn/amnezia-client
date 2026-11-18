@@ -67,7 +67,7 @@ Switch {
         Rectangle {
             id: knob
 
-            x: root.checked ? parent.width - width - 4 : 4
+            x: root.checked ? parent.width - width - 5 : 5
             y: (parent.height - height) / 2
 
             width: 20

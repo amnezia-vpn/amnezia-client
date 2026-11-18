@@ -41,8 +41,6 @@ RowLayout {
     }
 
     IconButtonType {
-        objectName: "sortButton"
-
         implicitWidth: 44
         implicitHeight: 44
 

@@ -300,19 +300,25 @@ bool SettingsController::isDevModeEnabled() const
     return m_isDevModeEnabled;
 }
 
-void SettingsController::resetGatewayEndpoint()
+QString SettingsController::devGatewayEndpoint() const
 {
-    m_appSettingsRepository->resetGatewayEndpoint();
+    return m_appSettingsRepository->devGatewayEndpoint();
 }
 
-void SettingsController::setGatewayEndpoint(const QString &endpoint)
+QString SettingsController::devGatewayProxyStorages() const
 {
-    m_appSettingsRepository->setGatewayEndpoint(endpoint);
+    return m_appSettingsRepository->devGatewayProxyStorages();
 }
 
-QString SettingsController::getGatewayEndpoint() const
+QString SettingsController::devGatewayPublicKey() const
 {
-    return m_appSettingsRepository->isDevGatewayEnv() ? "Dev endpoint" : m_appSettingsRepository->getGatewayEndpoint();
+    return m_appSettingsRepository->devGatewayPublicKey();
+}
+
+void SettingsController::setDevGatewayConfig(const QString &endpoint, const QString &proxyStorages,
+                                             const QString &publicKey)
+{
+    m_appSettingsRepository->setDevGatewayConfig(endpoint, proxyStorages, publicKey);
 }
 
 bool SettingsController::isDevGatewayEnv() const
@@ -323,11 +329,6 @@ bool SettingsController::isDevGatewayEnv() const
 void SettingsController::toggleDevGatewayEnv(bool enabled)
 {
     m_appSettingsRepository->toggleDevGatewayEnv(enabled);
-    if (enabled) {
-        m_appSettingsRepository->setDevGatewayEndpoint();
-    } else {
-        m_appSettingsRepository->resetGatewayEndpoint();
-    }
 }
 
 bool SettingsController::isHomeAdLabelVisible() const

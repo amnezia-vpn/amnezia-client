@@ -88,8 +88,6 @@ PageType {
 
         anchors.fill: parent
 
-        currentIndex: -1
-
         model: proxyContainersModel
 
         delegate: ColumnLayout {
@@ -110,7 +108,6 @@ PageType {
                 id: progressBar
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

@@ -31,6 +31,7 @@ FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
     connect(engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object) {
         if (auto *window = qobject_cast<QQuickWindow *>(object)) {
             window->installEventFilter(this);
+            window->contentItem()->installEventFilter(this);
         }
     });
 }
@@ -41,12 +42,24 @@ bool FocusController::eventFilter(QObject *watched, QEvent *event)
         return false;
     }
 
-    auto *window = qobject_cast<QQuickWindow *>(watched);
     auto *keyEvent = static_cast<QKeyEvent *>(event);
-    if (!window || (keyEvent->modifiers() & ~(Qt::ShiftModifier | Qt::KeypadModifier))) {
+    if (keyEvent->modifiers() & ~(Qt::ShiftModifier | Qt::KeypadModifier)) {
         return false;
     }
 
+    if (auto *window = qobject_cast<QQuickWindow *>(watched)) {
+        return handleNavigationKey(window, keyEvent);
+    }
+
+    if (auto *contentItem = qobject_cast<QQuickItem *>(watched)) {
+        return handleBackKey(contentItem, keyEvent);
+    }
+
+    return false;
+}
+
+bool FocusController::handleNavigationKey(QQuickWindow *window, QKeyEvent *keyEvent)
+{
     QQuickItem *current = window->activeFocusItem() ? window->activeFocusItem() : window->contentItem();
 
     bool forward = false;
@@ -71,6 +84,21 @@ bool FocusController::eventFilter(QObject *watched, QEvent *event)
         next->forceActiveFocus(forward ? Qt::TabFocusReason : Qt::BacktabFocusReason);
         ensureVisible(next);
     }
+    return true;
+}
+
+bool FocusController::handleBackKey(QQuickItem *contentItem, QKeyEvent *keyEvent)
+{
+    if (keyEvent->key() != Qt::Key_Escape && keyEvent->key() != Qt::Key_Back) {
+        return false;
+    }
+
+    QQuickItem *focused = contentItem->window() ? contentItem->window()->activeFocusItem() : nullptr;
+    if (focused && focusChainRoot(focused) != contentItem) {
+        return false;
+    }
+
+    emit backRequested();
     return true;
 }
 

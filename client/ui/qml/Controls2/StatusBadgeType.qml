@@ -42,7 +42,7 @@ Control {
     }
 
     contentItem: Row {
-        spacing: 4
+        spacing: root.dot ? 0 : 4
 
         Item {
             anchors.verticalCenter: parent.verticalCenter
@@ -68,6 +68,7 @@ Control {
 
             text: root.text
             wrapMode: Text.NoWrap
+            font.letterSpacing: -0.4
             color: {
                 if (root.variant === StatusBadgeType.Recommendation) {
                     return AmneziaStyle.color.textInverted

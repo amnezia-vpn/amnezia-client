@@ -39,6 +39,30 @@ PageType {
     property bool busyIndicatorShown: false
     property bool containerStatusRefreshCallPending: false
 
+    readonly property bool fieldsEditable: TProxyConfigModel.isEnabled && containerStatus === 1 && !root.pageBusy
+
+    function effectiveHost() {
+        return root.savedHostname !== "" ? root.savedHostname : TProxyConfigModel.hostname
+    }
+
+    function displayTmeLink() {
+        if (TProxyConfigModel.tmeLink !== "")
+            return TProxyConfigModel.tmeLink
+        var host = effectiveHost()
+        if (host === "" || TProxyConfigModel.secret === "")
+            return ""
+        return "https://telegram.me/webproxy?server=" + host + "&secret=" + TProxyConfigModel.secret
+    }
+
+    function displayTgLink() {
+        if (TProxyConfigModel.tgLink !== "")
+            return TProxyConfigModel.tgLink
+        var host = effectiveHost()
+        if (host === "" || TProxyConfigModel.secret === "")
+            return ""
+        return "tg://webproxy?server=" + host + "&secret=" + TProxyConfigModel.secret
+    }
+
     function syncPageBusyIndicator() {
         if (!root.pageOpenHandled) {
             return
@@ -258,7 +282,6 @@ PageType {
             }
 
             LinkButtonType {
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -307,487 +330,484 @@ PageType {
         anchors.right: parent.right
         currentIndex: mainTabBar.currentIndex
 
-        ListViewType {
-            id: connectionListView
-            model: TProxyConfigModel
-            delegate: ColumnLayout {
-                width: connectionListView.width
-                spacing: 0
+        Item {
+            FlickableType {
+                id: connectionFlickable
 
-                function effectiveHost() {
-                    return root.savedHostname !== "" ? root.savedHostname : hostname
-                }
+                anchors.top: parent.top
 
-                function displayTmeLink() {
-                    if (tmeLink !== "")
-                        return tmeLink
-                    var host = effectiveHost()
-                    if (host === "" || secret === "")
-                        return ""
-                    return "https://telegram.me/webproxy?server=" + host + "&secret=" + secret
-                }
+                contentHeight: connectionContent.implicitHeight
 
-                function displayTgLink() {
-                    if (tgLink !== "")
-                        return tgLink
-                    var host = effectiveHost()
-                    if (host === "" || secret === "")
-                        return ""
-                    return "tg://webproxy?server=" + host + "&secret=" + secret
-                }
+                ColumnLayout {
+                    id: connectionContent
 
-                SmallTextType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 24
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
 
-                    text: qsTr("Use Telegram WEB proxy link")
-                }
+                    spacing: 0
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 12
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                    implicitHeight: Math.max(72, linkRow.implicitHeight + 24)
-                    color: AmneziaStyle.color.bgSurface
-                    radius: 16
+                        text: qsTr("Use Telegram WEB proxy link")
+                    }
 
-                    RowLayout {
-                        id: linkRow
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 12
+                        implicitHeight: Math.max(72, linkRow.implicitHeight + 24)
+                        color: AmneziaStyle.color.bgSurface
+                        radius: 16
 
-                        spacing: 0
+                        RowLayout {
+                            id: linkRow
 
-                        BodyTextType {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
+
+                            spacing: 0
+
+                            BodyTextType {
+                                Layout.fillWidth: true
+
+                                text: TProxyConfigModel.secret !== "" ? root.displayTmeLink() : qsTr("Set a hostname first")
+                                color: TProxyConfigModel.secret !== "" ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textTertiary
+                                wrapMode: Text.WrapAnywhere
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                            }
+
+                            IconButtonType {
+                                visible: TProxyConfigModel.secret !== ""
+                                icon.source: "qrc:/images/controls/copy.svg"
+                                Accessible.name: qsTr("Use Telegram WEB proxy link")
+
+                                onClicked: {
+                                    GC.copyToClipBoard(root.displayTmeLink())
+                                    PageController.showNotificationMessage(qsTr("Copied"))
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        visible: TProxyConfigModel.secret !== ""
+                        implicitHeight: Math.max(72, tgLinkRow.implicitHeight + 24)
+                        color: AmneziaStyle.color.bgSurface
+                        radius: 16
+
+                        RowLayout {
+                            id: tgLinkRow
+
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
+
+                            spacing: 0
+
+                            BodyTextType {
+                                Layout.fillWidth: true
+
+                                text: root.displayTgLink()
+                                color: AmneziaStyle.color.textPrimary
+                                wrapMode: Text.WrapAnywhere
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                            }
+
+                            IconButtonType {
+                                icon.source: "qrc:/images/controls/qr-code.svg"
+                                Accessible.name: qsTr("Telegram connection link")
+
+                                onClicked: {
+                                    ExportController.generateQrFromStringRaw(root.displayTgLink())
+                                    PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
+                                        qsTr("TProxy WEB proxy link"), "", "", "")
+                                }
+                            }
+
+                            IconButtonType {
+                                icon.source: "qrc:/images/controls/copy.svg"
+
+                                onClicked: {
+                                    GC.copyToClipBoard(root.displayTgLink())
+                                    PageController.showNotificationMessage(qsTr("Copied"))
+                                }
+                            }
+                        }
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        text: qsTr("Or enter the proxy details manually.")
+                    }
+
+                    ListGroupType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        visible: TProxyConfigModel.secret !== ""
+
+                        CopyableValueRow {
                             Layout.fillWidth: true
 
-                            text: secret !== "" ? displayTmeLink() : qsTr("Set a hostname first")
-                            color: secret !== "" ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textTertiary
-                            wrapMode: Text.WrapAnywhere
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
+                            copiedText: qsTr("Copied")
+                            label: qsTr("Host")
+                            value: root.effectiveHost()
                         }
 
-                        IconButtonType {
-                            visible: secret !== ""
-                            icon.source: "qrc:/images/controls/copy.svg"
-                            Accessible.name: qsTr("Use Telegram WEB proxy link")
-
-                            onClicked: {
-                                GC.copyToClipBoard(displayTmeLink())
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 12
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-
-                    visible: secret !== ""
-                    implicitHeight: Math.max(72, tgLinkRow.implicitHeight + 24)
-                    color: AmneziaStyle.color.bgSurface
-                    radius: 16
-
-                    RowLayout {
-                        id: tgLinkRow
-
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 12
-
-                        spacing: 0
-
-                        BodyTextType {
+                        CopyableValueRow {
                             Layout.fillWidth: true
 
-                            text: displayTgLink()
-                            color: AmneziaStyle.color.textPrimary
-                            wrapMode: Text.WrapAnywhere
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
-                        }
-
-                        IconButtonType {
-                            icon.source: "qrc:/images/controls/qr-code.svg"
-                            Accessible.name: qsTr("Telegram connection link")
-
-                            onClicked: {
-                                ExportController.generateQrFromStringRaw(displayTgLink())
-                                PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
-                                    qsTr("TProxy WEB proxy link"), "", "", "")
-                            }
-                        }
-
-                        IconButtonType {
-                            icon.source: "qrc:/images/controls/copy.svg"
-
-                            onClicked: {
-                                GC.copyToClipBoard(displayTgLink())
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                            }
+                            copiedText: qsTr("Copied")
+                            label: qsTr("Secret")
+                            value: TProxyConfigModel.secret
+                            showSeparator: false
                         }
                     }
-                }
 
-                SmallTextType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 24
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    LinkButtonType {
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                    text: qsTr("Or enter the proxy details manually.")
-                }
+                        size: LinkButtonType.Medium
+                        horizontalPadding: 14
+                        verticalPadding: 8
 
-                ListGroupType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 12
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                        text: qsTr("How to do it")
 
-                    visible: secret !== ""
+                        onClicked: Qt.openUrlExternally("https://github.com/telegramdesktop/tproxy-server")
+                    }
 
-                    CopyableValueRow {
+                    CaptionTextType {
                         Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        copiedText: qsTr("Copied")
-                        label: qsTr("Host")
-                        value: effectiveHost()
+                        text: qsTr("Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.")
                     }
 
-                    CopyableValueRow {
+                    ButtonType {
+                        id: removeButton
+
                         Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        copiedText: qsTr("Copied")
-                        label: qsTr("Secret")
-                        value: secret
-                        showSeparator: false
-                    }
-                }
+                        visible: ServersUiController.isProcessedServerHasWriteAccess()
+                        variant: ButtonType.Destructive
+                        text: qsTr("Delete TProxy")
 
-                LinkButtonType {
-                    Layout.topMargin: 12
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-
-                    size: LinkButtonType.Medium
-                    horizontalPadding: 14
-                    verticalPadding: 8
-
-                    text: qsTr("How to do it")
-
-                    onClicked: Qt.openUrlExternally("https://github.com/telegramdesktop/tproxy-server")
-                }
-
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 12
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-
-                    text: qsTr("Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.")
-                }
-
-                ButtonType {
-                    id: removeButton
-
-                    Layout.fillWidth: true
-                    Layout.topMargin: 24
-                    Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-
-                    visible: ServersUiController.isProcessedServerHasWriteAccess()
-                    variant: ButtonType.Destructive
-                    text: qsTr("Delete TProxy")
-
-                    onClicked: {
-                        var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
-                        var yesButtonFunction = function () {
-                            PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.processedServerId,
-                                ServersUiController.processedContainerIndex)
+                        onClicked: {
+                            var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                            var yesButtonFunction = function () {
+                                PageController.goToPage(PageEnum.PageDeinstalling)
+                                InstallController.removeContainer(ServersUiController.processedServerId,
+                                    ServersUiController.processedContainerIndex)
+                            }
+                            Dialogs.askQuestion(headerText,
+                                qsTr("The proxy will be stopped and all users will lose access."),
+                                qsTr("Continue"), qsTr("Cancel"), yesButtonFunction, function () {})
                         }
-                        showQuestionDrawer(headerText,
-                            qsTr("The proxy will be stopped and all users will lose access."),
-                            qsTr("Continue"), qsTr("Cancel"), yesButtonFunction, function () {})
                     }
                 }
             }
         }
 
-        ListViewType {
-            id: settingsListView
-            model: TProxyConfigModel
-            delegate: ColumnLayout {
-                width: settingsListView.width
+        Item {
+            FlickableType {
+                id: settingsFlickable
 
-                spacing: 12
+                anchors.top: parent.top
 
-                readonly property bool fieldsEditable: isEnabled && containerStatus === 1 && !root.pageBusy
+                contentHeight: settingsContent.implicitHeight
 
-                SwitchRowType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 24
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: qsTr("Enable TProxy")
-                    checked: isEnabled
-                    enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy && !root.tproxyNetworkBlocked
-                    onToggled: function () {
-                        if (checked !== isEnabled) {
-                            previousEnabled = isEnabled
-                            previousContainerStatus = containerStatus
-                            root.previousSecret = secret
-                            isEnabled = checked
-                            isUpdating = true
-                            if (checked) {
-                                root.pendingUpdateAfterEnable = true
-                                InstallController.setContainerEnabled(ServersUiController.processedServerId,
-                                    ServersUiController.processedContainerIndex, true)
-                            } else {
-                                InstallController.setContainerEnabled(ServersUiController.processedServerId,
-                                    ServersUiController.processedContainerIndex, false)
-                            }
-                        }
-                    }
-                }
+                ColumnLayout {
+                    id: settingsContent
 
-                SmallTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    visible: !fieldsEditable && !root.pageBusy
-                    text: (containerStatus === 1 || containerStatus === 2)
-                        ? qsTr("Enable TProxy to edit settings")
-                        : (statusErrorCode !== 0
-                            ? qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(statusErrorCode)
-                            : qsTr("Cannot reach the server — settings are unavailable"))
-                }
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
 
-                TextFieldType {
-                    id: hostnameTextField
-                    Layout.topMargin: 12
-                    enabled: fieldsEditable
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    headerText: qsTr("Hostname")
-                    textField.placeholderText: qsTr("proxy.example.com")
-                    textField.text: hostname
-                    textField.onTextChanged: {
-                        var cur = hostnameTextField.textField.text
-                        var clean = TProxyConfigModel.sanitizeHostnameFieldText(cur)
-                        if (clean !== cur) {
-                            textField.text = clean
-                            textField.cursorPosition = clean.length
-                            return
-                        }
-                        if (TProxyConfigModel.isHostnameTypingIncomplete(cur)) {
-                            hostnameTextField.errorText = ""
-                            return
-                        }
-                        if (!TProxyConfigModel.isValidHostname(clean)) {
-                            hostnameTextField.errorText = qsTr("Use lowercase letters, digits, dots and hyphens")
-                            return
-                        }
-                        hostnameTextField.errorText = ""
-                    }
-                    textField.onEditingFinished: {
-                        var h = TProxyConfigModel.sanitizeHostnameFieldText(textField.text)
-                        textField.text = h
-                        if (!TProxyConfigModel.isValidHostname(h)) {
-                            hostnameTextField.errorText = qsTr("Enter a lowercase DNS hostname (A record to this server)")
-                            return
-                        }
-                        hostnameTextField.errorText = ""
-                        TProxyConfigModel.setHostname(h)
-                    }
-                }
+                    spacing: 12
 
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: qsTr("Required. Point a DNS A record at this server. Do not put a CDN in front.")
-                }
-
-                TextFieldType {
-                    id: emailTextField
-                    Layout.topMargin: 12
-                    enabled: fieldsEditable
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    headerText: qsTr("ACME email")
-                    textField.placeholderText: qsTr("you@example.com")
-                    textField.text: acmeEmail
-                    textField.onTextChanged: {
-                        var cur = emailTextField.textField.text
-                        var clean = TProxyConfigModel.sanitizeAcmeEmailFieldText(cur)
-                        if (clean !== cur) {
-                            textField.text = clean
-                            textField.cursorPosition = clean.length
-                            return
-                        }
-                        if (TProxyConfigModel.isAcmeEmailTypingIncomplete(cur)) {
-                            emailTextField.errorText = ""
-                            return
-                        }
-                        if (!TProxyConfigModel.isValidAcmeEmail(clean)) {
-                            emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
-                            return
-                        }
-                        emailTextField.errorText = ""
-                    }
-                    textField.onEditingFinished: {
-                        var e = TProxyConfigModel.sanitizeAcmeEmailFieldText(textField.text)
-                        textField.text = e
-                        if (!TProxyConfigModel.isValidAcmeEmail(e)) {
-                            emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
-                            return
-                        }
-                        emailTextField.errorText = ""
-                        TProxyConfigModel.setAcmeEmail(e)
-                    }
-                }
-
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: qsTr("Used by Caddy to issue a Let's Encrypt certificate.")
-                }
-
-                DropDownType {
-                    id: carrierDropDown
-                    Layout.topMargin: 12
-                    enabled: fieldsEditable
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    drawerHeight: 0.45
-                    descriptionText: qsTr("Carrier mode")
-                    headerText: qsTr("Carrier mode")
-                    text: TProxyConfigModel.carrierModeLabel(carrierMode)
-                    listView: Component {
-                        ListViewType {
-                            leftMargin: 16
-                            rightMargin: 16
-
-                            model: ["https", "https-lanes", "websocket", "websocket-lanes"]
-                            delegate: ListItemType {
-                                width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
-                                text: TProxyConfigModel.carrierModeLabel(modelData)
-                                trailingIconSource: modelData === carrierMode ? "qrc:/images/controls/check.svg" : ""
-                                onClicked: {
-                                    TProxyConfigModel.setCarrierMode(modelData)
-                                    carrierDropDown.close()
+                    SwitchRowType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Enable TProxy")
+                        checked: TProxyConfigModel.isEnabled
+                        enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy && !root.tproxyNetworkBlocked
+                        onToggled: function () {
+                            if (checked !== TProxyConfigModel.isEnabled) {
+                                previousEnabled = TProxyConfigModel.isEnabled
+                                previousContainerStatus = containerStatus
+                                root.previousSecret = TProxyConfigModel.secret
+                                TProxyConfigModel.isEnabled = checked
+                                isUpdating = true
+                                if (checked) {
+                                    root.pendingUpdateAfterEnable = true
+                                    InstallController.setContainerEnabled(ServersUiController.processedServerId,
+                                        ServersUiController.processedContainerIndex, true)
+                                } else {
+                                    InstallController.setContainerEnabled(ServersUiController.processedServerId,
+                                        ServersUiController.processedContainerIndex, false)
                                 }
                             }
                         }
                     }
-                }
 
-                TextFieldType {
-                    id: workersTextField
-                    enabled: fieldsEditable
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    headerText: qsTr("MTProxy workers")
-                    textField.placeholderText: TProxyConfigModel.defaultWorkers()
-                    textField.text: workers
-                    textField.maximumLength: 2
-                    textField.inputMethodHints: Qt.ImhDigitsOnly
-                    textField.validator: IntValidator {
-                        bottom: 1
-                        top: TProxyConfigModel.maxWorkers()
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        visible: !root.fieldsEditable && !root.pageBusy
+                        text: (containerStatus === 1 || containerStatus === 2)
+                            ? qsTr("Enable TProxy to edit settings")
+                            : (statusErrorCode !== 0
+                                ? qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(statusErrorCode)
+                                : qsTr("Cannot reach the server — settings are unavailable"))
                     }
-                    textField.onTextChanged: {
-                        var cur = workersTextField.textField.text
-                        if (cur === "") {
-                            return
+
+                    TextFieldType {
+                        id: hostnameTextField
+                        Layout.topMargin: 12
+                        enabled: root.fieldsEditable
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        headerText: qsTr("Hostname")
+                        textField.placeholderText: qsTr("proxy.example.com")
+                        textField.text: TProxyConfigModel.hostname
+                        textField.onTextChanged: {
+                            var cur = hostnameTextField.textField.text
+                            var clean = TProxyConfigModel.sanitizeHostnameFieldText(cur)
+                            if (clean !== cur) {
+                                textField.text = clean
+                                textField.cursorPosition = clean.length
+                                return
+                            }
+                            if (TProxyConfigModel.isHostnameTypingIncomplete(cur)) {
+                                hostnameTextField.errorText = ""
+                                return
+                            }
+                            if (!TProxyConfigModel.isValidHostname(clean)) {
+                                hostnameTextField.errorText = qsTr("Use lowercase letters, digits, dots and hyphens")
+                                return
+                            }
+                            hostnameTextField.errorText = ""
                         }
-                        var n = parseInt(cur, 10)
-                        var maxW = TProxyConfigModel.maxWorkers()
-                        if (isNaN(n) || n < 1) {
-                            n = 1
-                        }
-                        if (n > maxW) {
-                            n = maxW
-                        }
-                        var clamped = String(n)
-                        if (clamped !== cur) {
-                            textField.text = clamped
-                            textField.cursorPosition = clamped.length
+                        textField.onEditingFinished: {
+                            var h = TProxyConfigModel.sanitizeHostnameFieldText(textField.text)
+                            textField.text = h
+                            if (!TProxyConfigModel.isValidHostname(h)) {
+                                hostnameTextField.errorText = qsTr("Enter a lowercase DNS hostname (A record to this server)")
+                                return
+                            }
+                            hostnameTextField.errorText = ""
+                            TProxyConfigModel.setHostname(h)
                         }
                     }
-                    textField.onEditingFinished: {
-                        var w = TProxyConfigModel.sanitizeWorkersFieldText(textField.text)
-                        textField.text = w
-                        TProxyConfigModel.setWorkers(w)
+
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Required. Point a DNS A record at this server. Do not put a CDN in front.")
                     }
-                }
 
-                ButtonType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 12
-                    Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: qsTr("Save")
-                    enabled: fieldsEditable && !root.tproxyNetworkBlocked
-                    onClicked: {
-                        hostnameTextField.errorText = ""
-                        emailTextField.errorText = ""
-
-                        var h = TProxyConfigModel.sanitizeHostnameFieldText(hostnameTextField.textField.text)
-                        var e = TProxyConfigModel.sanitizeAcmeEmailFieldText(emailTextField.textField.text)
-                        hostnameTextField.textField.text = h
-                        emailTextField.textField.text = e
-
-                        var hasError = false
-
-                        var httpsPortValue = TProxyConfigModel.defaultPort()
-                        var httpPortValue = TProxyConfigModel.defaultHttpPort()
-
-                        if (!TProxyConfigModel.isValidHostname(h)) {
-                            hostnameTextField.errorText =
-                                qsTr("Enter a lowercase DNS hostname (A record to this server)")
-                            hasError = true
+                    TextFieldType {
+                        id: emailTextField
+                        Layout.topMargin: 12
+                        enabled: root.fieldsEditable
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        headerText: qsTr("ACME email")
+                        textField.placeholderText: qsTr("you@example.com")
+                        textField.text: TProxyConfigModel.acmeEmail
+                        textField.onTextChanged: {
+                            var cur = emailTextField.textField.text
+                            var clean = TProxyConfigModel.sanitizeAcmeEmailFieldText(cur)
+                            if (clean !== cur) {
+                                textField.text = clean
+                                textField.cursorPosition = clean.length
+                                return
+                            }
+                            if (TProxyConfigModel.isAcmeEmailTypingIncomplete(cur)) {
+                                emailTextField.errorText = ""
+                                return
+                            }
+                            if (!TProxyConfigModel.isValidAcmeEmail(clean)) {
+                                emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
+                                return
+                            }
+                            emailTextField.errorText = ""
                         }
-                        if (!TProxyConfigModel.isValidAcmeEmail(e)) {
-                            emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
-                            hasError = true
+                        textField.onEditingFinished: {
+                            var e = TProxyConfigModel.sanitizeAcmeEmailFieldText(textField.text)
+                            textField.text = e
+                            if (!TProxyConfigModel.isValidAcmeEmail(e)) {
+                                emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
+                                return
+                            }
+                            emailTextField.errorText = ""
+                            TProxyConfigModel.setAcmeEmail(e)
                         }
-                        if (hasError) {
-                            return
-                        }
+                    }
 
-                        previousHostname = TProxyConfigModel.getHostname()
-                        previousEmail = TProxyConfigModel.getAcmeEmail()
-                        previousSecret = secret
-                        TProxyConfigModel.setHostname(h)
-                        TProxyConfigModel.setAcmeEmail(e)
-                        TProxyConfigModel.setPort(httpsPortValue)
-                        TProxyConfigModel.setHttpPort(httpPortValue)
-                        TProxyConfigModel.setWorkers(TProxyConfigModel.sanitizeWorkersFieldText(workersTextField.textField.text))
-                        isUpdating = true
-                        root.scheduleUpdate()
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Used by Caddy to issue a Let's Encrypt certificate.")
+                    }
+
+                    DropDownType {
+                        id: carrierDropDown
+                        Layout.topMargin: 12
+                        enabled: root.fieldsEditable
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        drawerHeight: 0.45
+                        descriptionText: qsTr("Carrier mode")
+                        headerText: qsTr("Carrier mode")
+                        text: TProxyConfigModel.carrierModeLabel(TProxyConfigModel.carrierMode)
+                        listView: Component {
+                            ListViewType {
+                                leftMargin: 16
+                                rightMargin: 16
+
+                                model: ["https", "https-lanes", "websocket", "websocket-lanes"]
+                                delegate: ListItemType {
+                                    width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
+                                    text: TProxyConfigModel.carrierModeLabel(modelData)
+                                    trailingIconSource: modelData === TProxyConfigModel.carrierMode ? "qrc:/images/controls/check.svg" : ""
+                                    onClicked: {
+                                        TProxyConfigModel.setCarrierMode(modelData)
+                                        carrierDropDown.close()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    TextFieldType {
+                        id: workersTextField
+                        enabled: root.fieldsEditable
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        headerText: qsTr("MTProxy workers")
+                        textField.placeholderText: TProxyConfigModel.defaultWorkers()
+                        textField.text: TProxyConfigModel.workers
+                        textField.maximumLength: 2
+                        textField.inputMethodHints: Qt.ImhDigitsOnly
+                        textField.validator: IntValidator {
+                            bottom: 1
+                            top: TProxyConfigModel.maxWorkers()
+                        }
+                        textField.onTextChanged: {
+                            var cur = workersTextField.textField.text
+                            if (cur === "") {
+                                return
+                            }
+                            var n = parseInt(cur, 10)
+                            var maxW = TProxyConfigModel.maxWorkers()
+                            if (isNaN(n) || n < 1) {
+                                n = 1
+                            }
+                            if (n > maxW) {
+                                n = maxW
+                            }
+                            var clamped = String(n)
+                            if (clamped !== cur) {
+                                textField.text = clamped
+                                textField.cursorPosition = clamped.length
+                            }
+                        }
+                        textField.onEditingFinished: {
+                            var w = TProxyConfigModel.sanitizeWorkersFieldText(textField.text)
+                            textField.text = w
+                            TProxyConfigModel.setWorkers(w)
+                        }
+                    }
+
+                    ButtonType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        text: qsTr("Save")
+                        enabled: root.fieldsEditable && !root.tproxyNetworkBlocked
+                        onClicked: {
+                            hostnameTextField.errorText = ""
+                            emailTextField.errorText = ""
+
+                            var h = TProxyConfigModel.sanitizeHostnameFieldText(hostnameTextField.textField.text)
+                            var e = TProxyConfigModel.sanitizeAcmeEmailFieldText(emailTextField.textField.text)
+                            hostnameTextField.textField.text = h
+                            emailTextField.textField.text = e
+
+                            var hasError = false
+
+                            var httpsPortValue = TProxyConfigModel.defaultPort()
+                            var httpPortValue = TProxyConfigModel.defaultHttpPort()
+
+                            if (!TProxyConfigModel.isValidHostname(h)) {
+                                hostnameTextField.errorText =
+                                    qsTr("Enter a lowercase DNS hostname (A record to this server)")
+                                hasError = true
+                            }
+                            if (!TProxyConfigModel.isValidAcmeEmail(e)) {
+                                emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
+                                hasError = true
+                            }
+                            if (hasError) {
+                                return
+                            }
+
+                            previousHostname = TProxyConfigModel.getHostname()
+                            previousEmail = TProxyConfigModel.getAcmeEmail()
+                            previousSecret = TProxyConfigModel.secret
+                            TProxyConfigModel.setHostname(h)
+                            TProxyConfigModel.setAcmeEmail(e)
+                            TProxyConfigModel.setPort(httpsPortValue)
+                            TProxyConfigModel.setHttpPort(httpPortValue)
+                            TProxyConfigModel.setWorkers(TProxyConfigModel.sanitizeWorkersFieldText(workersTextField.textField.text))
+                            isUpdating = true
+                            root.scheduleUpdate()
+                        }
                     }
                 }
             }

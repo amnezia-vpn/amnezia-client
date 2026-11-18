@@ -22,31 +22,34 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
+        anchors.top: parent.top
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("SFTP settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: SftpConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("SFTP settings")
+            }
 
             ListItemType {
                 id: hostLabel
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -72,7 +75,7 @@ PageType {
 
                 dense: true
                 overline: qsTr("Port")
-                text: port
+                text: SftpConfigModel.port
                 Accessible.name: overline + " " + text
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
@@ -92,7 +95,7 @@ PageType {
 
                 dense: true
                 overline: qsTr("User name")
-                text: username
+                text: SftpConfigModel.username
                 Accessible.name: overline + " " + text
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
@@ -115,13 +118,13 @@ PageType {
                 showSeparator: false
                 dense: true
                 overline: qsTr("Password")
-                text: masked ? "*".repeat(password.length) : password
+                text: masked ? "*".repeat(SftpConfigModel.password.length) : SftpConfigModel.password
                 Accessible.name: overline
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
 
                 onClicked: {
-                    GC.copyToClipBoard(password)
+                    GC.copyToClipBoard(SftpConfigModel.password)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
 
@@ -148,7 +151,7 @@ PageType {
 
                 onClicked: {
                     PageController.showBusyIndicator(true)
-                    InstallController.mountSftpDrive(ServersUiController.processedServerId, port, password, username)
+                    InstallController.mountSftpDrive(ServersUiController.processedServerId, SftpConfigModel.port, SftpConfigModel.password, SftpConfigModel.username)
                     PageController.showBusyIndicator(false)
                 }
             }

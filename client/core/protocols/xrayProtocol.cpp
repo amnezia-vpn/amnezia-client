@@ -174,6 +174,10 @@ ErrorCode XrayProtocol::startTun2Socks()
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
             [this]() {
+                if (!m_tun2socksProcess) {
+                    return;
+                }
+
                 auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
                 if (!readAllStandardError.waitForFinished()) {
                     qWarning() << "Failed to read output from tun2socks";

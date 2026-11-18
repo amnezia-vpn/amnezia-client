@@ -39,7 +39,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -77,12 +76,11 @@ PageType {
             NavigationBarType {
                 Layout.fillWidth: true
 
-                title: root.processedServer ? qsTr(root.processedServer.name + "\nsubscription key") : ""
+                title: root.processedServer ? qsTr("%1 connection key").arg(root.processedServer.name) : ""
             }
 
             ButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

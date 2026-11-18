@@ -35,10 +35,8 @@ SheetType {
                 IconButtonType {
                     id: backButton
 
-                    x: 16
-                    y: 4
-
-                    size: IconButtonType.Small
+                    x: 4
+                    y: 0
                     icon.source: "qrc:/images/controls/arrow-left.svg"
                     Accessible.name: qsTr("Back")
 
@@ -76,10 +74,6 @@ SheetType {
                 height: 16 + PageController.safeAreaBottomMargin
             }
 
-            ButtonGroup {
-                id: buttonGroup
-            }
-
             delegate: Item {
                 width: listView.width
                 implicitHeight: languageItem.implicitHeight
@@ -93,7 +87,6 @@ SheetType {
 
                     text: languageName
 
-                    ButtonGroup.group: buttonGroup
                     checked: listView.selectedIndex === index
 
                     onClicked: {

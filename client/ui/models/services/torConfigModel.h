@@ -1,35 +1,31 @@
 #ifndef TORCONFIGMODEL_H
 #define TORCONFIGMODEL_H
 
-#include <QAbstractListModel>
+#include <QObject>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/torProtocolConfig.h"
 
-class TorConfigModel : public QAbstractListModel
+class TorConfigModel : public QObject
 {
     Q_OBJECT
 
-public:
-    enum Roles {
-        SiteRole
-    };
+    Q_PROPERTY(QString site READ site WRITE setSite NOTIFY changed)
 
+public:
     explicit TorConfigModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QString site() const;
+    void setSite(const QString &value);
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::TorProtocolConfig &protocolConfig);
     amnezia::TorProtocolConfig getProtocolConfig();
 
-protected:
-    QHash<int, QByteArray> roleNames() const override;
+signals:
+    void changed();
 
 private:
     amnezia::DockerContainer m_container;

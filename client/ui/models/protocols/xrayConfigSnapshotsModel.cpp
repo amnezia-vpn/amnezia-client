@@ -202,9 +202,9 @@ void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
     if (index < 0 || index >= m_configs.size()) {
         return;
     }
-    const XrayConfigSnapshot &snapshot = m_configs.at(index);
-    if (snapshot.serverConfig.port.isEmpty()) {
-        return;
+    amnezia::XrayServerConfig config = m_configs.at(index).serverConfig;
+    if (config.port.isEmpty()) {
+        config.port = m_xrayConfigModel->port();
     }
-    m_xrayConfigModel->applyServerConfig(snapshot.serverConfig);
+    m_xrayConfigModel->applyServerConfig(config);
 }

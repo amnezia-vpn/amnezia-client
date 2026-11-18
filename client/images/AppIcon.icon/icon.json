@@ -1,0 +1,50 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:0.24706,0.24706,0.27451,1.00000",
+      "srgb:0.03529,0.03529,0.04314,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 1
+      }
+    }
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name-specializations" : [
+            {
+              "value" : "01-mark.svg"
+            },
+            {
+              "appearance" : "tinted",
+              "value" : "02-mark-mono.svg"
+            }
+          ],
+          "name" : "01-mark"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

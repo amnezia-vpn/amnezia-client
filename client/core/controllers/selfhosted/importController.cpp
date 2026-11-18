@@ -779,8 +779,11 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
             }
 
             QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
-            jsonConfig[configKey::mtu] =
-                    ContainerUtils::isAwgContainer(dockerContainer) ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+            if (jsonConfig.value(configKey::mtu).toString().trimmed().isEmpty()) {
+                jsonConfig[configKey::mtu] = ContainerUtils::isAwgContainer(dockerContainer)
+                        ? protocols::awg::defaultMtu
+                        : protocols::wireguard::defaultMtu;
+            }
 
             containerConfig[configKey::lastConfig] = QString(QJsonDocument(jsonConfig).toJson());
 
@@ -790,4 +793,3 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
         }
     }
 }
-

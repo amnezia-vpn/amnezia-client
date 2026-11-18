@@ -89,18 +89,6 @@ void PageController::hideWindow()
 #endif
 }
 
-void PageController::keyPressEvent(Qt::Key key)
-{
-    switch (key) {
-    case Qt::Key_Back:
-    case Qt::Key_Escape: {
-        emit escapePressed();
-        break;
-    }
-    default: return;
-    }
-}
-
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
     if (m_serversController->getServersCount()) {
@@ -242,7 +230,7 @@ void PageController::onShowErrorMessage(ErrorCode errorCode)
     const auto fullErrorMessage = errorString(errorCode);
     const auto errorMessage = fullErrorMessage.mid(fullErrorMessage.indexOf(". ") + 1); // remove ErrorCode %1.
     const auto errorUrl = QStringLiteral("troubleshooting/error-codes/#error-%1-%2").arg(static_cast<int>(errorCode)).arg(utils::enumToString(errorCode).toLower());
-    const auto fullMessage = QStringLiteral("<a href=\"%1\" style=\"color: #FBB26A;\">ErrorCode: %2</a>. %3").arg(errorUrl).arg(static_cast<int>(errorCode)).arg(errorMessage);
+    const auto fullMessage = QStringLiteral("<a href=\"%1\">ErrorCode: %2</a>. %3").arg(errorUrl).arg(static_cast<int>(errorCode)).arg(errorMessage);
 
     emit showErrorMessage(fullMessage);
 }

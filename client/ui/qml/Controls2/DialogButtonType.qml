@@ -18,9 +18,7 @@ AbstractButton {
 
     background: Rectangle {
         radius: 16
-        color: root.hovered || root.down ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
-        border.width: root.down ? 1 : 0
-        border.color: AmneziaStyle.color.borderMedium
+        color: root.down ? AmneziaStyle.color.bgStateLayerPressed : (root.hovered ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent)
 
         Behavior on color {
             ColorAnimation { duration: 150 }

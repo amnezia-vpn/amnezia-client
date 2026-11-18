@@ -71,7 +71,6 @@ PageType {
                 id: shareButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -215,7 +214,7 @@ PageType {
             }
 
             Item {
-                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
+                Layout.preferredHeight: 24 + PageController.safeAreaBottomMargin
             }
         }
     }

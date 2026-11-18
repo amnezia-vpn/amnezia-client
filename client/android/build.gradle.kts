@@ -54,6 +54,7 @@ android {
             storePassword = providers.environmentVariable("QT_ANDROID_KEYSTORE_STORE_PASS").orNull
             keyAlias = providers.environmentVariable("QT_ANDROID_KEYSTORE_ALIAS").orNull
             keyPassword = providers.environmentVariable("QT_ANDROID_KEYSTORE_STORE_PASS").orNull
+            enableV3Signing = true
         }
     }
 
@@ -111,7 +112,7 @@ android {
             isEnable = abiList.size > 1
             reset()
             include(*abiList.toTypedArray())
-            isUniversalApk = false
+            isUniversalApk = true
         }
     }
 
@@ -122,18 +123,19 @@ android {
             outputs.map { it as BaseVariantOutputImpl }
                 .forEach { output ->
                     if (output.outputFileName.endsWith(".apk")) {
-                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
+                        output.outputFileName = listOfNotNull(outputBaseName, output.getFilter("ABI"), buildType.name)
+                            .joinToString("-", postfix = ".apk")
                     }
                 }
         }
     }
 
-    // androiddeployqt and Qt Creator look for the package in the build type dir, without flavor:
-    //   APK: build/outputs/apk/{buildType}/{base}-{buildType}[-unsigned].apk
-    //   AAB: build/outputs/bundle/{buildType}/{base}-{buildType}.aab
+    // androiddeployqt expects:
+    //   APK: build/outputs/apk/{base}-{buildType}[-unsigned].apk  (no flavor subdir)
+    //   AAB: build/outputs/bundle/{buildType}/{base}-{buildType}.aab (no flavor subdir)
     // where {base} = outputBaseName (set by Qt Creator) or "android-build" (CI fallback).
     // Release APK gets -unsigned suffix (Qt cmake signs it); debug does not.
-    // Gradle writes flavor outputs to {flavor}/{buildType}, so copy the oss flavor over.
+    // Copy only oss flavor to the flat output dir that androiddeployqt/Qt Creator expect.
     // Play flavor is built via android_play_apk/android_play_aab cmake targets and uses
     // its native Gradle output paths directly.
     applicationVariants.all {
@@ -143,14 +145,15 @@ android {
             val base = outputBaseName.ifEmpty { "android-build" }
             val unsignedSuffix = if (buildTypeName == "release") "-unsigned" else ""
 
+            val universalOutput = outputs.map { it as BaseVariantOutputImpl }.first { it.getFilter("ABI") == null }
+
             packageApplicationProvider.configure {
                 doLast {
                     val srcDir = layout.buildDirectory.dir("outputs/apk/oss/$buildTypeName").get().asFile
-                    val dstDir = layout.buildDirectory.dir("outputs/apk/$buildTypeName").get().asFile
+                    val dstDir = layout.buildDirectory.dir("outputs/apk").get().asFile
                     dstDir.mkdirs()
-                    srcDir.listFiles()?.filter { it.name.endsWith(".apk") }?.forEach { apk ->
-                        apk.copyTo(File(dstDir, "$base-$buildTypeName$unsignedSuffix.apk"), overwrite = true)
-                    }
+                    File(srcDir, universalOutput.outputFileName)
+                        .copyTo(File(dstDir, "$base-$buildTypeName$unsignedSuffix.apk"), overwrite = true)
                 }
             }
 

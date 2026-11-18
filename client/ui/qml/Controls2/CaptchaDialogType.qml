@@ -35,7 +35,8 @@ Popup {
     parent: Overlay.overlay
 
     width: parent ? parent.width : 0
-    height: Math.min(contentLayout.implicitHeight + 21 + 8 + PageController.safeAreaBottomMargin, parent ? parent.height - 20 : 0)
+    height: Math.min(contentLayout.implicitHeight + contentLayout.anchors.topMargin + 8 + PageController.safeAreaBottomMargin,
+                     parent ? parent.height - 20 - root.keyboardHeight : 0)
 
     x: 0
     y: parent ? parent.height - height - root.keyboardHeight : 0
@@ -97,19 +98,25 @@ Popup {
 
         SheetGrabberType {
             anchors.top: parent.top
-            anchors.topMargin: 16
+            anchors.topMargin: 8
             anchors.horizontalCenter: parent.horizontalCenter
         }
     }
 
-    contentItem: Item {
+    contentItem: Flickable {
+        contentWidth: width
+        contentHeight: contentLayout.implicitHeight + contentLayout.anchors.topMargin + 8 + PageController.safeAreaBottomMargin
+        boundsBehavior: Flickable.StopAtBounds
+        interactive: contentHeight > height
+        clip: true
+
         ColumnLayout {
             id: contentLayout
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 21 + 16
+            anchors.topMargin: 8 + 5 + 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 
@@ -180,7 +187,7 @@ Popup {
                 id: solutionField
 
                 Layout.fillWidth: true
-                Layout.topMargin: 26
+                Layout.topMargin: 32
 
                 headerText: qsTr("Digits from the image")
 
