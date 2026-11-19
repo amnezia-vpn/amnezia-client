@@ -5,9 +5,14 @@
 #include "windowstunnelservice.h"
 
 #include <Windows.h>
+#include <sddl.h>
 
 #include <QDateTime>
+#include <QRandomGenerator>
 #include <QScopeGuard>
+
+#include <atomic>
+#include <thread>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -15,11 +20,11 @@
 #include "platforms/windows/windowsutils.h"
 #include "windowsdaemon.h"
 
-#define TUNNEL_NAMED_PIPE \
-  "\\\\."                 \
-  "\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\AmneziaVPN"
+#define TUNNEL_NAMED_PIPE TUNNEL_PIPE_PREFIX "AmneziaVPN"
 
 constexpr uint32_t WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC = 2000;
+constexpr uint32_t WINDOWS_TUNNEL_CONFIG_TIMEOUT_MSEC = 15000;
+constexpr const wchar_t* WINDOWS_TUNNEL_CONFIG_PIPE_SDDL = L"D:P(A;;GA;;;SY)";
 
 namespace {
 Logger logger("WindowsTunnelService");
@@ -27,6 +32,8 @@ Logger logger("WindowsTunnelService");
 
 static bool stopAndDeleteTunnelService(SC_HANDLE service);
 static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus);
+static HANDLE createConfigPipe(const QString& pipeName);
+static bool writeConfigToPipe(HANDLE pipe, const QString& configData);
 
 WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
   MZ_COUNT_CTOR(WindowsTunnelService);
@@ -118,7 +125,11 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   SC_HANDLE scm = (SC_HANDLE)m_scm;
   SC_HANDLE service = nullptr;
+  HANDLE configPipe = INVALID_HANDLE_VALUE;
   auto guard = qScopeGuard([&] {
+    if (configPipe != INVALID_HANDLE_VALUE) {
+      CloseHandle(configPipe);
+    }
     if (service) {
       CloseServiceHandle(service);
     }
@@ -139,11 +150,21 @@ bool WindowsTunnelService::start(const QString& configData) {
     service = nullptr;
   }
 
+  const QString pipeName =
+      QString(TUNNEL_CONFIG_PIPE_PREFIX) +
+      QString::number(QRandomGenerator::system()->generate64(), 16) +
+      QString::number(QRandomGenerator::system()->generate64(), 16);
+
+  configPipe = createConfigPipe(pipeName);
+  if (configPipe == INVALID_HANDLE_VALUE) {
+    return false;
+  }
+
   QString serviceCmdline;
   {
     QTextStream out(&serviceCmdline);
     out << "\"" << qApp->applicationFilePath() << "\" tunneldaemon \""
-        << configData << "\"";
+        << pipeName << "\"";
   }
 
   logger.debug() << "Service:" << qApp->applicationFilePath();
@@ -174,7 +195,22 @@ bool WindowsTunnelService::start(const QString& configData) {
     return false;
   }
 
-  if (!StartService(service, 0, nullptr)) {
+  std::atomic<bool> started(false);
+  std::thread starter(
+      [&] { started = (StartService(service, 0, nullptr) != FALSE); });
+
+  const bool configSent = writeConfigToPipe(configPipe, configData);
+  starter.join();
+
+  CloseHandle(configPipe);
+  configPipe = INVALID_HANDLE_VALUE;
+
+  if (!configSent) {
+    logger.error() << "Failed to hand the tunnel config over to the service";
+    return false;
+  }
+
+  if (!started) {
     WindowsUtils::windowsLog("Failed to start the service");
     return false;
   }
@@ -200,6 +236,118 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   emit backendFailure();
   return false;
+}
+
+static HANDLE createConfigPipe(const QString& pipeName) {
+  PSECURITY_DESCRIPTOR descriptor = nullptr;
+  if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(
+          WINDOWS_TUNNEL_CONFIG_PIPE_SDDL, SDDL_REVISION_1, &descriptor,
+          nullptr)) {
+    WindowsUtils::windowsLog("Failed to build the config pipe descriptor");
+    return INVALID_HANDLE_VALUE;
+  }
+  auto guard = qScopeGuard([&] { LocalFree(descriptor); });
+
+  SECURITY_ATTRIBUTES attributes;
+  attributes.nLength = sizeof(attributes);
+  attributes.lpSecurityDescriptor = descriptor;
+  attributes.bInheritHandle = FALSE;
+
+  HANDLE pipe = CreateNamedPipeW(
+      (const wchar_t*)pipeName.utf16(),
+      PIPE_ACCESS_OUTBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
+      PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS, 1, 64 * 1024, 0,
+      0, &attributes);
+  if (pipe == INVALID_HANDLE_VALUE) {
+    WindowsUtils::windowsLog("Failed to create the config pipe");
+  }
+
+  return pipe;
+}
+
+static bool waitForOverlapped(HANDLE pipe, OVERLAPPED* overlapped,
+                              DWORD* transferred) {
+  if (WaitForSingleObject(overlapped->hEvent,
+                          WINDOWS_TUNNEL_CONFIG_TIMEOUT_MSEC) != WAIT_OBJECT_0) {
+    CancelIo(pipe);
+    return false;
+  }
+
+  return GetOverlappedResult(pipe, overlapped, transferred, FALSE);
+}
+
+static bool writeConfigToPipe(HANDLE pipe, const QString& configData) {
+  OVERLAPPED overlapped;
+  SecureZeroMemory(&overlapped, sizeof(overlapped));
+  overlapped.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+  if (overlapped.hEvent == nullptr) {
+    WindowsUtils::windowsLog("Failed to create the config pipe event");
+    return false;
+  }
+  auto guard = qScopeGuard([&] { CloseHandle(overlapped.hEvent); });
+
+  DWORD transferred = 0;
+  if (!ConnectNamedPipe(pipe, &overlapped)) {
+    DWORD error = GetLastError();
+    if (error == ERROR_IO_PENDING) {
+      if (!waitForOverlapped(pipe, &overlapped, &transferred)) {
+        WindowsUtils::windowsLog("The tunnel process never claimed its config");
+        return false;
+      }
+    } else if (error != ERROR_PIPE_CONNECTED) {
+      WindowsUtils::windowsLog("Failed to accept the tunnel process");
+      return false;
+    }
+  }
+
+  const QByteArray payload = configData.toUtf8();
+  ResetEvent(overlapped.hEvent);
+  if (!WriteFile(pipe, payload.constData(), payload.size(), nullptr,
+                 &overlapped)) {
+    if (GetLastError() != ERROR_IO_PENDING) {
+      WindowsUtils::windowsLog("Failed to write the config into the pipe");
+      return false;
+    }
+    if (!waitForOverlapped(pipe, &overlapped, &transferred)) {
+      WindowsUtils::windowsLog("Timed out writing the config into the pipe");
+      return false;
+    }
+  }
+
+  FlushFileBuffers(pipe);
+  DisconnectNamedPipe(pipe);
+  return true;
+}
+
+QString WindowsTunnelService::readConfigFromPipe(const QString& pipeName) {
+  LPCWSTR name = (const wchar_t*)pipeName.utf16();
+  HANDLE pipe = CreateFileW(name, GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0,
+                            nullptr);
+  if (pipe == INVALID_HANDLE_VALUE) {
+    if (!WaitNamedPipeW(name, WINDOWS_TUNNEL_CONFIG_TIMEOUT_MSEC)) {
+      WindowsUtils::windowsLog("Failed to wait for the config pipe");
+      return QString();
+    }
+    pipe = CreateFileW(name, GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0,
+                       nullptr);
+  }
+  if (pipe == INVALID_HANDLE_VALUE) {
+    WindowsUtils::windowsLog("Failed to open the config pipe");
+    return QString();
+  }
+  auto guard = qScopeGuard([&] { CloseHandle(pipe); });
+
+  QByteArray payload;
+  while (true) {
+    char buffer[512];
+    DWORD read = 0;
+    if (!ReadFile(pipe, buffer, sizeof(buffer), &read, nullptr) || read == 0) {
+      break;
+    }
+    payload.append(buffer, read);
+  }
+
+  return QString::fromUtf8(payload);
 }
 
 static bool stopAndDeleteTunnelService(SC_HANDLE service) {
