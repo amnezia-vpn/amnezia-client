@@ -64,6 +64,7 @@ LinuxRouteMonitor::LinuxRouteMonitor(const QString& ifname, QObject* parent)
   memset(&nladdr, 0, sizeof(nladdr));
   nladdr.nl_family = AF_NETLINK;
   nladdr.nl_pid = getpid();
+  nladdr.nl_groups = RTMGRP_IPV4_ROUTE | RTMGRP_IPV6_ROUTE;
   if (bind(m_nlsock, (struct sockaddr*)&nladdr, sizeof(nladdr)) != 0) {
       logger.warning() << "Failed to bind netlink socket:" << strerror(errno);
   }
@@ -107,6 +108,12 @@ bool LinuxRouteMonitor::deleteRoute(const IPAddress& prefix) {
 bool LinuxRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     logger.debug() << "Adding exclusion route for"
                    << prefix.toString();
+    const auto proto = prefix.type();
+    if ((proto == QAbstractSocket::IPv4Protocol ||
+         proto == QAbstractSocket::IPv6Protocol) &&
+        !m_exclusionRoutes.contains(prefix)) {
+        m_exclusionRoutes.append(prefix);
+    }
     const int flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     return rtmSendRoute(RTM_NEWROUTE, flags, RTN_THROW, prefix);
 }
@@ -114,8 +121,21 @@ bool LinuxRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 bool LinuxRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
     logger.debug() << "Removing exclusion route for"
                    << prefix.toString();
+    m_exclusionRoutes.removeAll(prefix);
     const int flags = NLM_F_REQUEST | NLM_F_ACK;
     return rtmSendRoute(RTM_DELROUTE, flags, RTN_THROW, prefix);
+}
+
+void LinuxRouteMonitor::reapplyExclusionRoutes() {
+    if (m_exclusionRoutes.isEmpty()) {
+        return;
+    }
+    logger.debug() << "Network change detected, re-applying"
+                   << m_exclusionRoutes.count() << "exclusion route(s)";
+    const int flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
+    for (const IPAddress& prefix : m_exclusionRoutes) {
+        rtmSendRoute(RTM_NEWROUTE, flags, RTN_THROW, prefix);
+    }
 }
 
 bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
@@ -215,6 +235,14 @@ void LinuxRouteMonitor::nlsockReady() {
     while (NLMSG_OK(nlmsg, len)) {
     if (nlmsg->nlmsg_type == NLMSG_DONE) {
         return;
+    }
+    if (nlmsg->nlmsg_type == RTM_NEWROUTE) {
+        struct rtmsg* rtm = static_cast<struct rtmsg*>(NLMSG_DATA(nlmsg));
+        if (rtm->rtm_dst_len == 0 && rtm->rtm_table == RT_TABLE_MAIN) {
+            reapplyExclusionRoutes();
+        }
+        nlmsg = NLMSG_NEXT(nlmsg, len);
+        continue;
     }
     if (nlmsg->nlmsg_type != NLMSG_ERROR) {
         nlmsg = NLMSG_NEXT(nlmsg, len);

@@ -31,11 +31,13 @@ class LinuxRouteMonitor final : public QObject {
   static QString addrToString(const QByteArray& data);
   bool rtmSendRoute(int action, int flags, int type,
                     const IPAddress& prefix);
+  void reapplyExclusionRoutes();
   QString m_ifname;
   unsigned int m_ifindex = 0;
   int m_nlsock = -1;
   int m_nlseq = 0;
   QSocketNotifier* m_notifier = nullptr;
+  QList<IPAddress> m_exclusionRoutes;
 
  private slots:
     void nlsockReady();
