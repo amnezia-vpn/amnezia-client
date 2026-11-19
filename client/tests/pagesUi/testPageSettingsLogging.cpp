@@ -1,4 +1,3 @@
-#include <QSignalSpy>
 #include <QTest>
 
 #include "ui/controllers/qml/pageController.h"
@@ -12,28 +11,6 @@ class TestPageSettingsLogging : public QObject
 
 private:
     PagesUiTestFixture m_fixture;
-
-    bool verifyNavigation(QQuickItem *target, PageLoader::PageEnum expectedPage)
-    {
-        if (!target) {
-            return false;
-        }
-
-        QSignalSpy navigationSpy(m_fixture.pageController(), &PageController::goToPage);
-
-        if (!navigationSpy.isValid()) {
-            return false;
-        }
-
-        m_fixture.click(target);
-
-        if (!QTest::qWaitFor([&navigationSpy] { return navigationSpy.count() == 1; }, 5000)) {
-            return false;
-        }
-
-        const QList<QVariant> arguments = navigationSpy.takeFirst();
-        return !arguments.isEmpty() && arguments.at(0).toInt() == static_cast<int>(expectedPage);
-    }
 
 private slots:
 
@@ -110,7 +87,7 @@ private slots:
         QQuickItem *tunnelRow = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Tunnel"));
 
         QVERIFY2(tunnelRow, "Tunnel logs option was not found");
-        QVERIFY(verifyNavigation(tunnelRow, PageLoader::PageEnum::PageSettingsLogViewer));
+        QVERIFY(m_fixture.verifyNavigation(tunnelRow, PageLoader::PageEnum::PageSettingsLogViewer));
     }
 
     void opensApplicationLogs()
@@ -120,7 +97,7 @@ private slots:
         QQuickItem *applicationRow = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Application"));
 
         QVERIFY2(applicationRow, "Application logs option was not found");
-        QVERIFY(verifyNavigation(applicationRow, PageLoader::PageEnum::PageSettingsLogViewer));
+        QVERIFY(m_fixture.verifyNavigation(applicationRow, PageLoader::PageEnum::PageSettingsLogViewer));
     }
 };
 

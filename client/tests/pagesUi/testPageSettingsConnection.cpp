@@ -1,4 +1,3 @@
-#include <QSignalSpy>
 #include <QTest>
 
 #include "pagesUiTestFixture.h"
@@ -11,28 +10,6 @@ class TestPageSettingsConnection : public QObject
 
 private:
     PagesUiTestFixture m_fixture;
-
-    bool verifyNavigation(QQuickItem *target, PageLoader::PageEnum expectedPage)
-    {
-        if (!target) {
-            return false;
-        }
-
-        QSignalSpy navigationSpy(m_fixture.pageController(), &PageController::goToPage);
-
-        if (!navigationSpy.isValid()) {
-            return false;
-        }
-
-        m_fixture.click(target);
-
-        if (!QTest::qWaitFor([&navigationSpy] { return navigationSpy.count() == 1; }, 5000)) {
-            return false;
-        }
-
-        const QList<QVariant> arguments = navigationSpy.takeFirst();
-        return !arguments.isEmpty() && arguments.at(0).toInt() == static_cast<int>(expectedPage);
-    }
 
 private slots:
 
@@ -111,7 +88,7 @@ private slots:
         QQuickItem *dnsButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("DNS servers"));
 
         QVERIFY(dnsButton);
-        QVERIFY(verifyNavigation(dnsButton, PageLoader::PageEnum::PageSettingsDns));
+        QVERIFY(m_fixture.verifyNavigation(dnsButton, PageLoader::PageEnum::PageSettingsDns));
     }
 
     void opensSiteSplitTunnelingSettings()
@@ -121,7 +98,7 @@ private slots:
         QQuickItem *splitTunnelingButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Site-based split tunneling"));
 
         QVERIFY(splitTunnelingButton);
-        QVERIFY(verifyNavigation(splitTunnelingButton, PageLoader::PageEnum::PageSettingsSplitTunneling));
+        QVERIFY(m_fixture.verifyNavigation(splitTunnelingButton, PageLoader::PageEnum::PageSettingsSplitTunneling));
     }
 
     void opensAppSplitTunnelingSettings()
@@ -140,7 +117,7 @@ private slots:
         QQuickItem *appSplitTunnelingButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("App-based split tunneling"));
 
         QVERIFY2(appSplitTunnelingButton, "App-based split tunneling button was not found");
-        QVERIFY(verifyNavigation(appSplitTunnelingButton, PageLoader::PageEnum::PageSettingsAppSplitTunneling));
+        QVERIFY(m_fixture.verifyNavigation(appSplitTunnelingButton, PageLoader::PageEnum::PageSettingsAppSplitTunneling));
     }
 
     void opensKillSwitchSettings()
@@ -153,7 +130,7 @@ private slots:
             QSKIP("KillSwitch option is not available on this platform");
         }
 
-        QVERIFY(verifyNavigation(killSwitchButton, PageLoader::PageEnum::PageSettingsKillSwitch));
+        QVERIFY(m_fixture.verifyNavigation(killSwitchButton, PageLoader::PageEnum::PageSettingsKillSwitch));
     }
 
     void dnsSettingsPageLoads()

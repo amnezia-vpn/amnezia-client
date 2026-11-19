@@ -56,6 +56,7 @@ public:
     void click(QQuickItem *target);
     void typeText(QQuickItem *target, const QString &text);
     void clearAndType(QQuickItem *target, const QString &text);
+    bool verifyNavigation(QQuickItem *target, PageLoader::PageEnum expectedPage);
 
 private:
     static void collectItems(QQuickItem *root, QList<QQuickItem *> &result);

@@ -9,6 +9,7 @@
 #include <QSet>
 #include <QUuid>
 #include <QVariant>
+#include <QSignalSpy>
 
 #include <vpnConnection.h>
 
@@ -88,7 +89,7 @@ bool PagesUiTestFixture::loadPage(const QString &pageName)
     }
 
     m_window->requestActivate();
-    QTest::qWaitForWindowActive(m_window);
+    QTest::qWaitForWindowActive(m_windowб 400);
 
     QObject *loader = m_window->findChild<QObject *>(QStringLiteral("pageLoader"));
 
@@ -347,4 +348,25 @@ void PagesUiTestFixture::clearAndType(QQuickItem *target, const QString &text)
     QTest::keyClick(m_window, Qt::Key_Backspace);
 
     typeText(target, text);
+}
+
+bool PagesUiTestFixture::verifyNavigation(QQuickItem *target, PageLoader::PageEnum expectedPage)
+{
+    if (!target || !m_pageController) {
+        return false;
+    }
+
+    QSignalSpy navigationSpy(m_pageController, &PageController::goToPage);
+    if (!navigationSpy.isValid()) {
+        return false;
+    }
+
+    click(target);
+
+    if (!QTest::qWaitFor([&navigationSpy] { return navigationSpy.count() == 1; }, 5000)) {
+        return false;
+    }
+
+    const QList<QVariant> arguments = navigationSpy.takeFirst();
+    return !arguments.isEmpty() && arguments.at(0).toInt() == static_cast<int>(expectedPage);
 }

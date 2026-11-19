@@ -37,7 +37,6 @@ private slots:
 
     void killSwitchSwitchIsPresent()
     {
-        QVERIFY(m_fixture.initialize(this));
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageSettingsKillSwitch")));
 
         const auto switches = m_fixture.itemsOfType("SwitchType");
