@@ -47,8 +47,8 @@ SheetType {
             trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
             onClicked: {
-                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 root.close()
+                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
             }
         }
 
@@ -63,8 +63,8 @@ SheetType {
             trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
             onClicked: {
-                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 root.close()
+                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
             }
         }
 
@@ -81,8 +81,8 @@ SheetType {
             trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
             onClicked: {
-                PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 root.close()
+                PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
             }
         }
     }

@@ -66,7 +66,6 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -85,7 +84,7 @@ PageType {
                         headerText: qsTr("Server IP address [:port]")
                         textField.placeholderText: qsTr("255.255.255.255:22")
 
-                        textField.onFocusChanged: root.trimField(hostnameField)
+                        textField.onEditingFinished: root.trimField(hostnameField)
                     }
 
                     TextFieldType {
@@ -96,7 +95,7 @@ PageType {
                         headerText: qsTr("SSH Username")
                         textField.placeholderText: "root"
 
-                        textField.onFocusChanged: root.trimField(usernameField)
+                        textField.onEditingFinished: root.trimField(usernameField)
                     }
 
                     TextFieldType {
@@ -107,7 +106,7 @@ PageType {
                         headerText: qsTr("Password or SSH private key")
                         passwordToggle: true
 
-                        textField.onFocusChanged: root.trimField(secretDataField)
+                        textField.onEditingFinished: root.trimField(secretDataField)
                     }
 
                     NotificationType {
@@ -197,7 +196,8 @@ PageType {
 
         CaptionTextType {
             Layout.fillWidth: true
-            Layout.topMargin: 4
+            Layout.topMargin: 16
+            Layout.bottomMargin: 12
 
             horizontalAlignment: Text.AlignHCenter
 

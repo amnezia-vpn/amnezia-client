@@ -145,6 +145,20 @@ QString ApiCountryModel::getUserCountryCode() const
     return m_userCountryCode;
 }
 
+QString ApiCountryModel::serverId() const
+{
+    return m_serverId;
+}
+
+void ApiCountryModel::setServerId(const QString &serverId)
+{
+    if (m_serverId == serverId) {
+        return;
+    }
+    m_serverId = serverId;
+    emit serverIdChanged(m_serverId);
+}
+
 int ApiCountryModel::getCurrentIndex()
 {
     return m_currentIndex;

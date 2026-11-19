@@ -129,7 +129,7 @@ private:
 
         // Update flow
         QString serverId;
-        QString newCountryCode;
+        QString serverCountryCode;
         QString newCountryName;
         bool isConnectEvent = false;
         bool reloadServiceConfig = false;
@@ -142,6 +142,7 @@ private:
 
 private:
     void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void finishCaptchaFlow();
     void emitCaptchaUpdateSuccess();
     void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
 

@@ -226,7 +226,8 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->gatewayEnvironment(isTestPurchase),
+                                        apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
@@ -337,7 +338,7 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &serverCountryCode, bool isConnectEvent,
                                                            CaptchaInfo *captchaInfoOut, ProtocolData *usedProtocolDataOut)
 {
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
@@ -347,11 +348,11 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString serviceProtocol = apiV2->serviceProtocol();
 
-    if (!newCountryCode.isEmpty()) {
+    if (!serverCountryCode.isEmpty()) {
         const auto availableCountries = apiV2->apiConfig.availableCountries;
         for (const auto &country : availableCountries) {
             const auto countryObject = country.toObject();
-            if (countryObject.value(apiDefs::key::serverCountryCode).toString() != newCountryCode) {
+            if (countryObject.value(apiDefs::key::serverCountryCode).toString() != serverCountryCode) {
                 continue;
             }
 
@@ -367,7 +368,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
 
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                      .addField(apiDefs::key::userCountryCode, apiV2->apiConfig.userCountryCode)
-                                     .addField(apiDefs::key::serverCountryCode, newCountryCode)
+                                     .addField(apiDefs::key::serverCountryCode, serverCountryCode)
                                      .addField(apiDefs::key::serviceType, apiV2->serviceType())
                                      .addField(apiDefs::key::serviceProtocol, serviceProtocol)
                                      .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
@@ -404,6 +405,7 @@ ErrorCode SubscriptionController::fetchServiceConfig(const QString &serverId, co
 
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                      .addField(apiDefs::key::userCountryCode, apiV2->apiConfig.userCountryCode)
+                                     .addField(apiDefs::key::serverCountryCode, apiV2->apiConfig.serverCountryCode)
                                      .addField(apiDefs::key::serviceType, apiV2->serviceType())
                                      .addField(apiDefs::key::serviceProtocol, serviceProtocol)
                                      .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
@@ -469,7 +471,7 @@ ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serve
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::resolveUpdateServiceCaptcha(const QString &serverId, const QString &newCountryCode,
+ErrorCode SubscriptionController::resolveUpdateServiceCaptcha(const QString &serverId, const QString &serverCountryCode,
                                                               bool isConnectEvent, const ProtocolData &protocolData,
                                                               const QString &captchaId, const QString &captchaSolution,
                                                               CaptchaInfo *retryCaptchaOut)
@@ -483,7 +485,7 @@ ErrorCode SubscriptionController::resolveUpdateServiceCaptcha(const QString &ser
 
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                      .addField(apiDefs::key::userCountryCode, apiV2->apiConfig.userCountryCode)
-                                     .addField(apiDefs::key::serverCountryCode, newCountryCode)
+                                     .addField(apiDefs::key::serverCountryCode, serverCountryCode)
                                      .addField(apiDefs::key::serviceType, apiV2->serviceType())
                                      .addField(apiDefs::key::serviceProtocol, serviceProtocol)
                                      .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
@@ -742,17 +744,19 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(const QString &serverId, Q
 ErrorCode SubscriptionController::validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers,
                                                          CaptchaInfo *captchaInfoOut, ProtocolData *usedProtocolDataOut)
 {
-    if (!m_serversRepository->apiV2Config(serverId).has_value()) {
+    const auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
         return ErrorCode::NoError;
     }
+    const QString serverCountryCode = apiV2->apiConfig.serverCountryCode;
 
     if (!hasInstalledContainers) {
-        return updateServiceFromGateway(serverId, "", true, captchaInfoOut, usedProtocolDataOut);
+        return updateServiceFromGateway(serverId, serverCountryCode, true, captchaInfoOut, usedProtocolDataOut);
     }
 
     if (isApiKeyExpired(serverId)) {
         qDebug() << "attempt to update api config by expires_at event";
-        return updateServiceFromGateway(serverId, "", true, captchaInfoOut, usedProtocolDataOut);
+        return updateServiceFromGateway(serverId, serverCountryCode, true, captchaInfoOut, usedProtocolDataOut);
     }
 
     return ErrorCode::NoError;
@@ -924,11 +928,9 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
                                      .addField(apiDefs::key::subscriptionStatus, getSubscriptionStatusForRenewal(apiV2->apiConfig))
                                      .build();
 
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
-                                                                       m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
-                                                                       apiDefs::requestTimeoutMsecs,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
-                                                                       m_appSettingsRepository);
+    auto gatewayController = QSharedPointer<GatewayController>::create(
+            m_appSettingsRepository->gatewayEnvironment(isTestPurchase), apiDefs::requestTimeoutMsecs,
+            m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,

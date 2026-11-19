@@ -14,7 +14,7 @@
 
 using namespace amnezia;
 
-TelemtConfigModel::TelemtConfigModel(QObject *parent) : QAbstractListModel(parent) {}
+TelemtConfigModel::TelemtConfigModel(QObject *parent) : QObject(parent) {}
 
 void TelemtConfigModel::applyDefaults(TelemtProtocolConfig &c) {
     if (c.port.isEmpty()) {
@@ -34,205 +34,109 @@ void TelemtConfigModel::applyDefaults(TelemtProtocolConfig &c) {
     }
 }
 
-int TelemtConfigModel::rowCount(const QModelIndex &parent) const {
-    Q_UNUSED(parent);
-    return 1;
+QString TelemtConfigModel::port() const {
+    return m_protocolConfig.port.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultPort)
+                                           : m_protocolConfig.port;
 }
 
-bool TelemtConfigModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (!index.isValid() || index.row() != 0) {
-        return false;
-    }
-
-    switch (role) {
-        case Roles::PortRole: {
-            m_protocolConfig.port = value.toString();
-            break;
-        }
-        case Roles::SecretRole: {
-            m_protocolConfig.secret = value.toString();
-            break;
-        }
-        case Roles::TagRole: {
-            const QString tag = sanitizeMtProxyTagFieldText(value.toString());
-            if (!isValidMtProxyTag(tag)) {
-                return false;
-            }
-            m_protocolConfig.tag = tag;
-            break;
-        }
-        case Roles::IsEnabledRole: {
-            m_protocolConfig.isEnabled = value.toBool();
-            break;
-        }
-        case Roles::PublicHostRole: {
-            const QString h = value.toString().trimmed();
-            if (!isValidPublicHost(h)) {
-                return false;
-            }
-            m_protocolConfig.publicHost = h;
-            break;
-        }
-        case Roles::TransportModeRole: {
-            m_protocolConfig.transportMode = value.toString();
-            break;
-        }
-        case Roles::TlsDomainRole: {
-            const QString d = value.toString().trimmed();
-            if (!isValidFakeTlsDomain(d)) {
-                return false;
-            }
-            m_protocolConfig.tlsDomain = d;
-            break;
-        }
-        case Roles::AdditionalSecretsRole: {
-            m_protocolConfig.additionalSecrets = value.toStringList();
-            break;
-        }
-        case Roles::WorkersModeRole: {
-            m_protocolConfig.workersMode = value.toString();
-            break;
-        }
-        case Roles::WorkersRole: {
-            m_protocolConfig.workers = value.toString();
-            break;
-        }
-        case Roles::NatEnabledRole: {
-            m_protocolConfig.natEnabled = value.toBool();
-            break;
-        }
-        case Roles::NatInternalIpRole: {
-            const QString ip = value.toString().trimmed();
-            if (!isValidOptionalIpv4(ip)) {
-                return false;
-            }
-            m_protocolConfig.natInternalIp = ip;
-            break;
-        }
-        case Roles::NatExternalIpRole: {
-            const QString ip = value.toString().trimmed();
-            if (!isValidOptionalIpv4(ip)) {
-                return false;
-            }
-            m_protocolConfig.natExternalIp = ip;
-            break;
-        }
-        case Roles::MaskEnabledRole: {
-            m_protocolConfig.maskEnabled = value.toBool();
-            break;
-        }
-        case Roles::UseMiddleProxyRole: {
-            m_protocolConfig.useMiddleProxy = value.toBool();
-            break;
-        }
-        case Roles::TlsEmulationRole: {
-            m_protocolConfig.tlsEmulation = value.toBool();
-            break;
-        }
-        case Roles::UserNameRole: {
-            m_protocolConfig.userName = value.toString();
-            break;
-        }
-        default: {
-            return false;
-        }
-    }
-
-    emit dataChanged(index, index, QList{role});
-    return true;
+QString TelemtConfigModel::secret() const {
+    return m_protocolConfig.secret;
 }
 
-QVariant TelemtConfigModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || index.row() != 0) {
-        return QVariant();
-    }
+QString TelemtConfigModel::tag() const {
+    return m_protocolConfig.tag;
+}
 
-    switch (role) {
-        case Roles::PortRole: {
-            return m_protocolConfig.port.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultPort)
-                                                   : m_protocolConfig.port;
-        }
-        case Roles::SecretRole: {
-            return m_protocolConfig.secret;
-        }
-        case Roles::TagRole: {
-            return m_protocolConfig.tag;
-        }
-        case Roles::TgLinkRole: {
-            return m_protocolConfig.tgLink;
-        }
-        case Roles::TmeLinkRole: {
-            return m_protocolConfig.tmeLink;
-        }
-        case Roles::IsEnabledRole: {
-            return m_protocolConfig.isEnabled;
-        }
-        case Roles::PublicHostRole: {
-            return m_protocolConfig.publicHost.isEmpty() ? m_fullConfig.value(QString(configKey::hostName)).toString()
-                                                         : m_protocolConfig.publicHost;
-        }
-        case Roles::TransportModeRole: {
-            return m_protocolConfig.transportMode.isEmpty() ? QString::fromUtf8(
-                    protocols::telemt::transportModeStandard)
-                                                            : m_protocolConfig.transportMode;
-        }
-        case Roles::TlsDomainRole: {
-            return m_protocolConfig.tlsDomain;
-        }
-        case Roles::AdditionalSecretsRole: {
-            return m_protocolConfig.additionalSecrets;
-        }
-        case Roles::WorkersModeRole: {
-            return m_protocolConfig.workersMode.isEmpty() ? QString::fromUtf8(protocols::telemt::workersModeAuto)
-                                                          : m_protocolConfig.workersMode;
-        }
-        case Roles::WorkersRole: {
-            return m_protocolConfig.workers.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultWorkers)
-                                                      : m_protocolConfig.workers;
-        }
-        case Roles::NatEnabledRole: {
-            return m_protocolConfig.natEnabled;
-        }
-        case Roles::NatInternalIpRole: {
-            return m_protocolConfig.natInternalIp;
-        }
-        case Roles::NatExternalIpRole: {
-            return m_protocolConfig.natExternalIp;
-        }
-        case Roles::MaskEnabledRole: {
-            return m_protocolConfig.maskEnabled;
-        }
-        case Roles::UseMiddleProxyRole: {
-            return m_protocolConfig.useMiddleProxy;
-        }
-        case Roles::TlsEmulationRole: {
-            return m_protocolConfig.tlsEmulation;
-        }
-        case Roles::UserNameRole: {
-            return m_protocolConfig.userName.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                                                       : m_protocolConfig.userName;
-        }
-    }
+QString TelemtConfigModel::tgLink() const {
+    return m_protocolConfig.tgLink;
+}
 
-    return QVariant();
+QString TelemtConfigModel::tmeLink() const {
+    return m_protocolConfig.tmeLink;
+}
+
+bool TelemtConfigModel::isEnabled() const {
+    return m_protocolConfig.isEnabled;
+}
+
+QString TelemtConfigModel::publicHost() const {
+    return m_protocolConfig.publicHost.isEmpty() ? m_fullConfig.value(QString(configKey::hostName)).toString()
+                                                 : m_protocolConfig.publicHost;
+}
+
+QString TelemtConfigModel::transportMode() const {
+    return m_protocolConfig.transportMode.isEmpty() ? QString::fromUtf8(protocols::telemt::transportModeStandard)
+                                                    : m_protocolConfig.transportMode;
+}
+
+QString TelemtConfigModel::tlsDomain() const {
+    return m_protocolConfig.tlsDomain;
+}
+
+QStringList TelemtConfigModel::additionalSecrets() const {
+    return m_protocolConfig.additionalSecrets;
+}
+
+void TelemtConfigModel::setAdditionalSecrets(const QStringList &secrets) {
+    if (m_protocolConfig.additionalSecrets == secrets) {
+        return;
+    }
+    m_protocolConfig.additionalSecrets = secrets;
+    emit changed();
+}
+
+QString TelemtConfigModel::workersMode() const {
+    return m_protocolConfig.workersMode.isEmpty() ? QString::fromUtf8(protocols::telemt::workersModeAuto)
+                                                  : m_protocolConfig.workersMode;
+}
+
+QString TelemtConfigModel::workers() const {
+    return m_protocolConfig.workers.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultWorkers)
+                                              : m_protocolConfig.workers;
+}
+
+bool TelemtConfigModel::natEnabled() const {
+    return m_protocolConfig.natEnabled;
+}
+
+QString TelemtConfigModel::natInternalIp() const {
+    return m_protocolConfig.natInternalIp;
+}
+
+QString TelemtConfigModel::natExternalIp() const {
+    return m_protocolConfig.natExternalIp;
+}
+
+bool TelemtConfigModel::maskEnabled() const {
+    return m_protocolConfig.maskEnabled;
+}
+
+bool TelemtConfigModel::useMiddleProxy() const {
+    return m_protocolConfig.useMiddleProxy;
+}
+
+bool TelemtConfigModel::tlsEmulation() const {
+    return m_protocolConfig.tlsEmulation;
+}
+
+QString TelemtConfigModel::userName() const {
+    return m_protocolConfig.userName.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultUserName)
+                                               : m_protocolConfig.userName;
 }
 
 void TelemtConfigModel::updateModel(DockerContainer container, const TelemtProtocolConfig &protocolConfig) {
-    beginResetModel();
     m_container = container;
     m_protocolConfig = protocolConfig;
     applyDefaults(m_protocolConfig);
-    endResetModel();
+    emit changed();
 }
 
 void TelemtConfigModel::updateModel(const QJsonObject &config) {
-    beginResetModel();
-
     m_fullConfig = config;
     m_protocolConfig = TelemtProtocolConfig::fromJson(config.value(QString(configKey::telemt)).toObject());
     applyDefaults(m_protocolConfig);
 
-    endResetModel();
+    emit changed();
 }
 
 QJsonObject TelemtConfigModel::getConfig() {
@@ -252,42 +156,57 @@ void TelemtConfigModel::generateSecret() {
     }
 
     m_protocolConfig.secret = secret;
-    emit dataChanged(index(0), index(0), QList<int>{SecretRole});
+    emit changed();
 }
 
 void TelemtConfigModel::setSecret(const QString &secret) {
-    if (secret.isEmpty()) {
+    if (secret.isEmpty() || m_protocolConfig.secret == secret) {
         return;
     }
-    setData(index(0), secret, SecretRole);
+    m_protocolConfig.secret = secret;
+    emit changed();
 }
 
 bool TelemtConfigModel::validateAndSetSecret(const QString &rawSecret) {
     if (!QRegularExpression("^[0-9a-fA-F]{32}$").match(rawSecret).hasMatch()) {
         return false;
     }
-    setData(index(0), rawSecret, SecretRole);
+    setSecret(rawSecret);
     return true;
 }
 
 void TelemtConfigModel::setPort(const QString &port) {
-    setData(index(0), port, PortRole);
+    if (m_protocolConfig.port == port) {
+        return;
+    }
+    m_protocolConfig.port = port;
+    emit changed();
 }
 
 void TelemtConfigModel::setTag(const QString &tag) {
-    setData(index(0), tag, TagRole);
+    const QString sanitized = sanitizeMtProxyTagFieldText(tag);
+    if (!isValidMtProxyTag(sanitized) || m_protocolConfig.tag == sanitized) {
+        return;
+    }
+    m_protocolConfig.tag = sanitized;
+    emit changed();
 }
 
 void TelemtConfigModel::setPublicHost(const QString &host) {
     const QString t = host.trimmed();
-    if (!isValidPublicHost(t)) {
+    if (!isValidPublicHost(t) || m_protocolConfig.publicHost == t) {
         return;
     }
-    setData(index(0), t, PublicHostRole);
+    m_protocolConfig.publicHost = t;
+    emit changed();
 }
 
 void TelemtConfigModel::setTransportMode(const QString &mode) {
-    setData(index(0), mode, TransportModeRole);
+    if (m_protocolConfig.transportMode == mode) {
+        return;
+    }
+    m_protocolConfig.transportMode = mode;
+    emit changed();
 }
 
 QString TelemtConfigModel::getTransportMode() const {
@@ -308,54 +227,85 @@ QString TelemtConfigModel::getPublicHost() const {
 
 void TelemtConfigModel::setTlsDomain(const QString &domain) {
     const QString t = domain.trimmed();
-    if (!isValidFakeTlsDomain(t)) {
+    if (!isValidFakeTlsDomain(t) || m_protocolConfig.tlsDomain == t) {
         return;
     }
-    setData(index(0), t, TlsDomainRole);
+    m_protocolConfig.tlsDomain = t;
+    emit changed();
 }
 
 void TelemtConfigModel::setWorkersMode(const QString &mode) {
-    setData(index(0), mode, WorkersModeRole);
+    if (m_protocolConfig.workersMode == mode) {
+        return;
+    }
+    m_protocolConfig.workersMode = mode;
+    emit changed();
 }
 
 void TelemtConfigModel::setWorkers(const QString &workers) {
-    setData(index(0), workers, WorkersRole);
+    if (m_protocolConfig.workers == workers) {
+        return;
+    }
+    m_protocolConfig.workers = workers;
+    emit changed();
 }
 
 void TelemtConfigModel::setNatEnabled(bool enabled) {
-    setData(index(0), enabled, NatEnabledRole);
+    if (m_protocolConfig.natEnabled == enabled) {
+        return;
+    }
+    m_protocolConfig.natEnabled = enabled;
+    emit changed();
 }
 
 void TelemtConfigModel::setNatInternalIp(const QString &ip) {
     const QString t = ip.trimmed();
-    if (!isValidOptionalIpv4(t)) {
+    if (!isValidOptionalIpv4(t) || m_protocolConfig.natInternalIp == t) {
         return;
     }
-    setData(index(0), t, NatInternalIpRole);
+    m_protocolConfig.natInternalIp = t;
+    emit changed();
 }
 
 void TelemtConfigModel::setNatExternalIp(const QString &ip) {
     const QString t = ip.trimmed();
-    if (!isValidOptionalIpv4(t)) {
+    if (!isValidOptionalIpv4(t) || m_protocolConfig.natExternalIp == t) {
         return;
     }
-    setData(index(0), t, NatExternalIpRole);
+    m_protocolConfig.natExternalIp = t;
+    emit changed();
 }
 
 void TelemtConfigModel::setMaskEnabled(bool enabled) {
-    setData(index(0), enabled, MaskEnabledRole);
+    if (m_protocolConfig.maskEnabled == enabled) {
+        return;
+    }
+    m_protocolConfig.maskEnabled = enabled;
+    emit changed();
 }
 
 void TelemtConfigModel::setUseMiddleProxy(bool enabled) {
-    setData(index(0), enabled, UseMiddleProxyRole);
+    if (m_protocolConfig.useMiddleProxy == enabled) {
+        return;
+    }
+    m_protocolConfig.useMiddleProxy = enabled;
+    emit changed();
 }
 
 void TelemtConfigModel::setTlsEmulation(bool enabled) {
-    setData(index(0), enabled, TlsEmulationRole);
+    if (m_protocolConfig.tlsEmulation == enabled) {
+        return;
+    }
+    m_protocolConfig.tlsEmulation = enabled;
+    emit changed();
 }
 
 void TelemtConfigModel::setUserName(const QString &name) {
-    setData(index(0), name, UserNameRole);
+    if (m_protocolConfig.userName == name) {
+        return;
+    }
+    m_protocolConfig.userName = name;
+    emit changed();
 }
 
 void TelemtConfigModel::addAdditionalSecret() {
@@ -366,7 +316,7 @@ void TelemtConfigModel::addAdditionalSecret() {
     }
 
     m_protocolConfig.additionalSecrets.append(newSecret);
-    emit dataChanged(index(0), index(0), QList<int>{AdditionalSecretsRole});
+    emit changed();
 }
 
 void TelemtConfigModel::removeAdditionalSecret(int idx) {
@@ -374,7 +324,7 @@ void TelemtConfigModel::removeAdditionalSecret(int idx) {
         return;
     }
     m_protocolConfig.additionalSecrets.removeAt(idx);
-    emit dataChanged(index(0), index(0), QList<int>{AdditionalSecretsRole});
+    emit changed();
 }
 
 QVariantList TelemtConfigModel::additionalSecretsList() const {
@@ -389,8 +339,11 @@ QVariantList TelemtConfigModel::additionalSecretsList() const {
 }
 
 void TelemtConfigModel::setEnabled(bool enabled) {
+    if (m_protocolConfig.isEnabled == enabled) {
+        return;
+    }
     m_protocolConfig.isEnabled = enabled;
-    emit dataChanged(index(0), index(0), QList<int>{IsEnabledRole});
+    emit changed();
 }
 
 QString TelemtConfigModel::generateQrCode(const QString &text) {
@@ -715,30 +668,4 @@ bool TelemtConfigModel::isValidOptionalIpv4(const QString &ip) const {
         return true;
     }
     return NetworkUtilities::checkIPv4Format(t);
-}
-
-QHash<int, QByteArray> TelemtConfigModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-
-    roles[PortRole] = "port";
-    roles[SecretRole] = "secret";
-    roles[TagRole] = "tag";
-    roles[TgLinkRole] = "tgLink";
-    roles[TmeLinkRole] = "tmeLink";
-    roles[IsEnabledRole] = "isEnabled";
-    roles[PublicHostRole] = "publicHost";
-    roles[TransportModeRole] = "transportMode";
-    roles[TlsDomainRole] = "tlsDomain";
-    roles[AdditionalSecretsRole] = "additionalSecrets";
-    roles[WorkersModeRole] = "workersMode";
-    roles[WorkersRole] = "workers";
-    roles[NatEnabledRole] = "natEnabled";
-    roles[NatInternalIpRole] = "natInternalIp";
-    roles[NatExternalIpRole] = "natExternalIp";
-    roles[MaskEnabledRole] = "maskEnabled";
-    roles[UseMiddleProxyRole] = "useMiddleProxy";
-    roles[TlsEmulationRole] = "tlsEmulation";
-    roles[UserNameRole] = "userName";
-
-    return roles;
 }

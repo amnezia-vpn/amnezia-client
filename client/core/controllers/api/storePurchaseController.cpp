@@ -108,8 +108,8 @@ StorePurchaseController::StorePurchaseController(SecureServersRepository *server
 ErrorCode StorePurchaseController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload,
                                                   QByteArray &responseBody, bool isTestPurchase)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
-                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->gatewayEnvironment(isTestPurchase),
+                                        apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }

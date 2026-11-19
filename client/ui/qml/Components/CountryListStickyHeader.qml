@@ -6,7 +6,7 @@ CountrySectionHeader {
     id: root
 
     required property ListView listView
-    required property CollapsingHeaderType header
+    required property ListPageHeaderType header
 
     property int revision: 0
 

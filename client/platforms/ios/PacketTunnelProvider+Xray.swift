@@ -205,10 +205,10 @@ extension PacketTunnelProvider {
         }
     }
 
-    func stopXray(completionHandler: () -> Void) {
+    func stopXray(completionHandler: @escaping () -> Void) {
         Socks5Tunnel.quit()
         LibXrayStopXray()
-        completionHandler()
+        hevSocksTunnelGroup.notify(queue: .main, execute: completionHandler)
     }
 
     func sockCallback(fd: uintptr_t) {
@@ -345,10 +345,13 @@ extension PacketTunnelProvider {
             return
         }
 
-        DispatchQueue.global().async {
+        hevSocksTunnelGroup.enter()
+        DispatchQueue.global().async { [hevSocksTunnelGroup] in
             xrayLog(.info, message: "Hev socks started")
             completionHandler(nil)
-            Socks5Tunnel.run(withConfig: configurationFilePath)
+            let result = Socks5Tunnel.run(withConfig: configurationFilePath)
+            xrayLog(.info, message: "Hev socks stopped: \(result)")
+            hevSocksTunnelGroup.leave()
         }
     }
 }

@@ -143,6 +143,9 @@ protected:
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
     SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
+    ApiCountryModel* apiCountryModelProtected() const { return m_apiCountryModel; }
+    ApiCountryListModel* apiCountryListModelProtected() const { return m_apiCountryListModel; }
+    ApiCountryListModel* apiConfigsCountryListModelProtected() const { return m_apiConfigsCountryListModel; }
 
 private:
     void initRepositories();
@@ -170,7 +173,7 @@ private:
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
     ConnectionUiController* m_connectionUiController;
-    FocusController* m_focusController;
+    FocusController* m_focusController = nullptr;
     PageController* m_pageController;
     InstallUiController* m_installUiController;
     ImportUiController* m_importController;

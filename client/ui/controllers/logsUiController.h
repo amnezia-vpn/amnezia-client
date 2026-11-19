@@ -14,6 +14,7 @@ class LogsUiController : public QObject
 
     Q_PROPERTY(QString appLogSize READ appLogSize NOTIFY sizesChanged)
     Q_PROPERTY(QString tunnelLogSize READ tunnelLogSize NOTIFY sizesChanged)
+    Q_PROPERTY(bool hasLogs READ hasLogs NOTIFY sizesChanged)
     Q_PROPERTY(QString viewerStream READ viewerStream WRITE setViewerStream NOTIFY viewerStreamChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -22,6 +23,7 @@ public:
 
     QString appLogSize() const;
     QString tunnelLogSize() const;
+    bool hasLogs() const;
 
     QString viewerStream() const;
     void setViewerStream(const QString &stream);

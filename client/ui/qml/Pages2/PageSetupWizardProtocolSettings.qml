@@ -113,7 +113,6 @@ PageType {
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
 
@@ -236,80 +235,82 @@ PageType {
 
                         expandedHeight: windowHeight * 0.9
 
-                        Item {
+                        Loader {
                             anchors.fill: parent
 
-                            Item {
-                                id: showDetailsNavigation
+                            active: showDetailsDrawer.visible
 
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-
-                                height: 48
-
-                                IconButtonType {
-                                    x: 16
-                                    y: 4
-
-                                    size: IconButtonType.Small
-                                    icon.source: "qrc:/images/controls/arrow-left.svg"
-                                    Accessible.name: qsTr("Back")
-
-                                    onClicked: showDetailsDrawer.close()
-                                }
-                            }
-
-                            FlickableType {
-                                id: showDetailsFlickable
-
-                                anchors.top: showDetailsNavigation.bottom
-                                anchors.bottom: showDetailsCloseBar.top
-
-                                contentHeight: showDetailsContent.implicitHeight + 28
-
-                                ColumnLayout {
-                                    id: showDetailsContent
+                            sourceComponent: Item {
+                                Item {
+                                    id: showDetailsNavigation
 
                                     anchors.top: parent.top
                                     anchors.left: parent.left
                                     anchors.right: parent.right
-                                    anchors.topMargin: 12
-                                    anchors.leftMargin: 16
-                                    anchors.rightMargin: 16
 
-                                    spacing: 8
+                                    height: 48
 
-                                    SectionHeaderType {
-                                        Layout.fillWidth: true
+                                    IconButtonType {
+                                        x: 4
+                                        y: 0
+                                        icon.source: "qrc:/images/controls/arrow-left.svg"
+                                        Accessible.name: qsTr("Back")
 
-                                        headerText: delegateRoot.name
-                                    }
-
-                                    BodyTextType {
-                                        Layout.fillWidth: true
-
-                                        text: delegateRoot.detailedDescription
-                                        textFormat: Text.MarkdownText
+                                        onClicked: showDetailsDrawer.close()
                                     }
                                 }
-                            }
 
-                            BottomBarType {
-                                id: showDetailsCloseBar
+                                FlickableType {
+                                    id: showDetailsFlickable
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
+                                    anchors.top: showDetailsNavigation.bottom
+                                    anchors.bottom: showDetailsCloseBar.top
 
-                                color: AmneziaStyle.color.transparent
+                                    contentHeight: showDetailsContent.implicitHeight + 28
 
-                                ButtonType {
-                                    Layout.fillWidth: true
+                                    ColumnLayout {
+                                        id: showDetailsContent
 
-                                    text: qsTr("Close")
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.topMargin: 12
+                                        anchors.leftMargin: 16
+                                        anchors.rightMargin: 16
 
-                                    onClicked: showDetailsDrawer.close()
+                                        spacing: 8
+
+                                        SectionHeaderType {
+                                            Layout.fillWidth: true
+
+                                            headerText: delegateRoot.name
+                                        }
+
+                                        BodyTextType {
+                                            Layout.fillWidth: true
+
+                                            text: delegateRoot.detailedDescription
+                                            textFormat: Text.MarkdownText
+                                        }
+                                    }
+                                }
+
+                                BottomBarType {
+                                    id: showDetailsCloseBar
+
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+
+                                    color: AmneziaStyle.color.transparent
+
+                                    ButtonType {
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Close")
+
+                                        onClicked: showDetailsDrawer.close()
+                                    }
                                 }
                             }
                         }

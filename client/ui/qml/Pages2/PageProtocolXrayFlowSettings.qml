@@ -15,38 +15,42 @@ import "../Components"
 PageType {
     id: root
 
-    ListViewType {
-        id: listView
+    readonly property bool visionAllowed: (XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw")
+                                          && (XrayConfigModel.security === "tls" || XrayConfigModel.security === "reality")
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: saveButton.visible ? 24 : 0
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("Flow")
-        }
+        ColumnLayout {
+            id: content
 
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            readonly property bool visionAllowed: transport === "" || transport === "raw"
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Flow")
+            }
 
             RadioItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Empty")
-                checked: flow === "" || !visionAllowed
-                onClicked: flow = ""
+                checked: XrayConfigModel.flow === "" || !root.visionAllowed
+                onClicked: XrayConfigModel.flow = ""
             }
 
             RadioItemType {
@@ -54,9 +58,9 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision"
-                enabled: visionAllowed
-                checked: flow === "xtls-rprx-vision" && visionAllowed
-                onClicked: flow = "xtls-rprx-vision"
+                enabled: root.visionAllowed
+                checked: XrayConfigModel.flow === "xtls-rprx-vision" && root.visionAllowed
+                onClicked: XrayConfigModel.flow = "xtls-rprx-vision"
             }
 
             RadioItemType {
@@ -65,9 +69,9 @@ PageType {
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
                 subtitle: qsTr("For apps that require QUIC. Browsers may stop loading.")
-                enabled: visionAllowed
-                checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
-                onClicked: flow = "xtls-rprx-vision-udp443"
+                enabled: root.visionAllowed
+                checked: XrayConfigModel.flow === "xtls-rprx-vision-udp443" && root.visionAllowed
+                onClicked: XrayConfigModel.flow = "xtls-rprx-vision-udp443"
             }
 
             SmallTextType {
@@ -75,9 +79,9 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 12
-                visible: !visionAllowed
+                visible: !root.visionAllowed
                 color: AmneziaStyle.color.textAccent
-                text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport.")
+                text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport and TLS or Reality security.")
             }
 
             Item {
@@ -96,10 +100,16 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
-        enabled: visible
+        visible: flickable.enabled
+        enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -109,15 +119,13 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var noButtonFunction = function () {}
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

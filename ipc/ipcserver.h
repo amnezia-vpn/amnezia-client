@@ -47,6 +47,7 @@ public:
     virtual qint64 xrayStartOwned(const QString& cfg) override;
     virtual bool xrayStopOwned(qint64 token) override;
     virtual qint64 xrayCurrentToken() override;
+    virtual bool isTcpPortAvailable(int port) override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 

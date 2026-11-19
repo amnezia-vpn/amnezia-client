@@ -57,11 +57,12 @@ public:
     bool isAppsSplitTunnelingEnabled() const;
     void setAppsSplitTunnelingEnabled(bool enabled);
 
-    QString getGatewayEndpoint(bool isTestPurchase = false) const;
-    void setGatewayEndpoint(const QString &endpoint);
-    void resetGatewayEndpoint();
-    void setDevGatewayEndpoint();
-    bool isDevGatewayEnv(bool isTestPurchase = false) const;
+    GatewayEnvironment gatewayEnvironment(bool isTestPurchase = false) const;
+    QString devGatewayEndpoint() const;
+    QString devGatewayProxyStorages() const;
+    QString devGatewayPublicKey() const;
+    void setDevGatewayConfig(const QString &endpoint, const QString &proxyStorages, const QString &publicKey);
+    bool isDevGatewayEnv() const;
     void toggleDevGatewayEnv(bool enabled);
     QByteArray readGatewayProxyUrls(const QString &cacheKey) const;
     void writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted);
@@ -80,8 +81,10 @@ public:
 
     int countryListSortMode(const QString &listId) const;
     void setCountryListSortMode(const QString &listId, int mode);
-    QStringList favoriteLocations() const;
-    void setFavoriteLocations(const QStringList &codes);
+    QStringList favoriteLocations(const QString &serverId) const;
+    void setFavoriteLocations(const QString &serverId, const QStringList &codes);
+    void removeFavoriteLocations(const QString &serverId);
+    void migrateLegacyFavoriteLocations(const QStringList &serverIds);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 
@@ -134,7 +137,6 @@ private:
     void setValue(const QString &key, const QVariant &value);
 
     SecureQSettings* m_settings;
-    QString m_gatewayEndpoint;
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H

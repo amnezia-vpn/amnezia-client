@@ -33,6 +33,9 @@ public:
 
     const QVector<CountryInfo> &countries() const;
 
+    QString serverId() const;
+    void setServerId(const QString &serverId);
+
     Q_PROPERTY(int currentIndex READ getCurrentIndex NOTIFY currentIndexChanged)
     Q_PROPERTY(QString currentCountryCode READ getCurrentCountryCode NOTIFY currentIndexChanged)
     Q_PROPERTY(bool hasExpiredWorkerConfigs READ hasExpiredWorkerConfigs NOTIFY issuedConfigsChanged)
@@ -51,6 +54,7 @@ public slots:
 signals:
     void currentIndexChanged(const int index);
     void issuedConfigsChanged();
+    void serverIdChanged(const QString &serverId);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -68,6 +72,7 @@ private:
     bool isWorkerExpired(const IssuedConfigInfo &issuedConfigInfo) const;
 
     QVector<CountryInfo> m_countries;
+    QString m_serverId;
     QHash<QString, IssuedConfigInfo> m_issuedConfigs;
     QString m_currentCountryCode;
     QString m_userCountryCode;

@@ -49,7 +49,6 @@ PageType {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -60,7 +59,7 @@ PageType {
 
                     spacing: 12
 
-                    visible: benefitsPanel.visible
+                    visible: benefitsPanel.benefitsCount > 0
 
                     BodyTextType {
                         Layout.fillWidth: true

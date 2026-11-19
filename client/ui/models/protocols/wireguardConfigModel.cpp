@@ -8,65 +8,127 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
-WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
+WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QObject(parent)
 {
 }
 
-int WireGuardConfigModel::rowCount(const QModelIndex &parent) const
+QString WireGuardConfigModel::subnetAddress() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.serverConfig.subnetAddress;
 }
 
-bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void WireGuardConfigModel::setSubnetAddress(const QString &value)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
-        return false;
+    if (m_protocolConfig.serverConfig.subnetAddress == value) {
+        return;
     }
-
-    QString strValue = value.toString();
-
-    switch (role) {
-    case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
-    case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
-    case Roles::ClientMtuRole: {
-        if (!m_protocolConfig.clientConfig.has_value()) {
-            m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
-        }
-        m_protocolConfig.clientConfig->mtu = strValue;
-        break;
-    }
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
+    m_protocolConfig.serverConfig.subnetAddress = value;
+    emit changed();
 }
 
-QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
+QString WireGuardConfigModel::port() const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
-    }
+    return m_protocolConfig.serverConfig.port;
+}
 
-    switch (role) {
-    case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
-    case Roles::PortRole: return m_protocolConfig.serverConfig.port;
-    case Roles::ClientMtuRole: {
-        if (m_protocolConfig.clientConfig.has_value()) {
-            return m_protocolConfig.clientConfig->mtu;
-        }
-        return QString(protocols::wireguard::defaultMtu);
+void WireGuardConfigModel::setPort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.port == value) {
+        return;
     }
-    }
+    m_protocolConfig.serverConfig.port = value;
+    emit changed();
+}
 
-    return QVariant();
+QString WireGuardConfigModel::cascadeEndpoint() const
+{
+    return m_protocolConfig.serverConfig.cascadeEndpoint;
+}
+
+void WireGuardConfigModel::setCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadeEndpoint = value;
+    emit changed();
+}
+
+QString WireGuardConfigModel::cascadePort() const
+{
+    return m_protocolConfig.serverConfig.cascadePort;
+}
+
+void WireGuardConfigModel::setCascadePort(const QString &value)
+{
+    if (m_protocolConfig.serverConfig.cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.serverConfig.cascadePort = value;
+    emit changed();
+}
+
+QString WireGuardConfigModel::clientHostName() const
+{
+    return m_protocolConfig.clientConfig->hostName;
+}
+
+QString WireGuardConfigModel::clientPort() const
+{
+    const int port = m_protocolConfig.clientConfig->port;
+    return port > 0 ? QString::number(port) : QString();
+}
+
+QString WireGuardConfigModel::clientCascadeEndpoint() const
+{
+    return m_protocolConfig.clientConfig->cascadeEndpoint;
+}
+
+void WireGuardConfigModel::setClientCascadeEndpoint(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadeEndpoint == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(value, m_protocolConfig.clientConfig->cascadePort);
+    emit changed();
+}
+
+QString WireGuardConfigModel::clientCascadePort() const
+{
+    return m_protocolConfig.clientConfig->cascadePort;
+}
+
+void WireGuardConfigModel::setClientCascadePort(const QString &value)
+{
+    if (m_protocolConfig.clientConfig->cascadePort == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->setCascade(m_protocolConfig.clientConfig->cascadeEndpoint, value);
+    emit changed();
+}
+
+QString WireGuardConfigModel::clientMtu() const
+{
+    if (m_protocolConfig.clientConfig.has_value()) {
+        return m_protocolConfig.clientConfig->mtu;
+    }
+    return QString(protocols::wireguard::defaultMtu);
+}
+
+void WireGuardConfigModel::setClientMtu(const QString &value)
+{
+    if (!m_protocolConfig.clientConfig.has_value()) {
+        m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
+    }
+    if (m_protocolConfig.clientConfig->mtu == value) {
+        return;
+    }
+    m_protocolConfig.clientConfig->mtu = value;
+    emit changed();
 }
 
 void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::WireGuardProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     
     m_protocolConfig = protocolConfig;
@@ -80,7 +142,7 @@ void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const
     
     m_originalProtocolConfig = m_protocolConfig;
     
-    endResetModel();
+    emit changed();
 }
 
 void WireGuardConfigModel::applyDefaultsToServerConfig(amnezia::WireGuardServerConfig& config)
@@ -101,8 +163,15 @@ amnezia::WireGuardProtocolConfig WireGuardConfigModel::getProtocolConfig()
 {
     bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
     
+    const auto &serverConfig = m_protocolConfig.serverConfig;
+    const auto &originalServerConfig = m_originalProtocolConfig.serverConfig;
+    const bool cascadeChanged = serverConfig.cascadeEndpoint != originalServerConfig.cascadeEndpoint
+            || serverConfig.cascadePort != originalServerConfig.cascadePort;
+
     if (serverSettingsChanged) {
         m_protocolConfig.clearClientConfig();
+    } else if (cascadeChanged) {
+        m_protocolConfig.clientConfig->setCascade(serverConfig.cascadeEndpoint, serverConfig.cascadePort);
     }
     
     return m_protocolConfig;
@@ -112,15 +181,3 @@ bool WireGuardConfigModel::isServerSettingsEqual()
 {
     return m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 }
-
-QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[SubnetAddressRole] = "subnetAddress";
-    roles[PortRole] = "port";
-    roles[ClientMtuRole] = "clientMtu";
-
-    return roles;
-}
-

@@ -4,6 +4,7 @@
 #include <QMargins>
 #include <QObject>
 #include <QQmlEngine>
+#include <QVariantMap>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -29,7 +30,6 @@ public slots:
 
     void closeWindow();
     void hideWindow();
-    void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
     void updateNavigationBarColor(const int color);
@@ -55,7 +55,7 @@ private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
 
 signals:
-    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToPage(PageLoader::PageEnum page, bool slide = true, const QVariantMap &pageProperties = {});
     void goToStartPage();
     void goToPageHome();
     void goToPageSettings();
