@@ -68,6 +68,12 @@ done
 HOST=$(echo "$HOST" | tr '[:upper:]' '[:lower:]')
 TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')
 
+# Qt names its Linux toolchain folder after the host architecture
+case "$(uname -m)" in
+    aarch64|arm64) qt_linux_dir="gcc_arm64" ;;
+    *)             qt_linux_dir="gcc_64"    ;;
+esac
+
 bases=(~/Qt /opt/Qt)
 [ -n "${QT_INSTALL_DIR}" ] && bases=("${QT_INSTALL_DIR}/Qt" "${bases[@]}")
 
@@ -95,7 +101,7 @@ fi
 
 # add host options
 case "$HOST" in
-    linux)  [[ "$HOST" != "$TARGET" ]] && [[ -n "${QT_ROOT_PATH}" ]] && : ${QT_HOST_PATH:="$QT_ROOT_PATH/gcc_64"} ;;
+    linux)  [[ "$HOST" != "$TARGET" ]] && [[ -n "${QT_ROOT_PATH}" ]] && : ${QT_HOST_PATH:="$QT_ROOT_PATH/$qt_linux_dir"} ;;
     darwin) [[ "$HOST" != "$TARGET" ]] && [[ -n "${QT_ROOT_PATH}" ]] && : ${QT_HOST_PATH:="$QT_ROOT_PATH/macos"} ;;
     *) echo "Unsupported host \"$HOST\""; exit 1 ;;
 esac
@@ -105,7 +111,7 @@ case "$TARGET" in
     linux)
         [ "$INSTALLERS" = "all" ] && INSTALLERS="IFW"
         : ${CMAKE_GENERATOR:="Unix Makefiles"}
-        : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH"/gcc_64}
+        : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH"/$qt_linux_dir}
         ;;
     darwin|macos)
         [ "$INSTALLERS" = "all" ] && INSTALLERS="productbuild"
