@@ -145,7 +145,7 @@ namespace libssh {
             int bytesRead = 0;
             char buffer[bufferSize];
 
-            int result = ssh_channel_request_exec(m_channel, data.toUtf8());
+            int result = ssh_channel_request_exec(m_channel, posixShellCommand(data).toUtf8());
             if (result == SSH_OK) {
                 std::string output;
                 auto readOutput = [&](bool isStdErr) {
@@ -192,6 +192,19 @@ namespace libssh {
         wait.exec(QEventLoop::ExcludeUserInputEvents);
 
         return watcher.result();
+    }
+
+    QString Client::posixShellCommand(const QString &command)
+    {
+        QString quoted;
+        for (const QChar c : command) {
+            if (c == u'\'' || c == u'\\') {
+                quoted += QStringLiteral("'\\") + c + u'\'';
+            } else {
+                quoted += c;
+            }
+        }
+        return QStringLiteral("sh -c '%1'").arg(quoted);
     }
 
     ErrorCode Client::writeResponse(const QString &data)
