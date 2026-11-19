@@ -25,6 +25,10 @@ public:
 
 public slots:
     void updateWebsiteUrl(const QString &newWebsiteUrl);
+    void setSplitTunnelingEnabled(bool enabled);
+
+signals:
+    void splitTunnelingToggleRequested(bool enabled);
 
 protected:
     virtual void notify(Message type, const QString& title,
@@ -49,6 +53,7 @@ private:
     QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
     QAction* m_trayActionDisconnect = nullptr;
+    QAction *m_trayActionSplitTunneling = nullptr;
     QAction* m_trayActionVisitWebSite = nullptr;
     QAction* m_trayActionQuit = nullptr;
     QAction* m_statusLabel = nullptr;    
