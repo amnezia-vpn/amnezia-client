@@ -65,13 +65,8 @@ namespace amnezia
                 "www.bing.com",
                 "www.samsung.com",
                 "www.nvidia.com",
-                "www.cisco.com",
-                "www.asus.com",
-                "www.logitech.com",
-                "www.dropbox.com",
                 "www.mozilla.org",
                 "addons.mozilla.org",
-                "www.speedtest.net",
             };
 
             constexpr char defaultPort[] = "443";
