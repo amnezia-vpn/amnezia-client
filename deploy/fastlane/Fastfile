@@ -39,6 +39,9 @@ def upload_to_external_testers(package)
     groups: ["test-external"],
     changelog: "Improve stability"
   )
+rescue Spaceship::UnexpectedResponse => e
+  raise unless e.message.include?("already in beta review")
+  UI.important(e.message)
 end
 
 platform :ios do
