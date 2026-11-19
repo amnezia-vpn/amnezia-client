@@ -16,6 +16,8 @@ class ConnectionUiController : public QObject
 
 public:
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectionStateChanged)
+    Q_PROPERTY(bool liveSplitTunnelingUpdatesAvailable READ liveSplitTunnelingUpdatesAvailable NOTIFY
+                       liveSplitTunnelingUpdatesAvailableChanged)
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
 
@@ -26,6 +28,7 @@ public:
     ~ConnectionUiController() = default;
 
     bool isConnected() const;
+    bool liveSplitTunnelingUpdatesAvailable() const;
     bool isConnectionInProgress() const;
     QString connectionStateText() const;
 
@@ -43,6 +46,7 @@ public slots:
     void onTranslationsUpdated();
 
 signals:
+    void liveSplitTunnelingUpdatesAvailableChanged();
     void connectionStateChanged();
 
     void connectionErrorOccurred(ErrorCode errorCode);

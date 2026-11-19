@@ -33,6 +33,8 @@
 #ifndef MACOSFIREWALL_H
 #define MACOSFIREWALL_H
 
+#include "daemon/splitTunnelingFirewall.h"
+
 #include <QString>
 #include <QStringList>
 
@@ -74,6 +76,7 @@ private:
     static bool isRootAnchorLoaded();
 
 public:
+    static SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config);
     static void install();
     static void uninstall();
     static bool isInstalled();

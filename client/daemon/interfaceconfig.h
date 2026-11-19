@@ -24,6 +24,7 @@ class InterfaceConfig {
 
   HopType m_hopType;
   QString m_privateKey;
+  QString m_splitTunnelSessionId;
   QString m_deviceIpv4Address;
   QString m_deviceIpv6Address;
   QString m_serverIpv4Gateway;

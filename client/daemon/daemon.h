@@ -35,6 +35,8 @@ class Daemon : public QObject {
   virtual bool activate(const InterfaceConfig& config);
   virtual bool deactivate(bool emitSignals = true);
   virtual QJsonObject getStatus();
+  SplitTunnelingUpdateResult updateSplitTunneling(int routeMode, const QStringList &sites, const QString &publicKey,
+                                                  const QString &sessionId);
 
   // Callback before any Activating measure is done
   virtual void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) {
@@ -84,6 +86,7 @@ class Daemon : public QObject {
     ConnectionState(const InterfaceConfig& config) { m_config = config; }
     QDateTime m_date;
     InterfaceConfig m_config;
+    bool m_splitTunnelingStateKnown = true;
   };
   QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
   QHash<IPAddress, int> m_excludedAddrSet;

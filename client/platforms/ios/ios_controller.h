@@ -2,13 +2,14 @@
 #define IOS_CONTROLLER_H
 
 #include "core/protocols/vpnProtocol.h"
-#include <functional>
+#include "core/splitTunneling/splitTunnelingUpdateResult.h"
+#include <QElapsedTimer>
+#include <QList>
+#include <QStringList>
 #include <QVariant>
 #include <QVariantMap>
-#include <QStringList>
-#include <QList>
-#include <QElapsedTimer>
 #include <atomic>
+#include <functional>
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
@@ -51,6 +52,10 @@ public:
     bool initialize();
     bool connectVpn(amnezia::Proto proto, const QJsonObject &configuration);
     void disconnectVpn();
+#ifdef AMNEZIA_APPLE_LIVE_ROUTING
+    void updateSplitTunneling(quint64 requestId, const QJsonObject &configuration,
+                              std::function<void(SplitTunnelingUpdateResult)> callback);
+#endif
 
     void vpnStatusDidChange(void *pNotification);
     

@@ -22,17 +22,16 @@ PageType {
 
     property var isServerFromTelegramApi: ServersUiController.isServerFromApi(ServersUiController.defaultServerId)
     
-    property bool pageEnabled
+    readonly property bool connectionActive: ConnectionController.isConnected || ConnectionController.isConnectionInProgress
+    readonly property bool pageEnabled: !ConnectionController.isConnectionInProgress
+                                       && (!ConnectionController.isConnected || ConnectionController.liveSplitTunnelingUpdatesAvailable)
+                                       && !ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
 
     Component.onCompleted: {
-        if (ConnectionController.isConnected) {
+        if (ConnectionController.isConnected && !ConnectionController.liveSplitTunnelingUpdatesAvailable) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
-            root.pageEnabled = false
         } else if (ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
-            root.pageEnabled = false
-        } else {
-            root.pageEnabled = true
         }
     }
 
@@ -108,7 +107,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: root.pageEnabled
+                enabled: root.pageEnabled && !root.connectionActive
 
                 text: qsTr("Split tunneling")
 
@@ -136,7 +135,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: root.pageEnabled
+                enabled: root.pageEnabled && !root.connectionActive
 
                 model: root.routeModes.map(function(mode) { return mode.segmentName })
                 currentIndex: root.routeModeIndex
@@ -172,7 +171,7 @@ PageType {
             width: listView.width
             implicitHeight: site.implicitHeight
 
-            enabled: root.pageEnabled
+            enabled: root.pageEnabled && !root.connectionActive
 
             ListItemType {
                 id: site
@@ -229,6 +228,7 @@ PageType {
 
         PopupMenuItemType {
             id: addImportedSitesButton
+            enabled: root.pageEnabled
 
             text: qsTr("Add imported sites to existing ones")
 
@@ -240,6 +240,7 @@ PageType {
 
         PopupMenuItemType {
             id: replaceSitesButton
+            enabled: !root.connectionActive
 
             text: qsTr("Replace site list")
 
@@ -278,6 +279,7 @@ PageType {
 
         PopupMenuItemType {
             id: clearSitesButton
+            enabled: !root.connectionActive
 
             text: qsTr("Clear site list")
             destructive: true
@@ -311,6 +313,9 @@ PageType {
     }
 
     function importSites(fileName, replaceExistingSites) {
+        if (!root.pageEnabled || (replaceExistingSites && root.connectionActive)) {
+            return
+        }
         PageController.showBusyIndicator(true)
         IpSplitTunnelingController.importSites(fileName, replaceExistingSites)
         PageController.showBusyIndicator(false)

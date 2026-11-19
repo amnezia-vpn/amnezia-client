@@ -176,31 +176,36 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
   } else {
-    if (config.m_killSwitchEnabled) {
-      FirewallParams params { };
-      params.dnsServers.append(config.m_primaryDnsServer);
-      if (!config.m_secondaryDnsServer.isEmpty()) {
-          params.dnsServers.append(config.m_secondaryDnsServer);
-      }
-
-      if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-          params.blockAll = true;
-          if (config.m_excludedAddresses.size()) {
-              params.allowNets = true;
-              foreach (auto net, config.m_excludedAddresses) {
-                  params.allowAddrs.append(net.toUtf8());
-              }
-          }
-      } else {
-          params.blockNets = true;
-          foreach (auto net, config.m_allowedIPAddressRanges) {
-              params.blockAddrs.append(net.toString());
-          }
-      }
-      applyFirewallRules(params);
-    }
+      updateFirewall(config);
   }
   return (err == 0);
+}
+
+void WireguardUtilsMacos::updateFirewall(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        FirewallParams params { };
+        params.dnsServers.append(config.m_primaryDnsServer);
+        if (!config.m_secondaryDnsServer.isEmpty()) {
+            params.dnsServers.append(config.m_secondaryDnsServer);
+        }
+
+        if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
+            params.blockAll = true;
+            if (config.m_excludedAddresses.size()) {
+                params.allowNets = true;
+                foreach (auto net, config.m_excludedAddresses) {
+                    params.allowAddrs.append(net.toUtf8());
+                }
+            }
+        } else {
+            params.blockNets = true;
+            foreach (auto net, config.m_allowedIPAddressRanges) {
+                params.blockAddrs.append(net.toString());
+            }
+        }
+        applyFirewallRules(params);
+    }
 }
 
 bool WireguardUtilsMacos::deleteInterface() {
@@ -231,53 +236,77 @@ bool WireguardUtilsMacos::deleteInterface() {
 }
 
 // dummy implementations for now
-bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
-  QByteArray publicKey =
-      QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
+bool WireguardUtilsMacos::updatePeer(const InterfaceConfig &config)
+{
+    if (!configurePeer(config)) {
+        return false;
+    }
+    updateFirewall(config);
+    return true;
+}
 
-  QByteArray pskKey = QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
+SplitTunnelingUpdateResult WireguardUtilsMacos::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (config.m_killSwitchEnabled) {
+        const auto result = MacOSFirewall::updateSplitTunneling(config);
+        if (result != SplitTunnelingUpdateResult::Applied) {
+            return result;
+        }
+    }
+    return configurePeer(config) ? SplitTunnelingUpdateResult::Applied : SplitTunnelingUpdateResult::StateUnknown;
+}
 
-  logger.debug() << "Configuring peer" << config.m_serverPublicKey
-                 << "via" << config.m_serverIpv4AddrIn;
+SplitTunnelingUpdateResult WireguardUtilsMacos::restoreSplitTunneling(const InterfaceConfig &config)
+{
+    return updateSplitTunneling(config);
+}
 
-  // Update/create the peer config
-  QString message;
-  QTextStream out(&message);
-  out << "set=1\n";
-  out << "public_key=" << QString(publicKey.toHex()) << "\n";
-  if (!config.m_serverPskKey.isNull()) {
-    out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
-  }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
-    out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
-    out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
-  } else {
-    logger.warning() << "Failed to create peer with no endpoints";
-    return false;
-  }
-  out << config.m_serverPort << "\n";
+bool WireguardUtilsMacos::configurePeer(const InterfaceConfig &config)
+{
+    QByteArray publicKey = QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
 
-  out << "replace_allowed_ips=true\n";
-  if (!config.m_persistentKeepalive.isEmpty()) {
-    out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
-  }
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    out << "allowed_ip=" << ip.toString() << "\n";
-  }
+    QByteArray pskKey = QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
-  // Exclude the server address, except for multihop exit servers.
-  if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-      (m_rtmonitor != nullptr)) {
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
+    logger.debug() << "Configuring peer" << config.m_serverPublicKey << "via" << config.m_serverIpv4AddrIn;
 
-  int err = uapiErrno(uapiCommand(message));
-  if (err != 0) {
-    logger.error() << "Peer configuration failed:" << strerror(err);
-  }
-  return (err == 0);
+    // Update/create the peer config
+    QString message;
+    QTextStream out(&message);
+    out << "set=1\n";
+    out << "public_key=" << QString(publicKey.toHex()) << "\n";
+    if (!config.m_serverPskKey.isNull()) {
+        out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
+    }
+    if (!config.m_serverIpv4AddrIn.isNull()) {
+        out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
+    } else if (!config.m_serverIpv6AddrIn.isNull()) {
+        out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
+    } else {
+        logger.warning() << "Failed to create peer with no endpoints";
+        return false;
+    }
+    out << config.m_serverPort << "\n";
+
+    out << "replace_allowed_ips=true\n";
+    if (!config.m_persistentKeepalive.isEmpty()) {
+        out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
+    }
+    for (const IPAddress &ip : config.m_allowedIPAddressRanges) {
+        out << "allowed_ip=" << ip.toString() << "\n";
+    }
+
+    // Exclude the server address, except for multihop exit servers.
+    if ((config.m_hopType != InterfaceConfig::MultiHopExit) && (m_rtmonitor != nullptr)) {
+        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
+
+    int err = uapiErrno(uapiCommand(message));
+    if (err != 0) {
+        logger.error() << "Peer configuration failed:" << strerror(err);
+    }
+
+    return (err == 0);
 }
 
 bool WireguardUtilsMacos::deletePeer(const InterfaceConfig& config) {
@@ -342,6 +371,18 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsMacos::getPeerStatus() {
   }
 
   return peerList;
+}
+
+RouteCreationResult WireguardUtilsMacos::createRoutePrefix(const IPAddress &prefix)
+{
+    if (!m_rtmonitor)
+        return { };
+    return createTunnelRoutes(prefix, [this](const auto &route) { return m_rtmonitor->createRoute(route); });
+}
+
+RouteCreationResult WireguardUtilsMacos::createExclusionRoute(const IPAddress &prefix)
+{
+    return m_rtmonitor ? m_rtmonitor->createExclusionRoute(prefix) : RouteCreationResult { };
 }
 
 bool WireguardUtilsMacos::updateRoutePrefix(const IPAddress& prefix) {

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "daemon.h"
+#include "core/utils/constants/configKeys.h"
 
 #include <QCoreApplication>
 #include <QJsonArray>
@@ -188,6 +189,140 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   return true;
 }
 
+SplitTunnelingUpdateResult Daemon::updateSplitTunneling(int routeMode, const QStringList &sites,
+                                                        const QString &publicKey, const QString &sessionId)
+{
+    if (routeMode < 0 || routeMode > 2 || publicKey.isEmpty() || m_connections.size() != 1
+        || !m_connections.contains(InterfaceConfig::SingleHop)) {
+        return SplitTunnelingUpdateResult::NotApplied;
+    }
+
+    auto &state = m_connections[InterfaceConfig::SingleHop];
+    const InterfaceConfig previous = state.m_config;
+    if (sessionId.isEmpty() || previous.m_splitTunnelSessionId != sessionId || previous.m_serverPublicKey != publicKey
+        || !wgutils()->interfaceExists()) {
+        return SplitTunnelingUpdateResult::NotApplied;
+    }
+    if (!state.m_splitTunnelingStateKnown) {
+        return SplitTunnelingUpdateResult::StateUnknown;
+    }
+
+    InterfaceConfig updated = previous;
+    updated.m_allowedIPAddressRanges.clear();
+    updated.m_excludedAddresses = QStringList { previous.m_serverIpv4AddrIn };
+    if (routeMode != 1) {
+        updated.m_allowedIPAddressRanges = { IPAddress("0.0.0.0/0"), IPAddress("::/0") };
+    }
+    for (const QString &site : sites) {
+        const auto subnet = QHostAddress::parseSubnet(site);
+        if (subnet.first.protocol() != QAbstractSocket::IPv4Protocol || subnet.second < 0 || subnet.second > 32) {
+            return SplitTunnelingUpdateResult::NotApplied;
+        }
+        const IPAddress address(subnet.first, subnet.second);
+        if (routeMode == 1 && !updated.m_allowedIPAddressRanges.contains(address)) {
+            updated.m_allowedIPAddressRanges.append(address);
+        } else if (routeMode == 2 && !updated.m_excludedAddresses.contains(address.toString())) {
+            updated.m_excludedAddresses.append(address.toString());
+        }
+    }
+
+    QList<IPAddress> addedRoutes;
+    QList<IPAddress> removedRoutes;
+    QList<IPAddress> createdExclusions;
+    QList<IPAddress> addedExclusionReferences;
+    QStringList removedExclusions;
+    bool peerMayHaveChanged = false;
+    const auto rollback = [&](bool restored = true) {
+        if (peerMayHaveChanged) {
+            restored = (wgutils()->restoreSplitTunneling(previous) == SplitTunnelingUpdateResult::Applied) && restored;
+        }
+        for (const IPAddress &address : removedRoutes) {
+            restored = wgutils()->updateRoutePrefix(address) && restored;
+        }
+        for (const QString &address : removedExclusions) {
+            restored = addExclusionRoute(IPAddress(address)) && restored;
+        }
+        for (const IPAddress &address : addedRoutes) {
+            restored = wgutils()->deleteRoutePrefix(address) && restored;
+        }
+        for (const auto &address : addedExclusionReferences) {
+            if (m_excludedAddrSet.value(address) > 1) {
+                --m_excludedAddrSet[address];
+            } else {
+                m_excludedAddrSet.remove(address);
+            }
+        }
+        for (const auto &address : createdExclusions) {
+            restored = wgutils()->deleteExclusionRoute(address) && restored;
+        }
+        if (!restored) {
+            state.m_splitTunnelingStateKnown = false;
+            logger.error() << "Failed to restore split tunneling rules";
+            return SplitTunnelingUpdateResult::StateUnknown;
+        }
+        return SplitTunnelingUpdateResult::NotApplied;
+    };
+    auto rollbackGuard = qScopeGuard([&]() { rollback(); });
+    const auto fail = [&](bool restored = true) {
+        const auto result = rollback(restored);
+        rollbackGuard.dismiss();
+        return result;
+    };
+
+    for (const IPAddress &address : updated.m_allowedIPAddressRanges) {
+        if (!previous.m_allowedIPAddressRanges.contains(address)) {
+            const auto changes = wgutils()->createRoutePrefix(address);
+            addedRoutes.append(changes.created);
+            if (changes.result != SplitTunnelingUpdateResult::Applied) {
+                return fail(changes.result != SplitTunnelingUpdateResult::StateUnknown);
+            }
+        }
+    }
+    for (const QString &address : updated.m_excludedAddresses) {
+        if (!previous.m_excludedAddresses.contains(address)) {
+            const IPAddress prefix(address);
+            if (!m_excludedAddrSet.contains(prefix)) {
+                const auto changes = wgutils()->createExclusionRoute(prefix);
+                createdExclusions.append(changes.created);
+                if (changes.result != SplitTunnelingUpdateResult::Applied) {
+                    return fail(changes.result != SplitTunnelingUpdateResult::StateUnknown);
+                }
+            }
+            ++m_excludedAddrSet[prefix];
+            addedExclusionReferences.append(prefix);
+        }
+    }
+    peerMayHaveChanged = true;
+    const auto peerResult = wgutils()->updateSplitTunneling(updated);
+    if (peerResult == SplitTunnelingUpdateResult::NotApplied) {
+        peerMayHaveChanged = false;
+        return fail();
+    }
+    if (peerResult != SplitTunnelingUpdateResult::Applied) {
+        return fail();
+    }
+    for (const QString &address : previous.m_excludedAddresses) {
+        if (!updated.m_excludedAddresses.contains(address)) {
+            if (!delExclusionRoute(IPAddress(address))) {
+                return fail(wgutils()->addExclusionRoute(IPAddress(address)));
+            }
+            removedExclusions.append(address);
+        }
+    }
+    for (const IPAddress &address : previous.m_allowedIPAddressRanges) {
+        if (!updated.m_allowedIPAddressRanges.contains(address)) {
+            removedRoutes.append(address);
+            if (!wgutils()->deleteRoutePrefix(address)) {
+                return fail();
+            }
+        }
+    }
+
+    state.m_config = updated;
+    rollbackGuard.dismiss();
+    return SplitTunnelingUpdateResult::Applied;
+}
+
 // static
 bool Daemon::parseStringList(const QJsonObject& obj, const QString& name,
                              QStringList& list) {
@@ -227,8 +362,11 @@ bool Daemon::delExclusionRoute(const IPAddress& prefix) {
     m_excludedAddrSet[prefix]--;
     return true;
   }
+  if (!wgutils()->deleteExclusionRoute(prefix)) {
+      return false;
+  }
   m_excludedAddrSet.remove(prefix);
-  return wgutils()->deleteExclusionRoute(prefix);
+  return true;
 }
 
 // static
@@ -246,6 +384,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     where = value.to##jsontype();                                 \
   }
 
+  config.m_splitTunnelSessionId = obj.value(amnezia::configKey::splitTunnelSessionId).toString();
   GETVALUE("privateKey", config.m_privateKey, String);
   GETVALUE("serverPublicKey", config.m_serverPublicKey, String);
   GETVALUE("serverPort", config.m_serverPort, Double);
