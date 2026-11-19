@@ -614,10 +614,15 @@ void InstallUiController::clearProcessedServerCredentials()
 
 void InstallUiController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
 {
-    m_processedServerCredentials.hostName = hostName;
-    if (m_processedServerCredentials.hostName.contains(":")) {
-        m_processedServerCredentials.port = m_processedServerCredentials.hostName.split(":").at(1).toInt();
-        m_processedServerCredentials.hostName = m_processedServerCredentials.hostName.split(":").at(0);
+    QString parsedHost;
+    int parsedPort = -1;
+    if (NetworkUtilities::parseHostPort(hostName, parsedHost, parsedPort)) {
+        m_processedServerCredentials.hostName = parsedHost;
+        if (parsedPort != -1) {
+            m_processedServerCredentials.port = parsedPort;
+        }
+    } else {
+        m_processedServerCredentials.hostName = hostName;
     }
     m_processedServerCredentials.userName = userName;
     m_processedServerCredentials.secretData = secretData;

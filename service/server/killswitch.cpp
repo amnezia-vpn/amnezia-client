@@ -13,7 +13,20 @@
 #include "qjsonarray.h"
 #include "version.h"
 
+static bool isValidIpv6OrCidr(const QString &value) {
+    static const QRegularExpression re(QStringLiteral(R"(^[0-9A-Fa-f:.]+(/\d{1,3})?$)"));
+    if (!re.match(value).hasMatch()) return false;
+    if (QHostAddress(value.section(QLatin1Char('/'), 0, 0)).protocol() != QAbstractSocket::IPv6Protocol) return false;
+    if (value.contains(QLatin1Char('/'))) {
+        bool ok;
+        int prefix = value.section(QLatin1Char('/'), 1).toInt(&ok);
+        if (!ok || prefix > 128) return false;
+    }
+    return true;
+}
+
 static bool isValidIpOrCidr(const QString &value) {
+    if (value.contains(QLatin1Char(':'))) return isValidIpv6OrCidr(value);
     static const QRegularExpression re(
         QStringLiteral(R"(^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$)"));
     if (!re.match(value).hasMatch()) return false;
@@ -102,7 +115,7 @@ bool KillSwitch::disableKillSwitch() {
     if (isStrictKillSwitchEnabled()) {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
-        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), false);
@@ -115,7 +128,7 @@ bool KillSwitch::disableKillSwitch() {
     } else {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), false);
-        LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), false);
@@ -193,7 +206,7 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
     m_allowedRanges = ranges;
 
 #ifdef Q_OS_LINUX
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), true);
     LinuxFirewall::updateAllowNets(m_allowedRanges);
 #endif
 
@@ -371,7 +384,7 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     // double-check + ensure our firewall is installed and enabled
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), allowNets);
     LinuxFirewall::updateAllowNets(allownets);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockNets);
     LinuxFirewall::updateBlockNets(blocknets);

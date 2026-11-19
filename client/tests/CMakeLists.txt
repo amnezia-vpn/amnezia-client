@@ -71,6 +71,24 @@ if(NOT ANDROID)
         test_common
     )
 
+    add_executable(test_host_port_parsing
+        testHostPortParsing.cpp
+    )
+
+    target_link_libraries(test_host_port_parsing PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_wireguard_endpoint_import
+        testWireGuardEndpointImport.cpp
+    )
+
+    target_link_libraries(test_wireguard_endpoint_import PRIVATE
+        Qt6::Test
+        test_common
+    )
+
     add_executable(test_server_edit
         testServerEdit.cpp
     )
@@ -492,6 +510,8 @@ if(NOT ANDROID)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
+    add_test(NAME HostPortParsingTest              COMMAND test_host_port_parsing)
+    add_test(NAME WireGuardEndpointImportTest      COMMAND test_wireguard_endpoint_import)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
