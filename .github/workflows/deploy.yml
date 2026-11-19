@@ -1098,6 +1098,7 @@ jobs:
           - XrayGeneratorMatrixTest
           - XrayConfigModelTest
           - XrayCoreAcceptsTest
+          - Tun2SocksStderrReaderTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
@@ -1315,6 +1316,7 @@ jobs:
           - XrayGeneratorMatrixTest
           - XrayConfigModelTest
           - XrayCoreAcceptsTest
+          - Tun2SocksStderrReaderTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
@@ -1434,6 +1436,7 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - Tun2SocksStderrReaderTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest

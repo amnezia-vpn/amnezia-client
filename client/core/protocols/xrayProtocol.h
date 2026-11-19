@@ -6,10 +6,11 @@
 #include <QHostAddress>
 #include <QList>
 
-#include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
+#include "core/utils/errorCodes.h"
 #include "core/utils/ipcClient.h"
+#include "core/utils/routeModes.h"
+#include "tun2SocksStderrReader.h"
 #include "vpnProtocol.h"
 
 class XrayProtocol : public VpnProtocol
@@ -24,6 +25,7 @@ public:
 private:
     ErrorCode setupRouting();
     ErrorCode startTun2Socks();
+    void onTun2SocksStandardError(const QByteArray &output);
 
     QJsonObject m_xrayConfig;
     amnezia::RouteMode m_routeMode;
@@ -35,6 +37,7 @@ private:
     int m_socksPort = 10808;
 
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
+    Tun2SocksStderrReader m_tun2socksStderrReader;
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;

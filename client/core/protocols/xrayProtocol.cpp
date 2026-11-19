@@ -26,8 +26,11 @@ static const QString tunName = "utun22";
 static const QString tunName = "tun2";
 #endif
 
-XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
+XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent)
+    : VpnProtocol(configuration, parent), m_tun2socksStderrReader(this)
 {
+    connect(&m_tun2socksStderrReader, &Tun2SocksStderrReader::outputReady, this, &XrayProtocol::onTun2SocksStandardError);
+
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
@@ -111,6 +114,7 @@ void XrayProtocol::stop()
         return;
     }
 
+    m_tun2socksStderrReader.setProcess(nullptr);
     qDebug() << "XrayProtocol::stop()";
 
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
@@ -161,6 +165,7 @@ void XrayProtocol::stop()
 
 ErrorCode XrayProtocol::startTun2Socks()
 {
+    m_tun2socksStderrReader.setProcess(nullptr);
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
     if (!m_tun2socksProcess->waitForSource()) {
         return ErrorCode::AmneziaServiceConnectionFailed;
@@ -171,36 +176,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
     m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
 
-    connect(
-            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
-            [this]() {
-                if (!m_tun2socksProcess) {
-                    return;
-                }
-
-                auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
-                if (!readAllStandardError.waitForFinished()) {
-                    qWarning() << "Failed to read output from tun2socks";
-                    return;
-                }
-
-                const QString line = readAllStandardError.returnValue();
-
-                if (!line.contains("[TCP]") && !line.contains("[UDP]"))
-                    qDebug() << "[tun2socks]:" << line;
-
-                if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
-                    disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
-
-                    if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
-                        stop();
-                        setLastError(res);
-                    } else {
-                        setConnectionState(Vpn::ConnectionState::Connected);
-                    }
-                }
-            },
-            Qt::QueuedConnection);
+    m_tun2socksStderrReader.setProcess(m_tun2socksProcess.data());
 
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this,
@@ -244,6 +220,33 @@ ErrorCode XrayProtocol::startTun2Socks()
 
     m_tun2socksProcess->start();
     return ErrorCode::NoError;
+}
+
+void XrayProtocol::onTun2SocksStandardError(const QByteArray &output)
+{
+    const QString line = QString::fromUtf8(output);
+    if (!line.contains("[STACK] tun://") || !line.contains("<-> socks5://")) {
+        if (!line.contains("[TCP]") && !line.contains("[UDP]")) {
+            qDebug() << "[tun2socks]:" << line;
+        }
+        return;
+    }
+
+    const QPointer<XrayProtocol> protocol(this);
+    const QPointer<IpcProcessInterfaceReplica> process(m_tun2socksProcess.data());
+    const ErrorCode result = setupRouting();
+    if (!protocol || m_stopped || !process || process != m_tun2socksProcess.data()) {
+        return;
+    }
+
+    if (result != ErrorCode::NoError) {
+        stop();
+        if (protocol && m_stopped) {
+            setLastError(result);
+        }
+    } else {
+        setConnectionState(Vpn::ConnectionState::Connected);
+    }
 }
 
 ErrorCode XrayProtocol::setupRouting()

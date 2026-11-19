@@ -494,6 +494,13 @@ if(NOT ANDROID)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
 endif()
 
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    add_executable(test_tun2socks_stderr_reader testTun2SocksStderrReader.cpp)
+    qt_add_repc_sources(test_tun2socks_stderr_reader ../../ipc/ipc_process_interface.rep)
+    target_link_libraries(test_tun2socks_stderr_reader PRIVATE Qt6::Test test_common)
+    add_test(NAME Tun2SocksStderrReaderTest COMMAND test_tun2socks_stderr_reader)
+endif()
+
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
 
