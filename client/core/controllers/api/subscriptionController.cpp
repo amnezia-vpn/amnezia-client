@@ -677,11 +677,9 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                                      .addField(apiDefs::key::otpRequestId, requestId)
                                      .build();
 
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
-                                                                       m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
-                                                                       apiDefs::requestTimeoutMsecs,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
-                                                                       m_appSettingsRepository);
+    auto gatewayController = QSharedPointer<GatewayController>::create(
+            m_appSettingsRepository->gatewayEnvironment(isTestPurchase), apiDefs::requestTimeoutMsecs,
+            m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     auto postFuture = gatewayController->postAsync(QString("%1v1/otp_status"), apiPayload);
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
