@@ -20,6 +20,14 @@
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+QList<IPAddress> routePrefixes(const IPAddress &prefix)
+{
+    if (prefix.type() == QAbstractSocket::IPv4Protocol && prefix.prefixLength() == 0) {
+        return prefix.subnets();
+    }
+    return { prefix };
+}
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -254,58 +262,61 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
   entry->Age = 0;
 }
 
-bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
-    // If we are setting up a default route, instruct the route monitor to
-    // capture traffic to all non-excluded destinations
-    m_routeMonitor->setDetaultRouteCapture(true);
-  }
-  // Build the route
-  
-  MIB_IPFORWARD_ROW2 entry;
-  buildMibForwardRow(prefix, &entry);
+bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress &prefix)
+{
+    if (m_routeMonitor && (prefix.prefixLength() == 0)) {
+        // If we are setting up a default route, instruct the route monitor to
+        // capture traffic to all non-excluded destinations
+        m_routeMonitor->setDetaultRouteCapture(true);
+    }
+    QList<MIB_IPFORWARD_ROW2> createdRoutes;
+    for (const IPAddress &routePrefix : routePrefixes(prefix)) {
+        MIB_IPFORWARD_ROW2 entry;
+        buildMibForwardRow(routePrefix, &entry);
 
-  // Install the route
-  DWORD result = CreateIpForwardEntry2(&entry);
-  if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+        DWORD result = CreateIpForwardEntry2(&entry);
+        if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+            continue;
+        }
+
+        // Case for ipv6 route with disabled ipv6
+        if (routePrefix.type() == QAbstractSocket::IPv6Protocol && result == ERROR_NOT_FOUND) {
+            continue;
+        }
+
+        if (result != NO_ERROR) {
+            logger.error() << "Failed to create route to" << routePrefix.toString() << "result:" << result;
+            for (MIB_IPFORWARD_ROW2 &createdRoute : createdRoutes) {
+                DWORD rollbackResult = DeleteIpForwardEntry2(&createdRoute);
+                if (rollbackResult != NO_ERROR && rollbackResult != ERROR_NOT_FOUND) {
+                    logger.error() << "Failed to roll back route creation, result:" << rollbackResult;
+                }
+            }
+            return false;
+        }
+        createdRoutes.append(entry);
+    }
     return true;
-  }
-
-  // Case for ipv6 route with disabled ipv6
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol
-      && result == ERROR_NOT_FOUND) {
-    return true;
-  }
-
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to create route to"
-                   << prefix.toString()
-                   << "result:" << result;
-  }
-  return result == NO_ERROR;
 }
 
-bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
-    // Deactivate the route capture feature.
-    m_routeMonitor->setDetaultRouteCapture(false);
-  }
-  // Build the route
-  
-  MIB_IPFORWARD_ROW2 entry;
-  buildMibForwardRow(prefix, &entry);
+bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress &prefix)
+{
+    if (m_routeMonitor && (prefix.prefixLength() == 0)) {
+        // Deactivate the route capture feature.
+        m_routeMonitor->setDetaultRouteCapture(false);
+    }
+    bool success = true;
+    for (const IPAddress &routePrefix : routePrefixes(prefix)) {
+        MIB_IPFORWARD_ROW2 entry;
+        buildMibForwardRow(routePrefix, &entry);
 
-  // Install the route
-  DWORD result = DeleteIpForwardEntry2(&entry);
-  if (result == ERROR_NOT_FOUND) {
-    return true;
-  }
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to delete route to"
-                   << prefix.toString()
-                   << "result:" << result;
-  }
-  return result == NO_ERROR;
+        DWORD result = DeleteIpForwardEntry2(&entry);
+        if (result != NO_ERROR && result != ERROR_NOT_FOUND) {
+            logger.error() << "Failed to delete route to" << routePrefix.toString() << "result:" << result;
+            success = false;
+        }
+    }
+    return success;
 }
 
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
