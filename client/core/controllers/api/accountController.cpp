@@ -135,9 +135,8 @@ AccountController::Captcha AccountController::captchaFromResponse(const QJsonObj
 
 AccountController::Reply AccountController::post(const QString &endpoint, const QJsonObject &apiPayload)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
-                                        apiDefs::requestTimeoutMsecs, m_appSettingsRepository->isStrictKillSwitchEnabled(),
-                                        m_appSettingsRepository);
+    GatewayController gatewayController(m_appSettingsRepository->gatewayEnvironment(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     Reply reply;
     QByteArray responseBody;
