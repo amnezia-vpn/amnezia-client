@@ -338,4 +338,11 @@ Window  {
         onRejected: SystemController.fileDialogClosed(false)
     }
 
+    Connections {
+        target: UpdateController
+        function onInstallerVerificationFailed(message) {
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(message)
+        }
+    }
 }
