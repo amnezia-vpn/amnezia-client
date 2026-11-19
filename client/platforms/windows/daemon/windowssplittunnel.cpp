@@ -149,6 +149,16 @@ ProcessInfo getProcessInfo(HANDLE process, const PROCESSENTRY32W& processMeta) {
   return pi;
 }
 
+bool retainParentRelationship(const ProcessInfo& parent,
+                              const ProcessInfo& child) {
+  const auto value = [](const FILETIME& time) {
+    return (static_cast<std::uint64_t>(time.dwHighDateTime) << 32) |
+           time.dwLowDateTime;
+  };
+  return value(parent.CreationTime) != 0 && value(child.CreationTime) != 0 &&
+         value(parent.CreationTime) < value(child.CreationTime);
+}
+
 QString normalizeExecutablePath(const QString& path) {
   QString normalized = path.trimmed();
   if (normalized.startsWith("file:", Qt::CaseInsensitive)) {
@@ -541,11 +551,12 @@ std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {
   }
   auto cleanup = qScopeGuard([&] { CloseHandle(snapshot_handle); });
   // Load the First Entry, later iterate over all
-  PROCESSENTRY32W currentProcess;
+  PROCESSENTRY32W currentProcess = {};
   currentProcess.dwSize = sizeof(PROCESSENTRY32W);
 
-  if (FALSE == (Process32First(snapshot_handle, &currentProcess))) {
+  if (FALSE == Process32FirstW(snapshot_handle, &currentProcess)) {
     WindowsUtils::windowsLog("Cant read first entry");
+    return {};
   }
 
   QMap<DWORD, ProcessInfo> processes;
@@ -561,7 +572,15 @@ std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {
     processes.insert(info.ProcessId, info);
     CloseHandle(process_handle);
 
-  } while (FALSE != (Process32NextW(snapshot_handle, &currentProcess)));
+  } while (FALSE != Process32NextW(snapshot_handle, &currentProcess));
+
+  for (auto process = processes.begin(); process != processes.end(); ++process) {
+    const DWORD parentId = process->ParentProcessId;
+    const auto parent = processes.constFind(parentId);
+    const bool keepParent = parent != processes.constEnd() &&
+                            retainParentRelationship(*parent, process.value());
+    process->ParentProcessId = keepParent ? parentId : 0;
+  }
 
   auto process_list = processes.values();
   if (process_list.isEmpty()) {
