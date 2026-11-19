@@ -12,6 +12,7 @@
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
 #include "core/models/protocols/tProxyProtocolConfig.h"
+#include "core/models/protocols/whatsAppProxyProtocolConfig.h"
 
 namespace amnezia
 {
@@ -47,6 +48,8 @@ Proto ProtocolConfig::type() const
             return Proto::Telemt;
         } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
             return Proto::TProxy;
+        } else if constexpr (std::is_same_v<T, WhatsAppProxyProtocolConfig>) {
+            return Proto::WhatsAppProxy;
         }
         return Proto::Unknown;
     }, data);
@@ -80,6 +83,8 @@ QString ProtocolConfig::port() const
             return arg.port.isEmpty() ? QString(protocols::telemt::defaultPort) : arg.port;
         } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
             return arg.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : arg.port;
+        } else if constexpr (std::is_same_v<T, WhatsAppProxyProtocolConfig>) {
+            return arg.effectivePort();
         }
         return QString();
     }, data);
@@ -108,6 +113,8 @@ QString ProtocolConfig::transportProto() const
         } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
             return QStringLiteral("tcp");
         } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
+            return QStringLiteral("tcp");
+        } else if constexpr (std::is_same_v<T, WhatsAppProxyProtocolConfig>) {
             return QStringLiteral("tcp");
         }
         return QString();
@@ -326,6 +333,8 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
         return ProtocolConfig{TelemtProtocolConfig::fromJson(json)};
     case Proto::TProxy:
         return ProtocolConfig{TProxyProtocolConfig::fromJson(json)};
+    case Proto::WhatsAppProxy:
+        return ProtocolConfig{WhatsAppProxyProtocolConfig::fromJson(json)};
     default:
         return ProtocolConfig{AwgProtocolConfig{}};
     }

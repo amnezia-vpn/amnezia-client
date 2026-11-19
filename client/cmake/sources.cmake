@@ -38,6 +38,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/mtProxyInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/telemtInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/whatsAppProxyInstaller.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
@@ -128,6 +129,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/mtProxyInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/telemtInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/tProxyInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/whatsAppProxyInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp

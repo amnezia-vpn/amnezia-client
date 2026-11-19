@@ -45,6 +45,7 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
     roles[IsMtProxyRole] = "isMtProxy";
     roles[IsTelemtRole] = "isTelemt";
     roles[IsTProxyRole] = "isTProxy";
+    roles[IsWhatsAppProxyRole] = "isWhatsAppProxy";
 
     return roles;
 }
@@ -77,6 +78,7 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     case IsMtProxyRole: return proto == Proto::MtProxy;
     case IsTelemtRole: return proto == Proto::Telemt;
     case IsTProxyRole: return proto == Proto::TProxy;
+    case IsWhatsAppProxyRole: return proto == Proto::WhatsAppProxy;
     case RawConfigRole:
         return getRawConfig();
     case IsClientProtocolExistsRole:
@@ -133,6 +135,7 @@ PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
     case Proto::MtProxy: return PageLoader::PageEnum::PageServiceMtProxySettings;
     case Proto::Telemt: return PageLoader::PageEnum::PageServiceTelemtSettings;
     case Proto::TProxy: return PageLoader::PageEnum::PageServiceTProxySettings;
+    case Proto::WhatsAppProxy: return PageLoader::PageEnum::PageServiceWhatsAppProxySettings;
     default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
     }
 }

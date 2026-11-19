@@ -143,6 +143,16 @@ const TProxyProtocolConfig* ContainerConfig::getTProxyProtocolConfig() const
     return protocolConfig.as<TProxyProtocolConfig>();
 }
 
+WhatsAppProxyProtocolConfig* ContainerConfig::getWhatsAppProxyProtocolConfig()
+{
+    return protocolConfig.as<WhatsAppProxyProtocolConfig>();
+}
+
+const WhatsAppProxyProtocolConfig* ContainerConfig::getWhatsAppProxyProtocolConfig() const
+{
+    return protocolConfig.as<WhatsAppProxyProtocolConfig>();
+}
+
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();
