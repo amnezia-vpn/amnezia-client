@@ -35,6 +35,8 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
                     (!m_vpnLocalAddress.isEmpty() && m_vpnLocalAddress != previousLocal)) {
                     emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
                 }
+
+                setBytesChanged(rxBytes, txBytes);
             });
 
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
