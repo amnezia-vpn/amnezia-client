@@ -79,6 +79,8 @@ namespace PageLoader
 
         PageSetupWizardApiPremiumInfo,
         PageSetupWizardApiTrialEmail,
+        PageSetupWizardApiFreeEmail,
+        PageSetupWizardApiFreeCode,
 
         PageDevMenu,
 

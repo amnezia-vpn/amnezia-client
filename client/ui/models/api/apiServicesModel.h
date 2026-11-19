@@ -32,6 +32,7 @@ public:
     struct ApiServicesData
     {
         bool isServiceAvailable;
+        bool emailRegistrationRequired = false;
 
         QString type;
         QString protocol;
@@ -61,7 +62,8 @@ public:
         TermsOfUseUrlRole,
         PrivacyPolicyUrlRole,
         ShowRecommendedRole,
-        OrderRole
+        OrderRole,
+        EmailRegistrationRequiredRole
     };
 
     explicit ApiServicesModel(QObject *parent = nullptr);
@@ -90,6 +92,7 @@ public slots:
     QVariant getSelectedServiceData(const QString roleString);
 
     Q_INVOKABLE int serviceIndexForType(const QString &type) const;
+    Q_INVOKABLE bool isEmailRegistrationRequired(const QString &type) const;
 
 signals:
     void serviceSelectionChanged();

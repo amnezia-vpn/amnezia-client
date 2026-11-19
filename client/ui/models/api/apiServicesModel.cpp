@@ -121,6 +121,9 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
         return QVariant();
     }
+    case EmailRegistrationRequiredRole: {
+        return apiServiceData.emailRegistrationRequired;
+    }
     }
 
     return QVariant();
@@ -232,6 +235,16 @@ int ApiServicesModel::serviceIndexForType(const QString &type) const
     return -1;
 }
 
+bool ApiServicesModel::isEmailRegistrationRequired(const QString &type) const
+{
+    for (const auto &service : m_services) {
+        if (service.type.compare(type, Qt::CaseInsensitive) == 0 && service.emailRegistrationRequired) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QHash<int, QByteArray> ApiServicesModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -247,6 +260,7 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[PrivacyPolicyUrlRole] = "privacyPolicyUrl";
     roles[ShowRecommendedRole] = "showRecommended";
     roles[OrderRole] = "order";
+    roles[EmailRegistrationRequiredRole] = "emailRegistrationRequired";
 
     return roles;
 }
@@ -286,6 +300,8 @@ ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJs
     } else {
         serviceData.isServiceAvailable = true;
     }
+
+    serviceData.emailRegistrationRequired = data.value(apiDefs::key::emailRegistrationRequired).toBool();
 
     serviceData.serviceInfo.object = serviceInfo;
     serviceData.availableCountries = availableCountries;
