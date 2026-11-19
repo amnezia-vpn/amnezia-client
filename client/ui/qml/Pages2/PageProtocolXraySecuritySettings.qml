@@ -159,7 +159,6 @@ PageType {
                     id: sniFieldTls
                     Layout.fillWidth: true
                     headerText: qsTr("Server Name (SNI)")
-                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: XrayConfigModel.sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._-]*$/ }
                     textField.onTextEdited: XrayConfigModel.sni = textField.text
@@ -216,7 +215,6 @@ PageType {
                     id: sniFieldReality
                     Layout.fillWidth: true
                     headerText: qsTr("Server Name (SNI)")
-                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: XrayConfigModel.sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._-]*$/ }
                     textField.onTextEdited: XrayConfigModel.sni = textField.text

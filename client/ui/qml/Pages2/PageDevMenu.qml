@@ -54,14 +54,25 @@ PageType {
                         Layout.fillWidth: true
 
                         headerText: qsTr("Gateway endpoint")
-                        textField.text: SettingsController.gatewayEndpoint
+                        textField.text: SettingsController.devGatewayEndpoint
+                    }
 
-                        buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+                    TextFieldType {
+                        id: gatewayProxyStoragesField
 
-                        clickedFunc: function() {
-                            SettingsController.resetGatewayEndpoint()
-                            gatewayEndpointField.textField.text = SettingsController.gatewayEndpoint
-                        }
+                        Layout.fillWidth: true
+
+                        headerText: qsTr("Gateway proxy storages")
+                        textField.text: SettingsController.devGatewayProxyStorages
+                    }
+
+                    TextFieldType {
+                        id: gatewayPublicKeyField
+
+                        Layout.fillWidth: true
+
+                        headerText: qsTr("Gateway public key")
+                        textField.text: SettingsController.devGatewayPublicKey
                     }
 
                     ButtonType {
@@ -72,11 +83,12 @@ PageType {
                         text: qsTr("Save")
 
                         onClicked: {
-                            var trimmed = gatewayEndpointField.textField.text.replace(/^\s+|\s+$/g, '')
-                            gatewayEndpointField.textField.text = trimmed
-                            if (trimmed !== SettingsController.gatewayEndpoint) {
-                                SettingsController.gatewayEndpoint = trimmed
-                            }
+                            SettingsController.saveDevGatewayConfig(gatewayEndpointField.textField.text.trim(),
+                                                                    gatewayProxyStoragesField.textField.text.trim(),
+                                                                    gatewayPublicKeyField.textField.text.trim())
+                            gatewayEndpointField.textField.text = SettingsController.devGatewayEndpoint
+                            gatewayProxyStoragesField.textField.text = SettingsController.devGatewayProxyStorages
+                            gatewayPublicKeyField.textField.text = SettingsController.devGatewayPublicKey
                             PageController.showNotificationMessage(qsTr("Settings saved"))
                         }
                     }

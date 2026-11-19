@@ -464,6 +464,23 @@ PageType {
                     }
                 }
             }
+
+            CascadeSettings {
+                Layout.fillWidth: true
+
+                enabled: root.isEnabled
+
+                warningVisible: true
+                scroller: smartScroll
+
+                endpoint: AwgConfigModel.cascadeEndpoint
+                port: AwgConfigModel.cascadePort
+                endpointPlaceholder: ServersUiController.serverHostName(ServersUiController.processedServerId)
+                portPlaceholder: AwgConfigModel.port
+
+                onEndpointEdited: (text) => { AwgConfigModel.cascadeEndpoint = text }
+                onPortEdited: (text) => { AwgConfigModel.cascadePort = text }
+            }
         }
     }
 
