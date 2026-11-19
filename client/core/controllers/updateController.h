@@ -58,6 +58,7 @@ private:
     void setUpdateState(UpdateState::State state);
     void setUpdateCheckRunning(bool running);
     void downloadInstaller();
+    void downloadInstallerFile(const QString &downloadUrl, const QByteArray &expectedSha256);
     QString composeDownloadUrl() const;
     void openStorePage() const;
 
@@ -71,7 +72,7 @@ private:
     QStringList m_improvements;
     QStringList m_bugFixes;
     QString m_downloadBaseUrl;
-    QString m_releasePageUrl;
+    QByteArray m_installerSha256;
 
     UpdateState::State m_updateState = UpdateState::State::Idle;
     bool m_updateCheckRunning = false;

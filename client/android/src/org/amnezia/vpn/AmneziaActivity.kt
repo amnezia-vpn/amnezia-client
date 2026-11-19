@@ -807,6 +807,29 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    fun installApk(path: String) {
+        Log.d(TAG, "Install apk $path")
+        mainScope.launch {
+            val uri = try {
+                FileProvider.getUriForFile(this@AmneziaActivity, FILE_PROVIDER_AUTHORITY, File(path))
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Failed to install apk $path: $e")
+                return@launch
+            }
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }.also {
+                try {
+                    startActivity(it)
+                } catch (_: ActivityNotFoundException) {
+                    Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
     fun openFile(filter: String?) {
         Log.v(TAG, "Open file with filter: $filter")
         mainScope.launch {

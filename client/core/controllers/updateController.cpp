@@ -1,12 +1,16 @@
 #include "updateController.h"
 
+#include <QCryptographicHash>
 #include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkReply>
 #include <QTimer>
 #include <QUrl>
+#include <QStandardPaths>
 
 #include "amneziaApplication.h"
 #include "logger.h"
@@ -18,6 +22,8 @@
 #include "core/utils/selfhosted/scriptsRegistry.h"
 
 #if defined(Q_OS_ANDROID)
+    #include <QOperatingSystemVersion>
+
     #include "platforms/android/android_controller.h"
 #endif
 
@@ -26,14 +32,73 @@ namespace
     Logger logger("UpdateController");
 
 #if defined(Q_OS_WINDOWS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
-    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
+    QString installerRemoteFileName(const QString &version)
+    {
+        return QStringLiteral("AmneziaVPN_%1_windows_x64.exe").arg(version);
+    }
+
+    QString installerLocalPath()
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
+    }
 #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");
-    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
-    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
+    QString installerRemoteFileName(const QString &version)
+    {
+        return QStringLiteral("AmneziaVPN_%1_macos_x64.pkg").arg(version);
+    }
+
+    QString installerLocalPath()
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
+    }
+#elif defined(Q_OS_ANDROID)
+    #if defined(Q_PROCESSOR_ARM_64)
+    const QLatin1String kAndroidAbi("arm64-v8a");
+    #elif defined(Q_PROCESSOR_ARM_32)
+    const QLatin1String kAndroidAbi("armeabi-v7a");
+    #elif defined(Q_PROCESSOR_X86_64)
+    const QLatin1String kAndroidAbi("x86_64");
+    #elif defined(Q_PROCESSOR_X86_32)
+    const QLatin1String kAndroidAbi("x86");
+    #endif
+
+    QString installerRemoteFileName(const QString &version)
+    {
+        const QLatin1String osLabel = QOperatingSystemVersion::current() >= QOperatingSystemVersion::Android11
+                ? QLatin1String("android11+")
+                : QLatin1String("android9-10");
+        return QStringLiteral("AmneziaVPN_%1_%2_%3.apk").arg(version, osLabel, kAndroidAbi);
+    }
+
+    QString installerLocalPath()
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/update/AmneziaVPN.apk";
+    }
+
+    bool isSha256Hex(const QByteArray &hash)
+    {
+        return hash.size() == 64 && QByteArray::fromHex(hash).toHex() == hash;
+    }
+#elif defined(Q_OS_LINUX)
+    QString installerRemoteFileName(const QString &version)
+    {
+        return QStringLiteral("AmneziaVPN_%1_linux_x64.run").arg(version);
+    }
+
+    QString installerLocalPath()
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
+    }
+#endif
+
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    QNetworkReply *requestDownload(const QString &url)
+    {
+        QNetworkRequest request;
+        request.setTransferTimeout(30000);
+        request.setUrl(QUrl(url));
+        return amnApp->networkManager()->get(request);
+    }
 #endif
 
     QStringList stringListFromJsonValue(const QJsonValue &value)
@@ -176,7 +241,14 @@ void UpdateController::checkForUpdates()
                 if (m_downloadBaseUrl.endsWith('/')) {
                     m_downloadBaseUrl.chop(1);
                 }
-                m_releasePageUrl = gatewayData.value(apiDefs::key::releasePageUrl).toString();
+#if defined(Q_OS_ANDROID)
+                m_installerSha256 = gatewayData.value(apiDefs::key::checksums)
+                                            .toObject()
+                                            .value(installerRemoteFileName(m_version))
+                                            .toString()
+                                            .toLower()
+                                            .toLatin1();
+#endif
 
                 if (m_version.isEmpty()) {
                     logger.error() << "Update response has no version, ignoring";
@@ -210,27 +282,18 @@ void UpdateController::startUpdate()
         return;
     }
 
-#if defined(Q_OS_ANDROID)
-    // GitHub build on Android: open the release page in a browser, the system downloads the APK.
-    if (m_releasePageUrl.isEmpty()) {
-        logger.error() << "Release page URL is empty";
-        setUpdateState(UpdateState::State::DownloadError);
-        return;
-    }
-    QDesktopServices::openUrl(QUrl(m_releasePageUrl));
-#elif !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     downloadInstaller();
 #endif
 }
 
 QString UpdateController::composeDownloadUrl() const
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_downloadBaseUrl.isEmpty() || m_version.isEmpty()) {
         return QString();
     }
-    const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
-    return m_downloadBaseUrl + "/" + fileName;
+    return m_downloadBaseUrl + "/" + QString::fromLatin1(QUrl::toPercentEncoding(installerRemoteFileName(m_version)));
 #else
     return QString();
 #endif
@@ -238,7 +301,7 @@ QString UpdateController::composeDownloadUrl() const
 
 void UpdateController::downloadInstaller()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_updateState == UpdateState::State::Downloading) {
         return;
     }
@@ -250,15 +313,25 @@ void UpdateController::downloadInstaller()
         return;
     }
 
+    #if defined(Q_OS_ANDROID)
+    if (!isSha256Hex(m_installerSha256)) {
+        logger.error() << "Update response has no valid checksum for the installer";
+        setUpdateState(UpdateState::State::DownloadError);
+        return;
+    }
+    #endif
+
     setUpdateState(UpdateState::State::Downloading);
+    downloadInstallerFile(downloadUrl, m_installerSha256);
+#endif
+}
 
-    QNetworkRequest request;
-    request.setTransferTimeout(30000);
-    request.setUrl(QUrl(downloadUrl));
+void UpdateController::downloadInstallerFile(const QString &downloadUrl, const QByteArray &expectedSha256)
+{
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    QNetworkReply *reply = requestDownload(downloadUrl);
 
-    QNetworkReply *reply = amnApp->networkManager()->get(request);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, expectedSha256]() {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
@@ -269,16 +342,26 @@ void UpdateController::downloadInstaller()
             return;
         }
 
-        QFile file(kInstallerLocalPath);
+        const QByteArray data = reply->readAll();
+        if (!expectedSha256.isEmpty() && QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex() != expectedSha256) {
+            logger.error() << "Installer checksum mismatch";
+            setUpdateState(UpdateState::State::DownloadError);
+            return;
+        }
+
+        const QString localPath = installerLocalPath();
+        QDir().mkpath(QFileInfo(localPath).absolutePath());
+
+        QFile file(localPath);
         if (!file.open(QIODevice::WriteOnly)) {
-            logger.error() << "Failed to open installer file for writing:" << kInstallerLocalPath
+            logger.error() << "Failed to open installer file for writing:" << localPath
                            << "Error:" << file.errorString();
             setUpdateState(UpdateState::State::DownloadError);
             return;
         }
 
-        if (file.write(reply->readAll()) == -1) {
-            logger.error() << "Failed to write installer data to file:" << kInstallerLocalPath
+        if (file.write(data) == -1) {
+            logger.error() << "Failed to write installer data to file:" << localPath
                            << "Error:" << file.errorString();
             file.close();
             setUpdateState(UpdateState::State::DownloadError);
@@ -293,18 +376,20 @@ void UpdateController::downloadInstaller()
 
 void UpdateController::installUpdate()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_updateState != UpdateState::State::ReadyToInstall) {
         logger.error() << "Installer is not downloaded yet";
         return;
     }
 
     #if defined(Q_OS_WINDOWS)
-    runWindowsInstaller(kInstallerLocalPath);
+    runWindowsInstaller(installerLocalPath());
     #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    runMacInstaller(kInstallerLocalPath);
-    #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    runLinuxInstaller(kInstallerLocalPath);
+    runMacInstaller(installerLocalPath());
+    #elif defined(Q_OS_ANDROID)
+    AndroidController::instance()->installApk(installerLocalPath());
+    #elif defined(Q_OS_LINUX)
+    runLinuxInstaller(installerLocalPath());
     #endif
 #endif
 }
