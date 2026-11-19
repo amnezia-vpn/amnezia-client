@@ -115,6 +115,21 @@ PageType {
 
                 visible: root.isServerWithWriteAccess
 
+                text: qsTr("Backup")
+                subtitle: qsTr("Local copy of VPN protocols, services, all server settings and users")
+
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageSettingsServerBackup)
+                }
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: root.isServerWithWriteAccess
+
                 text: qsTr("Update server packages")
                 subtitle: qsTr("Install system updates with the distribution's package manager")
                 destructive: true
