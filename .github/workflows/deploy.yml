@@ -1076,9 +1076,21 @@ jobs:
 
 # ------------------------------------------------------
 
+  Tests-Gate:
+    name: Tests gate
+    runs-on: ubuntu-latest
+    # The "tests" environment requires a reviewer, so a feature branch run pauses here
+    # until it is approved; dev and release tags go through the unprotected "tests-auto".
+    environment: ${{ (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/')) && 'tests-auto' || 'tests' }}
+    steps:
+      - name: 'Open the tests stage'
+        run: echo "Tests stage opened for ${{ github.ref_name }}"
+
+# ------------------------------------------------------
+
   test-linux:
     name: Test Linux (${{ matrix.filter }})
-    needs: Build-Linux-Ubuntu
+    needs: [Build-Linux-Ubuntu, Tests-Gate]
 
     strategy:
       fail-fast: false
@@ -1209,7 +1221,7 @@ jobs:
 
   test-vps:
     name: Test self-hosted VPS
-    needs: Build-Linux-Ubuntu
+    needs: [Build-Linux-Ubuntu, Tests-Gate]
 
     # These tests install and remove docker containers on a single shared VPS:
     # two runs at once corrupt each other's state, so only one job may touch it.
@@ -1295,7 +1307,7 @@ jobs:
 
   test-windows:
     name: Test Windows (${{ matrix.filter }})
-    needs: Build-Windows
+    needs: [Build-Windows, Tests-Gate]
 
     strategy:
       fail-fast: false
@@ -1418,7 +1430,7 @@ jobs:
 
   test-macos:
     name: Test macOS (${{ matrix.filter }})
-    needs: Build-MacOS
+    needs: [Build-MacOS, Tests-Gate]
 
     strategy:
       fail-fast: false
@@ -1527,6 +1539,7 @@ jobs:
 # ------------------------------------------------------
 
   test-android:
+    needs: Tests-Gate
     runs-on: android-runner
 
     env:
