@@ -51,6 +51,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/serverLatencyController.h
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.h
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.h
     ${CLIENT_ROOT_DIR}/core/protocols/qmlRegisterProtocols.h
@@ -62,6 +63,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.h
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/utils/latencyProbe.h
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.h
     ${CLIENT_ROOT_DIR}/core/utils/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/utils/serialization/transfer.h
@@ -86,6 +88,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.h
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.h
     ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
+    ${CLIENT_ROOT_DIR}/mozilla/pingsender.h
+    ${CLIENT_ROOT_DIR}/mozilla/pingsenderfactory.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -141,6 +145,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/serverLatencyController.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
@@ -148,6 +153,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/latencyProbe.cpp
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serialization/inbound.cpp
@@ -175,7 +181,26 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
     ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
+    ${CLIENT_ROOT_DIR}/mozilla/pingsender.cpp
+    ${CLIENT_ROOT_DIR}/mozilla/pingsenderfactory.cpp
 )
+
+if(LINUX OR ANDROID)
+    list(APPEND HEADERS ${CLIENT_ROOT_DIR}/platforms/linux/linuxpingsender.h)
+    list(APPEND SOURCES ${CLIENT_ROOT_DIR}/platforms/linux/linuxpingsender.cpp)
+elseif(APPLE)
+    list(APPEND HEADERS ${CLIENT_ROOT_DIR}/platforms/macos/macospingsender.h)
+    list(APPEND SOURCES ${CLIENT_ROOT_DIR}/platforms/macos/macospingsender.cpp)
+elseif(WIN32)
+    list(APPEND HEADERS
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowspingsender.h
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
+    )
+    list(APPEND SOURCES
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowspingsender.cpp
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
+    )
+endif()
 
 if(NOT IOS AND NOT MACOS_NE)
     set(SOURCES ${SOURCES}

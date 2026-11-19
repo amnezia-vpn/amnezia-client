@@ -54,6 +54,11 @@ target_link_libraries(test_common PUBLIC
 
 target_compile_definitions(test_common PUBLIC AMNEZIA_BUILD_TESTS)
 
+# MZ_<platform> is private to the app target, but the ping sender factory needs it
+set_source_files_properties(${CLIENT_ROOT_DIR}/mozilla/pingsenderfactory.cpp
+    PROPERTIES COMPILE_DEFINITIONS "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>"
+)
+
 target_include_directories(test_common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/..

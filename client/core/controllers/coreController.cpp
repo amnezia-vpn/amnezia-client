@@ -180,6 +180,8 @@ void CoreController::initCoreControllers()
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
     m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, m_subscriptionController, this);
+    m_serverLatencyController =
+            new ServerLatencyController(m_serversController, m_settingsController, m_connectionController, this);
 }
 
 void CoreController::initControllers()
@@ -224,6 +226,10 @@ void CoreController::initControllers()
 
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     setQmlContextProperty("ServersUiController", m_serversUiController);
+
+    m_serverLatencyUiController =
+            new ServerLatencyUiController(m_serverLatencyController, m_serversController, m_serversModel, this);
+    setQmlContextProperty("ServerLatencyController", m_serverLatencyUiController);
 
     m_ipSplitTunnelingUiController = new IpSplitTunnelingUiController(m_ipSplitTunnelingController, m_ipSplitTunnelingModel, this);
     setQmlContextProperty("IpSplitTunnelingController", m_ipSplitTunnelingUiController);

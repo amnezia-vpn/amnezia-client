@@ -71,4 +71,13 @@ public enum Socks5Tunnel {
     public static func quit() {
         hev_socks5_tunnel_quit()
     }
+
+    public static var trafficBytes: (received: UInt64, sent: UInt64) {
+        var sentPackets = 0
+        var sentBytes = 0
+        var receivedPackets = 0
+        var receivedBytes = 0
+        hev_socks5_tunnel_stats(&sentPackets, &sentBytes, &receivedPackets, &receivedBytes)
+        return (UInt64(receivedBytes), UInt64(sentBytes))
+    }
 }

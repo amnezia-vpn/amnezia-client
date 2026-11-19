@@ -81,6 +81,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return row.isSubscriptionExpired;
     case IsSubscriptionExpiringSoonRole:
         return row.isSubscriptionExpiringSoon;
+    case LatencyMsRole: return m_latencyResults.value(row.serverId).latencyMs;
+    case LatencyQualityRole: return static_cast<int>(m_latencyResults.value(row.serverId).quality);
+    case IsLatencyTestingRole: return m_latencyTestingServerIds.contains(row.serverId);
     }
 
     return QVariant();
@@ -120,6 +123,21 @@ void ServersModel::setDefaultServerId(const QString &serverId)
     }
 }
 
+void ServersModel::setServerLatency(const QString &serverId, const LatencyResult &result, bool isTesting)
+{
+    m_latencyResults.insert(serverId, result);
+    if (isTesting) {
+        m_latencyTestingServerIds.insert(serverId);
+    } else {
+        m_latencyTestingServerIds.remove(serverId);
+    }
+
+    const int row = rowForServerId(m_descriptions, serverId);
+    if (row >= 0) {
+        emit dataChanged(index(row), index(row), { LatencyMsRole, LatencyQualityRole, IsLatencyTestingRole });
+    }
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -141,6 +159,10 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+
+    roles[LatencyMsRole] = "latencyMs";
+    roles[LatencyQualityRole] = "latencyQuality";
+    roles[IsLatencyTestingRole] = "isLatencyTesting";
 
     return roles;
 }

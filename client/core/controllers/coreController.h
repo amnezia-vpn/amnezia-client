@@ -27,6 +27,7 @@
 #include "ui/controllers/localProxyUiController.h"
 #include "ui/controllers/logsUiController.h"
 #include "ui/controllers/serversUiController.h"
+#include "ui/controllers/serverLatencyUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/languageUiController.h"
@@ -48,6 +49,7 @@
 #include "core/controllers/localProxyController.h"
 #include "core/controllers/connectionController.h"
 #include "core/controllers/updateController.h"
+#include "core/controllers/serverLatencyController.h"
 
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
@@ -190,6 +192,7 @@ private:
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
     UpdateUiController* m_updateUiController;
+    ServerLatencyUiController *m_serverLatencyUiController;
 
     SubscriptionUiController* m_subscriptionUiController;
     ApiNewsUiController* m_apiNewsUiController;
@@ -211,6 +214,7 @@ private:
     ConnectionController* m_connectionController;
     SettingsController* m_settingsController;
     LocalProxyController* m_localProxyController;
+    ServerLatencyController *m_serverLatencyController;
 
     ContainersModel* m_containersModel;
     ContainersModel* m_defaultServerContainersModel;

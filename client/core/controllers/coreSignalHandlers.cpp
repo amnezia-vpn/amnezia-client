@@ -93,6 +93,7 @@ void CoreSignalHandlers::initAllHandlers()
     initNotificationHandler();
     initUpdateFoundHandler();
     initLocalProxyHandler();
+    initServerLatencyHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -562,4 +563,18 @@ void CoreSignalHandlers::initLocalProxyHandler()
             &PageController::showNotificationMessage);
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, m_coreController->m_localProxyController,
             &LocalProxyController::disable);
+}
+
+void CoreSignalHandlers::initServerLatencyHandler()
+{
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged,
+            m_coreController->m_serverLatencyUiController, &ServerLatencyUiController::onDefaultServerChanged);
+    connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this,
+            [this](Vpn::ConnectionState state) {
+                if (state == Vpn::ConnectionState::Connected || state == Vpn::ConnectionState::Disconnected) {
+                    m_coreController->m_serverLatencyUiController->testDefaultServer();
+                }
+            });
+    QTimer::singleShot(1000, m_coreController->m_serverLatencyUiController,
+                       &ServerLatencyUiController::testDefaultServer);
 }
