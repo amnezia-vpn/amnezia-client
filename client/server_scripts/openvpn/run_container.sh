@@ -4,6 +4,7 @@ sudo docker run -d \
 --log-driver none \
 --restart always \
 --cap-add=NET_ADMIN \
+--volume /lib/modules:/lib/modules:ro \
 -p $OPENVPN_PORT:$OPENVPN_PORT/$OPENVPN_TRANSPORT_PROTO \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
