@@ -31,6 +31,7 @@ void setDockIconVisible(bool visible)
     ProcessSerialNumber psn = { 0, kCurrentProcess };
     if (visible) {
         TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+        [NSApp activateIgnoringOtherApps:YES];
     } else {
         TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
     }
