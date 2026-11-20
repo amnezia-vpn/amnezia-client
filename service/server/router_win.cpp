@@ -280,9 +280,7 @@ bool RouterWin::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
-    QString command = QString("ipconfig /flushdns");
-
-    p.start(command);
+    p.start("ipconfig", { "/flushdns" });
     p.waitForFinished();
     return true;
     //qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
