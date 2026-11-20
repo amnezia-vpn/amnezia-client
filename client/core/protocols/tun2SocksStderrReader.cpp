@@ -27,14 +27,14 @@ void Tun2SocksStderrReader::setProcess(IpcProcessInterfaceReplica *process)
                 process, &IpcProcessInterfaceReplica::readyReadStandardError, this,
                 [this, process = m_process]() {
                     if (process && process == m_process) {
-                        read();
+                        requestRead();
                     }
                 },
                 Qt::QueuedConnection);
     }
 }
 
-void Tun2SocksStderrReader::read()
+void Tun2SocksStderrReader::requestRead()
 {
     if (!m_process) {
         return;
@@ -72,7 +72,7 @@ void Tun2SocksStderrReader::finishRead(QRemoteObjectPendingCallWatcher *call, bo
 
     resetRead();
     if (std::exchange(m_readAgain, false)) {
-        read();
+        requestRead();
     }
 }
 

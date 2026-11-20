@@ -20,7 +20,7 @@ signals:
     void outputReady(const QByteArray &output);
 
 private:
-    void read();
+    void requestRead();
     void finishRead(QRemoteObjectPendingCallWatcher *call, bool succeeded);
     void resetRead();
 
