@@ -18,7 +18,7 @@ protected:
     void stop() override;
 
 private:
-    LocalServer* m_localServer;
+    LocalServer* m_localServer = nullptr;
 };
 
 #endif // SYSTEMSERVICE_H

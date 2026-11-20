@@ -38,7 +38,15 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
             });
 
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
-            [this]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
+            [this]() {
+                if (connectionState() != Vpn::ConnectionState::Error) {
+                    setConnectionState(Vpn::ConnectionState::Disconnected);
+                }
+            });
+    connect(m_impl.get(), &ControllerImpl::backendFailure, this,
+            [this]() { setLastError(ErrorCode::AmneziaServiceConnectionFailed); });
+    connect(m_impl.get(), &ControllerImpl::connectionTimedOut, this,
+            [this]() { setLastError(ErrorCode::VpnConnectionTimeout); });
     m_impl->initialize(nullptr, nullptr);
 }
 
@@ -53,6 +61,7 @@ void WireguardProtocol::stop()
     if (guardStop()) {
         return;
     }
+    setConnectionState(Vpn::ConnectionState::Disconnecting);
     stopMzImpl();
 }
 
@@ -78,5 +87,6 @@ ErrorCode WireguardProtocol::stopMzImpl()
 ErrorCode WireguardProtocol::start()
 {
     resetStopGuard();
+    setConnectionState(Vpn::ConnectionState::Connecting);
     return startMzImpl();
 }
