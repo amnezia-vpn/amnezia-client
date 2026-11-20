@@ -34,6 +34,7 @@
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 #include "core/utils/selfhosted/sshClient.h"
+#include "core/utils/utilities.h"
 #include "logger.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -1266,10 +1267,31 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 
 ErrorCode InstallController::setupServerFirewall(const ServerCredentials &credentials, SshSession &sshSession)
 {
-    return sshSession.runScript(
-            credentials,
+    const QString tmpScriptPath = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
+    const QString tmpServicePath = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
+
+    const QString script =
             sshSession.replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall),
-                                            amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())));
+                                   amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString()));
+    ErrorCode errorCode = sshSession.uploadFileToHost(credentials, script.toUtf8(), tmpScriptPath);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    errorCode = sshSession.uploadFileToHost(
+            credentials, amnezia::scriptData(SharedScriptType::setup_host_firewall_service).toUtf8(), tmpServicePath);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    const QString installScript = QString("sudo install -m 0755 -D %1 /opt/amnezia/setup_host_firewall.sh; "
+                                          "sudo install -m 0644 %2 /etc/systemd/system/amnezia-host-firewall.service; "
+                                          "rm -f %1 %2; "
+                                          "sudo systemctl daemon-reload; "
+                                          "sudo systemctl enable amnezia-host-firewall.service; "
+                                          "sudo systemctl restart amnezia-host-firewall.service")
+                                          .arg(tmpScriptPath, tmpServicePath);
+    return sshSession.runScript(credentials, installScript);
 }
 
 ErrorCode InstallController::rebootServer(const QString &serverId)

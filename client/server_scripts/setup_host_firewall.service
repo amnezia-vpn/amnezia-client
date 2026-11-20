@@ -1,0 +1,12 @@
+[Unit]
+Description=AmneziaVPN host firewall and network tuning
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash /opt/amnezia/setup_host_firewall.sh
+
+[Install]
+WantedBy=multi-user.target
