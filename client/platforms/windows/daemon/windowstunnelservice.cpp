@@ -7,6 +7,8 @@
 #include <Windows.h>
 
 #include <QDateTime>
+#include <QDeadlineTimer>
+#include <QLocalSocket>
 #include <QScopeGuard>
 
 #include "leakdetector.h"
@@ -235,52 +237,56 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
   return true;
 }
 
-QString WindowsTunnelService::uapiCommand(const QString& command) {
-  // Create a pipe to the tunnel service.
-  LPTSTR tunnelName = (LPTSTR)TEXT(TUNNEL_NAMED_PIPE);
-  HANDLE pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                           OPEN_EXISTING, 0, nullptr);
-  if (pipe == INVALID_HANDLE_VALUE) {
-    return QString();
-  }
+QString WindowsTunnelService::uapiCommand(const QString &command)
+{
+    QDeadlineTimer deadline(1000);
 
-  auto guard = qScopeGuard([&] { CloseHandle(pipe); });
-  if (!WaitNamedPipe(tunnelName, 1000)) {
-    WindowsUtils::windowsLog("Failed to wait for named pipes");
-    return QString();
-  }
-
-  DWORD mode = PIPE_READMODE_BYTE;
-  if (!SetNamedPipeHandleState(pipe, &mode, nullptr, nullptr)) {
-    WindowsUtils::windowsLog("Failed to set the read-mode on pipe");
-    return QString();
-  }
-
-  // Write the UAPI command into the pipe.
-  QByteArray message = command.toLocal8Bit();
-  DWORD written;
-  while (!message.endsWith("\n\n")) {
-    message.append('\n');
-  }
-  if (!WriteFile(pipe, message.constData(), message.length(), &written,
-                 nullptr)) {
-    WindowsUtils::windowsLog("Failed to write into the pipe");
-    return QString();
-  }
-
-  // Receive the response from the pipe.
-  QByteArray reply;
-  while (!reply.contains("\n\n")) {
-    char buffer[512];
-    DWORD read = 0;
-    if (!ReadFile(pipe, buffer, sizeof(buffer), &read, nullptr)) {
-      break;
+    // QLocalSocket::connectToServer ignores caller deadlines for busy Windows pipes.
+    LPTSTR tunnelName = (LPTSTR)TEXT(TUNNEL_NAMED_PIPE);
+    HANDLE pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED,
+                             nullptr);
+    if (pipe == INVALID_HANDLE_VALUE) {
+        return QString();
     }
 
-    reply.append(buffer, read);
-  }
+    QLocalSocket socket;
+    if (!socket.setSocketDescriptor(reinterpret_cast<qintptr>(pipe), QLocalSocket::ConnectedState, QIODevice::ReadWrite)) {
+        CloseHandle(pipe);
+        return QString();
+    }
+    const auto guard = qScopeGuard([&socket] { socket.abort(); });
 
-  return QString::fromUtf8(reply).trimmed();
+    QByteArray message = command.toUtf8();
+    while (!message.endsWith("\n\n")) {
+        message.append('\n');
+    }
+    if (socket.write(message) != message.size()) {
+        return QString();
+    }
+    while (socket.bytesToWrite() > 0) {
+        if (deadline.hasExpired()
+            || (!socket.waitForBytesWritten(static_cast<int>(deadline.remainingTime())) && socket.bytesToWrite() > 0)) {
+            logger.warning() << "Timed out or failed writing to the tunnel service";
+            return QString();
+        }
+    }
+
+    QByteArray reply;
+    while (!reply.contains("\n\n")) {
+        reply.append(socket.readAll());
+        if (reply.contains("\n\n")) {
+            break;
+        }
+        if (deadline.hasExpired() || !socket.waitForReadyRead(static_cast<int>(deadline.remainingTime()))) {
+            reply.append(socket.readAll());
+            if (!reply.contains("\n\n")) {
+                logger.warning() << "Timed out or incomplete response from the tunnel service";
+                return QString();
+            }
+        }
+    }
+
+    return QString::fromUtf8(reply.left(reply.indexOf("\n\n"))).trimmed();
 }
 
 // static

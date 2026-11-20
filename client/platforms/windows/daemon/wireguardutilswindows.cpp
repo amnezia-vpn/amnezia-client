@@ -88,6 +88,12 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsWindows::getPeerStatus() {
   return peerList;
 }
 
+bool WireguardUtilsWindows::rebindInterface()
+{
+    const QString reply = m_tunnel.uapiCommand("set=1\nlisten_port=0\n");
+    return reply == "errno=0";
+}
+
 bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   QStringList addresses;
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {

@@ -10,10 +10,12 @@ function(amnezia_copy_runtime_dlls)
     foreach(_target ${_targets})
         get_target_property(_type ${_target} TYPE)
         if(_type STREQUAL "EXECUTABLE")
+            set(_runtime_dlls "$<FILTER:$<TARGET_RUNTIME_DLLS:${_target}>,EXCLUDE,/Qt6[^/]*\\.dll$>")
             add_custom_command(TARGET ${_target} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "$<FILTER:$<TARGET_RUNTIME_DLLS:${_target}>,EXCLUDE,/Qt6[^/]*\\.dll$>"
-                    "$<TARGET_FILE_DIR:${_target}>"
+                COMMAND ${CMAKE_COMMAND} -E
+                    "$<IF:$<BOOL:${_runtime_dlls}>,copy_if_different,true>"
+                    "${_runtime_dlls}"
+                    "$<$<BOOL:${_runtime_dlls}>:$<TARGET_FILE_DIR:${_target}>>"
                 COMMAND_EXPAND_LISTS
             )
         endif()
@@ -260,6 +262,29 @@ if(NOT ANDROID)
         test_common
     )
 
+    add_executable(test_wireguard_connection_monitor
+        testWireguardConnectionMonitor.cpp
+        ../daemon/wireguardconnectionmonitor.h
+    )
+    target_include_directories(test_wireguard_connection_monitor PRIVATE ..)
+    target_link_libraries(test_wireguard_connection_monitor PRIVATE Qt6::Test)
+
+    if(NOT IOS AND NOT MACOS_NE)
+        add_executable(test_daemon_connection_recovery
+            testDaemonConnectionRecovery.cpp
+            ../daemon/daemon.cpp
+            ../daemon/daemon.h
+            ../daemon/wireguardutils.h
+            ../daemon/interfaceconfig.h
+            ../daemon/dnsutils.h
+        )
+        target_include_directories(test_daemon_connection_recovery PRIVATE
+            ../daemon
+            ../mozilla/shared
+        )
+        target_link_libraries(test_daemon_connection_recovery PRIVATE Qt6::Test test_common)
+    endif()
+
     add_executable(test_logs_controller
         testLogsController.cpp
     )
@@ -490,6 +515,10 @@ if(NOT ANDROID)
     add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
     add_test(NAME FavoriteLocationsRestoreTest     COMMAND test_favorite_locations_restore)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
+    add_test(NAME WireguardConnectionMonitorTest  COMMAND test_wireguard_connection_monitor)
+    if(TARGET test_daemon_connection_recovery)
+        add_test(NAME DaemonConnectionRecoveryTest COMMAND test_daemon_connection_recovery)
+    endif()
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
 endif()

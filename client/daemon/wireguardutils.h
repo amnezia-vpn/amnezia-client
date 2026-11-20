@@ -40,6 +40,14 @@ class WireguardUtils : public QObject {
   virtual bool updatePeer(const InterfaceConfig& config) = 0;
   virtual bool deletePeer(const InterfaceConfig& config) = 0;
   virtual QList<PeerStatus> getPeerStatus() = 0;
+  virtual bool supportsConnectionRecovery() const
+  {
+      return false;
+  }
+  virtual bool rebindInterface()
+  {
+      return false;
+  }
 
   virtual bool updateRoutePrefix(const IPAddress& prefix) = 0;
   virtual bool deleteRoutePrefix(const IPAddress& prefix) = 0;

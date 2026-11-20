@@ -566,6 +566,7 @@ void VpnConnection::reconnectToVpn() {
 
     qDebug() << "Reconnect triggered. Reconnecting to the server";
 
+    m_protocolRestartPending = true;
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 
     m_vpnProtocol->stop();
@@ -611,11 +612,23 @@ void VpnConnection::disconnectFromVpn()
     m_vpnProtocol = nullptr;
 }
 
-void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
-    onConnectionStateChanged(state);
+void VpnConnection::setConnectionState(Vpn::ConnectionState state)
+{
+    bool transportRecovered = false;
+#ifdef AMNEZIA_DESKTOP
+    transportRecovered = state == Vpn::Connected && m_connectionState == Vpn::Reconnecting && !m_protocolRestartPending
+            && qobject_cast<WireguardProtocol *>(m_vpnProtocol.data());
+#endif
+    if (!transportRecovered) {
+        onConnectionStateChanged(state);
+    }
 
-    if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
+    if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting && m_protocolRestartPending)
         return;
+
+    if (state != Vpn::Disconnected && state != Vpn::Reconnecting) {
+        m_protocolRestartPending = false;
+    }
 
     m_connectionState = state;
     emit connectionStateChanged(state);

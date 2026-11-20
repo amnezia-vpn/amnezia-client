@@ -37,6 +37,11 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool updatePeer(const InterfaceConfig& config) override;
   bool deletePeer(const InterfaceConfig& config) override;
   QList<PeerStatus> getPeerStatus() override;
+  bool supportsConnectionRecovery() const override
+  {
+      return true;
+  }
+  bool rebindInterface() override;
 
   bool updateRoutePrefix(const IPAddress& prefix) override;
   bool deleteRoutePrefix(const IPAddress& prefix) override;

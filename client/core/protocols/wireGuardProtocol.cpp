@@ -39,6 +39,11 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
 
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
             [this]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
+    connect(m_impl.get(), &ControllerImpl::reconnecting, this, [this]() {
+        if (m_connectionState == Vpn::ConnectionState::Connected) {
+            setConnectionState(Vpn::ConnectionState::Reconnecting);
+        }
+    });
     m_impl->initialize(nullptr, nullptr);
 }
 
