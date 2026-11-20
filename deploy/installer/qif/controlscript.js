@@ -52,11 +52,6 @@ function runningOnLinux()
     return ((installer.value("os") === "linux") || (installer.value("os") === "x11"));
 }
 
-function sleep(milliseconds) {
-    var currentTime = new Date().getTime();
-    while (currentTime + milliseconds >= new Date().getTime()) {}
-}
-
 function raiseInstallerWindow()
 {
     if (!runningOnMacOS()) {
@@ -123,6 +118,56 @@ function requestToQuit(installer,gui)
     }
 }
 
+function prepareClosingApplicationsPage()
+{
+    desktopAppProcessRunning = appProcessIsRunning();
+
+    if (!desktopAppProcessRunning) {
+        return;
+    }
+
+    installer.setValue("ClosingApplicationsPageRequested", "true");
+}
+
+function removePreviousInstallation()
+{
+    if (!appInstalled()) {
+        return true;
+    }
+
+    if (QMessageBox.Ok !== QMessageBox.information("os.information", appName(),
+                                                   qsTr("The application is already installed.") + " " +
+                                                   qsTr("We need to remove the old installation first. Do you wish to proceed?"),
+                                                   QMessageBox.Ok | QMessageBox.Cancel)) {
+        console.log("Request to quit from user");
+        installer.setCancelled();
+        return false;
+    }
+
+    var resultArray = [];
+
+    if (installer.fileExists(appInstalledUninstallerPath_x86)) {
+        console.log("Starting uninstallation " + appInstalledUninstallerPath_x86);
+        resultArray = installer.execute(appInstalledUninstallerPath_x86);
+    }
+
+    if (installer.fileExists(appInstalledUninstallerPath)) {
+        console.log("Starting uninstallation " + appInstalledUninstallerPath);
+        resultArray = installer.execute(appInstalledUninstallerPath);
+    }
+
+    console.log("Uninstaller finished with code: " + resultArray[1]);
+
+    if (Number(resultArray[1]) !== 0) {
+        console.log("Uninstallation aborted by user");
+        installer.setCancelled();
+        return false;
+    }
+
+    raiseInstallerWindow();
+    return true;
+}
+
 
 Controller.prototype.PerformInstallationPageCallback = function()
 {
@@ -164,7 +209,14 @@ Controller.prototype.ReadyForInstallationPageCallback = function()
 {
     if (installer.isUpdater()) {
         gui.clickButton(buttons.CommitButton);
+        return;
     }
+
+    if (!installer.isInstaller() || !runningOnWindows() || !appProcessIsRunning()) {
+        return;
+    }
+
+    closeDesktopApp();
 }
 
 Controller.prototype.TargetDirectoryPageCallback = function ()
@@ -241,6 +293,11 @@ function Controller () {
         installer.setDefaultPageVisible(QInstaller.StartMenuDirectoryPage, false);
         installer.setDefaultPageVisible(QInstaller.LicenseCheck, false);
 
+        if (runningOnWindows()) {
+            prepareClosingApplicationsPage();
+            return;
+        }
+
         isDesktopAppProcessRunningMessageLoop();
 
         if (requestToQuitFromApp === true) {
@@ -252,50 +309,7 @@ function Controller () {
             installer.setMessageBoxAutomaticAnswer("OverwriteTargetDirectory", QMessageBox.Yes);
         }
 
-        if (appInstalled()) {
-            if (QMessageBox.Ok === QMessageBox.information("os.information", appName(),
-                                                           qsTr("The application is already installed.") + " " +
-                                                           qsTr("We need to remove the old installation first. Do you wish to proceed?"),
-                                                           QMessageBox.Ok | QMessageBox.Cancel)) {
-
-
-                if (appInstalled()) {
-                    var resultArray = [];
-
-                    if (installer.fileExists(appInstalledUninstallerPath_x86)) {
-                        console.log("Starting uninstallation " + appInstalledUninstallerPath_x86);
-                        resultArray = installer.execute(appInstalledUninstallerPath_x86);
-                    }
-
-                    if (installer.fileExists(appInstalledUninstallerPath)) {
-                        console.log("Starting uninstallation " + appInstalledUninstallerPath);
-                        resultArray = installer.execute(appInstalledUninstallerPath);
-                    }
-
-                    console.log("Uninstaller finished with code: " + resultArray[1])
-
-                    if (Number(resultArray[1]) !== 0) {
-                        console.log("Uninstallation aborted by user");
-                        installer.setCancelled();
-                        return;
-                    } else {
-                        for (var i = 0; i < 300; i++) {
-                            sleep(100);
-                            if (!installer.fileExists(appInstalledUninstallerPath)) {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                raiseInstallerWindow();
-
-            } else {
-                console.log("Request to quit from user");
-                installer.setCancelled();
-                return;
-            }
-        }
+        removePreviousInstallation();
 
     } else if (installer.isUninstaller()) {
         isDesktopAppProcessRunningMessageLoop();
@@ -329,15 +343,45 @@ isDesktopAppProcessRunningMessageLoop = function ()
     }
     desktopAppProcessRunning = appProcessIsRunning();
 
-    if (desktopAppProcessRunning) {
-        var result = QMessageBox.warning("QMessageBox", appName() + " installer",
-                                         appName() + " is active. Close the app and press \"Retry\" button to continue installation. Press \"Abort\" button to abort the installer and exit.",
-                                         QMessageBox.Retry | QMessageBox.Abort);
-        if (result === QMessageBox.Retry) {
-            isDesktopAppProcessRunningMessageLoop();
-        } else {
+    while (desktopAppProcessRunning) {
+        if (!userAgreedToCloseDesktopApp()) {
             requestToQuitFromApp = true;
             return;
         }
+        if (runningOnWindows()) {
+            closeDesktopApp();
+        }
+        desktopAppProcessRunning = appProcessIsRunning();
     }
+}
+
+function userAgreedToCloseDesktopApp()
+{
+    var title = appName() + " installer";
+    if (runningOnWindows()) {
+        return QMessageBox.question("QMessageBox", title,
+                                    qsTr("%1 is running. Close it and continue the installation?").arg(appName()),
+                                    QMessageBox.Yes | QMessageBox.No) === QMessageBox.Yes;
+    }
+    return QMessageBox.warning("QMessageBox", title,
+                               qsTr("%1 is running. Close it to continue the installation.").arg(appName()),
+                               QMessageBox.Retry | QMessageBox.Abort) === QMessageBox.Retry;
+}
+
+function waitForDesktopAppExit(timeoutSeconds)
+{
+    installer.execute("powershell", ["-NoProfile", "-NonInteractive", "-Command",
+                                     "Wait-Process -Name " + appName() + " -Timeout " + timeoutSeconds
+                                     + " -ErrorAction SilentlyContinue"]);
+    return !appProcessIsRunning();
+}
+
+function closeDesktopApp()
+{
+    installer.execute("taskkill", ["/IM", appExecutableFileName()]);
+    if (waitForDesktopAppExit(10)) {
+        return;
+    }
+    installer.execute("taskkill", ["/F", "/IM", appExecutableFileName()]);
+    waitForDesktopAppExit(5);
 }

@@ -1,6 +1,7 @@
 #include "ipcClient.h"
 #include "ipc.h"
 #include <QRemoteObjectNode>
+#include <QThread>
 #include <QtNetwork/qlocalsocket.h>
 
 IpcClient::IpcClient(QObject *parent) : QObject(parent)
@@ -11,8 +12,14 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 
 IpcClient& IpcClient::Instance()
 {
-    thread_local IpcClient ipcClient;
-    return ipcClient;
+    thread_local QScopedPointer<IpcClient> ipcClient;
+
+    if (ipcClient.isNull()) {
+        ipcClient.reset(new IpcClient());
+        QObject::connect(QThread::currentThread(), &QThread::finished, ipcClient.data(), [] { ipcClient.reset(); });
+    }
+
+    return *ipcClient;
 }
 
 QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
