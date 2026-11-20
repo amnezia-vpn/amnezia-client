@@ -10,6 +10,9 @@
 
 int runPageSetupWizardConfigSourceTests(int argc, char *argv[]);
 int runPageHomeTests(int argc, char *argv[]);
+int runPageShareTests(int argc, char *argv[]);
+int runPageShareConnectionTests(int argc, char *argv[]);
+int runPageShareFullAccessTests(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +33,9 @@ int main(int argc, char *argv[])
 
     result |= runPageSetupWizardConfigSourceTests(argc, argv);
     result |= runPageHomeTests(argc, argv);
+    result |= runPageShareTests(argc, argv);
+    result |= runPageShareConnectionTests(argc, argv);
+    result |= runPageShareFullAccessTests(argc, argv);
 
     return result;
 }

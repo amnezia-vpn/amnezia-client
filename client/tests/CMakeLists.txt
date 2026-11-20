@@ -335,6 +335,9 @@ if(NOT ANDROID)
         pagesUi/pagesUiTestFixture.h
         pagesUi/testPageSetupWizardConfigSource.cpp
         pagesUi/testPageHome.cpp
+        pagesUi/testPageShare.cpp
+        pagesUi/testPageShareConnection.cpp
+        pagesUi/testPageShareFullAccess.cpp
         ${PAGES_UI_QRC}
     )
 
