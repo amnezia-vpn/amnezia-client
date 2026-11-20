@@ -87,12 +87,20 @@ private slots:
         QVERIFY(loadPage());
 
         QQuickItem *settingsButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Show connection settings"), m_page);
-
         QVERIFY(settingsButton);
 
         m_fixture.click(settingsButton);
 
-        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection settings"), m_page));
+        QTest::qWait(500);
+
+        qDebug() << "Page:" << m_page;
+        qDebug() << "Window:" << m_fixture.window();
+
+        for (QQuickItem *item : m_fixture.items()) {
+            qDebug() << item->metaObject()->className() << item->property("headerText") << item->isVisible();
+        }
+
+        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection settings")));
     }
 
     void nativeConfigStringButtonVisibility()
