@@ -55,6 +55,42 @@ private slots:
     }
 };
 
+
+void navigatesToPageShareFullAccess()
+{
+    QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
+
+    QQuickItem *moreButton = nullptr;
+
+    const auto iconButtons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
+
+    for (QQuickItem *button : iconButtons) {
+        if (button->isVisible() && button->isEnabled()) {
+            moreButton = button;
+            break;
+        }
+    }
+
+    QVERIFY2(moreButton, "More button was not found");
+
+    m_fixture.click(moreButton);
+
+    QQuickItem *fullAccessButton = nullptr;
+
+    const auto listItems = m_fixture.itemsOfType(QStringLiteral("ListItemType"));
+
+    for (QQuickItem *item : listItems) {
+        if (item->isVisible() && item->isEnabled() && item->property("text").toString() == QStringLiteral("Share")) {
+            fullAccessButton = item;
+            break;
+        }
+    }
+
+    QVERIFY2(fullAccessButton, "Full access Share button was not found");
+    QVERIFY(m_fixture.verifyNavigation(fullAccessButton, PageLoader::PageEnum::PageShareFullAccess));
+}
+
+
 int runPageShareTests(int argc, char *argv[])
 {
     PageShareTest test;

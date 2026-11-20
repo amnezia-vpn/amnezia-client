@@ -348,3 +348,24 @@ void PagesUiTestFixture::clearAndType(QQuickItem *target, const QString &text)
 
     typeText(target, text);
 }
+
+bool PagesUiTestFixture::verifyNavigation(QQuickItem *target, PageLoader::PageEnum expectedPage)
+{
+    if (!target || !m_pageController) {
+        return false;
+    }
+
+    QSignalSpy navigationSpy(m_pageController, &PageController::goToPage);
+    if (!navigationSpy.isValid()) {
+        return false;
+    }
+
+    click(target);
+
+    if (!QTest::qWaitFor([&navigationSpy] { return navigationSpy.count() == 1; }, 5000)) {
+        return false;
+    }
+
+    const QList<QVariant> arguments = navigationSpy.takeFirst();
+    return !arguments.isEmpty() && arguments.at(0).toInt() == static_cast<int>(expectedPage);
+}
