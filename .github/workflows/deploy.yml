@@ -1107,6 +1107,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - PagesUiTest
 
     runs-on: ubuntu-22.04
 
@@ -1324,6 +1325,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - PagesUiTest
 
     runs-on: windows-latest
 
@@ -1443,6 +1445,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - PagesUiTest
 
     runs-on: macos-15
 
