@@ -90,3 +90,18 @@ void IpSplitTunnelingUiController::updateModel()
 {
     m_ipSplitTunnelingModel->updateModel(m_ipSplitTunnelingController->getCurrentSites());
 }
+
+bool IpSplitTunnelingUiController::isDynamicDomainRoutingEnabled() const
+{
+    return m_ipSplitTunnelingController->isDynamicDomainRoutingEnabled();
+}
+
+void IpSplitTunnelingUiController::setDynamicDomainRoutingEnabled(bool enabled)
+{
+    if (isDynamicDomainRoutingEnabled() == enabled) {
+        return;
+    }
+
+    m_ipSplitTunnelingController->setDynamicDomainRoutingEnabled(enabled);
+    emit dynamicDomainRoutingEnabledChanged();
+}

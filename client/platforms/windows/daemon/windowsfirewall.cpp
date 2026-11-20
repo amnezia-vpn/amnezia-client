@@ -173,7 +173,7 @@ bool WindowsFirewall::initSublayer() {
                         L"DNS filters for split tunneling");
 }
 
-bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
+bool WindowsFirewall::enableInterface(int vpnAdapterIndex, bool allowDnsOnInterface) {
 // Checks if the FW_Rule was enabled succesfully,
 // disables the whole killswitch and returns false if not.
 #define FW_OK(rule)                                                       \
@@ -210,7 +210,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
       return false;
     }
   } else
-  FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, MED_WEIGHT,
+  FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, allowDnsOnInterface ? HIGH_WEIGHT : MED_WEIGHT,
                                   "Allow usage of VPN Adapter"));
   FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
   FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic"));

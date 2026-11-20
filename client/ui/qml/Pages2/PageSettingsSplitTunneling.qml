@@ -55,6 +55,9 @@ PageType {
 
     readonly property int routeModeIndex: IpSplitTunnelingController.routeMode === 2 ? 1 : 0
 
+    /// <summary>Содержит условие поиска с буквальным сопоставлением введённого текста.</summary>
+    readonly property string searchPattern: ".*" + addSitePanel.textField.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*"
+
     ListViewType {
         id: listView
 
@@ -70,12 +73,12 @@ PageType {
                 AnyOf {
                     RegExpFilter {
                         roleName: "url"
-                        pattern: ".*" + addSitePanel.textField.text + ".*"
+                        pattern: root.searchPattern
                         caseSensitivity: Qt.CaseInsensitive
                     }
                     RegExpFilter {
                         roleName: "ip"
-                        pattern: ".*" + addSitePanel.textField.text + ".*"
+                        pattern: root.searchPattern
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }
@@ -126,6 +129,39 @@ PageType {
 
                     onToggled: IpSplitTunnelingController.toggleSplitTunneling(checked)
                 }
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: Qt.platform.os === "windows"
+                enabled: root.pageEnabled
+                text: qsTr("Dynamic domains and wildcards")
+                subtitle: qsTr("WireGuard / AmneziaWG on Windows. Applies after reconnecting.")
+
+                onClicked: {
+                    domainRoutingSwitch.toggle()
+                    domainRoutingSwitch.toggled()
+                }
+
+                SwitchType {
+                    id: domainRoutingSwitch
+                    objectName: "domainRoutingSwitch"
+                    focusPolicy: Qt.NoFocus
+                    checked: IpSplitTunnelingController.dynamicDomainRoutingEnabled
+                    onToggled: IpSplitTunnelingController.dynamicDomainRoutingEnabled = checked
+                }
+            }
+
+            BodyTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: Qt.platform.os === "windows" && domainRoutingSwitch.checked
+                color: AmneziaStyle.color.textSecondary
+                text: qsTr("Keeps domains current and matches subdomains with *.example.com. Uses a local TCP/UDP handler; IPv6 destinations and remote ping are not supported. App rules match executable paths, not child processes. Secure DNS settings are not changed; encrypted DNS with hidden hostnames can prevent domain matching.")
             }
 
             SegmentedControlType {
@@ -182,7 +218,7 @@ PageType {
                 anchors.rightMargin: 16
 
                 text: url
-                subtitle: ip
+                subtitle: IpSplitTunnelingController.dynamicDomainRoutingEnabled ? "" : ip
                 trailingIconSource: "qrc:/images/controls/trash.svg"
 
                 onClicked: {
@@ -203,6 +239,7 @@ PageType {
 
     AddSitePanel {
         id: addSitePanel
+        objectName: "splitTunnelingAddSitePanel"
 
         anchors.left: parent.left
         anchors.right: parent.right

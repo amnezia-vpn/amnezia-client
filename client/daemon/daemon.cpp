@@ -166,6 +166,11 @@ bool Daemon::activate(const InterfaceConfig& config) {
 }
 
 bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
+#ifdef MZ_WINDOWS
+  if (config.m_domainRoutingEnabled) {
+    return true;
+  }
+#endif
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
@@ -391,6 +396,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   }
 
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
+#ifdef MZ_WINDOWS
+  config.m_domainRoutingEnabled = obj.value("domainRoutingEnabled").toBool();
+#endif
 
   if (const auto jc = obj.value("Jc"); !jc.isUndefined()) {
     config.m_junkPacketCount = jc.toString();
@@ -529,7 +537,8 @@ bool Daemon::supportServerSwitching(const InterfaceConfig& config) const {
   const InterfaceConfig& current =
       m_connections.value(config.m_hopType).m_config;
 
-  return current.m_privateKey == config.m_privateKey &&
+  return current.m_domainRoutingEnabled == config.m_domainRoutingEnabled &&
+         current.m_privateKey == config.m_privateKey &&
          current.m_deviceIpv4Address == config.m_deviceIpv4Address &&
          current.m_deviceIpv6Address == config.m_deviceIpv6Address &&
          current.m_serverIpv4Gateway == config.m_serverIpv4Gateway &&

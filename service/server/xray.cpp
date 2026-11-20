@@ -31,8 +31,33 @@
     #include "xray_defs.h"
 #endif
 
-qint64 Xray::start(const QString &cfg)
+Xray::Xray()
 {
+    m_ownerTimer.setSingleShot(true);
+    m_ownerTimer.setInterval(30000);
+    QObject::connect(&m_ownerTimer, &QTimer::timeout, &m_ownerTimer, [this]() {
+        qWarning() << "Владелец доменного обработчика перестал отвечать; обработчик остановлен.";
+        stopAny();
+    });
+}
+
+bool Xray::keepAlive(qint64 token)
+{
+    if (!m_exclusive || token == 0 || token != m_currentToken) {
+        return false;
+    }
+
+    m_ownerTimer.start();
+    return true;
+}
+
+qint64 Xray::start(const QString &cfg, bool exclusive)
+{
+    if (m_currentToken != 0 && (exclusive || m_exclusive)) {
+        qWarning() << "Обработчик занят другим подключением.";
+        return 0;
+    }
+
     if (m_currentToken != 0) {
         qDebug() << "Xray::start() engine is busy (token" << m_currentToken << "), stopping it for the new owner";
         stopXray();
@@ -40,10 +65,17 @@ qint64 Xray::start(const QString &cfg)
     }
 
     if (!startXray(cfg)) {
+        if (exclusive) {
+            stopXray();
+        }
         return 0;
     }
 
+    m_exclusive = exclusive;
     m_currentToken = ++m_lastToken;
+    if (m_exclusive) {
+        m_ownerTimer.start();
+    }
     qDebug() << "Xray::start() engine started, owner token" << m_currentToken;
     return m_currentToken;
 }
@@ -60,6 +92,8 @@ bool Xray::stop(qint64 token)
     }
 
     m_currentToken = 0;
+    m_exclusive = false;
+    m_ownerTimer.stop();
     return stopXray();
 }
 
@@ -70,6 +104,8 @@ bool Xray::stopAny()
     }
 
     m_currentToken = 0;
+    m_exclusive = false;
+    m_ownerTimer.stop();
     return stopXray();
 }
 

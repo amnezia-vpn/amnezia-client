@@ -1,7 +1,11 @@
 #include "ipSplitTunnelingController.h"
+#include "core/utils/domainRouting.h"
 #include "core/utils/networkUtilities.h"
-#include <QJsonObject>
 #include <QDebug>
+#include <QJsonObject>
+#include <QUrl>
+
+#include <algorithm>
 
 IpSplitTunnelingController::IpSplitTunnelingController(SecureAppSettingsRepository* appSettingsRepository, QObject* parent)
     : QObject(parent),
@@ -80,14 +84,35 @@ bool IpSplitTunnelingController::addSite(const QString &hostname)
     if (!validateHostname(normalizedHostname)) {
         return false;
     }
-    
-    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalizedHostname)) {
+
+#ifdef Q_OS_WIN
+    if (normalizedHostname.startsWith(QStringLiteral("*."))) {
+        return addSiteInternal(normalizedHostname, { });
+    }
+#endif
+
+    if (validateIpv4Cidr(normalizedHostname)) {
         processSite(normalizedHostname, {});
         return true;
     }
     
     if (addSiteInternal(normalizedHostname, {})) {
-        QHostInfo::lookupHost(normalizedHostname, this, SLOT(onHostResolved(QHostInfo)));
+        const RouteMode routeMode = m_currentRouteMode;
+        QHostInfo::lookupHost(normalizedHostname, this,
+                              [this, routeMode, normalizedHostname](const QHostInfo &hostInfo) {
+            QStringList allIpv4;
+            for (const QHostAddress &address : hostInfo.addresses()) {
+                if (address.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
+                    allIpv4.append(address.toString());
+                }
+            }
+            allIpv4.removeDuplicates();
+            allIpv4.sort();
+
+            if (!allIpv4.isEmpty()) {
+                processSiteAfterResolve(routeMode, normalizedHostname, allIpv4);
+            }
+        });
         return true;
     }
     
@@ -134,6 +159,16 @@ bool IpSplitTunnelingController::isSplitTunnelingEnabled() const
     return m_appSettingsRepository->isSitesSplitTunnelingEnabled();
 }
 
+bool IpSplitTunnelingController::isDynamicDomainRoutingEnabled() const
+{
+    return m_appSettingsRepository->isDynamicDomainRoutingEnabled();
+}
+
+void IpSplitTunnelingController::setDynamicDomainRoutingEnabled(bool enabled)
+{
+    m_appSettingsRepository->setDynamicDomainRoutingEnabled(enabled);
+}
+
 QVector<QPair<QString, QStringList>> IpSplitTunnelingController::getCurrentSites() const
 {
     return m_sites;
@@ -150,53 +185,111 @@ void IpSplitTunnelingController::fillSites()
 
 QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) const
 {
-    QString normalized = hostname;
-    normalized.replace("https://", "");
-    normalized.replace("http://", "");
-    normalized.replace("ftp://", "");
-
-    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalized)) {
-        return normalized;
+#ifdef Q_OS_WIN
+    const auto rule = domainRouting::parseRule(hostname);
+    return rule ? rule->value : QString();
+#else
+    const QString candidate = hostname.trimmed();
+    if (candidate.isEmpty()) {
+        return {};
     }
 
-    const QStringList parts = normalized.split("/", Qt::SkipEmptyParts);
-    return parts.isEmpty() ? QString() : parts.first();
+    if (validateIpv4Cidr(candidate)) {
+        return candidate;
+    }
+
+    const qsizetype slashIndex = candidate.indexOf('/');
+    if (slashIndex > 0 && NetworkUtilities::checkIPv4Format(candidate.left(slashIndex))) {
+        return {};
+    }
+
+    const QString urlText = candidate.contains("://") ? candidate : QStringLiteral("https://") + candidate;
+    const QUrl url(urlText, QUrl::StrictMode);
+    if (!url.isValid() || url.host().isEmpty()) {
+        return {};
+    }
+
+    QString normalized = QString::fromLatin1(QUrl::toAce(url.host())).toLower();
+    while (normalized.endsWith('.')) {
+        normalized.chop(1);
+    }
+    return normalized;
+#endif
 }
 
 bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
 {
-    if (hostname.isEmpty()) {
+#ifdef Q_OS_WIN
+    const auto rule = domainRouting::parseRule(hostname);
+    return rule && (rule->kind != domainRouting::RuleKind::Network || validateIpv4Cidr(rule->value));
+#else
+    if (validateIpv4Cidr(hostname)) {
+        return true;
+    }
+
+    if (hostname.isEmpty() || hostname.size() > 253 || !hostname.contains('.') || hostname.contains('/')) {
         return false;
     }
-    if (!hostname.contains(".") && !NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+
+    const QStringList labels = hostname.split('.', Qt::KeepEmptyParts);
+    if (labels.constLast().size() < 2) {
         return false;
     }
-    return true;
-}
-
-
-void IpSplitTunnelingController::onHostResolved(const QHostInfo &hostInfo)
-{
-    const QList<QHostAddress> &addresses = hostInfo.addresses();
-    QString hostname = hostInfo.hostName();
-
-    QStringList allIpv4;
-    for (const QHostAddress &addr : addresses) {
-        if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-            allIpv4.append(addr.toString());
+    for (const QString &label : labels) {
+        if (label.isEmpty() || label.size() > 63 || !label.front().isLetterOrNumber() || !label.back().isLetterOrNumber()) {
+            return false;
+        }
+        for (const QChar character : label) {
+            if (!character.isLetterOrNumber() && character != '-') {
+                return false;
+            }
         }
     }
-    allIpv4.removeDuplicates();
-    qDebug() << "[SplitTunneling] Host resolved:" << hostname
-             << "-> adding all IPv4 addresses to list:" << allIpv4;
 
-    if (!allIpv4.isEmpty()) {
-        processSiteAfterResolve(hostname, allIpv4);
-    }
+    return std::any_of(labels.constLast().cbegin(), labels.constLast().cend(), [](QChar character) {
+        return character.isLetter();
+    });
+#endif
 }
 
-void IpSplitTunnelingController::processSiteAfterResolve(const QString &hostname, const QStringList &ips)
+bool IpSplitTunnelingController::validateIpv4Cidr(const QString &value) const
 {
+    const QStringList parts = value.split('/', Qt::KeepEmptyParts);
+    if (parts.size() == 1) {
+        return NetworkUtilities::ipAddressRegExp().match(parts.constFirst()).hasMatch();
+    }
+    if (parts.size() != 2 || !NetworkUtilities::ipAddressRegExp().match(parts.constFirst()).hasMatch()) {
+        return false;
+    }
+
+    const QString prefix = parts.constLast();
+    if (prefix.isEmpty() || (prefix.size() > 1 && prefix.startsWith('0'))) {
+        return false;
+    }
+    for (const QChar character : prefix) {
+        if (character < '0' || character > '9') {
+            return false;
+        }
+    }
+
+    bool converted = false;
+    const int prefixLength = prefix.toInt(&converted);
+    return converted && prefixLength >= 0 && prefixLength <= 32;
+}
+
+void IpSplitTunnelingController::processSiteAfterResolve(RouteMode routeMode, const QString &hostname,
+                                                         const QStringList &ips)
+{
+    const QVariantMap sites = m_appSettingsRepository->vpnSites(routeMode);
+    if (!sites.contains(hostname)) {
+        return;
+    }
+
+    m_appSettingsRepository->addVpnSite(routeMode, hostname, ips);
+    if (m_currentRouteMode != routeMode) {
+        return;
+    }
+
     for (int i = 0; i < m_sites.size(); i++) {
         if (m_sites[i].first == hostname) {
             for (const QString &ip : ips) {
@@ -207,7 +300,6 @@ void IpSplitTunnelingController::processSiteAfterResolve(const QString &hostname
             break;
         }
     }
-    m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ips);
 }
 
 void IpSplitTunnelingController::processSite(const QString &hostname, const QStringList &ips)
@@ -234,33 +326,54 @@ bool IpSplitTunnelingController::importSitesFromJson(const QByteArray& jsonData,
     QMap<QString, QStringList> sites;
     
     for (auto jsonValue : jsonArray) {
-        QJsonObject jsonObject = jsonValue.toObject();
-        QString hostname = jsonObject.value("hostname").toString("");
+        if (!jsonValue.isObject()) {
+            continue;
+        }
 
-        QStringList ips;
-        if (jsonObject.value("ips").isArray()) {
-            const QJsonArray ipsArray = jsonObject.value("ips").toArray();
-            for (const auto &ipValue : ipsArray) {
-                ips.append(ipValue.toString());
-            }
-        }
-        const QString singleIp = jsonObject.value("ip").toString("");
-        if (!singleIp.isEmpty()) {
-            ips.append(singleIp);
-        }
-        ips.removeAll(QString());
-        ips.removeDuplicates();
-        
+        const QJsonObject jsonObject = jsonValue.toObject();
+        QString hostname = jsonObject.value("hostname").toString("");
         QString normalizedHostname = normalizeHostname(hostname);
-        
+
         if (!validateHostname(normalizedHostname)) {
             qDebug() << normalizedHostname << " not look like ip adress or domain name";
             continue;
         }
-        
-        sites.insert(normalizedHostname, ips);
+
+        QStringList ips;
+        if (jsonObject.value("ips").isArray()) {
+            const QJsonArray ipsArray = jsonObject.value("ips").toArray();
+            for (const QJsonValue &ipValue : ipsArray) {
+                const QString ip = ipValue.toString().trimmed();
+                if (!ip.contains('/') && validateIpv4Cidr(ip)) {
+                    ips.append(ip);
+                }
+            }
+        }
+
+        const QString legacyIp = jsonObject.value("ip").toString().trimmed();
+        if (!legacyIp.contains('/') && validateIpv4Cidr(legacyIp)) {
+            ips.append(legacyIp);
+        }
+        ips.removeDuplicates();
+        ips.sort();
+        if (normalizedHostname.startsWith(QStringLiteral("*."))) {
+            ips.clear();
+        }
+
+        QStringList mergedIps = sites.value(normalizedHostname);
+        for (const QString &ip : ips) {
+            if (!mergedIps.contains(ip)) {
+                mergedIps.append(ip);
+            }
+        }
+        sites.insert(normalizedHostname, mergedIps);
     }
-    
+
+    if (sites.isEmpty()) {
+        errorMessage = tr("The JSON data does not contain valid sites");
+        return false;
+    }
+
     addSites(sites, replaceExisting);
     
     return true;
@@ -282,11 +395,9 @@ QByteArray IpSplitTunnelingController::exportSitesToJson() const
         jsonObject["ips"] = ipsArray;
         // Keep the legacy "ip" field (first address) for backward compatibility.
         jsonObject["ip"] = site.second.isEmpty() ? QString() : site.second.first();
-
         jsonArray.append(jsonObject);
     }
     
     QJsonDocument jsonDocument(jsonArray);
     return jsonDocument.toJson();
 }
-
