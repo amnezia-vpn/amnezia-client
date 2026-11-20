@@ -537,14 +537,32 @@ ErrorCode XrayConfigurator::uploadServerConfigAtomically(const ServerCredentials
 
 bool XrayConfigurator::restartXrayContainer(const ServerCredentials &credentials, DockerContainer container) const
 {
-    const ErrorCode errorCode = m_sshSession->runScript(
-            credentials,
-            SshSession::replaceVars(QStringLiteral("sudo docker restart $CONTAINER_NAME"),
-                                    amnezia::genBaseVars(credentials, container, QString(), QString())));
-    if (errorCode != ErrorCode::NoError) {
+    const auto vars = amnezia::genBaseVars(credentials, container, QString(), QString());
+
+    auto readStartedAt = [&]() {
+        QString out;
+        auto collect = [&out](const QString &data, libssh::Client &) {
+            out += data;
+            return ErrorCode::NoError;
+        };
+        const ErrorCode errorCode = m_sshSession->runScript(
+                credentials,
+                SshSession::replaceVars(QStringLiteral("sudo docker inspect -f '{{.State.StartedAt}}' $CONTAINER_NAME"),
+                                        vars),
+                collect);
+        return errorCode == ErrorCode::NoError ? out.trimmed() : QString();
+    };
+
+    const QString startedBefore = readStartedAt();
+    if (startedBefore.isEmpty()) {
         return false;
     }
-    return true;
+
+    m_sshSession->runScript(credentials,
+                            SshSession::replaceVars(QStringLiteral("sudo docker restart $CONTAINER_NAME"), vars));
+
+    const QString startedAfter = readStartedAt();
+    return !startedAfter.isEmpty() && startedAfter != startedBefore;
 }
 
 bool XrayConfigurator::xrayProcessIsUp(const ServerCredentials &credentials, DockerContainer container) const
