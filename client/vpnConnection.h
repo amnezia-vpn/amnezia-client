@@ -51,6 +51,7 @@ public slots:
     void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void reconnectToVpn();
+    void onProtocolReconnectRequested();
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);

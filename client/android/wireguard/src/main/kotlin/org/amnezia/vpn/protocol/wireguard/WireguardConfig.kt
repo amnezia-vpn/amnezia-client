@@ -9,7 +9,8 @@ private const val WIREGUARD_DEFAULT_MTU = 1280
 
 open class WireguardConfig protected constructor(
     protocolConfigBuilder: ProtocolConfig.Builder,
-    val endpoint: InetEndpoint,
+    // var: the address behind the server's host name may change while connected
+    var endpoint: InetEndpoint,
     val persistentKeepalive: String?,
     val publicKeyHex: String,
     val preSharedKeyHex: String?,

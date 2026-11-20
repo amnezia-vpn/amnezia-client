@@ -37,6 +37,16 @@ fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
 
 fun parseInetAddress(address: String): InetAddress = InetAddress.getByName(address)
 
+/** True for an IPv4 or IPv6 literal, false for a host name. Never queries DNS. */
+fun isNumericAddress(address: String): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        InetAddresses.isNumericAddress(address)
+    } else {
+        address.contains(':') || IPV4_LITERAL.matches(address)
+    }
+
+private val IPV4_LITERAL = Regex("""\d{1,3}(\.\d{1,3}){3}""")
+
 private val parseNumericAddressCompat: (String) -> InetAddress =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         InetAddresses::parseNumericAddress
