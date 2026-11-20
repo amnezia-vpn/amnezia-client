@@ -86,13 +86,13 @@ class Xray : Protocol() {
         ensureInboundAuth(xrayJsonConfig)
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
-        var xrayJsonConfigString = xrayJsonConfig.toString()
         config.getString("hostName").let { hostName ->
             val ipAddress = parseInetAddress(hostName).ip
             if (hostName != ipAddress) {
-                xrayJsonConfigString = xrayJsonConfigString.replace(hostName, ipAddress)
+                replaceResolvedEndpointAddresses(xrayJsonConfig, hostName, ipAddress)
             }
         }
+        val xrayJsonConfigString = xrayJsonConfig.toString()
 
         start(xrayConfig, xrayJsonConfigString, vpnBuilder, protect)
         state.value = CONNECTED

@@ -16,4 +16,7 @@ dependencies {
     compileOnly(project(":protocolApi"))
     implementation(project(":xray:libXray"))
     implementation(libs.kotlinx.coroutines)
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }
