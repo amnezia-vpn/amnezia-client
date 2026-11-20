@@ -65,7 +65,14 @@ private slots:
     {
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageShareFullAccess")));
 
-        QQuickItem *serverSelector = m_fixture.visibleItem(QStringLiteral("objectName"), QStringLiteral("serverSelector"));
+        QQuickItem *serverSelector = nullptr;
+
+        for (QQuickItem *item : m_fixture.itemsOfType(QStringLiteral("DropDownType"))) {
+            if (item->isVisible() && item->property("descriptionText").toString() == QStringLiteral("Server")) {
+                serverSelector = item;
+                break;
+            }
+        }
 
         QVERIFY2(serverSelector, "Server selector was not found");
         QVERIFY(serverSelector->isEnabled());

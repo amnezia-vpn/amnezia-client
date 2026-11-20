@@ -92,7 +92,7 @@ private slots:
 
         m_fixture.click(settingsButton);
 
-        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Connection settings"), m_page));
+        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection settings"), m_page));
     }
 
     void nativeConfigStringButtonVisibility()
