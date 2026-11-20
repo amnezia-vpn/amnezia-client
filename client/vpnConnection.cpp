@@ -340,10 +340,12 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_vpnConfiguration = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
-    if (m_vpnProtocol) {
-        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        m_vpnProtocol->stop();
-        m_vpnProtocol.reset();
+    if (const auto previousProtocol = m_vpnProtocol) {
+        disconnect(previousProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        previousProtocol->stop();
+        if (m_vpnProtocol == previousProtocol) {
+            m_vpnProtocol.reset();
+        }
     }
     appendKillSwitchConfig();
 #endif
@@ -371,7 +373,8 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 
     createProtocolConnections();
 
-    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
+    const auto vpnProtocol = m_vpnProtocol;
+    if (ErrorCode err = vpnProtocol->start(); err != ErrorCode::NoError && m_vpnProtocol == vpnProtocol) {
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(err);
     }
@@ -568,8 +571,12 @@ void VpnConnection::reconnectToVpn() {
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 
-    m_vpnProtocol->stop();
-    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
+    const auto vpnProtocol = m_vpnProtocol;
+    vpnProtocol->stop();
+    if (m_vpnProtocol != vpnProtocol) {
+        return;
+    }
+    if (ErrorCode err = vpnProtocol->start(); err != ErrorCode::NoError && m_vpnProtocol == vpnProtocol) {
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(err);
     }
@@ -602,13 +609,16 @@ void VpnConnection::disconnectFromVpn()
                           });
 #endif
 
-    m_vpnProtocol->stop();
+    const auto vpnProtocol = m_vpnProtocol;
+    vpnProtocol->stop();
 
 #if !defined(Q_OS_ANDROID) && !defined(AMNEZIA_DESKTOP)
-    m_vpnProtocol->deleteLater();
+    vpnProtocol->deleteLater();
 #endif
 
-    m_vpnProtocol = nullptr;
+    if (m_vpnProtocol == vpnProtocol) {
+        m_vpnProtocol = nullptr;
+    }
 }
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
