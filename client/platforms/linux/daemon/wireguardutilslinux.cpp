@@ -60,6 +60,7 @@ void WireguardUtilsLinux::tunnelErrorOccurred(QProcess::ProcessError error) {
 
 bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     Q_UNUSED(config);
+    m_firewallActive = false;
     if (m_tunnel.state() != QProcess::NotRunning) {
         logger.warning() << "Unable to start: tunnel process already running";
         return false;
@@ -104,7 +105,6 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     QTextStream out(&message);
     out << "private_key=" << QString(privateKey.toHex()) << "\n";
     out << "replace_peers=true\n";
-
 
     if (!config.m_junkPacketCount.isEmpty()) {
         out << "jc=" << config.m_junkPacketCount << "\n";
@@ -227,6 +227,7 @@ bool WireguardUtilsLinux::deleteInterface() {
     QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
 
     // double-check + ensure our firewall is installed and enabled
+    m_firewallActive = false;
     KillSwitch::instance()->disableKillSwitch();
     return true;
 }
@@ -493,6 +494,84 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     return QString();
 }
 
+// The wildcard permits live in their own anchor (240.allowWildcard), one rule
+// per address, so learning or withdrawing an address is a single iptables call
+// and nothing else that writes the firewall (KillSwitch, applyFirewallRules)
+// can flush them. They only matter while our kill switch firewall is in place;
+// without it there is nothing to permit.
+bool WireguardUtilsLinux::wildcardFirewallActive()
+{
+    if (!m_firewallActive) {
+        return false;
+    }
+    if (!LinuxFirewall::isInstalled()) {
+        // Removed underneath us (kill switch turned off): stop writing to it.
+        m_firewallActive = false;
+        return false;
+    }
+    return true;
+}
+
+bool WireguardUtilsLinux::allowBypassTraffic(const IPAddress& prefix)
+{
+    if (!m_firewallActive) {
+        return true;
+    }
+    if (LinuxFirewall::allowWildcardAddress(prefix.toString())) {
+        return true;
+    }
+    return !wildcardFirewallActive();
+}
+
+bool WireguardUtilsLinux::revokeBypassTraffic(const IPAddress& prefix)
+{
+    if (m_firewallActive) {
+        LinuxFirewall::revokeWildcardAddress(prefix.toString());
+    }
+    return true;
+}
+
+bool WireguardUtilsLinux::revokeAllBypassTraffic()
+{
+    if (m_firewallActive) {
+        LinuxFirewall::flushWildcard();
+    }
+    return true;
+}
+
+void WireguardUtilsLinux::reassertBypassTraffic(const QList<IPAddress>& prefixes,
+                                                const QHostAddress& resolver)
+{
+    if (!wildcardFirewallActive()) {
+        return;
+    }
+    for (const IPAddress& prefix : prefixes) {
+        LinuxFirewall::allowWildcardAddress(prefix.toString());
+    }
+    if (!resolver.isNull()) {
+        LinuxFirewall::allowWildcardResolver(resolver.toString());
+    }
+}
+
+bool WireguardUtilsLinux::allowResolverEndpoint(const QHostAddress& address)
+{
+    if (!m_firewallActive) {
+        return true;
+    }
+    if (LinuxFirewall::allowWildcardResolver(address.toString())) {
+        return true;
+    }
+    return !wildcardFirewallActive();
+}
+
+bool WireguardUtilsLinux::revokeResolverEndpoint(const QHostAddress& address)
+{
+    if (m_firewallActive) {
+        LinuxFirewall::revokeWildcardResolver(address.toString());
+    }
+    return true;
+}
+
 void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
 {
     // double-check + ensure our firewall is installed and enabled
@@ -515,4 +594,13 @@ void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
     LinuxFirewall::updateDNSServers(params.dnsServers);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
+
+    // Start a session with an empty wildcard anchor, but keep it across a peer
+    // update within the session (server switch): the daemon still holds those
+    // routes and re-asserts their permits.
+    if (!m_firewallActive) {
+        LinuxFirewall::flushWildcard();
+    }
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("240.allowWildcard"), true);
+    m_firewallActive = true;
 }

@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#include "logprivacy.h"
+#include "wildcardsite.h"
 #include "daemon.h"
 
 #include <QCoreApplication>
@@ -14,6 +16,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "wildcardsite.h"
 
 constexpr const char* JSON_ALLOWEDIPADDRESSRANGES = "allowedIPAddressRanges";
 constexpr int HANDSHAKE_POLL_MSEC = 250;
@@ -142,6 +145,16 @@ bool Daemon::activate(const InterfaceConfig& config) {
     return false;
   }
 
+  reconcileDnsWildcardRouter(config);
+
+  auto wildcard_guard = qScopeGuard([this] {
+    stopDnsWildcardRouter();
+    withdrawWildcardRoutes();
+    if (dnsutils()) {
+      dnsutils()->restoreResolvers();
+    }
+  });
+
   if (!maybeUpdateResolvers(config)) {
     return false;
   }
@@ -159,6 +172,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   if (status) {
     m_connections[config.m_hopType] = ConnectionState(config);
     m_handshakeTimer.start(HANDSHAKE_POLL_MSEC);
+    wildcard_guard.dismiss();
     emit_failure_guard.dismiss();
     return true;
   }
@@ -180,12 +194,249 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 
+    if (m_dnsWildcardRouter && m_dnsWildcardRouter->isRunning()) {
+      resolvers =
+          QList<QHostAddress>({ m_dnsWildcardRouter->listenAddress() });
+    }
+
     if (!dnsutils()->updateResolvers(wgutils()->interfaceName(), resolvers)) {
       return false;
     }
   }
 
   return true;
+}
+
+void Daemon::reconcileDnsWildcardRouter(const InterfaceConfig& config) {
+  const bool eligible = (config.m_hopType == InterfaceConfig::MultiHopExit) ||
+                        (config.m_hopType == InterfaceConfig::SingleHop);
+
+  QStringList patterns;
+  if (eligible) {
+    for (const QString& entry : config.m_wildcardSites) {
+      const QString canonical = WildcardSite::canonicalize(entry);
+      if (!canonical.isEmpty() && !patterns.contains(canonical)) {
+        patterns.append(canonical);
+      }
+    }
+  }
+
+  if (patterns.isEmpty()) {
+    if (m_dnsWildcardRouter && m_dnsWildcardRouter->isRunning()) {
+      logger.debug() << "No wildcard sites left, stopping the DNS observer";
+    }
+    stopDnsWildcardRouter();
+    withdrawWildcardRoutes();
+    return;
+  }
+
+  QList<QHostAddress> upstreams;
+  if (!config.m_primaryDnsServer.isEmpty()) {
+    upstreams.append(QHostAddress(config.m_primaryDnsServer));
+  }
+  if (!config.m_secondaryDnsServer.isEmpty()) {
+    upstreams.append(QHostAddress(config.m_secondaryDnsServer));
+  }
+  if (upstreams.isEmpty()) {
+    logger.warning() << "Wildcard sites are configured but no resolver is, "
+                        "leaving DNS untouched";
+    withdrawWildcardRoutes();
+    return;
+  }
+
+  const QHostAddress listenAddress(
+      config.m_deviceIpv4Address.section(QLatin1Char('/'), 0, 0));
+  if (listenAddress.isNull()) {
+    logger.warning() << "No tunnel address to listen on, wildcards inactive";
+    withdrawWildcardRoutes();
+    return;
+  }
+
+  if (!m_dnsWildcardRouter) {
+    m_dnsWildcardRouter = new DnsWildcardRouter(this);
+    connect(m_dnsWildcardRouter, &DnsWildcardRouter::addressesResolved, this,
+            &Daemon::onWildcardAddressesResolved);
+  }
+
+  if (m_dnsWildcardRouter->matchesConfiguration(patterns, upstreams,
+                                                listenAddress)) {
+    // Same observer, same learned routes. The firewall may have been rebuilt
+    // underneath them (a peer update on a server switch re-applies the kill
+    // switch rules), so put the permits back; the platforms make this
+    // idempotent.
+    LogPrivacy::Scope quiet;
+    QList<IPAddress> learned;
+    for (const QHostAddress& address : m_wildcardRoutes.addresses()) {
+      learned.append(IPAddress(address));
+    }
+    reassertBypassPermits(learned, listenAddress);
+    return;
+  }
+
+  stopDnsWildcardRouter();
+  withdrawWildcardRoutes();
+
+  // Nothing the tunnel itself depends on may be routed around it: the
+  // forwarder's endpoint and its upstream resolvers (routing one of them out
+  // would send every DNS query on the machine outside the tunnel in clear
+  // text), any other resolver the configuration allows, the server endpoint,
+  // the gateways, and the tunnel's own network (the peer, in-tunnel services).
+  QList<QHostAddress> reserved;
+  reserved.append(listenAddress);
+  reserved.append(upstreams);
+  for (const QString& text :
+       {config.m_serverIpv4Gateway, config.m_serverIpv6Gateway,
+        config.m_serverIpv4AddrIn, config.m_serverIpv6AddrIn}) {
+    if (!text.isEmpty()) {
+      reserved.append(QHostAddress(text));
+    }
+  }
+  for (const QString& text : config.m_allowedDnsServers) {
+    reserved.append(QHostAddress(text.section(QLatin1Char('/'), 0, 0)));
+  }
+
+  // A bare host address (or a full-length prefix) does not say how large the
+  // tunnel's network is; assume the usual server-side subnet so the peer
+  // inside it is covered.
+  //
+  // An explicit prefix is taken as given, a /32 included. A bare address does
+  // not say how large the tunnel's network is: when it is a private one (the
+  // usual 10.8.1.x tunnel, where the peer is 10.8.1.1) the surrounding /24 or
+  // /64 is reserved; a public one is reserved as a host only, so no unrelated
+  // Internet servers next to it are refused.
+  const auto tunnelSubnet = [](const QString& text, int fallbackPrefix) {
+    const QHostAddress address(text.section(QLatin1Char('/'), 0, 0));
+    const int fullLength =
+        address.protocol() == QAbstractSocket::IPv6Protocol ? 128 : 32;
+    bool ok = false;
+    int prefix = text.section(QLatin1Char('/'), 1, 1).toInt(&ok);
+    if (!ok || prefix <= 0 || prefix > fullLength) {
+      const bool privateRange =
+          address.isPrivateUse() || address.isUniqueLocalUnicast() ||
+          address.isInSubnet(QHostAddress::parseSubnet("100.64.0.0/10"));
+      prefix = privateRange ? fallbackPrefix : fullLength;
+    }
+    return QPair<QHostAddress, int>(address, prefix);
+  };
+  QList<QPair<QHostAddress, int>> reservedSubnets;
+  if (!config.m_deviceIpv4Address.isEmpty()) {
+    reservedSubnets.append(tunnelSubnet(config.m_deviceIpv4Address, 24));
+  }
+  if (!config.m_deviceIpv6Address.isEmpty()) {
+    reservedSubnets.append(tunnelSubnet(config.m_deviceIpv6Address, 64));
+  }
+  m_wildcardRoutes.setReserved(reserved, reservedSubnets);
+  m_wildcardPatterns = patterns;
+
+  if (!m_dnsWildcardRouter->start(patterns, upstreams, listenAddress)) {
+    logger.warning() << "Could not observe DNS, wildcard sites are inactive";
+    return;
+  }
+
+  if (!allowResolverEndpoint(listenAddress)) {
+    logger.warning() << "Could not open the firewall for the DNS observer";
+    m_dnsWildcardRouter->stop();
+    return;
+  }
+
+}
+
+void Daemon::onWildcardAddressesResolved(
+    const QString& name, const QList<DnsWildcardRouter::Record>& records) {
+  // Each pattern has its own budget in the table. When several match, the
+  // most specific one (the longest base) owns the name, so a broad *.com can
+  // never use up the room of *.example.com.
+  QString pattern;
+  for (const QString& candidate : m_wildcardPatterns) {
+    if (WildcardSite::matches(name, candidate) &&
+        (pattern.isEmpty() ||
+         candidate.count(QLatin1Char('.')) > pattern.count(QLatin1Char('.')))) {
+      pattern = candidate;
+    }
+  }
+  if (pattern.isEmpty()) {
+    return;
+  }
+
+  LogPrivacy::Scope quiet;
+  const qint64 now = WildcardRouteTable::monotonicNowMsec();
+  int refused = 0;
+  for (const DnsWildcardRouter::Record& record : records) {
+    if (record.address.protocol() == QAbstractSocket::IPv6Protocol &&
+        !supportsIPv6ExclusionRoutes()) {
+      continue;
+    }
+    QHostAddress evicted;
+    const WildcardRouteTable::AddResult result = m_wildcardRoutes.add(
+        record.address, pattern, record.ttl, now, &evicted);
+    if (result == WildcardRouteTable::AddResult::Renew ||
+        result == WildcardRouteTable::AddResult::Rejected) {
+      continue;
+    }
+    if (result == WildcardRouteTable::AddResult::AtCapacity) {
+      ++refused;
+      continue;
+    }
+
+    if (!evicted.isNull()) {
+      withdrawWildcardAddress(evicted);
+    }
+
+    const IPAddress prefix(record.address);
+    if (!allowBypassAddress(prefix)) {
+      logger.warning() << "Could not open the firewall for a wildcard site";
+      m_wildcardRoutes.remove(record.address);
+      continue;
+    }
+    if (!addExclusionRoute(prefix)) {
+      logger.warning() << "Failed to route an address of a wildcard site";
+      revokeBypassAddress(prefix);
+      m_wildcardRoutes.remove(record.address);
+      continue;
+    }
+  }
+  if (refused > 0) {
+    logger.warning() << "A wildcard pattern has no room for" << refused
+                     << "more address(es); they stay in the tunnel";
+  }
+}
+
+void Daemon::withdrawWildcardAddress(const QHostAddress& address) {
+  const IPAddress prefix(address);
+  if (m_excludedAddrSet.contains(prefix)) {
+    delExclusionRoute(prefix);
+  }
+  revokeBypassAddress(prefix);
+}
+
+void Daemon::stopDnsWildcardRouter() {
+  if (!m_dnsWildcardRouter || !m_dnsWildcardRouter->isRunning()) {
+    return;
+  }
+  const QHostAddress endpoint = m_dnsWildcardRouter->listenAddress();
+  m_dnsWildcardRouter->stop();
+  revokeResolverEndpoint(endpoint);
+}
+
+void Daemon::withdrawWildcardRoutes() {
+  const QList<QHostAddress> all = m_wildcardRoutes.takeAll();
+  if (all.isEmpty()) {
+    return;
+  }
+  LogPrivacy::Scope quiet;
+  // One bulk operation where the platform has it (a single iptables/pfctl
+  // flush), so a disconnect with many learned addresses does not keep DNS
+  // down while hundreds of commands run.
+  const bool revokedAll = revokeAllBypassAddresses();
+  for (const QHostAddress& address : all) {
+    const IPAddress prefix(address);
+    if (m_excludedAddrSet.contains(prefix)) {
+      delExclusionRoute(prefix);
+    }
+    if (!revokedAll) {
+      revokeBypassAddress(prefix);
+    }
+  }
 }
 
 // static
@@ -389,6 +640,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "allowedDnsServers", config.m_allowedDnsServers)) {
     return false;
   }
+  if (!parseStringList(obj, "wildcardSites", config.m_wildcardSites)) {
+    return false;
+  }
 
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
 
@@ -476,6 +730,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
 bool Daemon::deactivate(bool emitSignals) {
   Q_ASSERT(wgutils() != nullptr);
+
+  stopDnsWildcardRouter();
+  withdrawWildcardRoutes();
 
   // Deactivate the main interface.
   if (!m_connections.isEmpty()) {
@@ -578,6 +835,11 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
       return false;
     }
   }
+
+  // The resolvers are restored and pointed at the new configuration by
+  // activate() right after this returns. Updating them here as well would let
+  // the macOS backup capture the VPN's own DNS as the "original" one.
+  reconcileDnsWildcardRouter(config);
 
   m_connections[config.m_hopType] = ConnectionState(config);
   return true;

@@ -58,6 +58,7 @@ void WireguardUtilsMacos::tunnelErrorOccurred(QProcess::ProcessError error) {
 }
 
 bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
+  m_firewallActive = false;
   Q_UNUSED(config);
   if (m_tunnel.state() != QProcess::NotRunning) {
     logger.warning() << "Unable to start: tunnel process already running";
@@ -225,6 +226,7 @@ bool WireguardUtilsMacos::deleteInterface() {
   QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
 
   // double-check + ensure our firewall is installed and enabled
+  m_firewallActive = false;
   KillSwitch::instance()->disableKillSwitch();
 
   return true;
@@ -496,6 +498,95 @@ QString WireguardUtilsMacos::waitForTunnelName(const QString& filename) {
   return QString();
 }
 
+// The wildcard permits live in their own anchor (320.allowWildcard) and
+// tables, changed one address at a time, so a new DNS answer costs one pfctl
+// call and nothing else that writes the firewall (KillSwitch,
+// applyFirewallRules) can replace them. They only matter while our kill switch
+// firewall is in place.
+namespace {
+const QString kWildcardAnchor = QStringLiteral("320.allowWildcard");
+}
+
+bool WireguardUtilsMacos::wildcardFirewallActive()
+{
+  if (!m_firewallActive) {
+    return false;
+  }
+  if (!MacOSFirewall::isInstalled()) {
+    m_firewallActive = false;
+    return false;
+  }
+  return true;
+}
+
+bool WireguardUtilsMacos::allowBypassTraffic(const IPAddress& prefix)
+{
+  if (!m_firewallActive) {
+    return true;
+  }
+  if (MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcardnets"),
+                                       QStringLiteral("add"), prefix.toString())) {
+    return true;
+  }
+  return !wildcardFirewallActive();
+}
+
+bool WireguardUtilsMacos::revokeBypassTraffic(const IPAddress& prefix)
+{
+  if (m_firewallActive) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcardnets"),
+                                     QStringLiteral("delete"), prefix.toString());
+  }
+  return true;
+}
+
+bool WireguardUtilsMacos::revokeAllBypassTraffic()
+{
+  if (m_firewallActive) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcardnets"),
+                                     QStringLiteral("flush"));
+  }
+  return true;
+}
+
+void WireguardUtilsMacos::reassertBypassTraffic(const QList<IPAddress>& prefixes,
+                                                const QHostAddress& resolver)
+{
+  if (!wildcardFirewallActive()) {
+    return;
+  }
+  // pfctl -T add is idempotent.
+  for (const IPAddress& prefix : prefixes) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcardnets"),
+                                     QStringLiteral("add"), prefix.toString());
+  }
+  if (!resolver.isNull()) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcarddns"),
+                                     QStringLiteral("add"), resolver.toString());
+  }
+}
+
+bool WireguardUtilsMacos::allowResolverEndpoint(const QHostAddress& address)
+{
+  if (!m_firewallActive) {
+    return true;
+  }
+  if (MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcarddns"),
+                                       QStringLiteral("add"), address.toString())) {
+    return true;
+  }
+  return !wildcardFirewallActive();
+}
+
+bool WireguardUtilsMacos::revokeResolverEndpoint(const QHostAddress& address)
+{
+  if (m_firewallActive) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcarddns"),
+                                     QStringLiteral("delete"), address.toString());
+  }
+  return true;
+}
+
 void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
 {
   // double-check + ensure our firewall is installed and enabled. This is necessary as
@@ -519,4 +610,14 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
   MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);
+
+  // Start a session with empty wildcard tables, but keep them across a peer
+  // update within the session (server switch): the daemon still holds those
+  // routes and re-asserts their permits.
+  MacOSFirewall::setAnchorEnabled(kWildcardAnchor, true);
+  if (!m_firewallActive) {
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcardnets"), QStringLiteral("flush"));
+    MacOSFirewall::updateAnchorTable(kWildcardAnchor, QStringLiteral("wildcarddns"), QStringLiteral("flush"));
+  }
+  m_firewallActive = true;
 }

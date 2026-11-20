@@ -1,5 +1,6 @@
 #include "ipSplitTunnelingController.h"
 #include "core/utils/networkUtilities.h"
+#include "daemon/wildcardsite.h"
 #include <QJsonObject>
 #include <QDebug>
 
@@ -73,25 +74,59 @@ void IpSplitTunnelingController::addSites(const QMap<QString, QStringList> &site
     m_appSettingsRepository->addVpnSites(m_currentRouteMode, sites);
 }
 
-bool IpSplitTunnelingController::addSite(const QString &hostname)
+// static
+bool IpSplitTunnelingController::platformSupportsWildcards()
 {
-    QString normalizedHostname = normalizeHostname(hostname);
-    
-    if (!validateHostname(normalizedHostname)) {
-        return false;
-    }
-    
-    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalizedHostname)) {
-        processSite(normalizedHostname, {});
-        return true;
-    }
-    
-    if (addSiteInternal(normalizedHostname, {})) {
-        QHostInfo::lookupHost(normalizedHostname, this, SLOT(onHostResolved(QHostInfo)));
-        return true;
-    }
-    
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
     return false;
+#else
+    return true;
+#endif
+}
+
+IpSplitTunnelingController::AddSiteResult IpSplitTunnelingController::addSite(const QString &hostname,
+                                                                              QString *normalized)
+{
+    // Decide on the same form normalizeHostname() works on, so that the
+    // reason reported to the UI matches what the core actually did.
+    const QString stripped = stripScheme(hostname);
+    if (WildcardSite::isPattern(stripped)) {
+        const QString canonical = WildcardSite::canonicalize(stripped);
+        if (normalized) {
+            *normalized = canonical.isEmpty() ? stripped : canonical;
+        }
+        if (!platformSupportsWildcards()) {
+            return AddSiteResult::WildcardUnsupportedHere;
+        }
+        if (m_currentRouteMode != RouteMode::VpnAllExceptSites) {
+            return AddSiteResult::WildcardNeedsBypassMode;
+        }
+        if (canonical.isEmpty() || !WildcardSite::isValid(canonical)) {
+            return AddSiteResult::InvalidWildcard;
+        }
+        if (!addSiteInternal(canonical, {})) {
+            return AddSiteResult::Duplicate;
+        }
+        return AddSiteResult::AddedWildcard;
+    }
+
+    const QString normalizedHostname = normalizeHostname(hostname);
+    if (normalized) {
+        *normalized = normalizedHostname;
+    }
+
+    if (!validateHostname(normalizedHostname)) {
+        return AddSiteResult::Invalid;
+    }
+
+    if (!addSiteInternal(normalizedHostname, {})) {
+        return AddSiteResult::Duplicate;
+    }
+
+    if (!NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalizedHostname)) {
+        QHostInfo::lookupHost(normalizedHostname, this, SLOT(onHostResolved(QHostInfo)));
+    }
+    return AddSiteResult::Added;
 }
 
 bool IpSplitTunnelingController::removeSite(const QString &hostname)
@@ -148,15 +183,26 @@ void IpSplitTunnelingController::fillSites()
     }
 }
 
+// static
+QString IpSplitTunnelingController::stripScheme(const QString &hostname)
+{
+    QString normalized = hostname.trimmed();
+    normalized.replace("https://", "", Qt::CaseInsensitive);
+    normalized.replace("http://", "", Qt::CaseInsensitive);
+    normalized.replace("ftp://", "", Qt::CaseInsensitive);
+    return normalized;
+}
+
 QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) const
 {
-    QString normalized = hostname;
-    normalized.replace("https://", "");
-    normalized.replace("http://", "");
-    normalized.replace("ftp://", "");
+    const QString normalized = stripScheme(hostname);
 
     if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalized)) {
         return normalized;
+    }
+
+    if (WildcardSite::isPattern(normalized)) {
+        return WildcardSite::canonicalize(normalized);
     }
 
     const QStringList parts = normalized.split("/", Qt::SkipEmptyParts);
@@ -168,12 +214,14 @@ bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
     if (hostname.isEmpty()) {
         return false;
     }
+    if (WildcardSite::isPattern(hostname)) {
+        return WildcardSite::isValid(hostname);
+    }
     if (!hostname.contains(".") && !NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
         return false;
     }
     return true;
 }
-
 
 void IpSplitTunnelingController::onHostResolved(const QHostInfo &hostInfo)
 {
@@ -232,6 +280,7 @@ bool IpSplitTunnelingController::importSitesFromJson(const QByteArray& jsonData,
     
     QJsonArray jsonArray = jsonDocument.array();
     QMap<QString, QStringList> sites;
+    int skippedWildcards = 0;
     
     for (auto jsonValue : jsonArray) {
         QJsonObject jsonObject = jsonValue.toObject();
@@ -257,11 +306,29 @@ bool IpSplitTunnelingController::importSitesFromJson(const QByteArray& jsonData,
             qDebug() << normalizedHostname << " not look like ip adress or domain name";
             continue;
         }
+
+        if (WildcardSite::isPattern(normalizedHostname)) {
+            if (!platformSupportsWildcards() || m_currentRouteMode != RouteMode::VpnAllExceptSites) {
+                ++skippedWildcards;
+                continue;
+            }
+            // A wildcard is matched from DNS answers at connect time; addresses
+            // attached to it in a file would be routed by protocols that do not
+            // apply the wildcard at all.
+            ips.clear();
+        }
         
         sites.insert(normalizedHostname, ips);
     }
     
     addSites(sites, replaceExisting);
+
+    if (skippedWildcards > 0) {
+        errorMessage = platformSupportsWildcards()
+                ? tr("%n wildcard entries were skipped: they only work in the Directly mode.", "", skippedWildcards)
+                : tr("%n wildcard entries were skipped: wildcard sites are supported only by the desktop app "
+                     "with WireGuard/AmneziaWG.", "", skippedWildcards);
+    }
     
     return true;
 }
@@ -289,4 +356,3 @@ QByteArray IpSplitTunnelingController::exportSitesToJson() const
     QJsonDocument jsonDocument(jsonArray);
     return jsonDocument.toJson();
 }
-

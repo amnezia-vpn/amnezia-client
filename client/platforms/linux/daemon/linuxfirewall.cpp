@@ -240,6 +240,11 @@ void LinuxFirewall::install()
     installAnchor(IPv6, QStringLiteral("290.allowDHCP"), {
                                                              QStringLiteral("-p udp -d ff00::/8 --sport 546 --dport 547 -j ACCEPT"),
                                                          });
+    // Addresses learned for wildcard site entries, permitted one by one while
+    // their exclusion route exists. Placed ahead of 250.blockIPv6 and
+    // 100.blockAll, and owned by nothing else, so no other writer flushes it.
+    installAnchor(Both, QStringLiteral("240.allowWildcard"), {});
+
     installAnchor(IPv6, QStringLiteral("250.blockIPv6"), {
                                                              QStringLiteral("! -o lo+ -j REJECT"),
                                                          });
@@ -329,6 +334,7 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(Both, QStringLiteral("310.blockDNS"));
     uninstallAnchor(Both, QStringLiteral("300.allowLAN"));
     uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
+    uninstallAnchor(Both, QStringLiteral("240.allowWildcard"));
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));
@@ -450,6 +456,67 @@ void LinuxFirewall::updateAllowNets(const QStringList& servers)
         executeIptables(QStringLiteral("iptables"),
             {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
              QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+}
+
+static QString wildcardChain()
+{
+    return QStringLiteral("%1.240.allowWildcard").arg(kAnchorName);
+}
+
+static QString iptablesFor(const QString& address)
+{
+    return address.contains(QLatin1Char(':')) ? QStringLiteral("ip6tables")
+                                               : QStringLiteral("iptables");
+}
+
+// Idempotent: a rule that is already there is not added twice, so the daemon
+// can re-assert permits after the firewall was rebuilt.
+static QString checkThenAppend(const QString& program, const QString& rule)
+{
+    return QStringLiteral("%1 -C %2 2> /dev/null || %1 -A %2").arg(program, rule);
+}
+
+bool LinuxFirewall::allowWildcardAddress(const QString& address)
+{
+    return execute(checkThenAppend(iptablesFor(address),
+        QStringLiteral("%1 -d %2 -j ACCEPT").arg(wildcardChain(), address))) == 0;
+}
+
+bool LinuxFirewall::revokeWildcardAddress(const QString& address)
+{
+    return executeIptables(iptablesFor(address),
+        {QStringLiteral("-D"), wildcardChain(), QStringLiteral("-d"), address,
+         QStringLiteral("-j"), QStringLiteral("ACCEPT")}, true) == 0;
+}
+
+bool LinuxFirewall::allowWildcardResolver(const QString& address)
+{
+    const QString program = iptablesFor(address);
+    bool ok = true;
+    for (const QString& proto : {QStringLiteral("udp"), QStringLiteral("tcp")}) {
+        ok = execute(checkThenAppend(program,
+            QStringLiteral("%1 -d %2 -p %3 --dport 53 -j ACCEPT")
+                .arg(wildcardChain(), address, proto))) == 0 && ok;
+    }
+    return ok;
+}
+
+bool LinuxFirewall::revokeWildcardResolver(const QString& address)
+{
+    const QString program = iptablesFor(address);
+    for (const QString& proto : {QStringLiteral("udp"), QStringLiteral("tcp")}) {
+        executeIptables(program,
+            {QStringLiteral("-D"), wildcardChain(), QStringLiteral("-d"), address,
+             QStringLiteral("-p"), proto, QStringLiteral("--dport"), QStringLiteral("53"),
+             QStringLiteral("-j"), QStringLiteral("ACCEPT")}, true);
+    }
+    return true;
+}
+
+void LinuxFirewall::flushWildcard()
+{
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), wildcardChain()}, true);
+    executeIptables(QStringLiteral("ip6tables"), {QStringLiteral("-F"), wildcardChain()}, true);
 }
 
 void LinuxFirewall::updateBlockNets(const QStringList& servers)

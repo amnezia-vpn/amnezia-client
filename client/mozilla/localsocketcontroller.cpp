@@ -24,6 +24,7 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "daemon/daemonerrors.h"
+#include "daemon/wildcardsite.h"
 
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -127,6 +128,8 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
   QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
+  QJsonArray wildcardSites =
+      rawConfig.value(amnezia::configKey::wildcardSites).toArray();
 
   int appSplitTunnelType = rawConfig.value(amnezia::configKey::appSplitTunnelType).toInt();
   QJsonArray splitTunnelApps = rawConfig.value(amnezia::configKey::splitTunnelApps).toArray();
@@ -216,6 +219,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
               QString ipRange = v.toString();
+              if (WildcardSite::isPattern(ipRange)) {
+                  continue;
+              }
               if (ipRange.split('/').size() > 1){
                   QJsonObject range;
                   range.insert("address", ipRange.split('/')[0]);
@@ -240,11 +246,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
+          if (WildcardSite::isPattern(ipRange)) {
+              continue;
+          }
           jsExcludedAddresses.append(ipRange);
       }
   }
 
   json.insert("excludedAddresses", jsExcludedAddresses);
+
+  json.insert("wildcardSites", wildcardSites);
 
   json.insert("vpnDisabledApps", splitTunnelApps);
 

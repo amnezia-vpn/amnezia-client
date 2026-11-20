@@ -111,11 +111,17 @@ if (WIN32 OR APPLE OR LINUX)
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.h
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.h
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/dnswildcardrouter.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wildcardsite.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wildcardroutetable.h
     )
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemon.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserver.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonlocalserverconnection.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/dnswildcardrouter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wildcardsite.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/wildcardroutetable.cpp
     )
 endif()
 
