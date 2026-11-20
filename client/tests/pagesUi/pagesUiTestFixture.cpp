@@ -9,6 +9,7 @@
 #include <QSet>
 #include <QUuid>
 #include <QVariant>
+#include <QSignalSpy>
 
 #include <vpnConnection.h>
 

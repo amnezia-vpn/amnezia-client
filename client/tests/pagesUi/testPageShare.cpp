@@ -1,99 +1,154 @@
+#include <QQuickItem>
 #include <QTest>
 
 #include "pagesUiTestFixture.h"
+#include "ui/utils/pageEnum.h"
 
-class PageShareTest : public QObject
+class TestPageShare : public QObject
 {
     Q_OBJECT
 
 private:
     PagesUiTestFixture m_fixture;
 
-private slots:
-    void init()
+    QQuickItem *segment(const QString &text) const
     {
-        QVERIFY(m_fixture.initialize());
+        for (QQuickItem *item : m_fixture.itemsOfType(QStringLiteral("SegmentType"))) {
+            if (item->isVisible() && item->property("text").toString() == text) {
+                return item;
+            }
+        }
+
+        return nullptr;
+    }
+
+private slots:
+    void initTestCase()
+    {
+        QVERIFY(m_fixture.initialize(this));
     }
 
     void cleanup()
     {
+        m_fixture.closePage();
+    }
+
+    void cleanupTestCase()
+    {
         m_fixture.cleanup();
     }
 
-    void pageShareLoads()
+    void pageLoads()
     {
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Share VPN Access")));
-        QVERIFY(m_fixture.clickable(QStringLiteral("Connection")));
-        QVERIFY(m_fixture.clickable(QStringLiteral("Users")));
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("User name")));
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Server")));
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Protocol")));
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Connection format")));
-        QVERIFY(m_fixture.clickable(QStringLiteral("Share")));
+        QVERIFY(m_fixture.page());
+    }
+
+    void connectionFieldsAreVisible()
+    {
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("User name")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Server")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Protocol")));
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection format")));
     }
 
     void switchesBetweenConnectionAndUsers()
     {
         QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
 
-        // Switch to Users tab
-        QQuickItem *usersButton = m_fixture.clickable(QStringLiteral("Users"));
+        QQuickItem *connectionSegment = segment(QStringLiteral("Connection"));
+        QQuickItem *usersSegment = segment(QStringLiteral("Users"));
 
-        QVERIFY(usersButton);
-        m_fixture.click(usersButton);
+        QVERIFY(connectionSegment);
+        QVERIFY(usersSegment);
 
-        // Switch back to Connection tab
-        QQuickItem *connectionButton = m_fixture.clickable(QStringLiteral("Connection"));
+        QCOMPARE(connectionSegment->property("checked").toBool(), true);
+        QCOMPARE(usersSegment->property("checked").toBool(), false);
 
-        QVERIFY(connectionButton);
-        m_fixture.click(connectionButton);
+        m_fixture.click(usersSegment);
 
-        // Connection controls should be available again
-        QVERIFY(m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("User name")));
-        QVERIFY(m_fixture.clickable(QStringLiteral("Share")));
+        QTRY_VERIFY(usersSegment->property("checked").toBool());
+        QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Users")));
+        QVERIFY(!m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("User name")));
+
+        m_fixture.click(connectionSegment);
+
+        QTRY_VERIFY(connectionSegment->property("checked").toBool());
+        QVERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("User name")));
+    }
+
+    void connectionFieldsAreHiddenOnUsersTab()
+    {
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
+
+        QQuickItem *usersSegment = segment(QStringLiteral("Users"));
+        QVERIFY(usersSegment);
+
+        m_fixture.click(usersSegment);
+
+        QTRY_VERIFY(usersSegment->property("checked").toBool());
+        QVERIFY(!m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("User name")));
+        QVERIFY(!m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection format")));
+    }
+
+    void opensUsersSearch()
+    {
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
+
+        QQuickItem *usersSegment = segment(QStringLiteral("Users"));
+        QVERIFY(usersSegment);
+
+        m_fixture.click(usersSegment);
+        QTRY_VERIFY(usersSegment->property("checked").toBool());
+
+        // The search button belongs to the Users section header.
+        QQuickItem *usersHeader = m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Users"));
+        QVERIFY(usersHeader);
+
+        QQuickItem *searchButton = nullptr;
+
+        for (QQuickItem *candidate : m_fixture.itemsOfType(QStringLiteral("IconButtonType"))) {
+            if (candidate->isVisible()) {
+                searchButton = candidate;
+                break;
+            }
+        }
+
+        QVERIFY2(searchButton, "Users search button was not found");
+
+        m_fixture.click(searchButton);
+
+        QTRY_VERIFY(m_fixture.page()->property("isSearchBarVisible").toBool());
+    }
+
+    void navigatesToPageShareFullAccess()
+    {
+        QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
+
+        QQuickItem *moreButton = nullptr;
+
+        for (QQuickItem *candidate : m_fixture.itemsOfType(QStringLiteral("IconButtonType"))) {
+            if (candidate->isVisible() && candidate->isEnabled()) {
+                moreButton = candidate;
+                break;
+            }
+        }
+
+        QVERIFY2(moreButton, "More actions button was not found");
+
+        m_fixture.click(moreButton);
+
+        QQuickItem *shareFullAccessButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Share"));
+
+        QVERIFY2(shareFullAccessButton, "Share full access menu item was not found");
+        QVERIFY(m_fixture.verifyNavigation(shareFullAccessButton, PageLoader::PageEnum::PageShareFullAccess));
     }
 };
 
-
-void navigatesToPageShareFullAccess()
-{
-    QVERIFY(m_fixture.loadPage(QStringLiteral("PageShare")));
-
-    QQuickItem *moreButton = nullptr;
-
-    const auto iconButtons = m_fixture.itemsOfType(QStringLiteral("IconButtonType"));
-
-    for (QQuickItem *button : iconButtons) {
-        if (button->isVisible() && button->isEnabled()) {
-            moreButton = button;
-            break;
-        }
-    }
-
-    QVERIFY2(moreButton, "More button was not found");
-
-    m_fixture.click(moreButton);
-
-    QQuickItem *fullAccessButton = nullptr;
-
-    const auto listItems = m_fixture.itemsOfType(QStringLiteral("ListItemType"));
-
-    for (QQuickItem *item : listItems) {
-        if (item->isVisible() && item->isEnabled() && item->property("text").toString() == QStringLiteral("Share")) {
-            fullAccessButton = item;
-            break;
-        }
-    }
-
-    QVERIFY2(fullAccessButton, "Full access Share button was not found");
-    QVERIFY(m_fixture.verifyNavigation(fullAccessButton, PageLoader::PageEnum::PageShareFullAccess));
-}
-
-
 int runPageShareTests(int argc, char *argv[])
 {
-    PageShareTest test;
+    TestPageShare test;
     return QTest::qExec(&test, argc, argv);
 }
 
