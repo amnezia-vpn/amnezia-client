@@ -46,6 +46,9 @@ private:
         }
 
         m_page->setParentItem(m_fixture.window()->contentItem());
+        m_page->setWidth(m_fixture.window()->width());
+        m_page->setHeight(m_fixture.window()->height());
+
         return true;
     }
 
@@ -86,19 +89,17 @@ private slots:
     {
         QVERIFY(loadPage());
 
+        QCOMPARE(m_page->width(), m_fixture.window()->width());
+        QCOMPARE(m_page->height(), m_fixture.window()->height());
+
         QQuickItem *settingsButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Show connection settings"), m_page);
+
         QVERIFY(settingsButton);
+        QVERIFY(settingsButton->isEnabled());
+        QVERIFY(settingsButton->width() > 0);
+        QVERIFY(settingsButton->height() > 0);
 
         m_fixture.click(settingsButton);
-
-        QTest::qWait(500);
-
-        qDebug() << "Page:" << m_page;
-        qDebug() << "Window:" << m_fixture.window();
-
-        for (QQuickItem *item : m_fixture.items()) {
-            qDebug() << item->metaObject()->className() << item->property("headerText") << item->isVisible();
-        }
 
         QTRY_VERIFY(m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Connection settings")));
     }
