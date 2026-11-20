@@ -16,13 +16,10 @@
     #include <QSettings>
 #endif
 #ifdef Q_OS_LINUX
-    #include <arpa/inet.h>
-    #include <linux/netlink.h>
-    #include <linux/rtnetlink.h>
-    #include <net/if.h>
-    #include <sys/ioctl.h>
-    #include <sys/socket.h>
-    #include <unistd.h>
+    #include <QFile>
+    #include <QRegularExpression>
+    #include <QTextStream>
+    #include <limits>
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     #include <sys/param.h>
@@ -291,125 +288,50 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 8192;
-    int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
-    int     sock = -1, msgseq = 0;
-    struct  nlmsghdr *nlh, *nlmsg;
-    struct  rtmsg *route_entry;
-    // This struct contain route attributes (route type)
-    struct  rtattr *route_attribute;
-    char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[100], buffer[BUFFER_SIZE];
-    char    *ptr = buffer;
-    struct timeval tv;
+    QString gateway;
+    QString interface;
+    quint32 bestMetric = std::numeric_limits<quint32>::max();
 
-    if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
-        perror("socket failed");
-        return {};
-    }
-
-    memset(msgbuf, 0, sizeof(msgbuf));
-    memset(gateway_address, 0, sizeof(gateway_address));
-    memset(interface, 0, sizeof(interface));
-    memset(buffer, 0, sizeof(buffer));
-
-    /* point the header and the msg structure pointers into the buffer */
-    nlmsg = (struct nlmsghdr *)msgbuf;
-
-    /* Fill in the nlmsg header*/
-    nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-    nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
-    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
-    nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
-
-    /* 1 Sec Timeout to avoid stall */
-    tv.tv_sec = 1;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval));
-    /* send msg */
-    if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
-        perror("send failed");
-        return {};
-    }
-
-    /* receive response */
-    do
-    {
-        received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
-        if (received_bytes < 0) {
-            perror("Error in recv");
-            return {};
-        }
-
-        nlh = (struct nlmsghdr *) ptr;
-
-        /* Check if the header is valid */
-        if((NLMSG_OK(nlh, received_bytes) == 0) ||
-            (nlh->nlmsg_type == NLMSG_ERROR))
-        {
-            perror("Error in received packet");
-            return {};
-        }
-
-        /* If we received all data break */
-        if (nlh->nlmsg_type == NLMSG_DONE)
-            break;
-        else {
-            ptr += received_bytes;
-            msg_len += received_bytes;
-        }
-
-        /* Break if its not a multi part message */
-        if ((nlh->nlmsg_flags & NLM_F_MULTI) == 0)
-            break;
-    }
-    while ((nlh->nlmsg_seq != msgseq) || (nlh->nlmsg_pid != getpid()));
-
-    /* parse response */
-    int remaining = msg_len + received_bytes;
-    nlh = (struct nlmsghdr *) buffer;
-    for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
-    {
-        /* Get the route data */
-        route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
-
-        /* We are just interested in main routing table */
-        if (route_entry->rtm_table != RT_TABLE_MAIN)
-            continue;
-
-        /* Reset per-route to avoid cross-route state pollution */
-        memset(gateway_address, 0, sizeof(gateway_address));
-        memset(interface, 0, sizeof(interface));
-
-        route_attribute = (struct rtattr *) RTM_RTA(route_entry);
-        route_attribute_len = RTM_PAYLOAD(nlh);
-
-        /* Loop through all attributes */
-        for ( ; RTA_OK(route_attribute, route_attribute_len);
-             route_attribute = RTA_NEXT(route_attribute, route_attribute_len))
-        {
-            switch(route_attribute->rta_type) {
-            case RTA_OIF:
-                if_indextoname(*(int *)RTA_DATA(route_attribute), interface);
-                break;
-            case RTA_GATEWAY:
-                inet_ntop(AF_INET, RTA_DATA(route_attribute),
-                          gateway_address, sizeof(gateway_address));
-                break;
-            default:
-                break;
+    QFile routeFile("/proc/net/route");
+    if (routeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        static const QRegularExpression separator(QStringLiteral("\\s+"));
+        QTextStream stream(&routeFile);
+        stream.readLine();
+        while (!stream.atEnd()) {
+            const QStringList fields = stream.readLine().trimmed().split(separator);
+            if (fields.size() < 8 || fields[1] != QStringLiteral("00000000")) {
+                continue;
             }
-        }
 
-        if ((*gateway_address) && (*interface)) {
-            qDebug() << "Gateway " << gateway_address << " for interface " << interface;
-            break;
+            bool metricOk = false;
+            const quint32 metric = fields[6].toUInt(&metricOk, 10);
+            if (!metricOk || metric >= bestMetric) {
+                continue;
+            }
+
+            bool gatewayOk = false;
+            const quint32 rawGateway = fields[2].toUInt(&gatewayOk, 16);
+            if (!gatewayOk || rawGateway == 0) {
+                continue;
+            }
+
+            bestMetric = metric;
+            interface = fields[0];
+            gateway = QString("%1.%2.%3.%4")
+                              .arg(rawGateway & 0xff)
+                              .arg((rawGateway >> 8) & 0xff)
+                              .arg((rawGateway >> 16) & 0xff)
+                              .arg((rawGateway >> 24) & 0xff);
         }
     }
-    if (!(*gateway_address) || !(*interface))
+
+    if (gateway.isEmpty()) {
         qDebug() << "getGatewayAndIface: no gateway found";
-    close(sock);
-    return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
+    } else {
+        qDebug() << "Gateway " << gateway << " for interface " << interface;
+    }
+
+    return { gateway, QNetworkInterface::interfaceFromName(interface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QString gateway;
