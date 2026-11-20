@@ -1,4 +1,5 @@
 #include <QQuickItem>
+#include <QQmlProperty>
 #include <QTest>
 
 #include "pagesUiTestFixture.h"
@@ -102,14 +103,12 @@ private slots:
         m_fixture.click(usersSegment);
         QTRY_VERIFY(usersSegment->property("checked").toBool());
 
-        // The search button belongs to the Users section header.
-        QQuickItem *usersHeader = m_fixture.visibleItem(QStringLiteral("headerText"), QStringLiteral("Users"));
-        QVERIFY(usersHeader);
-
         QQuickItem *searchButton = nullptr;
 
         for (QQuickItem *candidate : m_fixture.itemsOfType(QStringLiteral("IconButtonType"))) {
-            if (candidate->isVisible()) {
+            const QString iconSource = QQmlProperty(candidate, QStringLiteral("icon.source")).read().toString();
+
+            if (candidate->isVisible() && candidate->isEnabled() && iconSource.endsWith(QStringLiteral("search.svg"))) {
                 searchButton = candidate;
                 break;
             }
@@ -129,7 +128,10 @@ private slots:
         QQuickItem *moreButton = nullptr;
 
         for (QQuickItem *candidate : m_fixture.itemsOfType(QStringLiteral("IconButtonType"))) {
-            if (candidate->isVisible() && candidate->isEnabled()) {
+            const QString iconSource = QQmlProperty(candidate, QStringLiteral("icon.source")).read().toString();
+
+            if (candidate->isVisible() && candidate->isEnabled()
+                && iconSource.endsWith(QStringLiteral("more-vertical.svg"))) {
                 moreButton = candidate;
                 break;
             }
@@ -139,7 +141,15 @@ private slots:
 
         m_fixture.click(moreButton);
 
-        QQuickItem *shareFullAccessButton = m_fixture.visibleItem(QStringLiteral("text"), QStringLiteral("Share"));
+        QQuickItem *shareFullAccessButton = nullptr;
+
+        for (QQuickItem *candidate : m_fixture.itemsOfType(QStringLiteral("ListItemType"))) {
+            if (candidate->isVisible() && candidate->isEnabled()
+                && candidate->property("text").toString() == QStringLiteral("Share")) {
+                shareFullAccessButton = candidate;
+                break;
+            }
+        }
 
         QVERIFY2(shareFullAccessButton, "Share full access menu item was not found");
         QVERIFY(m_fixture.verifyNavigation(shareFullAccessButton, PageLoader::PageEnum::PageShareFullAccess));

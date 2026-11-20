@@ -20,6 +20,7 @@ public:
     bool loadPage(const QString &pageName);
     bool loadPageFromStartPage(PageLoader::PageEnum page);
     void closePage();
+    bool loadEmptyWindow();
 
     TestCoreController *core() const
     {

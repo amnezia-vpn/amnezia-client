@@ -154,6 +154,41 @@ void PagesUiTestFixture::closePage()
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
 }
 
+bool PagesUiTestFixture::loadEmptyWindow()
+{
+    closePage();
+
+    const QByteArray hostQml = QStringLiteral("import QtQuick\n"
+                                              "import QtQuick.Controls\n"
+                                              "import \"../Config\"\n"
+                                              "\n"
+                                              "ApplicationWindow {\n"
+                                              "    width: 420\n"
+                                              "    height: 800\n"
+                                              "    visible: true\n"
+                                              "    property var dialogs: Dialogs\n"
+                                              "}\n")
+                                       .toUtf8();
+
+    m_engine->loadData(hostQml, QUrl(QStringLiteral("qrc:/ui/qml/Pages2/pagesUiTestHost.qml")));
+
+    if (m_engine->rootObjects().isEmpty()) {
+        return false;
+    }
+
+    m_window = qobject_cast<QQuickWindow *>(m_engine->rootObjects().last());
+
+    if (!m_window || !QTest::qWaitForWindowExposed(m_window)) {
+        closePage();
+        return false;
+    }
+
+    m_window->requestActivate();
+    QTest::qWaitForWindowActive(m_window);
+
+    return true;
+}
+
 static void collectFromObject(QObject *object, QList<QQuickItem *> &result, QSet<QObject *> &seen)
 {
     if (!object || seen.contains(object)) {

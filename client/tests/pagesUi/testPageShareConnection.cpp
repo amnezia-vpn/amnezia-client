@@ -15,6 +15,10 @@ private:
 
     bool loadPage()
     {
+        if (!m_fixture.loadEmptyWindow()) {
+            return false;
+        }
+
         QQmlComponent component(m_fixture.engine(), QUrl(QStringLiteral("qrc:/ui/qml/Pages2/PageShareConnection.qml")));
 
         if (component.isError()) {
@@ -55,6 +59,8 @@ private slots:
     {
         delete m_page;
         m_page = nullptr;
+
+        m_fixture.closePage();
     }
 
     void cleanupTestCase()
