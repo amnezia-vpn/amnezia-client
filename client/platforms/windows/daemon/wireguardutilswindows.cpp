@@ -312,8 +312,20 @@ bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
   return m_routeMonitor->addExclusionRoute(prefix);
 }
 
+QList<IPAddress> WireguardUtilsWindows::addExclusionRoutes(const QList<IPAddress> &prefixes)
+{
+    return m_routeMonitor->addExclusionRoutes(prefixes);
+}
+
 bool WireguardUtilsWindows::deleteExclusionRoute(const IPAddress& prefix) {
   return m_routeMonitor->deleteExclusionRoute(prefix);
+}
+
+void WireguardUtilsWindows::deleteExclusionRoutes(const QList<IPAddress> &prefixes)
+{
+    if (m_routeMonitor) {
+        m_routeMonitor->deleteExclusionRoutes(prefixes);
+    }
 }
 
 bool WireguardUtilsWindows::excludeLocalNetworks(
@@ -321,12 +333,7 @@ bool WireguardUtilsWindows::excludeLocalNetworks(
   // If the interface isn't up then something went horribly wrong.
   Q_ASSERT(m_routeMonitor);
   // For each destination - attempt to exclude it from the VPN tunnel.
-  bool result = true;
-  for (const IPAddress& prefix : addresses) {
-    if (!m_routeMonitor->addExclusionRoute(prefix)) {
-      result = false;
-    }
-  }
+  bool result = m_routeMonitor->addExclusionRoutes(addresses).size() == addresses.size();
   // Permit LAN traffic through the firewall.
   if (!m_firewall->enableLanBypass(addresses)) {
     result = false;
