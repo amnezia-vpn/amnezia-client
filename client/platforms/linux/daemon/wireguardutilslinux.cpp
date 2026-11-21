@@ -503,7 +503,7 @@ void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
 
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), params.allowNets);
     LinuxFirewall::updateAllowNets(params.allowAddrs);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
     LinuxFirewall::updateBlockNets(params.blockAddrs);

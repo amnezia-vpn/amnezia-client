@@ -44,6 +44,91 @@
 
 #include <QHostAddress>
 #include <QHostInfo>
+#include <QUrl>
+
+namespace
+{
+    bool parsePort(const QString &text, int &port)
+    {
+        bool ok = false;
+        const uint value = text.toUInt(&ok);
+        if (!ok || value == 0 || value > 65535 || text.startsWith(QLatin1Char('+'))) {
+            return false;
+        }
+        port = static_cast<int>(value);
+        return true;
+    }
+
+    bool isIpv6Literal(const QString &host)
+    {
+        return QHostAddress(host).protocol() == QAbstractSocket::IPv6Protocol;
+    }
+
+    bool isValidHostName(const QString &host)
+    {
+        if (host.isEmpty() || host.contains(QLatin1Char(':'))) {
+            return false;
+        }
+        bool isNumericTopLabel = false;
+        host.section(QLatin1Char('.'), -1).toUInt(&isNumericTopLabel);
+        if (isNumericTopLabel) {
+            return false;
+        }
+        QUrl url;
+        url.setHost(host, QUrl::StrictMode);
+        return url.isValid() && !url.host().isEmpty();
+    }
+}
+
+bool NetworkUtilities::parseHostPort(const QString &input, QString &host, int &port)
+{
+    const QString text = input.trimmed();
+    QString parsedHost;
+    int parsedPort = -1;
+
+    if (text.startsWith(QLatin1Char('['))) {
+        const qsizetype closing = text.indexOf(QLatin1Char(']'));
+        if (closing < 0) {
+            return false;
+        }
+        parsedHost = text.mid(1, closing - 1);
+        if (!isIpv6Literal(parsedHost)) {
+            return false;
+        }
+        const QString rest = text.mid(closing + 1);
+        if (!rest.isEmpty() && (!rest.startsWith(QLatin1Char(':')) || !parsePort(rest.mid(1), parsedPort))) {
+            return false;
+        }
+    } else if (text.count(QLatin1Char(':')) > 1) {
+        if (!isIpv6Literal(text)) {
+            return false;
+        }
+        parsedHost = text;
+    } else {
+        const qsizetype separator = text.indexOf(QLatin1Char(':'));
+        parsedHost = separator < 0 ? text : text.left(separator);
+        if (separator >= 0 && !parsePort(text.mid(separator + 1), parsedPort)) {
+            return false;
+        }
+        if (!checkIPv4Format(parsedHost) && !isValidHostName(parsedHost)) {
+            return false;
+        }
+    }
+
+    host = parsedHost;
+    port = parsedPort;
+    return true;
+}
+
+QString NetworkUtilities::endpointHost(const QString &host)
+{
+    return isIpv6Literal(host) ? QStringLiteral("[%1]").arg(host) : host;
+}
+
+QString NetworkUtilities::endpoint(const QString &host, int port)
+{
+    return QStringLiteral("%1:%2").arg(endpointHost(host)).arg(port);
+}
 
 QRegularExpression NetworkUtilities::ipAddressRegExp()
 {
@@ -179,6 +264,19 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
+    if (dst.protocol() == QAbstractSocket::IPv6Protocol) {
+        SOCKADDR_INET destination {};
+        destination.Ipv6.sin6_family = AF_INET6;
+        const Q_IPV6ADDR ipv6 = dst.toIPv6Address();
+        memcpy(&destination.Ipv6.sin6_addr, ipv6.c, sizeof(ipv6.c));
+        MIB_IPFORWARD_ROW2 route {};
+        SOCKADDR_INET source {};
+        if (GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &route, &source) != NO_ERROR) {
+            return -1;
+        }
+        qDebug() << "Internet Adapter:" << QNetworkInterface::interfaceFromIndex(route.InterfaceIndex).name();
+        return route.InterfaceIndex;
+    }
     quint32 ipBigEndian;
     quint32 ip = dst.toIPv4Address();
     qToBigEndian(ip, &ipBigEndian);

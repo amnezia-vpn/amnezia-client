@@ -140,6 +140,10 @@ struct WGConfig: Decodable {
     return settingsLines.joined(separator: "\n")
   }
 
+  var endpointHost: String {
+    hostName.contains(":") && !hostName.hasPrefix("[") ? "[\(hostName)]" : hostName
+  }
+
   var str: String {
     """
     [Interface]
@@ -152,7 +156,7 @@ struct WGConfig: Decodable {
     PublicKey = \(serverPublicKey)
     \(presharedKey == nil ? "" : "PresharedKey = \(presharedKey!)")
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
-    Endpoint = \(hostName):\(port)
+    Endpoint = \(endpointHost):\(port)
     \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
     """
   }
