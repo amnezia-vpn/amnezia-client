@@ -21,7 +21,8 @@ namespace LanguageSettings
         Korean,
         French,
         Thai,
-        Indonesian
+        Indonesian,
+        Belarusian
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 
