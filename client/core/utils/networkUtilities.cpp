@@ -17,6 +17,8 @@
 #endif
 #ifdef Q_OS_LINUX
     #include <arpa/inet.h>
+    #include <cerrno>
+    #include <cstring>
     #include <linux/netlink.h>
     #include <linux/rtnetlink.h>
     #include <net/if.h>
@@ -291,7 +293,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 8192;
+    constexpr int BUFFER_SIZE = 131072;
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
     struct  nlmsghdr *nlh, *nlmsg;
@@ -299,19 +301,21 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     // This struct contain route attributes (route type)
     struct  rtattr *route_attribute;
     char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[100], buffer[BUFFER_SIZE];
-    char    *ptr = buffer;
+    char    msgbuf[100];
+    char*   buffer = new char[BUFFER_SIZE];
+    char*   ptr = buffer;
     struct timeval tv;
 
     if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
         perror("socket failed");
+        delete[] buffer;
         return {};
     }
 
     memset(msgbuf, 0, sizeof(msgbuf));
     memset(gateway_address, 0, sizeof(gateway_address));
     memset(interface, 0, sizeof(interface));
-    memset(buffer, 0, sizeof(buffer));
+    memset(buffer, 0, BUFFER_SIZE);
 
     /* point the header and the msg structure pointers into the buffer */
     nlmsg = (struct nlmsghdr *)msgbuf;
@@ -321,7 +325,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
     nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
     nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
+    nlmsg->nlmsg_pid = 0; // Let the kernel fill in the port id of the sending socket.
 
     /* 1 Sec Timeout to avoid stall */
     tv.tv_sec = 1;
@@ -329,16 +333,42 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     /* send msg */
     if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
         perror("send failed");
+        close(sock);
+        delete[] buffer;
         return {};
     }
 
-    /* receive response */
-    do
+    /* receive response.
+     * The dump arrives as a sequence of netlink datagrams, terminated by a
+     * NLMSG_DONE message. A single datagram may exceed any preallocated
+     * buffer size, and recv() silently truncates oversized datagrams, so the
+     * buffer must be large enough for the whole dump and must never be fed
+     * to recv() with a zero capacity (recv() would return 0 and the dump
+     * would be mistaken for a protocol error). */
+    while (true)
     {
-        received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
-        if (received_bytes < 0) {
-            perror("Error in recv");
+        int capacity = BUFFER_SIZE - msg_len;
+        if (capacity <= 0) {
+            qDebug() << "getGatewayAndIface: route dump is too large";
+            close(sock);
+            delete[] buffer;
             return {};
+        }
+
+        received_bytes = recv(sock, ptr, capacity, 0);
+        if (received_bytes < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("Error in recv");
+            close(sock);
+            delete[] buffer;
+            return {};
+        }
+
+        /* An empty datagram terminates the transfer */
+        if (received_bytes == 0) {
+            break;
         }
 
         nlh = (struct nlmsghdr *) ptr;
@@ -347,7 +377,14 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         if((NLMSG_OK(nlh, received_bytes) == 0) ||
             (nlh->nlmsg_type == NLMSG_ERROR))
         {
-            perror("Error in received packet");
+            if (nlh->nlmsg_type == NLMSG_ERROR && NLMSG_OK(nlh, received_bytes)) {
+                struct nlmsgerr *err = (struct nlmsgerr *) NLMSG_DATA(nlh);
+                qDebug() << "Error in received packet:" << strerror(-err->error);
+            } else {
+                qDebug() << "Error in received packet: invalid netlink message";
+            }
+            close(sock);
+            delete[] buffer;
             return {};
         }
 
@@ -363,10 +400,9 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         if ((nlh->nlmsg_flags & NLM_F_MULTI) == 0)
             break;
     }
-    while ((nlh->nlmsg_seq != msgseq) || (nlh->nlmsg_pid != getpid()));
 
     /* parse response */
-    int remaining = msg_len + received_bytes;
+    int remaining = msg_len;
     nlh = (struct nlmsghdr *) buffer;
     for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
     {
@@ -409,6 +445,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     if (!(*gateway_address) || !(*interface))
         qDebug() << "getGatewayAndIface: no gateway found";
     close(sock);
+    delete[] buffer;
     return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
