@@ -248,9 +248,12 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     if (!config.m_serverPskKey.isNull()) {
         out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
     }
-    if (!config.m_serverIpv4AddrIn.isNull()) {
+    QString endpointAddress;
+    if (!config.m_serverIpv4AddrIn.isEmpty()) {
+        endpointAddress = config.m_serverIpv4AddrIn;
         out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-    } else if (!config.m_serverIpv6AddrIn.isNull()) {
+    } else if (!config.m_serverIpv6AddrIn.isEmpty()) {
+        endpointAddress = config.m_serverIpv6AddrIn;
         out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
     } else {
         logger.warning() << "Failed to create peer with no endpoints";
@@ -266,16 +269,29 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
         out << "allowed_ip=" << ip.toString() << "\n";
     }
 
-    // Exclude the server address, except for multihop exit servers.
-    if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-        (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    // Resolve and install endpoint routes before any full-tunnel routes.
+    // Failing here is safer than recursively routing the transport into itself.
+    const IPAddress endpointRoute(endpointAddress);
+    bool endpointRouteAdded = false;
+    if (config.m_hopType != InterfaceConfig::MultiHopExit) {
+        if (m_rtmonitor == nullptr) {
+            logger.error() << "Cannot protect VPN endpoint without route monitor";
+            return false;
+        }
+        if (!m_rtmonitor->addExclusionRoute(endpointRoute)) {
+            logger.error() << "Failed to protect VPN endpoint route"
+                           << endpointRoute.toString();
+            return false;
+        }
+        endpointRouteAdded = true;
     }
 
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Peer configuration failed:" << strerror(err);
+        if (endpointRouteAdded) {
+            m_rtmonitor->deleteExclusionRoute(endpointRoute);
+        }
     }
     return (err == 0);
 }
@@ -287,8 +303,13 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     // Clear exclustion routes for this peer.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        const QString endpointAddress =
+            !config.m_serverIpv4AddrIn.isEmpty()
+                ? config.m_serverIpv4AddrIn
+                : config.m_serverIpv6AddrIn;
+        if (!endpointAddress.isEmpty()) {
+            m_rtmonitor->deleteExclusionRoute(IPAddress(endpointAddress));
+        }
     }
 
     QString message;
