@@ -45,6 +45,8 @@ struct FirewallParams
     QVector<QString> excludeApps; // Apps to exclude if VPN exemptions are enabled
     QStringList allowAddrs;
     QStringList blockAddrs;
+    QString serverIpv6Address;
+    int serverPort;
     // The follow flags indicate which general rulesets are needed. Note that
     // this is after some sanity filtering, i.e. an allow rule may be listed
     // as not needed if there were no block rules preceding it. The rulesets
@@ -100,6 +102,7 @@ public:
     static void updateDNSServers(const QStringList& servers);
     static void updateAllowNets(const QStringList& servers);
     static void updateBlockNets(const QStringList& servers);
+    static void updateIpv6Endpoint(const QString &serverAddress, int port);
 };
 
 #endif // LINUXFIREWALL_H

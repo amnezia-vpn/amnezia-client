@@ -33,8 +33,10 @@
 #ifndef MACOSFIREWALL_H
 #define MACOSFIREWALL_H
 
+#include <QHostAddress>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 
 // Descriptor for a set of firewall rules to be appled.
 //
@@ -45,6 +47,8 @@ struct FirewallParams
 
     QStringList allowAddrs;
     QStringList blockAddrs;
+    QString serverIpv6Address;
+    int serverPort;
 
     // The follow flags indicate which general rulesets are needed. Note that
     // this is after some sanity filtering, i.e. an allow rule may be listed
@@ -74,6 +78,18 @@ private:
     static bool isRootAnchorLoaded();
 
 public:
+    static QStringList ipv6Rules(const QString &serverAddress, int port)
+    {
+        QStringList rules { QStringLiteral("block return out inet6 flags any no state") };
+        QHostAddress address(serverAddress);
+        if (address.protocol() == QAbstractSocket::IPv6Protocol && port > 0 && port <= 65535) {
+            address.setScopeId(QString());
+            rules.append(
+                    QStringLiteral("pass out inet6 proto udp to %1 port %2 no state").arg(address.toString()).arg(port));
+        }
+        return rules;
+    }
+
     static void install();
     static void uninstall();
     static bool isInstalled();
