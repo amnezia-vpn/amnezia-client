@@ -43,7 +43,9 @@ QPair<QString, QString> NativeServerConfig::getDnsPair(const QString &primaryDns
     if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
         d1 = primaryDns;
     }
-    if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
+    const bool hasSingleWireGuardDns = dns2.isEmpty() && NetworkUtilities::checkIPv4Format(dns1)
+            && (defaultContainer == DockerContainer::WireGuard || ContainerUtils::isAwgContainer(defaultContainer));
+    if (!hasSingleWireGuardDns && !NetworkUtilities::checkIPv4Format(d2)) {
         d2 = secondaryDns;
     }
     return { d1, d2 };

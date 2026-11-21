@@ -15,6 +15,7 @@
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
+#include "core/utils/networkUtilities.h"
 #include "core/utils/protocolEnum.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
@@ -649,13 +650,22 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     config[configKey::defaultContainer] = containerName;
     config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
-    const static QRegularExpression dnsRegExp(
-            "DNS = "
-            "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
-    QRegularExpressionMatch dnsMatch = dnsRegExp.match(data);
-    if (dnsMatch.hasMatch()) {
-        config[configKey::dns1] = dnsMatch.captured(1);
-        config[configKey::dns2] = dnsMatch.captured(2);
+    QStringList dnsServers;
+    const QStringList dnsEntries = configMap.value(QStringLiteral("DNS")).section('#', 0, 0).split(',');
+    for (const QString &entry : dnsEntries) {
+        const QString dns = entry.trimmed();
+        if (NetworkUtilities::checkIPv4Format(dns)) {
+            dnsServers.append(dns);
+            if (dnsServers.size() == 2) {
+                break;
+            }
+        }
+    }
+    if (!dnsServers.isEmpty()) {
+        config[configKey::dns1] = dnsServers.first();
+    }
+    if (dnsServers.size() > 1) {
+        config[configKey::dns2] = dnsServers.at(1);
     }
 
     config[configKey::hostName] = hostName;
