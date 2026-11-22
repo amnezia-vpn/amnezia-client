@@ -23,6 +23,10 @@ void anchorOpenSSL() {
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    #include "platforms/macos/macosutils.h"
+#endif
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
 bool isAnotherInstanceRunning()
 {
@@ -54,6 +58,9 @@ int main(int argc, char *argv[])
     AmneziaApplication app(argc, argv);
     OsSignalHandler::setup();
 
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    MacOSUtils::patchNSStatusBarSetImageForBigSur();
+#endif
     anchorOpenSSL();
 
     ssh_init();

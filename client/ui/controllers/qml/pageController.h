@@ -42,6 +42,7 @@ public slots:
 
     void closeApplication();
 
+    void onErrorMessageClosed();
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
     int getNavigationBarHeight();
@@ -72,7 +73,7 @@ signals:
     void showErrorMessage(amnezia::ErrorCode);
     void showErrorMessage(const QString &errorMessage);
     void showNotificationMessage(const QString &message);
-
+    void errorMessageClosed();
     void showBusyIndicator(bool visible);
     void disableControls(bool disabled);
     void disableTabBar(bool disabled);
