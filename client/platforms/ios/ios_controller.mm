@@ -1,12 +1,13 @@
 #include "ios_controller.h"
 
 #include <QDebug>
+#include <QEventLoop>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QPointer>
 #include <QThread>
-#include <QEventLoop>
 
 #include "../core/protocols/vpnProtocol.h"
 #import "ios_controller_wrapper.h"
@@ -311,6 +312,113 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     return false;
 }
 
+#ifdef AMNEZIA_APPLE_LIVE_ROUTING
+void IosController::updateSplitTunneling(quint64 requestId, const QJsonObject &configuration,
+                                         std::function<void(SplitTunnelingUpdateResult)> callback)
+{
+    const auto sessionId = configuration.value(configKey::splitTunnelSessionId).toString();
+    NETunnelProviderManager *manager = m_currentTunnel;
+    NETunnelProviderProtocol *protocol = (NETunnelProviderProtocol *)manager.protocolConfiguration;
+    NSData *data = protocol.providerConfiguration[@"wireguard"];
+    const auto saved = data ? QJsonDocument::fromJson(QByteArray((const char *)data.bytes, data.length)).object()
+                            : QJsonObject { };
+    if (!manager || !data || sessionId.isEmpty() || manager.connection.status != NEVPNStatusConnected
+        || m_rawConfig.value(configKey::splitTunnelSessionId).toString() != sessionId
+        || saved.value(configKey::splitTunnelSessionId).toString() != sessionId) {
+        callback(SplitTunnelingUpdateResult::NotApplied);
+        return;
+    }
+    const auto request = QString::number(requestId);
+    const auto sites = configuration.value(configKey::splitTunnelSites).toArray();
+    const auto mode = configuration.value(configKey::splitTunnelType).toInt();
+    QJsonObject message { { "action", "updateSplitTunneling" },
+                          { "requestId", request },
+                          { "publicKey", saved.value(configKey::serverPubKey) },
+                          { configKey::splitTunnelSessionId, sessionId },
+                          { configKey::splitTunnelType, mode },
+                          { configKey::splitTunnelSites, sites } };
+    const auto encoded = QJsonDocument(message).toJson(QJsonDocument::Compact);
+    NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:[NSData dataWithBytes:encoded.constData()
+                                                                                      length:encoded.size()]
+                                                               options:0
+                                                                 error:nil];
+    const QPointer<IosController> guard(this);
+    sendVpnExtensionMessage(dictionary, [guard, manager, configuration, sessionId, request, callback](NSDictionary *response) {
+        const bool correlated = response && [response[@"requestId"] isKindOfClass:[NSString class]] &&
+                [response[@"splitTunnelSessionId"] isKindOfClass:[NSString class]]
+                && QString::fromNSString(response[@"requestId"]) == request
+                && QString::fromNSString(response[@"splitTunnelSessionId"]) == sessionId &&
+                [response[@"result"] isKindOfClass:[NSNumber class]];
+        const auto result = correlated ? splitTunnelingUpdateResultFromInt([response[@"result"] intValue])
+                                       : SplitTunnelingUpdateResult::StateUnknown;
+        if (!guard)
+            return;
+        QMetaObject::invokeMethod(
+                guard,
+                [guard, manager, configuration, sessionId, callback, result] {
+                    if (!guard)
+                        return;
+                    const auto currentSession = [&] {
+                        return guard->m_currentTunnel == manager
+                                && guard->m_rawConfig.value(configKey::splitTunnelSessionId).toString() == sessionId
+                                && manager.connection.status == NEVPNStatusConnected;
+                    };
+                    if (!currentSession()) {
+                        callback(SplitTunnelingUpdateResult::StateUnknown);
+                        return;
+                    }
+                    if (result != SplitTunnelingUpdateResult::Applied) {
+                        callback(result);
+                        return;
+                    }
+                    NETunnelProviderProtocol *protocol = (NETunnelProviderProtocol *)manager.protocolConfiguration;
+                    NSData *data = protocol.providerConfiguration[@"wireguard"];
+                    auto updated = data
+                            ? QJsonDocument::fromJson(QByteArray((const char *)data.bytes, data.length)).object()
+                            : QJsonObject { };
+                    if (updated.value(configKey::splitTunnelSessionId).toString() != sessionId) {
+                        callback(SplitTunnelingUpdateResult::StateUnknown);
+                        return;
+                    }
+                    updated.insert(configKey::splitTunnelType, configuration.value(configKey::splitTunnelType));
+                    updated.insert(configKey::splitTunnelSites, configuration.value(configKey::splitTunnelSites));
+                    const auto bytes = QJsonDocument(updated).toJson(QJsonDocument::Compact);
+                    NSMutableDictionary *providerConfiguration = [protocol.providerConfiguration mutableCopy];
+                    providerConfiguration[@"wireguard"] = [NSData dataWithBytes:bytes.constData() length:bytes.size()];
+                    NETunnelProviderProtocol *updatedProtocol = [protocol copy];
+                    updatedProtocol.providerConfiguration = providerConfiguration;
+                    manager.protocolConfiguration = updatedProtocol;
+                    [providerConfiguration release];
+                    [updatedProtocol release];
+                    [manager saveToPreferencesWithCompletionHandler:^(NSError *error) {
+                        const bool saved = error == nil;
+                        if (!guard)
+                            return;
+                        QMetaObject::invokeMethod(
+                                guard,
+                                [guard, manager, configuration, sessionId, callback, saved] {
+                                    if (!guard)
+                                        return;
+                                    if (!saved || guard->m_currentTunnel != manager
+                                        || guard->m_rawConfig.value(configKey::splitTunnelSessionId).toString() != sessionId
+                                        || manager.connection.status != NEVPNStatusConnected) {
+                                        callback(SplitTunnelingUpdateResult::StateUnknown);
+                                        return;
+                                    }
+                                    guard->m_rawConfig.insert(configKey::splitTunnelType,
+                                                              configuration.value(configKey::splitTunnelType));
+                                    guard->m_rawConfig.insert(configKey::splitTunnelSites,
+                                                              configuration.value(configKey::splitTunnelSites));
+                                    callback(SplitTunnelingUpdateResult::Applied);
+                                },
+                                Qt::QueuedConnection);
+                    }];
+                },
+                Qt::QueuedConnection);
+    });
+}
+#endif
+
 void IosController::disconnectVpn()
 {
     if (!m_currentTunnel) {
@@ -590,6 +698,7 @@ bool IosController::setupWireGuard()
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
+    wgConfig.insert(configKey::splitTunnelSessionId, m_rawConfig.value(configKey::splitTunnelSessionId));
 
     if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
         wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
@@ -680,6 +789,7 @@ bool IosController::setupAwg()
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
+    wgConfig.insert(configKey::splitTunnelSessionId, m_rawConfig.value(configKey::splitTunnelSessionId));
 
     if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
         wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);

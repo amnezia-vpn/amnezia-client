@@ -68,7 +68,7 @@ target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${FW_LIBRESOLV})
 target_compile_options(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${AMNEZIA_WG_APPLE_SOURCE_DIR})
 
 target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
@@ -124,7 +124,11 @@ set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATI
 target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE amnezia::openvpnadapter)
 
 find_package(awg-apple REQUIRED)
-target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE amnezia::awg-apple)
+if(AMNEZIA_WG_APPLE_GO_LIBRARY)
+    target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE "${AMNEZIA_WG_APPLE_GO_LIBRARY}")
+else()
+    target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE amnezia::awg-apple)
+endif()
 
 find_package(hev-socks5-tunnel REQUIRED)
 # FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
@@ -133,3 +137,13 @@ set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURA
 set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
 target_link_libraries(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE heiher::hev-socks5-tunnel)
+
+foreach(_routing_source RoutingUpdatePlan.swift RoutingUpdateTransaction.swift)
+    if(EXISTS "${WG_APPLE_SOURCE_DIR}/WireGuardKit/${_routing_source}")
+        target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE "${WG_APPLE_SOURCE_DIR}/WireGuardKit/${_routing_source}")
+    endif()
+endforeach()
+if(AMNEZIA_ENABLE_APPLE_LIVE_ROUTING)
+    target_compile_options(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE "$<$<COMPILE_LANGUAGE:Swift>:-DAMNEZIA_APPLE_LIVE_ROUTING>")
+    target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE ${CLIENT_ROOT_DIR}/platforms/ios/WireguardRoutingSession.swift)
+endif()

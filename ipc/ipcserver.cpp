@@ -14,9 +14,10 @@
 #include <QStringList>
 #include <QTcpServer>
 
+#include "daemon/daemon.h"
+#include "killswitch.h"
 #include "logger.h"
 #include "router.h"
-#include "killswitch.h"
 #include "xray.h"
 
 #ifdef Q_OS_WIN
@@ -90,6 +91,12 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 
     return Router::routeDeleteList(gw, ips);
+}
+
+int IpcServer::updateSplitTunneling(int routeMode, const QStringList &sites, const QString &publicKey,
+                                    const QString &sessionId)
+{
+    return static_cast<int>(Daemon::instance()->updateSplitTunneling(routeMode, sites, publicKey, sessionId));
 }
 
 bool IpcServer::flushDns()

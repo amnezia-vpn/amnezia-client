@@ -357,92 +357,96 @@ void MacosRouteMonitor::rtmAppendAddr(struct rt_msghdr* rtm, size_t maxlen,
   }
 }
 
-bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress& prefix,
-                                     unsigned int ifindex, const void* gateway,
-                                     int flags) {
-  constexpr size_t rtm_max_size = sizeof(struct rt_msghdr) +
-                                  sizeof(struct sockaddr_in6) * 2 +
-                                  sizeof(struct sockaddr_storage);
-  char buf[rtm_max_size] = {0};
-  struct rt_msghdr* rtm = reinterpret_cast<struct rt_msghdr*>(buf);
+bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress &prefix, unsigned int ifindex, const void *gateway,
+                                     int flags)
+{
+    return routeMutationSucceeded(rtmSendRouteWithResult(action, prefix, ifindex, gateway, flags));
+}
 
-  rtm->rtm_msglen = sizeof(struct rt_msghdr);
-  rtm->rtm_version = RTM_VERSION;
-  rtm->rtm_type = action;
-  rtm->rtm_index = ifindex;
-  rtm->rtm_flags = flags | RTF_STATIC | RTF_UP;
-  rtm->rtm_addrs = 0;
-  rtm->rtm_pid = 0;
-  rtm->rtm_seq = m_rtseq++;
-  rtm->rtm_errno = 0;
-  rtm->rtm_inits = 0;
-  memset(&rtm->rtm_rmx, 0, sizeof(rtm->rtm_rmx));
+RouteMutationResult MacosRouteMonitor::rtmSendRouteWithResult(int action, const IPAddress &prefix, unsigned int ifindex,
+                                                              const void *gateway, int flags)
+{
+    constexpr size_t rtm_max_size =
+            sizeof(struct rt_msghdr) + sizeof(struct sockaddr_in6) * 2 + sizeof(struct sockaddr_storage);
+    char buf[rtm_max_size] = { 0 };
+    struct rt_msghdr *rtm = reinterpret_cast<struct rt_msghdr *>(buf);
 
-  // Append RTA_DST
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    struct sockaddr_in6 sin6;
-    Q_IPV6ADDR dst = prefix.address().toIPv6Address();
-    memset(&sin6, 0, sizeof(sin6));
-    sin6.sin6_family = AF_INET6;
-    sin6.sin6_len = sizeof(sin6);
-    memcpy(&sin6.sin6_addr, &dst, 16);
-    rtmAppendAddr(rtm, rtm_max_size, RTA_DST, &sin6);
-  } else {
-    struct sockaddr_in sin;
-    quint32 dst = prefix.address().toIPv4Address();
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_len = sizeof(sin);
-    sin.sin_addr.s_addr = htonl(dst);
-    rtmAppendAddr(rtm, rtm_max_size, RTA_DST, &sin);
-  }
+    rtm->rtm_msglen = sizeof(struct rt_msghdr);
+    rtm->rtm_version = RTM_VERSION;
+    rtm->rtm_type = action;
+    rtm->rtm_index = ifindex;
+    rtm->rtm_flags = flags | RTF_STATIC | RTF_UP;
+    rtm->rtm_addrs = 0;
+    rtm->rtm_pid = 0;
+    rtm->rtm_seq = m_rtseq++;
+    rtm->rtm_errno = 0;
+    rtm->rtm_inits = 0;
+    memset(&rtm->rtm_rmx, 0, sizeof(rtm->rtm_rmx));
 
-  // Append RTA_GATEWAY
-  if (gateway != nullptr) {
-    int family = static_cast<const struct sockaddr*>(gateway)->sa_family;
-    if ((family == AF_INET) || (family == AF_INET6)) {
-      rtm->rtm_flags |= RTF_GATEWAY;
+    // Append RTA_DST
+    if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
+        struct sockaddr_in6 sin6;
+        Q_IPV6ADDR dst = prefix.address().toIPv6Address();
+        memset(&sin6, 0, sizeof(sin6));
+        sin6.sin6_family = AF_INET6;
+        sin6.sin6_len = sizeof(sin6);
+        memcpy(&sin6.sin6_addr, &dst, 16);
+        rtmAppendAddr(rtm, rtm_max_size, RTA_DST, &sin6);
+    } else {
+        struct sockaddr_in sin;
+        quint32 dst = prefix.address().toIPv4Address();
+        memset(&sin, 0, sizeof(sin));
+        sin.sin_family = AF_INET;
+        sin.sin_len = sizeof(sin);
+        sin.sin_addr.s_addr = htonl(dst);
+        rtmAppendAddr(rtm, rtm_max_size, RTA_DST, &sin);
     }
-    rtmAppendAddr(rtm, rtm_max_size, RTA_GATEWAY, gateway);
-  }
 
-  // Append RTA_NETMASK
-  unsigned int plen = prefix.prefixLength();
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    struct sockaddr_in6 sin6;
-    memset(&sin6, 0, sizeof(sin6));
-    sin6.sin6_family = AF_INET6;
-    sin6.sin6_len = sizeof(sin6);
-    memset(&sin6.sin6_addr.s6_addr, 0xff, plen / 8);
-    if (plen % 8) {
-      sin6.sin6_addr.s6_addr[plen / 8] = 0xFF ^ (0xFF >> (plen % 8));
+    // Append RTA_GATEWAY
+    if (gateway != nullptr) {
+        int family = static_cast<const struct sockaddr *>(gateway)->sa_family;
+        if ((family == AF_INET) || (family == AF_INET6)) {
+            rtm->rtm_flags |= RTF_GATEWAY;
+        }
+        rtmAppendAddr(rtm, rtm_max_size, RTA_GATEWAY, gateway);
     }
-    rtmAppendAddr(rtm, rtm_max_size, RTA_NETMASK, &sin6);
-  } else if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_len = sizeof(struct sockaddr_in);
-    sin.sin_addr.s_addr = 0xffffffff;
-    if (plen < 32) {
-      sin.sin_addr.s_addr ^= htonl(0xffffffff >> plen);
-    }
-    rtmAppendAddr(rtm, rtm_max_size, RTA_NETMASK, &sin);
-  }
 
-  // Send the routing message to the kernel.
-  int len = write(m_rtsock, rtm, rtm->rtm_msglen);
-  if (len == rtm->rtm_msglen) {
-    return true;
-  }
-  if ((action == RTM_ADD) && (errno == EEXIST)) {
-    return true;
-  }
-  if ((action == RTM_DELETE) && (errno == ESRCH)) {
-    return true;
-  }
-  logger.warning() << "Failed to send routing message:" << strerror(errno);
-  return false;
+    // Append RTA_NETMASK
+    unsigned int plen = prefix.prefixLength();
+    if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
+        struct sockaddr_in6 sin6;
+        memset(&sin6, 0, sizeof(sin6));
+        sin6.sin6_family = AF_INET6;
+        sin6.sin6_len = sizeof(sin6);
+        memset(&sin6.sin6_addr.s6_addr, 0xff, plen / 8);
+        if (plen % 8) {
+            sin6.sin6_addr.s6_addr[plen / 8] = 0xFF ^ (0xFF >> (plen % 8));
+        }
+        rtmAppendAddr(rtm, rtm_max_size, RTA_NETMASK, &sin6);
+    } else if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {
+        struct sockaddr_in sin;
+        memset(&sin, 0, sizeof(sin));
+        sin.sin_family = AF_INET;
+        sin.sin_len = sizeof(struct sockaddr_in);
+        sin.sin_addr.s_addr = 0xffffffff;
+        if (plen < 32) {
+            sin.sin_addr.s_addr ^= htonl(0xffffffff >> plen);
+        }
+        rtmAppendAddr(rtm, rtm_max_size, RTA_NETMASK, &sin);
+    }
+
+    // Send the routing message to the kernel.
+    int len = write(m_rtsock, rtm, rtm->rtm_msglen);
+    if (len == rtm->rtm_msglen)
+        return RouteMutationResult::Applied;
+    if (len >= 0)
+        return RouteMutationResult::StateUnknown;
+    if (action == RTM_ADD && errno == EEXIST)
+        return RouteMutationResult::Unchanged;
+    if (action == RTM_DELETE && errno == ESRCH)
+        return RouteMutationResult::Unchanged;
+    logger.warning() << "Failed to send routing message:" << strerror(errno);
+    return RouteMutationResult::NotApplied;
 }
 
 bool MacosRouteMonitor::rtmFetchRoutes(int family) {
@@ -490,23 +494,49 @@ bool MacosRouteMonitor::rtmFetchRoutes(int family) {
   return false;
 }
 
-bool MacosRouteMonitor::insertRoute(const IPAddress& prefix, int flags) {
-  struct sockaddr_dl datalink;
-  memset(&datalink, 0, sizeof(datalink));
-  datalink.sdl_family = AF_LINK;
-  datalink.sdl_len = offsetof(struct sockaddr_dl, sdl_data) + m_ifname.length();
-  datalink.sdl_index = m_ifindex;
-  datalink.sdl_type = IFT_OTHER;
-  datalink.sdl_nlen = m_ifname.length();
-  datalink.sdl_alen = 0;
-  datalink.sdl_slen = 0;
-  memcpy(&datalink.sdl_data, qPrintable(m_ifname), datalink.sdl_nlen);
+RouteMutationResult MacosRouteMonitor::createRoute(const IPAddress &prefix, int flags)
+{
+    struct sockaddr_dl datalink;
+    memset(&datalink, 0, sizeof(datalink));
+    datalink.sdl_family = AF_LINK;
+    datalink.sdl_len = offsetof(struct sockaddr_dl, sdl_data) + m_ifname.length();
+    datalink.sdl_index = m_ifindex;
+    datalink.sdl_type = IFT_OTHER;
+    datalink.sdl_nlen = m_ifname.length();
+    datalink.sdl_alen = 0;
+    datalink.sdl_slen = 0;
+    memcpy(&datalink.sdl_data, qPrintable(m_ifname), datalink.sdl_nlen);
 
-  return rtmSendRoute(RTM_ADD, prefix, m_ifindex, &datalink, flags);
+    return rtmSendRouteWithResult(RTM_ADD, prefix, m_ifindex, &datalink, flags);
+}
+
+bool MacosRouteMonitor::insertRoute(const IPAddress &prefix, int flags)
+{
+    return routeMutationSucceeded(createRoute(prefix, flags));
 }
 
 bool MacosRouteMonitor::deleteRoute(const IPAddress& prefix, int flags) {
   return rtmSendRoute(RTM_DELETE, prefix, m_ifindex, nullptr, flags);
+}
+
+RouteCreationResult MacosRouteMonitor::createExclusionRoute(const IPAddress &prefix)
+{
+    if (m_exclusionRoutes.contains(prefix))
+        return { };
+    RouteMutationResult result = RouteMutationResult::NotApplied;
+    if (prefix.type() == QAbstractSocket::IPv4Protocol && m_defaultIfindexIpv4 != 0 && !m_defaultGatewayIpv4.isEmpty()) {
+        result = rtmSendRouteWithResult(RTM_ADD, prefix, m_defaultIfindexIpv4, m_defaultGatewayIpv4.constData());
+    } else if (prefix.type() == QAbstractSocket::IPv6Protocol && m_defaultIfindexIpv6 != 0
+               && !m_defaultGatewayIpv6.isEmpty()) {
+        result = rtmSendRouteWithResult(RTM_ADD, prefix, m_defaultIfindexIpv6, m_defaultGatewayIpv6.constData());
+    }
+    if (result == RouteMutationResult::Applied) {
+        m_exclusionRoutes.append(prefix);
+        return { SplitTunnelingUpdateResult::Applied, { prefix } };
+    }
+    return { result == RouteMutationResult::StateUnknown ? SplitTunnelingUpdateResult::StateUnknown
+                                                         : SplitTunnelingUpdateResult::NotApplied,
+             { } };
 }
 
 bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
@@ -534,17 +564,19 @@ bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
   return true;
 }
 
-bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Deleting exclusion route for" << prefix.toString();
-
-  m_exclusionRoutes.removeAll(prefix);
-  if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {
-    return rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv4, nullptr);
-  } else if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    return rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv6, nullptr);
-  } else {
-    return false;
-  }
+bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress &prefix)
+{
+    if (!m_exclusionRoutes.contains(prefix))
+        return true;
+    bool removed = false;
+    if (prefix.type() == QAbstractSocket::IPv4Protocol && m_defaultIfindexIpv4 != 0) {
+        removed = rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv4, nullptr);
+    } else if (prefix.type() == QAbstractSocket::IPv6Protocol && m_defaultIfindexIpv6 != 0) {
+        removed = rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv6, nullptr);
+    }
+    if (removed)
+        m_exclusionRoutes.removeAll(prefix);
+    return removed;
 }
 
 void MacosRouteMonitor::flushExclusionRoutes() {

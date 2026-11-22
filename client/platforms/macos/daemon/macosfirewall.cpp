@@ -207,3 +207,11 @@ void MacOSFirewall::setAnchorWithRules(const QString& anchor, bool enabled, cons
     else
         return (void)execute(QStringLiteral("echo -e \"%1\" | pfctl -q -a '%2/%3' -f -").arg(ruleList.join('\n'), kRootAnchor, anchor), true);
 }
+
+SplitTunnelingUpdateResult MacOSFirewall::updateSplitTunneling(const InterfaceConfig &config)
+{
+    if (!isInstalled()) {
+        return SplitTunnelingUpdateResult::NotApplied;
+    }
+    return SplitTunnelingFirewall::apply(SplitTunnelingFirewall::Platform::MacOS, config);
+}

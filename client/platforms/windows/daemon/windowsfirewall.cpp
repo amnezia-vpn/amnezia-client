@@ -285,154 +285,153 @@ bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
   return true;
 }
 
-
-bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
-  // Start the firewall transaction
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-  if (result != ERROR_SUCCESS) {
-    disableKillSwitch();
-    return false;
-  }
-  auto cleanup = qScopeGuard([&] {
-    FwpmTransactionAbort0(m_sessionHandle);
-    disableKillSwitch();
-  });
-
-  // Build the firewall rules for this peer.
-  logger.info() << "Enabling traffic for peer"
-                << config.m_serverPublicKey;
-  if (!blockTrafficTo(config.m_allowedIPAddressRanges, LOW_WEIGHT,
-                      "Block Internet", config.m_serverPublicKey)) {
-    return false;
-  }
-  if (!config.m_primaryDnsServer.isEmpty()) {
-    if (!allowTrafficTo(QHostAddress(config.m_primaryDnsServer), 53, HIGH_WEIGHT,
-                        "Allow DNS-Server", config.m_serverPublicKey)) {
-      return false;
-    }
-    // In some cases, we might configure a 2nd DNS server for IPv6, however
-    // this should probably be cleaned up by converting m_dnsServer into
-    // a QStringList instead.
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
-      if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53,
-                          HIGH_WEIGHT, "Allow extra IPv6 DNS-Server",
-                          config.m_serverPublicKey)) {
-        return false;
-      }
-    }
-  }
-
-  if (!config.m_secondaryDnsServer.isEmpty()) {
-    if (!allowTrafficTo(QHostAddress(config.m_secondaryDnsServer), 53, HIGH_WEIGHT,
-                        "Allow DNS-Server", config.m_serverPublicKey)) {
-      return false;
-    }
-    // In some cases, we might configure a 2nd DNS server for IPv6, however
-    // this should probably be cleaned up by converting m_dnsServer into
-    // a QStringList instead.
-    if (config.m_secondaryDnsServer == config.m_serverIpv4Gateway) {
-      if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53,
-                          HIGH_WEIGHT, "Allow extra IPv6 DNS-Server",
-                          config.m_serverPublicKey)) {
-        return false;
-      }
-    }
-  }
-
-  for (const QString& dns : config.m_allowedDnsServers) {
-    logger.debug() << "Allow DNS: " << dns;
-    if (!allowTrafficTo(QHostAddress(dns), 53, HIGH_WEIGHT,
-                        "Allow DNS-Server", config.m_serverPublicKey)) {
-      return false;
-    }
-  }
-
-  if (!config.m_excludedAddresses.empty()) {
-    for (const QString& i : config.m_excludedAddresses) {
-      logger.debug() << "excludedAddresses range: " << i;
-
-      if (!allowTrafficTo(i, HIGH_WEIGHT,
-                          "Allow Ecxlude route", config.m_serverPublicKey)) {
-        return false;
-      }
-    }
-  }
-
-  result = FwpmTransactionCommit0(m_sessionHandle);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionCommit0 failed with error:" << result;
-    return false;
-  }
-
-  cleanup.dismiss();
-  return true;
+bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig &config)
+{
+    return WindowsFirewallPeerTransaction::enable(peerTransactionOperations(config));
 }
 
-bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-  auto cleanup = qScopeGuard([&] {
-    if (result != ERROR_SUCCESS) {
-      FwpmTransactionAbort0(m_sessionHandle);
+SplitTunnelingUpdateResult WindowsFirewall::replacePeerTraffic(const InterfaceConfig &config)
+{
+    if (!m_peerRulesSynchronized) {
+        logger.error() << "Cannot replace peer rules after a failed firewall rollback";
+        return SplitTunnelingUpdateResult::StateUnknown;
     }
-  });
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
+    const auto result = WindowsFirewallPeerTransaction::replace(config.m_serverPublicKey, m_peerRules,
+                                                                peerTransactionOperations(config));
+    switch (result) {
+    case WindowsFirewallPeerTransaction::Result::Committed: return SplitTunnelingUpdateResult::Applied;
+    case WindowsFirewallPeerTransaction::Result::Failed: return SplitTunnelingUpdateResult::NotApplied;
+    case WindowsFirewallPeerTransaction::Result::RollbackFailed:
+        m_peerRulesSynchronized = false;
+        logger.error() << "Peer firewall state is unknown after a failed rollback";
+        return SplitTunnelingUpdateResult::StateUnknown;
+    }
+    return SplitTunnelingUpdateResult::StateUnknown;
+}
 
-  logger.info() << "Disabling traffic for peer" << pubkey;
-  for (const auto& filterID : m_peerRules.values(pubkey)) {
-    FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    m_peerRules.remove(pubkey, filterID);
-  }
+WindowsFirewallPeerTransaction::Operations WindowsFirewall::peerTransactionOperations(const InterfaceConfig &config)
+{
+    WindowsFirewallPeerTransaction::Operations operations;
+    operations.begin = [this]() {
+        const auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+        if (result != ERROR_SUCCESS) {
+            logger.error() << "FwpmTransactionBegin failed with error:" << result;
+        }
+        return result == ERROR_SUCCESS;
+    };
+    operations.writeFilters = [this, &config]() { return writePeerFilters(config); };
+    operations.commit = [this]() {
+        const auto result = FwpmTransactionCommit0(m_sessionHandle);
+        if (result != ERROR_SUCCESS) {
+            logger.error() << "FwpmTransactionCommit0 failed with error:" << result;
+        }
+        return result == ERROR_SUCCESS;
+    };
+    operations.abort = [this]() {
+        const auto result = FwpmTransactionAbort0(m_sessionHandle);
+        if (result != ERROR_SUCCESS) {
+            logger.error() << "FwpmTransactionAbort0 failed with error:" << result;
+            m_peerRulesSynchronized = false;
+        }
+        return result == ERROR_SUCCESS;
+    };
+    operations.removeFilter = [this](quint64 filterId) {
+        const auto result = FwpmFilterDeleteById0(m_sessionHandle, filterId);
+        if (result != ERROR_SUCCESS) {
+            logger.error() << "FwpmFilterDeleteById0 failed with error:" << result;
+        }
+        return result == ERROR_SUCCESS;
+    };
+    operations.resetTransaction = [this]() {
+        const auto result = FwpmTransactionAbort0(m_sessionHandle);
+        return result == ERROR_SUCCESS || result == FWP_E_NO_TXN_IN_PROGRESS;
+    };
+    operations.removeFilterIfPresent = [this](quint64 filterId) {
+        const auto result = FwpmFilterDeleteById0(m_sessionHandle, filterId);
+        return result == ERROR_SUCCESS || result == FWP_E_FILTER_NOT_FOUND;
+    };
+    operations.disableKillSwitch = [this]() { disableKillSwitch(); };
+    return operations;
+}
 
-  // Commit!
-  result = FwpmTransactionCommit0(m_sessionHandle);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-  return true;
+bool WindowsFirewall::writePeerFilters(const InterfaceConfig &config)
+{
+    // Build the firewall rules for this peer.
+    logger.info() << "Enabling traffic for peer" << config.m_serverPublicKey;
+    if (!blockTrafficTo(config.m_allowedIPAddressRanges, LOW_WEIGHT, "Block Internet", config.m_serverPublicKey)) {
+        return false;
+    }
+    if (!config.m_primaryDnsServer.isEmpty()) {
+        if (!allowTrafficTo(QHostAddress(config.m_primaryDnsServer), 53, HIGH_WEIGHT, "Allow DNS-Server",
+                            config.m_serverPublicKey)) {
+            return false;
+        }
+        // In some cases, we might configure a 2nd DNS server for IPv6, however
+        // this should probably be cleaned up by converting m_dnsServer into
+        // a QStringList instead.
+        if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+            if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53, HIGH_WEIGHT,
+                                "Allow extra IPv6 DNS-Server", config.m_serverPublicKey)) {
+                return false;
+            }
+        }
+    }
+
+    if (!config.m_secondaryDnsServer.isEmpty()) {
+        if (!allowTrafficTo(QHostAddress(config.m_secondaryDnsServer), 53, HIGH_WEIGHT, "Allow DNS-Server",
+                            config.m_serverPublicKey)) {
+            return false;
+        }
+        // In some cases, we might configure a 2nd DNS server for IPv6, however
+        // this should probably be cleaned up by converting m_dnsServer into
+        // a QStringList instead.
+        if (config.m_secondaryDnsServer == config.m_serverIpv4Gateway) {
+            if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53, HIGH_WEIGHT,
+                                "Allow extra IPv6 DNS-Server", config.m_serverPublicKey)) {
+                return false;
+            }
+        }
+    }
+
+    for (const QString &dns : config.m_allowedDnsServers) {
+        logger.debug() << "Allow DNS: " << dns;
+        if (!allowTrafficTo(QHostAddress(dns), 53, HIGH_WEIGHT, "Allow DNS-Server", config.m_serverPublicKey)) {
+            return false;
+        }
+    }
+
+    if (!config.m_excludedAddresses.empty()) {
+        for (const QString &i : config.m_excludedAddresses) {
+            logger.debug() << "excludedAddresses range: " << i;
+
+            if (!allowTrafficTo(i, HIGH_WEIGHT, "Allow Ecxlude route", config.m_serverPublicKey)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool WindowsFirewall::disablePeerTraffic(const QString &pubkey)
+{
+    InterfaceConfig config;
+    config.m_serverPublicKey = pubkey;
+    const auto result = WindowsFirewallPeerTransaction::remove(pubkey, m_peerRules, peerTransactionOperations(config));
+    if (result == WindowsFirewallPeerTransaction::Result::RollbackFailed)
+        m_peerRulesSynchronized = false;
+    return result == WindowsFirewallPeerTransaction::Result::Committed;
 }
 
 bool WindowsFirewall::disableKillSwitch() {
   return KillSwitch::instance()->disableKillSwitch();
 }
 
-bool WindowsFirewall::allowAllTraffic() {
-    auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-    auto cleanup = qScopeGuard([&] {
-        if (result != ERROR_SUCCESS) {
-            FwpmTransactionAbort0(m_sessionHandle);
-        }
-    });
-    if (result != ERROR_SUCCESS) {
-      logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                     << result;
-      return false;
-    }
-
-    for (const auto& filterID : m_peerRules.values()) {
-      FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    }
-
-    for (const auto& filterID : qAsConst(m_activeRules)) {
-      FwpmFilterDeleteById0(m_sessionHandle, filterID);
-    }
-
-           // Commit!
-    result = FwpmTransactionCommit0(m_sessionHandle);
-    if (result != ERROR_SUCCESS) {
-      logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                     << result;
-      return false;
-    }
-    m_peerRules.clear();
-    m_activeRules.clear();
-    logger.debug() << "Firewall Disabled!";
-    return true;
+bool WindowsFirewall::allowAllTraffic()
+{
+    InterfaceConfig config;
+    return WindowsFirewallPeerTransaction::clear(m_peerRules, m_activeRules, m_peerRulesSynchronized,
+                                                 peerTransactionOperations(config));
 }
 
 bool WindowsFirewall::allowTrafficForAppOnAll(const QString& exePath,

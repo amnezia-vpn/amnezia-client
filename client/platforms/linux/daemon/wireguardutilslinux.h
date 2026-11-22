@@ -29,9 +29,13 @@ public:
     bool deleteInterface() override;
 
     bool updatePeer(const InterfaceConfig& config) override;
+    SplitTunnelingUpdateResult updateSplitTunneling(const InterfaceConfig &config) override;
+    SplitTunnelingUpdateResult restoreSplitTunneling(const InterfaceConfig &config) override;
     bool deletePeer(const InterfaceConfig& config) override;
     QList<PeerStatus> getPeerStatus() override;
 
+    RouteCreationResult createRoutePrefix(const IPAddress &prefix) override;
+    RouteCreationResult createExclusionRoute(const IPAddress &prefix) override;
     bool updateRoutePrefix(const IPAddress& prefix) override;
     bool deleteRoutePrefix(const IPAddress& prefix) override;
 
@@ -49,6 +53,8 @@ private slots:
     void tunnelErrorOccurred(QProcess::ProcessError error);
 
 private:
+    bool configurePeer(const InterfaceConfig &config);
+    void updateFirewall(const InterfaceConfig &config);
     QString uapiCommand(const QString& command);
     static int uapiErrno(const QString& command);
     QString waitForTunnelName(const QString& filename);
