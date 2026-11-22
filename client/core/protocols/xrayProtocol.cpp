@@ -26,6 +26,12 @@ static const QString tunName = "utun22";
 static const QString tunName = "tun2";
 #endif
 
+#ifdef Q_OS_WIN
+static const QString tunDevice = QString("tun://%1?GUID={7B3C9E4A-2D61-4F0B-9A8E-5C1D3F6A2B90}").arg(tunName);
+#else
+static const QString tunDevice = QString("tun://%1").arg(tunName);
+#endif
+
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
@@ -169,7 +175,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     const QString proxyUrl = QString("socks5://%1:%2@127.0.0.1:%3").arg(m_socksUser, m_socksPassword, QString::number(m_socksPort));
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
+    m_tun2socksProcess->setArguments({ "-device", tunDevice, "-proxy", proxyUrl });
 
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
