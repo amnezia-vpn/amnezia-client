@@ -12,6 +12,7 @@
 #include "core/utils/constants.h"
 #include "leakdetector.h"
 #include "logger.h"
+#include "platforms/windows/daemon/windowstunnelservice.h"
 #include "platforms/windows/daemon/wireguardutilswindows.h"
 #include "platforms/windows/windowsutils.h"
 
@@ -38,13 +39,20 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
   QCoreApplication::setApplicationVersion(Constants::versionString());
 
   if (tokens.length() != 2) {
-    logger.error() << "Expected 1 parameter only: the config file.";
+    logger.error() << "Expected 1 parameter only: the config pipe.";
     return 1;
   }
-  QString maybeConfig = tokens.at(1);
+  QString pipeName = tokens.at(1);
+
+  if (!pipeName.startsWith(TUNNEL_CONFIG_PIPE_PREFIX)) {
+    logger.error() << "parameter Does not seem to be a config pipe";
+    return 1;
+  }
+
+  QString maybeConfig = WindowsTunnelService::readConfigFromPipe(pipeName);
 
   if (!maybeConfig.startsWith("[Interface]")) {
-    logger.error() << "parameter Does not seem to be a config";
+    logger.error() << "pipe Does not seem to carry a config";
     return 1;
   }
   // This process will be used by the wireguard tunnel. No need to call
