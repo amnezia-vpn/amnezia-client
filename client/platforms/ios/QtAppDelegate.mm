@@ -1,7 +1,83 @@
 #import "QtAppDelegate.h"
 #import "ios_controller.h"
+#import <StoreKit/StoreKit.h>
 
 #include <QFile>
+
+namespace {
+constexpr NSInteger kReviewRequestOpenInterval = 20;
+NSString *const kAppOpenCountKey = @"AmneziaVPN.AppOpenCount";
+BOOL gShouldRequestReviewOnBecomeActive = NO;
+id gSceneWillEnterForegroundObserver = nil;
+id gSceneDidActivateObserver = nil;
+
+void scheduleAppStoreReviewIfNeededOnOpen()
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    const NSInteger openCount = [defaults integerForKey:kAppOpenCountKey] + 1;
+    [defaults setInteger:openCount forKey:kAppOpenCountKey];
+
+    gShouldRequestReviewOnBecomeActive =
+        (openCount > 0 && openCount % kReviewRequestOpenInterval == 0);
+
+    NSLog(@"[Review] scene open count=%ld interval=%ld scheduled=%@",
+          (long)openCount,
+          (long)kReviewRequestOpenInterval,
+          gShouldRequestReviewOnBecomeActive ? @"YES" : @"NO");
+}
+
+void requestAppStoreReviewForScene(UIScene *scene)
+{
+    if (@available(iOS 14.0, *)) {
+        if ([scene isKindOfClass:[UIWindowScene class]] &&
+            scene.activationState == UISceneActivationStateForegroundActive) {
+            [SKStoreReviewController requestReviewInScene:(UIWindowScene *)scene];
+            NSLog(@"[Review] requestReviewInScene invoked");
+            return;
+        }
+    }
+
+    if (@available(iOS 10.3, *)) {
+        [SKStoreReviewController requestReview];
+        NSLog(@"[Review] requestReview fallback invoked");
+    }
+}
+
+void setupSceneReviewObservers()
+{
+    if (gSceneWillEnterForegroundObserver || gSceneDidActivateObserver) {
+        return;
+    }
+
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+
+    if (@available(iOS 13.0, *)) {
+        gSceneWillEnterForegroundObserver =
+            [center addObserverForName:UISceneWillEnterForegroundNotification
+                                object:nil
+                                 queue:[NSOperationQueue mainQueue]
+                            usingBlock:^(__unused NSNotification *note) {
+            scheduleAppStoreReviewIfNeededOnOpen();
+        }];
+
+        gSceneDidActivateObserver =
+            [center addObserverForName:UISceneDidActivateNotification
+                                object:nil
+                                 queue:[NSOperationQueue mainQueue]
+                            usingBlock:^(NSNotification *note) {
+            if (!gShouldRequestReviewOnBecomeActive) {
+                return;
+            }
+
+            gShouldRequestReviewOnBecomeActive = NO;
+            UIScene *scene = [note.object isKindOfClass:[UIScene class]] ? (UIScene *)note.object : nil;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                requestAppStoreReviewForScene(scene);
+            });
+        }];
+    }
+}
+} // namespace
 
 
 @implementation QIOSApplicationDelegate (AmneziaVPNDelegate)
@@ -9,6 +85,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [application setMinimumBackgroundFetchInterval: UIApplicationBackgroundFetchIntervalMinimum];
+    setupSceneReviewObservers();
     // Override point for customization after application launch.
     NSLog(@"Application didFinishLaunchingWithOptions");
     return YES;
