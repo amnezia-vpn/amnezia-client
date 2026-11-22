@@ -2,6 +2,7 @@
 
 
 #include <QApplication>
+#include <QFile>
 #include <QHostAddress>
 #include <QRegularExpression>
 #include <algorithm>
@@ -392,7 +393,31 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     dnsServers.append("127.0.0.53");
     dnsServers.append(allowedDnsServers);
 
-    LinuxFirewall::updateDNSServers(dnsServers);
+    // The system may keep resolving through the nameservers from
+    // /etc/resolv.conf (e.g. until the tunnel DNS is applied, or on systems
+    // where the per-link tunnel DNS is not consumed). Rejecting them breaks
+    // name resolution completely, so keep them reachable. They are usually
+    // reached via the physical interface, so they are passed separately and
+    // get rules without the tunnel interface restriction.
+    QStringList systemDnsServers;
+    QFile resolvConf(QStringLiteral("/etc/resolv.conf"));
+    if (resolvConf.open(QIODevice::ReadOnly)) {
+        static const QRegularExpression nameserverRe(
+            QStringLiteral("^\\s*nameserver\\s+(\\S+)"));
+        while (!resolvConf.atEnd()) {
+            const QRegularExpressionMatch match =
+                nameserverRe.match(QString::fromLocal8Bit(resolvConf.readLine()));
+            if (match.hasMatch()) {
+                const QString server = match.captured(1);
+                if (!systemDnsServers.contains(server)) {
+                    systemDnsServers.append(server);
+                }
+            }
+        }
+        resolvConf.close();
+    }
+
+    LinuxFirewall::updateDNSServers(dnsServers, systemDnsServers);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 #endif

@@ -7,6 +7,8 @@
 #include <net/if.h>
 
 #include <QDBusVariant>
+#include <QFileInfo>
+#include <QProcess>
 #include <QtDBus/QtDBus>
 
 #include "leakdetector.h"
@@ -20,7 +22,32 @@ constexpr const char* DBUS_PROPERTY_INTERFACE =
 
 namespace {
 Logger logger("DnsUtilsLinux");
+
+// Applications only consume the per-link configuration set through the
+// resolved D-Bus API when they use the systemd-resolved stub resolver.
+// Otherwise (e.g. a resolvconf-managed /etc/resolv.conf) the tunnel DNS has
+// to be pushed into the system resolver as well.
+bool isResolvedManagingResolvConf() {
+  const QFileInfo info(QStringLiteral("/etc/resolv.conf"));
+  if (!info.isSymLink()) {
+    return false;
+  }
+  return info.symLinkTarget().contains(QStringLiteral("systemd/resolve"));
 }
+
+QString findResolvconfBinary() {
+  const QStringList paths = {
+      QStringLiteral("/usr/sbin/resolvconf"), QStringLiteral("/sbin/resolvconf"),
+      QStringLiteral("/usr/bin/resolvconf"), QStringLiteral("/bin/resolvconf"),
+  };
+  for (const QString& path : paths) {
+    if (QFileInfo::exists(path)) {
+      return path;
+    }
+  }
+  return QString();
+}
+}  // namespace
 
 DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
   MZ_COUNT_CTOR(DnsUtilsLinux);
@@ -33,6 +60,8 @@ DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
 
 DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
+
+  removeResolvconfEntry();
 
   for (auto iterator = m_linkDomains.constBegin();
        iterator != m_linkDomains.constEnd(); ++iterator) {
@@ -61,6 +90,15 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
+
+  if (isResolvedManagingResolvConf()) {
+    m_resolvconfIface.clear();
+  } else {
+    // Push the tunnel resolvers into the system resolver too, the same way
+    // the OpenVPN update-resolv-conf script does.
+    m_resolvconfIface = ifname;
+    updateResolvConf(resolvers);
+  }
   return true;
 }
 
@@ -84,7 +122,60 @@ bool DnsUtilsLinux::restoreResolvers() {
     m_ifindex = 0;
   }
 
+  removeResolvconfEntry();
+
   return true;
+}
+
+void DnsUtilsLinux::updateResolvConf(const QList<QHostAddress>& resolvers) {
+  const QString resolvconf = findResolvconfBinary();
+  if (resolvconf.isEmpty()) {
+    logger.warning()
+        << "resolvconf binary not found, the system resolver is not updated";
+    return;
+  }
+
+  QProcess process;
+  process.start(resolvconf,
+                {QStringLiteral("-a"), m_resolvconfIface + QStringLiteral(".inet")});
+  if (!process.waitForStarted(3000)) {
+    logger.error() << "Failed to start" << resolvconf;
+    return;
+  }
+
+  QByteArray data;
+  for (const QHostAddress& address : resolvers) {
+    if (!address.isNull()) {
+      data.append("nameserver " + address.toString().toUtf8() + "\n");
+    }
+  }
+  process.write(data);
+  process.closeWriteChannel();
+
+  if (!process.waitForFinished(10000) ||
+      process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+    logger.error() << "resolvconf exited with an error";
+    return;
+  }
+  logger.debug() << "System resolver updated via resolvconf for"
+                 << m_resolvconfIface;
+}
+
+void DnsUtilsLinux::removeResolvconfEntry() {
+  if (m_resolvconfIface.isEmpty()) {
+    return;
+  }
+
+  const QString resolvconf = findResolvconfBinary();
+  if (!resolvconf.isEmpty()) {
+    QProcess process;
+    process.start(resolvconf,
+                  {QStringLiteral("-d"), m_resolvconfIface + QStringLiteral(".inet")});
+    if (!process.waitForFinished(10000)) {
+      logger.error() << "Failed to remove the resolvconf entry";
+    }
+  }
+  m_resolvconfIface.clear();
 }
 
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
