@@ -35,6 +35,8 @@ PageType {
     readonly property bool showRenewLink: !root.showSubscriptionNote
                                           && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
+    readonly property bool isStorePlatform: Qt.platform.os === "ios" || Qt.platform.os === "android" || Qt.platform.os === "osx"
+
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
@@ -269,6 +271,22 @@ PageType {
                 spacing: 0
 
                 ListItemType {
+                    id: otpLoginEntry
+
+                    Layout.fillWidth: true
+
+                    visible: root.isStorePlatform
+
+                    text: qsTr("Code for the web account")
+                    subtitle: qsTr("To sign in or add a subscription")
+                    trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                    onClicked: {
+                        otpLoginDialog.requestCode(ServersUiController.processedServerId)
+                    }
+                }
+
+                ListItemType {
                     id: localProxyItem
 
                     Layout.fillWidth: true
@@ -487,5 +505,9 @@ PageType {
         id: serverNameEditDrawer
 
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
+    }
+
+    OtpLoginDialog {
+        id: otpLoginDialog
     }
 }
