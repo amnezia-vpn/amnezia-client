@@ -46,6 +46,16 @@ void ConnectionUiController::closeConnection()
     m_connectionController->closeConnection();
 }
 
+void ConnectionUiController::reconnect()
+{
+    if (!isConnected()) {
+        return;
+    }
+
+    m_isReconnectRequested = true;
+    closeConnection();
+}
+
 ErrorCode ConnectionUiController::getLastConnectionError()
 {
     return m_connectionController->lastConnectionError();
@@ -104,6 +114,13 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
     }
     }
     emit connectionStateChanged();
+
+    if (m_isReconnectRequested && state != Vpn::ConnectionState::Disconnecting) {
+        m_isReconnectRequested = false;
+        if (state == Vpn::ConnectionState::Disconnected) {
+            QMetaObject::invokeMethod(this, &ConnectionUiController::openConnection, Qt::QueuedConnection);
+        }
+    }
 }
 
 void ConnectionUiController::onTranslationsUpdated()
