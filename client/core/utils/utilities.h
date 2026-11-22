@@ -34,6 +34,7 @@ public:
     static QString wireguardExecPath();
     static QString certUtilPath();
     static QString tun2socksPath();
+    static QString securityPath();
 
     static void logException(const std::exception &e);
     static void logException(const std::exception_ptr &eptr = std::current_exception());
