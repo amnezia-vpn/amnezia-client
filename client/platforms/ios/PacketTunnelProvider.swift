@@ -11,12 +11,6 @@ struct Constants {
     static let kMessageKeyAction = "action"
 }
 
-private enum SplitTunnelType: Int {
-    case disabled = 0
-    case include = 1
-    case exclude = 2
-}
-
 private enum TunnelStatus: Int {
     case disconnected = 0
     case connected = 1
@@ -27,8 +21,8 @@ private struct TunnelSettings: Decodable {
     let proto: String
     let config: String
     let dns: [String]
-    let splitTunnelType: Int
-    let splitTunnelSites: [String]
+    let includeRoutes: [String]
+    let excludeRoutes: [String]
     let mtu: Int
 }
 
@@ -80,12 +74,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             do {
                 let proxy = try XtunProxy(proto: proto,
                                           config: settings.config,
+                                          includeRoutes: settings.includeRoutes,
+                                          excludeRoutes: settings.excludeRoutes,
                                           onLog: { neLog(.info, title: "xtun", message: $0) },
                                           onStatus: { [weak self] status in self?.queue.async { self?.update(status) } })
                 let tunnel = try XtunTunnel(ifAddrs: ["\(Self.interfaceAddress4)/30",
-                                                      "\(Self.interfaceAddress6)/\(Self.interfacePrefix6)"]) { [weak self] dns, routes, mtu in
+                                                      "\(Self.interfaceAddress6)/\(Self.interfacePrefix6)"],
+                                            dns: settings.dns) { [weak self] dns, includeRoutes, excludeRoutes, mtu in
                     guard let self else { throw TunnelError("The tunnel provider is gone") }
-                    return try self.createTun(settings: settings, dns: dns, routes: routes, mtu: mtu)
+                    return try self.createTun(settings: settings, dns: dns, includeRoutes: includeRoutes,
+                                              excludeRoutes: excludeRoutes, mtu: mtu)
                 }
                 try tunnel.attach(proxy)
                 try tunnel.start()
@@ -158,12 +156,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         uplink = current
     }
 
-    private func createTun(settings: TunnelSettings, dns: [String], routes: [String], mtu: Int32) throws -> Int32 {
-        let splitTunnelType = SplitTunnelType(rawValue: settings.splitTunnelType) ?? .disabled
-        let includedPrefixes = splitTunnelType == .include ? settings.splitTunnelSites : routes
-        let excludedPrefixes = splitTunnelType == .exclude ? settings.splitTunnelSites : []
-        let (includedRoutes4, includedRoutes6) = try Self.parseRoutes(includedPrefixes)
-        let (excludedRoutes4, excludedRoutes6) = try Self.parseRoutes(excludedPrefixes)
+    private func createTun(settings: TunnelSettings, dns: [String], includeRoutes: [String], excludeRoutes: [String],
+                           mtu: Int32) throws -> Int32 {
+        let (includedRoutes4, includedRoutes6) = try Self.parseRoutes(includeRoutes)
+        let (excludedRoutes4, excludedRoutes6) = try Self.parseRoutes(excludeRoutes)
 
         let ipv4Settings = NEIPv4Settings(addresses: [Self.interfaceAddress4], subnetMasks: [Self.interfaceMask4])
         ipv4Settings.includedRoutes = includedRoutes4
@@ -174,7 +170,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         ipv6Settings.includedRoutes = includedRoutes6
         ipv6Settings.excludedRoutes = excludedRoutes6
 
-        let dnsSettings = NEDNSSettings(servers: dns.isEmpty ? settings.dns : dns)
+        let dnsSettings = NEDNSSettings(servers: dns)
         dnsSettings.matchDomains = [""]
 
         let networkSettings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: protocolConfiguration.serverAddress ?? "127.0.0.1")

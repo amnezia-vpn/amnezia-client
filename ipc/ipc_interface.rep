@@ -2,7 +2,7 @@
 #include <QString>
 #include <QStringList>
 
-POD TunnelConfig(int proto, QString config, QStringList dnsServers, int killSwitchMode, QStringList allowedDnsServers, int sitesRouteMode, QStringList sites, int appsRouteMode, QStringList apps, int mtu)
+POD TunnelConfig(int proto, QString config, QStringList dnsServers, int killSwitchMode, QStringList allowedDnsServers, QStringList includeRoutes, QStringList excludeRoutes, int appsRouteMode, QStringList apps, int mtu)
 
 class IpcInterface
 {

@@ -36,8 +36,8 @@ namespace amnezia
         QStringList dnsServers;
         KillSwitchMode killSwitchMode = KillSwitchMode::Disabled;
         QStringList allowedDnsServers;
-        RouteMode sitesRouteMode = RouteMode::VpnAllSites;
-        QStringList sites;
+        QStringList includeRoutes;
+        QStringList excludeRoutes;
         AppsRouteMode appsRouteMode = AppsRouteMode::VpnAllApps;
         QStringList apps;
         int mtu = 0;

@@ -91,8 +91,8 @@ ErrorCode XtunController::up(const TunnelConfig &config)
         return ErrorCode::NotImplementedError;
     }
 
-    if (!config.sites().isEmpty() || !config.apps().isEmpty()) {
-        qWarning() << "XtunController::up: xtun does not support split tunneling yet";
+    if (!config.apps().isEmpty()) {
+        qWarning() << "XtunController::up: xtun does not support app split tunneling yet";
     }
 
     const std::vector<std::string> dnsServers = toStdStrings(config.dnsServers());
@@ -122,7 +122,17 @@ ErrorCode XtunController::up(const TunnelConfig &config)
     m_proxy.statushandler = &XtunController::onStatus;
     m_proxy.statushandler_priv = this;
 
-    if (const int error = libxtun_proxy_new(&m_proxy, *proto, config.config().toStdString().c_str());
+    const std::vector<std::string> includeRoutes = toStdStrings(config.includeRoutes());
+    const std::vector<std::string> excludeRoutes = toStdStrings(config.excludeRoutes());
+    const std::vector<const char *> includeRoutesArgv = toArgv(includeRoutes);
+    const std::vector<const char *> excludeRoutesArgv = toArgv(excludeRoutes);
+
+    libxtun_proxy_opts proxyOpts {};
+    proxyOpts.size = sizeof(proxyOpts);
+    proxyOpts.includeRoutes = includeRoutesArgv.data();
+    proxyOpts.excludeRoutes = excludeRoutesArgv.data();
+
+    if (const int error = libxtun_proxy_new(&m_proxy, *proto, config.config().toStdString().c_str(), &proxyOpts);
         error != LIBXTUN_OK) {
         qCritical() << "XtunController::up: failed to create proxy:" << libxtun_strerror(error);
         down();

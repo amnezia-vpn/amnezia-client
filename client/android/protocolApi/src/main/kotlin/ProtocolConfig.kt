@@ -10,8 +10,6 @@ open class ProtocolConfig protected constructor(
     val addresses: Set<InetNetwork>,
     val dnsServers: Set<InetAddress>,
     val routes: Set<Route>,
-    val includedAddresses: Set<InetNetwork>,
-    val excludedAddresses: Set<InetNetwork>,
     val includedApplications: Set<String>,
     val excludedApplications: Set<String>,
     val blockingMode: Boolean,
@@ -22,8 +20,6 @@ open class ProtocolConfig protected constructor(
         builder.addresses,
         builder.dnsServers,
         builder.routes,
-        builder.includedAddresses,
-        builder.excludedAddresses,
         builder.includedApplications,
         builder.excludedApplications,
         builder.blockingMode,
@@ -34,8 +30,6 @@ open class ProtocolConfig protected constructor(
         internal val addresses: MutableSet<InetNetwork> = hashSetOf()
         internal val dnsServers: MutableSet<InetAddress> = hashSetOf()
         internal val routes: MutableSet<Route> = mutableSetOf()
-        internal val includedAddresses: MutableSet<InetNetwork> = hashSetOf()
-        internal val excludedAddresses: MutableSet<InetNetwork> = hashSetOf()
         internal val includedApplications: MutableSet<String> = hashSetOf()
         internal val excludedApplications: MutableSet<String> = hashSetOf()
 
@@ -58,7 +52,6 @@ open class ProtocolConfig protected constructor(
         fun excludeRoute(route: InetNetwork) = apply { this.routes += Route(route, false) }
         fun excludeRoutes(routes: Collection<InetNetwork>) = apply { this.routes += routes.map { Route(it, false) } }
 
-        fun removeRoute(route: InetNetwork) = apply { this.routes.removeIf { it.inetNetwork == route } }
         fun clearRoutes() = apply { this.routes.clear() }
 
         fun prependRoutes(block: Builder.() -> Unit) = apply {
@@ -67,12 +60,6 @@ open class ProtocolConfig protected constructor(
             block()
             routes.addAll(savedRoutes)
         }
-
-        fun includeAddress(addr: InetNetwork) = apply { this.includedAddresses += addr }
-        fun includeAddresses(addresses: Collection<InetNetwork>) = apply { this.includedAddresses += addresses }
-
-        fun excludeAddress(addr: InetNetwork) = apply { this.excludedAddresses += addr }
-        fun excludeAddresses(addresses: Collection<InetNetwork>) = apply { this.excludedAddresses += addresses }
 
         fun includeApplication(application: String) = apply { this.includedApplications += application }
         fun includeApplications(applications: Collection<String>) = apply { this.includedApplications += applications }
@@ -83,28 +70,6 @@ open class ProtocolConfig protected constructor(
         fun setBlockingMode(blockingMode: Boolean) = apply { this.blockingMode = blockingMode }
 
         fun setMtu(mtu: Int) = apply { this.mtu = mtu }
-
-        private fun processSplitTunneling() {
-            if (includedAddresses.isNotEmpty() && excludedAddresses.isNotEmpty()) {
-                throw BadConfigException("Config contains addresses for inclusive and exclusive split tunneling at the same time")
-            }
-
-            if (includedAddresses.isNotEmpty()) {
-                // remove default routes, if any
-                removeRoute(InetNetwork("0.0.0.0", 0))
-                removeRoute(InetNetwork("::", 0))
-                removeRoute(InetNetwork("2000::", 3))
-                prependRoutes {
-                    addRoutes(includedAddresses)
-                }
-            } else if (excludedAddresses.isNotEmpty()) {
-                prependRoutes {
-                    addRoute(InetNetwork("0.0.0.0", 0))
-                    addRoute(InetNetwork("2000::", 3))
-                    excludeRoutes(excludedAddresses)
-                }
-            }
-        }
 
         private fun processRoutes() {
             // replace ::/0 as it may cause LAN connection issues
@@ -149,7 +114,6 @@ open class ProtocolConfig protected constructor(
         }
 
         protected fun configBuild() {
-            processSplitTunneling()
             processRoutes()
             validate()
         }

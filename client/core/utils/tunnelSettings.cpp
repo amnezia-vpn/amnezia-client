@@ -1,6 +1,7 @@
 #include "tunnelSettings.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 
 #include "core/protocols/protocolUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
@@ -32,6 +33,26 @@ namespace amnezia
             case XtunProto::None: return QString();
             }
             return QString();
+        }
+
+        QString xtunConfig(XtunProto proto, const QString &config)
+        {
+            if (proto != XtunProto::Xray) {
+                return config;
+            }
+
+            QJsonObject root = QJsonDocument::fromJson(config.toUtf8()).object();
+            QJsonArray inbounds = root.value(protocols::xray::inbounds).toArray();
+            for (qsizetype i = 0; i < inbounds.size(); ++i) {
+                QJsonObject inbound = inbounds.at(i).toObject();
+                if (inbound.value(protocols::xray::protocol).toString() == protocols::xray::protocolSocks) {
+                    inbound.insert(protocols::xray::tag, QStringLiteral("xtun"));
+                    inbounds.replace(i, inbound);
+                    break;
+                }
+            }
+            root.insert(protocols::xray::inbounds, inbounds);
+            return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
         }
 
         QStringList dnsServers(const QJsonObject &vpnConfiguration)
@@ -89,8 +110,8 @@ namespace amnezia
             { "dns", QJsonArray::fromStringList(dnsServers) },
             { "killSwitchMode", static_cast<int>(killSwitchMode) },
             { configKey::allowedDnsServers, QJsonArray::fromStringList(allowedDnsServers) },
-            { configKey::splitTunnelType, static_cast<int>(sitesRouteMode) },
-            { configKey::splitTunnelSites, QJsonArray::fromStringList(sites) },
+            { "includeRoutes", QJsonArray::fromStringList(includeRoutes) },
+            { "excludeRoutes", QJsonArray::fromStringList(excludeRoutes) },
             { configKey::appSplitTunnelType, static_cast<int>(appsRouteMode) },
             { configKey::splitTunnelApps, QJsonArray::fromStringList(apps) },
             { configKey::mtu, mtu },
@@ -105,17 +126,19 @@ namespace amnezia
 
         TunnelSettings settings;
         settings.proto = xtunProto(proto);
-        settings.config = protocolConfig.value(configKey::config).toString();
+        settings.config = xtunConfig(settings.proto, protocolConfig.value(configKey::config).toString());
         settings.dnsServers = dnsServers(vpnConfiguration);
         settings.killSwitchMode = killSwitchMode(appSettingsRepository, appSettingsRepository.isKillSwitchEnabled());
         settings.allowedDnsServers = appSettingsRepository.getAllowedDnsServers();
         settings.mtu = protocolConfig.value(configKey::mtu).toString().toInt();
 
         if (appSettingsRepository.isSitesSplitTunnelingEnabled()) {
-            settings.sites =
-                    splitTunnelingSites(appSettingsRepository, appSettingsRepository.routeMode(), vpnConfiguration);
-            if (!settings.sites.isEmpty()) {
-                settings.sitesRouteMode = appSettingsRepository.routeMode();
+            const RouteMode routeMode = appSettingsRepository.routeMode();
+            const QStringList sites = splitTunnelingSites(appSettingsRepository, routeMode, vpnConfiguration);
+            if (routeMode == RouteMode::VpnOnlyForwardSites) {
+                settings.includeRoutes = sites;
+            } else if (routeMode == RouteMode::VpnAllExceptSites) {
+                settings.excludeRoutes = sites;
             }
         }
 

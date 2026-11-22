@@ -42,23 +42,6 @@ abstract class Protocol {
 
     abstract fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean)
 
-    protected fun ProtocolConfig.Builder.configSplitTunneling(config: JSONObject) {
-        val splitTunnelType = config.optInt("splitTunnelType")
-        if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
-        val splitTunnelSites = config.getJSONArray("splitTunnelSites")
-        val addressHandlerFunc = when (splitTunnelType) {
-            SPLIT_TUNNEL_INCLUDE -> ::includeAddress
-            SPLIT_TUNNEL_EXCLUDE -> ::excludeAddress
-
-            else -> throw BadConfigException("Unexpected value of the 'splitTunnelType' parameter: $splitTunnelType")
-        }
-
-        for (i in 0 until splitTunnelSites.length()) {
-            val address = InetNetwork.parse(splitTunnelSites.getString(i))
-            addressHandlerFunc(address)
-        }
-    }
-
     protected fun ProtocolConfig.Builder.configAppSplitTunneling(config: JSONObject) {
         val splitTunnelType = config.optInt("appSplitTunnelType")
         if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return

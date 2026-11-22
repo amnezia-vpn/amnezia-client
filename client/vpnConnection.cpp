@@ -143,8 +143,8 @@ ErrorCode VpnConnection::startTunnel(const TunnelSettings &settings, const QJson
 
     const TunnelConfig config(static_cast<int>(settings.proto), settings.config, settings.dnsServers,
                               static_cast<int>(settings.killSwitchMode), settings.allowedDnsServers,
-                              static_cast<int>(settings.sitesRouteMode), settings.sites,
-                              static_cast<int>(settings.appsRouteMode), settings.apps, settings.mtu);
+                              settings.includeRoutes, settings.excludeRoutes, static_cast<int>(settings.appsRouteMode),
+                              settings.apps, settings.mtu);
     return IpcClient::withInterface(
             [this, &config](QSharedPointer<IpcInterfaceReplica> iface) {
                 connect(iface.data(), &IpcInterfaceReplica::tunnelStatusChanged, this,

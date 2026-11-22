@@ -41,17 +41,20 @@ class Xtun : Protocol() {
         }
 
         try {
-            val newProxy = XtunProxy(
-                proto,
-                config.getString("config"),
-                { socket -> protect(socket) },
-                { log -> Log.d(TAG, log) },
-                ::onStatus
-            )
+            val newProxy = XtunProxy.Builder()
+                .withIncludeRoutes(config.stringArray("includeRoutes"))
+                .withExcludeRoutes(config.stringArray("excludeRoutes"))
+                .withSocketHandler { socket -> protect(socket) }
+                .withLogHandler { log -> Log.d(TAG, log) }
+                .withStatusHandler(::onStatus)
+                .build(proto, config.getString("config"))
             proxy = newProxy
             val newTunnel = XtunTunnel(
-                { dns, routes, mtu -> createTun(config, vpnBuilder, dns, routes, mtu) },
-                INTERFACE_ADDRESSES.map { it.toString() }.toTypedArray()
+                { dns, includeRoutes, excludeRoutes, mtu ->
+                    createTun(config, vpnBuilder, dns, includeRoutes, excludeRoutes, mtu)
+                },
+                INTERFACE_ADDRESSES.map { it.toString() }.toTypedArray(),
+                config.stringArray("dns")
             )
             tunnel = newTunnel
             newTunnel.attachProxy(newProxy)
@@ -82,14 +85,20 @@ class Xtun : Protocol() {
         }
     }
 
-    private fun createTun(config: JSONObject, vpnBuilder: Builder, dns: Array<String>, routes: Array<String>, mtu: Int): Int {
-        val dnsServers = dns.ifEmpty { config.getJSONArray("dns").asSequence<String>().toList().toTypedArray() }
+    private fun createTun(
+        config: JSONObject,
+        vpnBuilder: Builder,
+        dns: Array<String>,
+        includeRoutes: Array<String>,
+        excludeRoutes: Array<String>,
+        mtu: Int
+    ): Int {
         val protocolConfig = ProtocolConfig.build(blockingMode = true) {
             addAddresses(INTERFACE_ADDRESSES)
-            addDnsServers(dnsServers.map(::parseInetAddress))
-            addRoutes(routes.map { InetNetwork.parse(it) })
+            addDnsServers(dns.map(::parseInetAddress))
+            addRoutes(includeRoutes.map { InetNetwork.parse(it) })
+            excludeRoutes(excludeRoutes.map { InetNetwork.parse(it) })
             setMtu(if (mtu > 0) mtu else config.optInt("mtu").takeIf { it > 0 } ?: DEFAULT_MTU)
-            configSplitTunneling(config)
             configAppSplitTunneling(config)
         }
         buildVpnInterface(protocolConfig, vpnBuilder)
@@ -101,6 +110,9 @@ class Xtun : Protocol() {
         }
         return tunFd.detachFd()
     }
+
+    private fun JSONObject.stringArray(key: String): Array<String> =
+        optJSONArray(key)?.asSequence<String>()?.toList()?.toTypedArray() ?: emptyArray()
 
     private fun close() {
         isTunnelConnected = false
