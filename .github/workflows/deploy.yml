@@ -1107,6 +1107,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - SshShellCommandTest
 
     runs-on: ubuntu-22.04
 
@@ -1443,6 +1444,7 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - SshShellCommandTest
 
     runs-on: macos-15
 
