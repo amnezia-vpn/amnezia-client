@@ -36,6 +36,8 @@ public:
     bool restoreResolvers();
     bool routeAddXray(const QString& ifname, const QString& gateway);
     bool routeDeleteXray(const QString& ifname, const QString& gateway);
+    bool StopRoutingIpv6();
+    bool StartRoutingIpv6();
     
 public slots:
 
@@ -46,6 +48,7 @@ private:
 
     QList<Route> m_addedRoutes;
     DnsUtilsMacos *m_dnsUtil;    
+    bool m_pfInstalledForIpv6 = false;
 };
 
 #endif // ROUTERMAC_H
