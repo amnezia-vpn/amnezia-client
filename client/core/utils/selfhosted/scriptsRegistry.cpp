@@ -208,7 +208,7 @@ amnezia::ScriptVars amnezia::genXrayVars(const ContainerConfig &containerConfig)
     if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
         const XrayServerConfig& config = xrayProtocolConfig->serverConfig;
         
-        vars.append({ { "$XRAY_SITE_NAME", config.site.isEmpty() ? protocols::xray::defaultSite : config.site } });
+        vars.append({ { "$XRAY_SITE_NAME", config.site } });
         vars.append({ { "$XRAY_SERVER_PORT", config.port.isEmpty() ? protocols::xray::defaultPort : config.port } });
     }
     

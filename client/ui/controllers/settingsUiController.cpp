@@ -296,21 +296,26 @@ bool SettingsUiController::isDevModeEnabled()
     return m_settingsController->isDevModeEnabled();
 }
 
-void SettingsUiController::resetGatewayEndpoint()
+QString SettingsUiController::getDevGatewayEndpoint()
 {
-    m_settingsController->resetGatewayEndpoint();
-    emit gatewayEndpointChanged(m_settingsController->getGatewayEndpoint());
+    return m_settingsController->devGatewayEndpoint();
 }
 
-void SettingsUiController::setGatewayEndpoint(const QString &endpoint)
+QString SettingsUiController::getDevGatewayProxyStorages()
 {
-    m_settingsController->setGatewayEndpoint(endpoint);
-    emit gatewayEndpointChanged(endpoint);
+    return m_settingsController->devGatewayProxyStorages();
 }
 
-QString SettingsUiController::getGatewayEndpoint()
+QString SettingsUiController::getDevGatewayPublicKey()
 {
-    return m_settingsController->getGatewayEndpoint();
+    return m_settingsController->devGatewayPublicKey();
+}
+
+void SettingsUiController::saveDevGatewayConfig(const QString &endpoint, const QString &proxyStorages,
+                                                const QString &publicKey)
+{
+    m_settingsController->setDevGatewayConfig(endpoint, proxyStorages, publicKey);
+    emit devGatewayConfigChanged();
 }
 
 bool SettingsUiController::isDevGatewayEnv()
@@ -321,7 +326,6 @@ bool SettingsUiController::isDevGatewayEnv()
 void SettingsUiController::toggleDevGatewayEnv(bool enabled)
 {
     m_settingsController->toggleDevGatewayEnv(enabled);
-    emit gatewayEndpointChanged(m_settingsController->getGatewayEndpoint());
     emit devGatewayEnvChanged(enabled);
 }
 

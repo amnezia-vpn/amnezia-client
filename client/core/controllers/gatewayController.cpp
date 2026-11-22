@@ -56,9 +56,9 @@ namespace
     constexpr QLatin1String endpointListSeparator(", ");
     constexpr QLatin1String legacyEndpointPlaceholder("%1");
 
-    QStringList splitEndpoints(const char *raw)
+    QStringList splitEndpoints(const QString &raw)
     {
-        return QString::fromUtf8(raw).split(endpointListSeparator, Qt::SkipEmptyParts);
+        return raw.split(endpointListSeparator, Qt::SkipEmptyParts);
     }
 
     void logAgwTrace(const QString &path, const int code, const QString &trace)
@@ -77,32 +77,24 @@ namespace
     }
 }
 
-GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                                     const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
-                                     QObject *parent)
+GatewayController::GatewayController(const amnezia::GatewayEnvironment &environment, const int requestTimeoutMsecs,
+                                     const bool isStrictKillSwitchEnabled,
+                                     SecureAppSettingsRepository *appSettingsRepository, QObject *parent)
     : QObject(parent),
-      m_gatewayEndpoint(gatewayEndpoint),
+      m_gatewayEndpoint(environment.endpoint),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled),
       m_appSettingsRepository(appSettingsRepository)
 {
-    const QByteArray publicKey = isDevEnvironment ? QByteArray(DEV_AGW_PUBLIC_KEY) : QByteArray(PROD_AGW_PUBLIC_KEY);
-    m_publicKeyMissing = publicKey.isEmpty();
-
-    QStringList primaryEndpoints;
-    QStringList fallbackEndpoints;
-    if (isDevEnvironment) {
-        primaryEndpoints = splitEndpoints(DEV_S3_ENDPOINT);
-    } else {
-        primaryEndpoints = splitEndpoints(PROD_S3_ENDPOINT);
-        fallbackEndpoints = splitEndpoints(FALLBACK_S3_ENDPOINT);
-    }
+    m_publicKeyMissing = environment.publicKey.isEmpty();
 
     QJsonObject config;
-    config[agwConfigKey::gatewayEndpoint] = gatewayEndpoint;
-    config[agwConfigKey::publicKeyPem] = QString::fromUtf8(publicKey);
-    config[agwConfigKey::s3PrimaryEndpoints] = QJsonArray::fromStringList(primaryEndpoints);
-    config[agwConfigKey::s3FallbackEndpoints] = QJsonArray::fromStringList(fallbackEndpoints);
-    config[agwConfigKey::isDevEnvironment] = isDevEnvironment;
+    config[agwConfigKey::gatewayEndpoint] = environment.endpoint;
+    config[agwConfigKey::publicKeyPem] = QString::fromUtf8(environment.publicKey);
+    config[agwConfigKey::s3PrimaryEndpoints] =
+            QJsonArray::fromStringList(splitEndpoints(environment.primaryProxyStorages));
+    config[agwConfigKey::s3FallbackEndpoints] =
+            QJsonArray::fromStringList(splitEndpoints(environment.fallbackProxyStorages));
+    config[agwConfigKey::isDevEnvironment] = environment.isDev;
     config[agwConfigKey::requestTimeoutMsecs] = requestTimeoutMsecs;
     config[agwConfigKey::proxyRequestTimeoutMsecs] = apiDefs::proxyRequestTimeoutMsecs;
     config[agwConfigKey::proxyStorageTimeoutMsecs] = apiDefs::proxyStorageTimeoutMsecs;

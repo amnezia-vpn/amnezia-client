@@ -19,6 +19,8 @@ namespace AwgConstant
 
 struct AwgServerConfig {
     QString port;
+    QString cascadeEndpoint;
+    QString cascadePort;
     QString transportProto;
     QString protocolVersion;
     QString subnetAddress;
@@ -61,6 +63,8 @@ struct AwgClientConfig {
     QString nativeConfig;
     QString hostName;
     int port;
+    QString cascadeEndpoint;
+    QString cascadePort;
     QString clientIp;
     QString clientPrivateKey;
     QString clientPublicKey;
@@ -95,6 +99,9 @@ struct AwgClientConfig {
     QString maxHandshakeAttempts;
     QString randomTrailers;
     QString disableCookies;
+
+    void setCascade(const QString &newEndpoint, const QString &newPort);
+
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);
 };

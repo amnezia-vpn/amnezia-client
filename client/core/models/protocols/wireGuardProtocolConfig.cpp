@@ -20,6 +20,12 @@ QJsonObject WireGuardServerConfig::toJson() const
     if (!port.isEmpty()) {
         obj[configKey::port] = port;
     }
+    if (!cascadeEndpoint.isEmpty()) {
+        obj[configKey::cascadeEndpoint] = cascadeEndpoint;
+    }
+    if (!cascadePort.isEmpty()) {
+        obj[configKey::cascadePort] = cascadePort;
+    }
     if (!transportProto.isEmpty()) {
         obj[configKey::transportProto] = transportProto;
     }
@@ -45,6 +51,8 @@ WireGuardServerConfig WireGuardServerConfig::fromJson(const QJsonObject& json)
     WireGuardServerConfig config;
     
     config.port = json.value(configKey::port).toString();
+    config.cascadeEndpoint = json.value(configKey::cascadeEndpoint).toString();
+    config.cascadePort = json.value(configKey::cascadePort).toString();
     config.transportProto = json.value(configKey::transportProto).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
     config.subnetMask = json.value(configKey::subnetMask).toString();
@@ -72,6 +80,12 @@ QJsonObject WireGuardClientConfig::toJson() const
     }
     if (port > 0) {
         obj[configKey::port] = port;
+    }
+    if (!cascadeEndpoint.isEmpty()) {
+        obj[configKey::cascadeEndpoint] = cascadeEndpoint;
+    }
+    if (!cascadePort.isEmpty()) {
+        obj[configKey::cascadePort] = cascadePort;
     }
     if (!clientIp.isEmpty()) {
         obj[configKey::clientIp] = clientIp;
@@ -119,6 +133,14 @@ QJsonObject WireGuardClientConfig::toJson() const
     return obj;
 }
 
+void WireGuardClientConfig::setCascade(const QString &newEndpoint, const QString &newPort)
+{
+    cascadeEndpoint = newEndpoint;
+    cascadePort = newPort;
+    nativeConfig = replaceWireGuardEndpoint(nativeConfig, newEndpoint.isEmpty() ? hostName : newEndpoint,
+                                            newPort.isEmpty() ? port : newPort.toInt());
+}
+
 WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
 {
     WireGuardClientConfig config;
@@ -126,6 +148,8 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
     config.nativeConfig = json.value(configKey::config).toString();
     config.hostName = json.value(configKey::hostName).toString();
     config.port = json.value(configKey::port).toInt(0);
+    config.cascadeEndpoint = json.value(configKey::cascadeEndpoint).toString();
+    config.cascadePort = json.value(configKey::cascadePort).toString();
     config.clientIp = json.value(configKey::clientIp).toString();
     config.clientPrivateKey = json.value(configKey::clientPrivKey).toString();
     config.clientPublicKey = json.value(configKey::clientPubKey).toString();

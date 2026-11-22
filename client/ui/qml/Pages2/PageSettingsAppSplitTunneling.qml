@@ -160,6 +160,8 @@ PageType {
             width: listView.width
             implicitHeight: appItem.implicitHeight
 
+            enabled: root.pageEnabled
+
             ListItemType {
                 id: appItem
 

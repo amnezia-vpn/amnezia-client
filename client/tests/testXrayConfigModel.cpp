@@ -75,7 +75,7 @@ void TestXrayConfigModel::isValidSni_data()
 {
     QTest::addColumn<QString>("sni");
     QTest::addColumn<bool>("valid");
-    QTest::newRow("empty") << "" << true;
+    QTest::newRow("empty") << "" << false;
     QTest::newRow("domain") << "www.example.com" << true;
     QTest::newRow("ipv4") << "203.0.113.10" << true;
     QTest::newRow("star") << "*" << false;
