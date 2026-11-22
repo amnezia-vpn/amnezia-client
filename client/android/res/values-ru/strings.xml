@@ -25,4 +25,7 @@
     <string name="openNotificationSettings">Открыть настройки уведомлений</string>
 
     <string name="tvNoFileBrowser">Пожалуйста, установите приложение для просмотра файлов</string>
+
+    <string name="widget_toggle_vpn">Переключить VPN</string>
+    <string name="widget_description">Виджет быстрого переключения VPN</string>
 </resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="2dp">
+
+    <!-- Pulse ring (visible during connecting/disconnecting) -->
+    <ImageView
+        android:id="@+id/widget_pulse_ring"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:src="@drawable/widget_pulse_ring"
+        android:visibility="gone"
+        android:contentDescription="@null" />
+
+    <!-- Main circle button -->
+    <ImageView
+        android:id="@+id/widget_circle"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:src="@drawable/widget_circle_disconnected"
+        android:contentDescription="@string/widget_toggle_vpn" />
+
+    <!-- Amnezia icon overlay -->
+    <ImageView
+        android:id="@+id/widget_icon"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_amnezia_round"
+        android:tint="#FFFFFFFF"
+        android:contentDescription="@null" />
+
+</FrameLayout>
