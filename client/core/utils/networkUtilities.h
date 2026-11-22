@@ -8,10 +8,18 @@
 #include <QNetworkReply>
 #include <QtNetwork/qnetworkinterface.h>
 
+#include <optional>
+
 class NetworkUtilities : public QObject
 {
     Q_OBJECT
 public:
+    struct InterfaceTraffic
+    {
+        quint64 receivedBytes = 0;
+        quint64 sentBytes = 0;
+    };
+
     static QString getIPAddress(const QString &host);
     static QString getStringBetween(const QString &s, const QString &a, const QString &b);
     static bool checkIPv4Format(const QString &ip);
@@ -20,6 +28,8 @@ public:
     static QPair<QString, QNetworkInterface> getGatewayAndIface();
     // Returns the Interface Index that could Route to dst
     static int AdapterIndexTo(const QHostAddress& dst);
+    static QNetworkInterface interfaceWithAddress(const QString &addressList);
+    static std::optional<InterfaceTraffic> interfaceTraffic(const QNetworkInterface &networkInterface);
 
     static QRegularExpression ipAddressRegExp();
     static QRegExp ipAddressWithSubnetRegExp();

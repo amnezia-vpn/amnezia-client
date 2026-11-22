@@ -2,6 +2,7 @@
 #include <QTimer>
 
 #include "core/utils/errorStrings.h"
+#include "core/utils/networkUtilities.h"
 #include "vpnProtocol.h"
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) and !defined MACOS_NE || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
@@ -21,10 +22,14 @@ VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
       m_timeoutTimer(new QTimer(this)),
       m_lastError(ErrorCode::NoError),
       m_receivedBytes(0),
-      m_sentBytes(0)
+      m_sentBytes(0),
+      m_tunnelTrafficTimer(new QTimer(this))
 {
     m_timeoutTimer->setSingleShot(true);
     connect(m_timeoutTimer, &QTimer::timeout, this, &VpnProtocol::onTimeout);
+
+    m_tunnelTrafficTimer->setInterval(1000);
+    connect(m_tunnelTrafficTimer, &QTimer::timeout, this, &VpnProtocol::pollTunnelTraffic);
 }
 
 bool VpnProtocol::guardStop()
@@ -80,8 +85,8 @@ Vpn::ConnectionState VpnProtocol::connectionState() const
 
 void VpnProtocol::setBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 {
-    quint64 rxDiff = receivedBytes - m_receivedBytes;
-    quint64 txDiff = sentBytes - m_sentBytes;
+    const quint64 rxDiff = receivedBytes >= m_receivedBytes ? receivedBytes - m_receivedBytes : receivedBytes;
+    const quint64 txDiff = sentBytes >= m_sentBytes ? sentBytes - m_sentBytes : sentBytes;
 
     emit bytesChanged(rxDiff, txDiff);
 
@@ -101,6 +106,9 @@ void VpnProtocol::setConnectionState(Vpn::ConnectionState state)
     }
 
     m_connectionState = state;
+    if (m_connectionState != Vpn::ConnectionState::Connected) {
+        stopTunnelTrafficPolling();
+    }
     if (m_connectionState == Vpn::ConnectionState::Disconnected) {
         m_receivedBytes = 0;
         m_sentBytes = 0;
@@ -109,6 +117,32 @@ void VpnProtocol::setConnectionState(Vpn::ConnectionState state)
     qDebug().noquote() << QString("Connection state: '%1'").arg(textConnectionState());
 
     emit connectionStateChanged(m_connectionState);
+}
+
+void VpnProtocol::startTunnelTrafficPolling()
+{
+    m_tunnelTrafficTimer->start();
+    pollTunnelTraffic();
+}
+
+void VpnProtocol::stopTunnelTrafficPolling()
+{
+    m_tunnelTrafficTimer->stop();
+    m_tunnelInterface = QNetworkInterface();
+}
+
+void VpnProtocol::pollTunnelTraffic()
+{
+    if (!m_tunnelInterface.isValid()) {
+        m_tunnelInterface = NetworkUtilities::interfaceWithAddress(m_vpnLocalAddress);
+    }
+
+    const auto traffic = NetworkUtilities::interfaceTraffic(m_tunnelInterface);
+    if (!traffic) {
+        m_tunnelInterface = QNetworkInterface();
+        return;
+    }
+    setBytesChanged(traffic->receivedBytes, traffic->sentBytes);
 }
 
 QString VpnProtocol::vpnGateway() const

@@ -54,6 +54,9 @@ ListViewType {
                        ? (isSubscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.statusWarning)
                        : AmneziaStyle.color.textTertiary
         showWarning: ServersUiController.serverHasOutdatedAwgContainer(serverId)
+        latencyMs: model.latencyMs
+        latencyQuality: model.latencyQuality
+        latencyTesting: model.isLatencyTesting
         showSeparator: index < root.count - 1
 
         checked: serverId === ServersUiController.defaultServerId

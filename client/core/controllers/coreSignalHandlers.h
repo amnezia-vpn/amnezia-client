@@ -45,6 +45,7 @@ private:
     void initNotificationHandler();
     void initUpdateFoundHandler();
     void initLocalProxyHandler();
+    void initServerLatencyHandler();
 
     CoreController* m_coreController;
 };
