@@ -13,7 +13,11 @@ class IpcProcessInterface
     SLOT( setNativeArguments(const QString &arguments) );
     SLOT( setProcessChannelMode(QProcess::ProcessChannelMode mode) );
     SLOT( setProgram(int programId) );
+    SLOT( setTun2SocksConfig(const QString &device, const QString &proxy) );
     SLOT( setWorkingDirectory(const QString &dir) );
+
+    SLOT( write(const QByteArray &data) );
+    SLOT( closeWriteChannel() );
 
     SLOT( QByteArray readAll() );
     SLOT( QByteArray readAllStandardError() );

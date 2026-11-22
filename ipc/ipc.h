@@ -72,9 +72,7 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
         break;
     }
     case Tun2Socks:
-        namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };
-        namedArgs["-proxy"] = [](const QString& v) { return v.startsWith("socks5://"); };
-        break;
+        return {};
     case CertUtil:
         return args;
     default:
