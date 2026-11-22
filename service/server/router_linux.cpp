@@ -165,13 +165,15 @@ bool RouterLinux::flushDns()
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
-    //check what the dns manager use
-    if (isServiceActive("nscd.service")) {
-        qDebug() << "Restarting nscd.service";
-        p.start("systemctl", { "restart", "nscd" });
-    } else if (isServiceActive("systemd-resolved.service")) {
-        qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+    // Flush the resolver cache instead of restarting the service. A restart drops the
+    // cache for the whole system and briefly breaks name resolution for every other
+    // process on the machine, which is far more than this needs to do.
+    if (isServiceActive("systemd-resolved.service")) {
+        qDebug() << "Flushing systemd-resolved caches";
+        p.start("resolvectl", { "flush-caches" });
+    } else if (isServiceActive("nscd.service")) {
+        qDebug() << "Invalidating nscd hosts cache";
+        p.start("nscd", { "-i", "hosts" });
     } else {
         qDebug() << "No suitable DNS manager found.";
         return false;
@@ -179,10 +181,15 @@ bool RouterLinux::flushDns()
 
     p.waitForFinished();
     QByteArray output(p.readAll());
+    if (p.error() == QProcess::FailedToStart || p.exitStatus() != QProcess::NormalExit || p.exitCode() != 0) {
+        qDebug().noquote() << "Flush dns failed: " + output;
+        return false;
+    }
+
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
     else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+        qDebug().noquote() << "OUTPUT flush dns: " + output;
 
     return true;
 }

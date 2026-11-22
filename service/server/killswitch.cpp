@@ -253,13 +253,13 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     }
 
     if (splitTunnelType == 1) {
-        for (auto v : splitTunnelSites) {
-            QString ipRange = v.toString();
-            if (ipRange.split('/').size() > 1) {
+        for (const QJsonValue &v : splitTunnelSites) {
+            const QStringList parts = v.toString().split('/');
+            if (parts.size() > 1) {
                 config.m_allowedIPAddressRanges.append(
-                        IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
+                        IPAddress(QHostAddress(parts[0]), atoi(parts[1].toLocal8Bit())));
             } else {
-                config.m_allowedIPAddressRanges.append(IPAddress(QHostAddress(ipRange), 32));
+                config.m_allowedIPAddressRanges.append(IPAddress(QHostAddress(parts[0]), 32));
             }
         }
     }
