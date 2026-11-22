@@ -175,6 +175,7 @@ void CoreController::initCoreControllers()
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
+    m_backupController = new BackupController(m_serversController, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
@@ -227,6 +228,9 @@ void CoreController::initControllers()
 
     m_ipSplitTunnelingUiController = new IpSplitTunnelingUiController(m_ipSplitTunnelingController, m_ipSplitTunnelingModel, this);
     setQmlContextProperty("IpSplitTunnelingController", m_ipSplitTunnelingUiController);
+
+    m_backupUiController = new BackupUiController(m_backupController, m_serversController, m_serversUiController, this);
+    setQmlContextProperty("BackupController", m_backupUiController);
 
     m_allowedDnsUiController = new AllowedDnsUiController(m_allowedDnsController, m_allowedDnsModel, this);
     setQmlContextProperty("AllowedDnsController", m_allowedDnsUiController);

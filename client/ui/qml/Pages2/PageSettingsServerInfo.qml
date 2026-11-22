@@ -46,6 +46,10 @@ PageType {
         function onGoToPageSettingsServerServices() {
             root.currentTab = root.pageSettingsServerServices
         }
+
+        function onGoToPageSettingsServerManagement() {
+            root.currentTab = root.pageSettingsServerData
+        }
     }
 
     Connections {
