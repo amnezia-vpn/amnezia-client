@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
@@ -15,7 +17,12 @@ ListViewType {
     rightMargin: 16
     bottomMargin: 16
 
-    model: ServersModel
+    model: SortFilterProxyModel {
+        sourceModel: ServersModel
+        sorters: StringSorter {
+            roleName: "name"
+        }
+    }
 
     function openServerSettings(serverId) {
         ServersUiController.setProcessedServerId(serverId)
@@ -64,7 +71,7 @@ ListViewType {
                 return
             }
 
-            ServersUiController.setDefaultServerAtIndex(index)
+            ServersUiController.setDefaultServer(serverId)
         }
 
         onSettingsRequested: root.openServerSettings(serverId)
