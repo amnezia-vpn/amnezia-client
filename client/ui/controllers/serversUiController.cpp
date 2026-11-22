@@ -576,6 +576,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("Telemt");
             } else if (container == DockerContainer::TProxy) {
                 servicesName.append("TProxy");
+            } else if (container == DockerContainer::WhatsAppProxy) {
+                servicesName.append("WhatsApp");
             }
         }
     }

@@ -73,6 +73,7 @@ QMap<Proto, QString> ProtocolUtils::protocolHumanNames()
              { Proto::MtProxy, QObject::tr("MTProxy (Telegram)") },
              { Proto::Telemt, QObject::tr("Telemt (Telegram)") },
              { Proto::TProxy, QObject::tr("TProxy (Telegram WEB)") },
+             { Proto::WhatsAppProxy, QObject::tr("WhatsApp proxy") },
     };
 }
 
@@ -100,6 +101,7 @@ ServiceType ProtocolUtils::protocolService(Proto p)
     case Proto::MtProxy: return ServiceType::Other;
     case Proto::Telemt: return ServiceType::Other;
     case Proto::TProxy: return ServiceType::Other;
+    case Proto::WhatsAppProxy: return ServiceType::Other;
     default: return ServiceType::Other;
     }
 }
@@ -115,6 +117,7 @@ int ProtocolUtils::getPortForInstall(Proto p)
     case MtProxy:
     case Telemt:
     case TProxy:
+    case WhatsAppProxy:
     default:
         return defaultPort(p);
     }
@@ -137,6 +140,7 @@ int ProtocolUtils::defaultPort(Proto p)
     case Proto::MtProxy: return QString(protocols::mtProxy::defaultPort).toInt();
     case Proto::Telemt: return QString(protocols::telemt::defaultPort).toInt();
     case Proto::TProxy: return QString(protocols::tProxy::defaultPort).toInt();
+    case Proto::WhatsAppProxy: return QString(protocols::whatsAppProxy::defaultPort).toInt();
     default: return -1;
     }
 }
@@ -158,6 +162,7 @@ bool ProtocolUtils::defaultPortChangeable(Proto p)
     case Proto::MtProxy: return true;
     case Proto::Telemt: return true;
     case Proto::TProxy: return true;
+    case Proto::WhatsAppProxy: return true;
     default: return false;
     }
 }
@@ -181,6 +186,7 @@ TransportProto ProtocolUtils::defaultTransportProto(Proto p)
     case Proto::MtProxy: return TransportProto::Tcp;
     case Proto::Telemt: return TransportProto::Tcp;
     case Proto::TProxy: return TransportProto::Tcp;
+    case Proto::WhatsAppProxy: return TransportProto::Tcp;
     default: return TransportProto::Udp;
     }
 }
@@ -203,6 +209,7 @@ bool ProtocolUtils::defaultTransportProtoChangeable(Proto p)
     case Proto::MtProxy: return false;
     case Proto::Telemt: return false;
     case Proto::TProxy: return false;
+    case Proto::WhatsAppProxy: return false;
     default: return false;
     }
 }

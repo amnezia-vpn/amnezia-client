@@ -66,6 +66,9 @@ struct ContainerConfig {
     TProxyProtocolConfig* getTProxyProtocolConfig();
     const TProxyProtocolConfig* getTProxyProtocolConfig() const;
 
+    WhatsAppProxyProtocolConfig* getWhatsAppProxyProtocolConfig();
+    const WhatsAppProxyProtocolConfig* getWhatsAppProxyProtocolConfig() const;
+
     Ikev2ProtocolConfig* getIkev2ProtocolConfig();
     const Ikev2ProtocolConfig* getIkev2ProtocolConfig() const;
     

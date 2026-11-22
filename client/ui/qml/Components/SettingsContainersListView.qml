@@ -76,6 +76,9 @@ ListViewType {
                     } else if (isTProxy) {
                         TProxyConfigModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageServiceTProxySettings, false)
+                    } else if (isWhatsAppProxy) {
+                        WhatsAppProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceWhatsAppProxySettings, false)
                     } else {
                         InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
