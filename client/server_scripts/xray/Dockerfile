@@ -12,8 +12,12 @@ RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray
 
-RUN curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip > /root/xray.zip;\
-  unzip /root/xray.zip -d /usr/bin/;\
+RUN ARCH=$(uname -m); \
+  if [ "$ARCH" = "x86_64" ]; then XRAY_ARCH="64"; \
+  elif [ "$ARCH" = "aarch64" ]; then XRAY_ARCH="arm64-v8a"; \
+  else echo "Unsupported architecture: $ARCH" && exit 1; fi; \
+  curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-${XRAY_ARCH}.zip > /root/xray.zip; \
+  unzip /root/xray.zip -d /usr/bin/; \
   chmod a+x /usr/bin/xray;
 
 # Tune network  
