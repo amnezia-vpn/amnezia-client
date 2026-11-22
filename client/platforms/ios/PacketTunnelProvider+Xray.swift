@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import Network
 import NetworkExtension
 
 enum XrayErrors: Error {
@@ -70,30 +71,36 @@ extension PacketTunnelProvider {
             return
         }
 
+        guard splitTunnelType == 1 || splitTunnelType == 2 else {
+            return
+        }
+
+        // Sites are split by address family: IPv6 ones used to end up in NEIPv4Route
+        var ipv4Routes = [NEIPv4Route]()
+        var ipv6Routes = [NEIPv6Route]()
+
+        for siteString in splitTunnelSites {
+            guard let site = IPAddressRange(from: siteString) else {
+                continue
+            }
+            if site.address is IPv6Address {
+                ipv6Routes.append(NEIPv6Route(
+                    destinationAddress: "\(site.maskedAddress())",
+                    networkPrefixLength: NSNumber(value: site.networkPrefixLength)))
+            } else {
+                ipv4Routes.append(NEIPv4Route(
+                    destinationAddress: "\(site.address)",
+                    subnetMask: "\(site.subnetMask())"))
+            }
+        }
+
         if splitTunnelType == 1 {
-            var ipv4IncludedRoutes = [NEIPv4Route]()
-
-            for allowedIPString in splitTunnelSites {
-                if let allowedIP = IPAddressRange(from: allowedIPString) {
-                    ipv4IncludedRoutes.append(NEIPv4Route(
-                        destinationAddress: "\(allowedIP.address)",
-                        subnetMask: "\(allowedIP.subnetMask())"))
-                }
-            }
-
-            settings.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
-        } else if splitTunnelType == 2 {
-            var ipv4ExcludedRoutes = [NEIPv4Route]()
-
-            for excludedIPString in splitTunnelSites {
-                if let excludedIP = IPAddressRange(from: excludedIPString) {
-                    ipv4ExcludedRoutes.append(NEIPv4Route(
-                        destinationAddress: "\(excludedIP.address)",
-                        subnetMask: "\(excludedIP.subnetMask())"))
-                }
-            }
-
-            settings.ipv4Settings?.excludedRoutes = ipv4ExcludedRoutes
+            // Only listed sites go through the tunnel, the same for IPv6
+            settings.ipv4Settings?.includedRoutes = ipv4Routes
+            settings.ipv6Settings?.includedRoutes = ipv6Routes
+        } else {
+            settings.ipv4Settings?.excludedRoutes = ipv4Routes
+            settings.ipv6Settings?.excludedRoutes = ipv6Routes
         }
     }
 
@@ -109,7 +116,8 @@ extension PacketTunnelProvider {
         }
 
         // Tunnel settings
-        let ipv6Enabled = false
+        // Without ipv6Settings IPv6 traffic bypasses the tunnel through Wi-Fi/cellular
+        let ipv6Enabled = true
         let hideVPNIcon = false
 
         let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "254.1.1.1")
@@ -177,6 +185,7 @@ extension PacketTunnelProvider {
 
             setTunnelNetworkSettings(settings) { [weak self] error in
                 if let error {
+                    xrayLog(.error, message: "setTunnelNetworkSettings failed: \(error)")
                     completionHandler(error)
                     return
                 }
