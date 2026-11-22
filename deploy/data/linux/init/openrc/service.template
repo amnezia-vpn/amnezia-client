@@ -1,0 +1,64 @@
+#!/sbin/openrc-run
+
+name="@NAME@"
+description="@DESC@"
+command="@BIN@"
+command_args="@ARGS@"
+pidfile="/run/@NAME@.pid"
+command_user="root:root"
+output_log="@LOGDIR@/@NAME@.log"
+error_log="@LOGDIR@/@NAME@.log"
+
+if command -v supervise-daemon >/dev/null 2>&1; then
+    supervisor="supervise-daemon"
+    respawn_delay=1
+    respawn_max=10
+    respawn_period=60
+else
+    command_background=true
+fi
+
+depend() {
+    @OPENRC_DEPS@
+}
+
+cleanup_amnezia_iptables() {
+    for ipt in iptables ip6tables; do
+        if ! command -v "$ipt" >/dev/null 2>&1; then
+            continue
+        fi
+
+        for table in filter nat mangle raw; do
+            "$ipt" -t "$table" -L -n >/dev/null 2>&1 || continue
+
+            "$ipt" -t "$table" -S 2>/dev/null | grep -E '\-j amnvpn\.' | while read -r rule; do
+                del_rule=$(echo "$rule" | sed 's/^-A/-D/')
+                "$ipt" -t "$table" $del_rule 2>/dev/null || true
+            done
+
+            "$ipt" -t "$table" -S 2>/dev/null | sed -n 's/^-N \(amnvpn[^ ]*\)$/\1/p' | while read -r chain; do
+                "$ipt" -t "$table" -F "$chain" 2>/dev/null || true
+                "$ipt" -t "$table" -X "$chain" 2>/dev/null || true
+            done
+        done
+    done
+}
+
+start_pre() {
+    checkpath --directory --owner root:root --mode 0755 /run
+    checkpath --directory --owner root:root --mode 0755 "@LOGDIR@"
+    case "@NAME@" in
+        amneziavpn)
+            rm -f /tmp/AmneziaVPN* /run/AmneziaVPN* /var/run/AmneziaVPN*
+            ;;
+    esac
+}
+
+stop_post() {
+    case "@NAME@" in
+        amneziavpn)
+            cleanup_amnezia_iptables
+            rm -f /tmp/AmneziaVPN* /run/AmneziaVPN* /var/run/AmneziaVPN*
+            ;;
+    esac
+}
