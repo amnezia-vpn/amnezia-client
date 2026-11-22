@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QJsonObject>
 #include <QPair>
+#include <QElapsedTimer>
 #include <memory>
 
 #include "core/utils/containerEnum.h"
@@ -65,6 +66,8 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
+    void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
+    void connectionHistoryChanged(const QString &serverId);
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
@@ -75,10 +78,17 @@ signals:
 
 private:
     ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;
+    void onConnectionStateChanged(Vpn::ConnectionState state);
+    void recordConnectionAttempt(bool success, int setupMs, int errorCode = 0);
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;
+
+    QString m_currentServerId;
+    QString m_currentCountryCode;
+    QElapsedTimer m_connectionAttemptTimer;
+    bool m_attemptInProgress = false;
 };
 
 #endif
