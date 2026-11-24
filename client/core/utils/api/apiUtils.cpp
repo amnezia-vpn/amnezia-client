@@ -123,6 +123,7 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     const int httpStatusCodeTooManyRequests = 429;
     const int httpStatusCodeRequestTimeout = 408;
     const int httpStatusCodeUnprocessableEntity = 422;
+    const int httpStatusCodePreconditionRequired = 428;
 
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (!jsonDoc.isObject()) {
@@ -152,6 +153,9 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     }
     if (httpStatusFromBody == httpStatusCodeNotImplemented) {
         return amnezia::ErrorCode::ApiUpdateRequestError;
+    }
+    if (httpStatusFromBody == httpStatusCodePreconditionRequired) {
+        return amnezia::ErrorCode::ApiEmailSignInRequiredError;
     }
     if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
         if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
