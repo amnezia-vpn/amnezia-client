@@ -47,6 +47,11 @@ jobs:
     - name: 'Install conan'
       run: pip install "conan==2.28.0"
 
+    - name: 'Use GCC 12'
+      run: |
+        echo "CC=gcc-12" >> "$GITHUB_ENV"
+        echo "CXX=g++-12" >> "$GITHUB_ENV"
+
     - name: 'Build dependencies'
       shell: bash
       run: |
@@ -109,6 +114,11 @@ jobs:
 
     - name: 'Install system packages'
       run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
+
+    - name: 'Use GCC 12'
+      run: |
+        echo "CC=gcc-12" >> "$GITHUB_ENV"
+        echo "CXX=g++-12" >> "$GITHUB_ENV"
 
     - name: 'Get sources'
       uses: actions/checkout@v4
