@@ -146,6 +146,12 @@ namespace amnezia
             constexpr char protocol[] = "protocol";
             constexpr char protocolVless[] = "vless";
             constexpr char protocolFreedom[] = "freedom";
+            constexpr char finalRules[] = "finalRules";
+            constexpr char action[] = "action";
+            constexpr char actionAllow[] = "allow";
+            constexpr char ip[] = "ip";
+            constexpr char networkTcpUdp[] = "tcp,udp";
+            constexpr char dnsPort[] = "53";
             constexpr char protocolSocks[] = "socks";
             constexpr char decryption[] = "decryption";
             constexpr char decryptionNone[] = "none";
