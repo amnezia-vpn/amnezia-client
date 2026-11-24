@@ -78,6 +78,7 @@ private slots:
     void serverInboundCarriesNoDeviceSettings();
     void clientOutboundCarriesDeviceSettings();
     void serverInboundStillCarriesWhatTheServerListensWith();
+    void freedomOutboundAllowsAmneziaDns();
     void rebuildFromServerLosesOnlyDeviceSettings();
     void realityIsDowngradedOnlyForMkcp_data();
     void realityIsDowngradedOnlyForMkcp();
@@ -139,6 +140,22 @@ void TestXrayServerInbound::serverInboundStillCarriesWhatTheServerListensWith()
     QVERIFY2(inbound.contains(QStringLiteral("\"security\":\"reality\"")), qPrintable(inbound));
     QVERIFY2(inbound.contains(QStringLiteral("\"host\":\"host.example.com\"")), qPrintable(inbound));
     QVERIFY2(inbound.contains(QStringLiteral("\"path\":\"/p\"")), qPrintable(inbound));
+}
+
+void TestXrayServerInbound::freedomOutboundAllowsAmneziaDns()
+{
+    const QJsonObject serverJson = fullyConfigured().toServerInboundJson(inboundInputs());
+    const QJsonObject freedom = serverJson.value("outbounds").toArray().first().toObject();
+    QCOMPARE(freedom.value("protocol").toString(), QStringLiteral("freedom"));
+
+    const QJsonArray finalRules = freedom.value("settings").toObject().value("finalRules").toArray();
+    QCOMPARE(finalRules.size(), 1);
+
+    const QJsonObject rule = finalRules.first().toObject();
+    QCOMPARE(rule.value("action").toString(), QStringLiteral("allow"));
+    QCOMPARE(rule.value("network").toString(), QStringLiteral("tcp,udp"));
+    QCOMPARE(rule.value("port").toString(), QStringLiteral("53"));
+    QCOMPARE(rule.value("ip").toArray(), QJsonArray { QStringLiteral("172.29.172.254") });
 }
 
 void TestXrayServerInbound::rebuildFromServerLosesOnlyDeviceSettings()

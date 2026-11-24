@@ -1157,7 +1157,13 @@ QJsonObject XrayServerConfig::toServerInboundJson(const XrayServerInboundInputs 
     QJsonObject serverJson;
     serverJson[px::logBlock] = QJsonObject { { px::logLevel, px::logLevelError } };
     serverJson[px::inbounds] = QJsonArray { inbound };
-    serverJson[px::outbounds] = QJsonArray { QJsonObject { { px::protocol, px::protocolFreedom } } };
+    const QJsonObject allowAmneziaDns { { px::action, px::actionAllow },
+                                        { px::network, px::networkTcpUdp },
+                                        { px::port, px::dnsPort },
+                                        { px::ip, QJsonArray { protocols::dns::amneziaDnsIp } } };
+    const QJsonObject freedomSettings { { px::finalRules, QJsonArray { allowAmneziaDns } } };
+    serverJson[px::outbounds] =
+            QJsonArray { QJsonObject { { px::protocol, px::protocolFreedom }, { px::settings, freedomSettings } } };
 
     return serverJson;
 }
