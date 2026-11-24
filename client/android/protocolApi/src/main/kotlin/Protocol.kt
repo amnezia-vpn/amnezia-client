@@ -38,6 +38,8 @@ abstract class Protocol {
 
     abstract suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
+    abstract fun switchProxy(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
+
     abstract fun stopVpn()
 
     abstract fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean)

@@ -38,6 +38,8 @@ public:
 
     ErrorCode openConnection(const QString &serverId);
 
+    ErrorCode switchConnection(const QString &serverId);
+
     void closeConnection();
 
     void onKillSwitchModeChanged(bool enabled);
@@ -62,6 +64,7 @@ public:
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void switchConnectionRequested(DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
 

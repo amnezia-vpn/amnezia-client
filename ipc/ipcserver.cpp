@@ -43,6 +43,15 @@ int IpcServer::tunnelUp(const TunnelConfig &config)
     return m_xtunController.up(config);
 }
 
+int IpcServer::tunnelSwitchProxy(const TunnelConfig &config)
+{
+#ifdef QT_DEBUG
+    qDebug() << "IpcServer::tunnelSwitchProxy";
+#endif
+
+    return m_xtunController.switchProxy(config);
+}
+
 bool IpcServer::tunnelDown()
 {
 #ifdef QT_DEBUG

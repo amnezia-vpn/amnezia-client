@@ -31,6 +31,7 @@ public:
     };
 
     ErrorCode start(const QJsonObject &vpnConfig);
+    void switchProxy(const QJsonObject &vpnConfig);
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);

@@ -27,6 +27,7 @@ public:
 public slots:
     void setRepositories(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void switchVpnConfiguration(DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void onKillSwitchModeChanged(bool enabled);
 #ifdef AMNEZIA_DESKTOP
@@ -39,6 +40,7 @@ signals:
 private:
     void setConnectionState(Vpn::ConnectionState state);
     ErrorCode startTunnel(const TunnelSettings &settings, const QJsonObject &vpnConfiguration);
+    ErrorCode switchTunnelProxy(const TunnelSettings &settings, const QJsonObject &vpnConfiguration);
     void stopTunnel();
 #ifdef AMNEZIA_DESKTOP
     void onTunnelStatusChanged(int status);

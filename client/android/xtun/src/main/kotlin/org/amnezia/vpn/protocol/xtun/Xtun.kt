@@ -28,31 +28,25 @@ class Xtun : Protocol() {
 
     private var proxy: XtunProxy? = null
     private var tunnel: XtunTunnel? = null
+    private lateinit var tunConfig: JSONObject
+    private lateinit var tunBuilder: Builder
+    @Volatile
+    private var proxyGeneration = 0
     @Volatile
     private var isTunnelConnected = false
 
     override fun internalInit() {}
 
     override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
-        val proto = when (config.optString("proto")) {
-            "awg" -> XtunProxy.Proto.AWG
-            "xray" -> XtunProxy.Proto.XRAY
-            else -> throw BadConfigException("The protocol is not supported by xtun")
-        }
-
+        tunConfig = config
+        tunBuilder = vpnBuilder
+        val generation = proxyGeneration + 1
         try {
-            val newProxy = XtunProxy.Builder()
-                .withIncludeRoutes(config.stringArray("includeRoutes"))
-                .withExcludeRoutes(config.stringArray("excludeRoutes"))
-                .withSocketHandler { socket -> protect(socket) }
-                .withLogHandler { log -> Log.d(TAG, log) }
-                .withStatusHandler(::onStatus)
-                .build(proto, config.getString("config"))
+            val newProxy = buildProxy(config, generation, protect)
             proxy = newProxy
+            proxyGeneration = generation
             val newTunnel = XtunTunnel(
-                { dns, includeRoutes, excludeRoutes, mtu ->
-                    createTun(config, vpnBuilder, dns, includeRoutes, excludeRoutes, mtu)
-                },
+                { dns, includeRoutes, excludeRoutes, mtu -> createTun(dns, includeRoutes, excludeRoutes, mtu) },
                 INTERFACE_ADDRESSES.map { it.toString() }.toTypedArray(),
                 config.stringArray("dns")
             )
@@ -60,9 +54,34 @@ class Xtun : Protocol() {
             newTunnel.attachProxy(newProxy)
             newTunnel.start()
         } catch (e: XtunException) {
-            close()
-            throw VpnStartException("xtun: ${e.message}", e)
+            fail(e)
         }
+    }
+
+    override fun switchProxy(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
+        val currentTunnel = tunnel ?: return
+        val oldProxy = proxy
+        val generation = proxyGeneration + 1
+        val newProxy = try {
+            buildProxy(config, generation, protect)
+        } catch (e: XtunException) {
+            fail(e)
+        } catch (e: Exception) {
+            close()
+            throw e
+        }
+
+        proxy = newProxy
+        tunConfig = config
+        tunBuilder = vpnBuilder
+        proxyGeneration = generation
+        try {
+            currentTunnel.attachProxy(newProxy)
+        } catch (e: XtunException) {
+            oldProxy?.close()
+            fail(e)
+        }
+        oldProxy?.close()
     }
 
     override fun stopVpn() {
@@ -85,14 +104,24 @@ class Xtun : Protocol() {
         }
     }
 
-    private fun createTun(
-        config: JSONObject,
-        vpnBuilder: Builder,
-        dns: Array<String>,
-        includeRoutes: Array<String>,
-        excludeRoutes: Array<String>,
-        mtu: Int
-    ): Int {
+    private fun buildProxy(config: JSONObject, generation: Int, protect: (Int) -> Boolean): XtunProxy {
+        val proto = when (config.optString("proto")) {
+            "awg" -> XtunProxy.Proto.AWG
+            "xray" -> XtunProxy.Proto.XRAY
+            else -> throw BadConfigException("The protocol is not supported by xtun")
+        }
+        return XtunProxy.Builder()
+            .withIncludeRoutes(config.stringArray("includeRoutes"))
+            .withExcludeRoutes(config.stringArray("excludeRoutes"))
+            .withSocketHandler { socket -> protect(socket) }
+            .withLogHandler { log -> Log.d(TAG, log) }
+            .withStatusHandler { status -> if (generation == proxyGeneration) onStatus(status) }
+            .build(proto, config.getString("config"))
+    }
+
+    private fun createTun(dns: Array<String>, includeRoutes: Array<String>, excludeRoutes: Array<String>, mtu: Int): Int {
+        val config = tunConfig
+        val vpnBuilder = tunBuilder
         val protocolConfig = ProtocolConfig.build(blockingMode = true) {
             addAddresses(INTERFACE_ADDRESSES)
             addDnsServers(dns.map(::parseInetAddress))
@@ -113,6 +142,11 @@ class Xtun : Protocol() {
 
     private fun JSONObject.stringArray(key: String): Array<String> =
         optJSONArray(key)?.asSequence<String>()?.toList()?.toTypedArray() ?: emptyArray()
+
+    private fun fail(e: XtunException): Nothing {
+        close()
+        throw VpnStartException("xtun: ${e.message}", e)
+    }
 
     private fun close() {
         isTunnelConnected = false

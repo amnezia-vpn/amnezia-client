@@ -8,7 +8,9 @@ import Xtun
 struct Constants {
     static let xtunConfigKey = "xtun"
     static let kActionStatus = "status"
+    static let kActionSwitchProxy = "switchProxy"
     static let kMessageKeyAction = "action"
+    static let kMessageKeyConfig = "config"
 }
 
 private enum TunnelStatus: Int {
@@ -44,6 +46,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private let queue = DispatchQueue(label: "org.amnezia.xtun")
     private let pathMonitor = NWPathMonitor()
     private var proxy: XtunProxy?
+    private var proxyGeneration = 0
     private var tunnel: XtunTunnel?
     private var status = TunnelStatus.disconnected
     private var uplink: (interface: NWInterface?, gateways: [Network.NWEndpoint])?
@@ -61,23 +64,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
-        let proto: XtunProxy.Proto
-        switch settings.proto {
-        case "awg": proto = .awg
-        case "xray": proto = .xray
-        default:
-            completionHandler(TunnelError("The protocol is not supported by xtun"))
-            return
-        }
-
         queue.async {
             do {
-                let proxy = try XtunProxy(proto: proto,
-                                          config: settings.config,
-                                          includeRoutes: settings.includeRoutes,
-                                          excludeRoutes: settings.excludeRoutes,
-                                          onLog: { neLog(.info, title: "xtun", message: $0) },
-                                          onStatus: { [weak self] status in self?.queue.async { self?.update(status) } })
+                let proxy = try self.makeProxy(settings: settings)
                 let tunnel = try XtunTunnel(ifAddrs: ["\(Self.interfaceAddress4)/30",
                                                       "\(Self.interfaceAddress6)/\(Self.interfacePrefix6)"],
                                             dns: settings.dns) { [weak self] dns, includeRoutes, excludeRoutes, mtu in
@@ -116,16 +105,66 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
     override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-        guard let completionHandler else { return }
-
-        guard let message = try? JSONSerialization.jsonObject(with: messageData) as? [String: Any],
-              message[Constants.kMessageKeyAction] as? String == Constants.kActionStatus else {
-            completionHandler(nil)
+        guard let message = try? JSONSerialization.jsonObject(with: messageData) as? [String: Any] else {
+            completionHandler?(nil)
             return
         }
 
-        queue.async {
-            completionHandler(try? JSONSerialization.data(withJSONObject: ["status": self.status.rawValue]))
+        switch message[Constants.kMessageKeyAction] as? String {
+        case Constants.kActionStatus:
+            queue.async {
+                completionHandler?(try? JSONSerialization.data(withJSONObject: ["status": self.status.rawValue]))
+            }
+        case Constants.kActionSwitchProxy:
+            guard let config = message[Constants.kMessageKeyConfig] as? String else {
+                completionHandler?(nil)
+                return
+            }
+            queue.async {
+                let switched = self.switchProxy(config)
+                completionHandler?(try? JSONSerialization.data(withJSONObject: ["switched": switched]))
+            }
+        default:
+            completionHandler?(nil)
+        }
+    }
+
+    private func makeProxy(settings: TunnelSettings) throws -> XtunProxy {
+        let proto: XtunProxy.Proto
+        switch settings.proto {
+        case "awg": proto = .awg
+        case "xray": proto = .xray
+        default: throw TunnelError("The protocol is not supported by xtun")
+        }
+
+        proxyGeneration += 1
+        let generation = proxyGeneration
+        return try XtunProxy(proto: proto,
+                             config: settings.config,
+                             includeRoutes: settings.includeRoutes,
+                             excludeRoutes: settings.excludeRoutes,
+                             onLog: { neLog(.info, title: "xtun", message: $0) },
+                             onStatus: { [weak self] status in
+                                 self?.queue.async {
+                                     guard let self, self.proxyGeneration == generation else { return }
+                                     self.update(status)
+                                 }
+                             })
+    }
+
+    private func switchProxy(_ configJson: String) -> Bool {
+        guard let tunnel else { return false }
+        neLog(.info, message: "Switch proxy")
+        do {
+            let settings = try JSONDecoder().decode(TunnelSettings.self, from: Data(configJson.utf8))
+            let proxy = try makeProxy(settings: settings)
+            try tunnel.attach(proxy)
+            self.proxy = proxy
+            return true
+        } catch {
+            neLog(.error, message: "Failed to switch the xtun proxy: \(error.localizedDescription)")
+            cancelTunnelWithError(error)
+            return false
         }
     }
 

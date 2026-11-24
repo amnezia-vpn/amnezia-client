@@ -667,6 +667,16 @@ class AmneziaActivity : QtActivity() {
     }
 
     @MainThread
+    private fun switchVpnProxy(vpnConfig: String) {
+        Log.d(TAG, "Switch VPN proxy")
+        vpnServiceMessenger.send {
+            Action.SWITCH_PROXY.packToMessage {
+                putString(MSG_VPN_CONFIG, vpnConfig)
+            }
+        }
+    }
+
+    @MainThread
     private fun disconnectFromVpn() {
         Log.d(TAG, "Disconnect from VPN")
         vpnServiceMessenger.send(Action.DISCONNECT)
@@ -690,6 +700,14 @@ class AmneziaActivity : QtActivity() {
                     startVpn(vpnConfig)
                 }
             }
+        }
+    }
+
+    @Suppress("unused")
+    fun switchProxy(vpnConfig: String) {
+        Log.v(TAG, "Switch VPN proxy")
+        mainScope.launch {
+            switchVpnProxy(vpnConfig)
         }
     }
 

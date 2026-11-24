@@ -13,9 +13,11 @@
 #import "core/utils/swiftBridge.h"
 
 const char* Action::getStatus = "status";
+const char* Action::switchProxy = "switchProxy";
 
 const char* MessageKey::action = "action";
 const char* MessageKey::tunnelId = "tunnelId";
+const char* MessageKey::config = "config";
 
 #if !MACOS_NE
 static UIViewController* getViewController() {
@@ -89,6 +91,11 @@ TunnelStatus tunnelStatusFromResponse(NSDictionary *response) {
         return TunnelStatus::Disconnected;
     }
     return static_cast<TunnelStatus>([(NSNumber *)value intValue]);
+}
+
+NSDictionary *providerConfiguration(const QJsonObject &configuration) {
+    const QByteArray configJson = QJsonDocument(configuration).toJson(QJsonDocument::Compact);
+    return @{@"xtun": [NSData dataWithBytes:configJson.constData() length:configJson.size()]};
 }
 }
 
@@ -239,14 +246,58 @@ bool IosController::connectVpn(const QJsonObject& configuration)
 
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
-    const QByteArray configJson = QJsonDocument(configuration).toJson(QJsonDocument::Compact);
-    NSData *configData = [NSData dataWithBytes:configJson.constData() length:configJson.size()];
-    tunnelProtocol.providerConfiguration = @{@"xtun": configData};
+    tunnelProtocol.providerConfiguration = providerConfiguration(configuration);
     tunnelProtocol.serverAddress = m_serverAddress;
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
 
     startTunnel();
     return true;
+}
+
+void IosController::switchProxy(const QJsonObject &configuration)
+{
+    const QByteArray configJson = QJsonDocument(configuration).toJson(QJsonDocument::Compact);
+    NSDictionary *message = @{
+        [NSString stringWithUTF8String:MessageKey::action]: [NSString stringWithUTF8String:Action::switchProxy],
+        [NSString stringWithUTF8String:MessageKey::config]: QString::fromUtf8(configJson).toNSString()
+    };
+    sendVpnExtensionMessage(message, [this, configuration](NSDictionary *response) {
+        if (![response[@"switched"] boolValue]) {
+            qWarning() << "IosController::switchProxy: the extension did not switch the proxy";
+            return;
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            saveProviderConfiguration(configuration);
+        });
+    });
+}
+
+void IosController::saveProviderConfiguration(const QJsonObject &configuration)
+{
+    NETunnelProviderManager *tunnel = m_currentTunnel;
+    if (!tunnel) {
+        return;
+    }
+
+    [tunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
+        if (loadError) {
+            qWarning() << "IosController::saveProviderConfiguration: failed to load the VPN profile:"
+                       << loadError.localizedDescription.UTF8String;
+            return;
+        }
+
+        NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)tunnel.protocolConfiguration;
+        tunnelProtocol.providerConfiguration = providerConfiguration(configuration);
+        tunnelProtocol.serverAddress = configuration.value(configKey::hostName).toString().toNSString();
+        tunnel.protocolConfiguration = tunnelProtocol;
+
+        [tunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+            if (saveError) {
+                qWarning() << "IosController::saveProviderConfiguration: failed to save the VPN profile:"
+                           << saveError.localizedDescription.UTF8String;
+            }
+        }];
+    }];
 }
 
 void IosController::disconnectVpn()

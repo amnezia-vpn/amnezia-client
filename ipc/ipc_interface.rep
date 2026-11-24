@@ -10,6 +10,7 @@ class IpcInterface
     SLOT( void clearLogs() );
 
     SLOT( int tunnelUp(const TunnelConfig &config) );
+    SLOT( int tunnelSwitchProxy(const TunnelConfig &config) );
     SLOT( bool tunnelDown() );
     SLOT( bool setKillSwitchMode(int mode) );
     SLOT( bool addKillSwitchAllowedRanges(const QStringList &ranges) );

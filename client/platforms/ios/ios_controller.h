@@ -20,12 +20,14 @@ using namespace amnezia;
 struct Action
 {
     static const char *getStatus;
+    static const char *switchProxy;
 };
 
 struct MessageKey
 {
     static const char *action;
     static const char *tunnelId;
+    static const char *config;
 };
 
 class IosController : public QObject
@@ -39,6 +41,7 @@ public:
 
     bool initialize();
     bool connectVpn(const QJsonObject &configuration);
+    void switchProxy(const QJsonObject &configuration);
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);
@@ -105,6 +108,7 @@ private:
     explicit IosController();
 
     void startTunnel();
+    void saveProviderConfiguration(const QJsonObject &configuration);
     void emitConnectionStateIfChanged(Vpn::ConnectionState state);
 
 private:

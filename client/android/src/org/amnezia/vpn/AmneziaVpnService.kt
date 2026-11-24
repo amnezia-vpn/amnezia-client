@@ -151,6 +151,10 @@ open class AmneziaVpnService : VpnService() {
                         disconnect()
                     }
 
+                    Action.SWITCH_PROXY -> {
+                        msg.data.getString(MSG_VPN_CONFIG)?.let(::switchProxy)
+                    }
+
                     Action.REQUEST_STATUS -> {
                         clientMessengers[msg.replyTo]?.let { clientMessenger ->
                             clientMessenger.send {
@@ -484,6 +488,21 @@ open class AmneziaVpnService : VpnService() {
                 protocol.initialize(applicationContext, protocolState, ::onError)
                 protocol.startVpn(config, Builder(), ::protect)
             }
+        }
+    }
+
+    @MainThread
+    private fun switchProxy(vpnConfig: String) {
+        if (!isConnected) return
+
+        Log.d(TAG, "Switch VPN proxy")
+
+        val config = parseConfigToJson(vpnConfig) ?: return
+        Prefs.save(PREFS_CONFIG_KEY, vpnConfig)
+        saveServerData(config)
+
+        connectionJob = connectionScope.launch {
+            vpnProto?.protocol?.switchProxy(config, Builder(), ::protect)
         }
     }
 

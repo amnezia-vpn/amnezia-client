@@ -94,6 +94,23 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     }
 }
 
+void VpnConnection::switchVpnConfiguration(DockerContainer container, const QJsonObject &vpnConfiguration)
+{
+    if (!m_appSettingsRepository || m_connectionState != Vpn::ConnectionState::Connected) {
+        return;
+    }
+
+    qDebug() << "VpnConnection::switchVpnConfiguration: container" << ContainerUtils::containerToString(container);
+
+    const ErrorCode errorCode =
+            switchTunnelProxy(tunnelSettings(*m_appSettingsRepository, container, vpnConfiguration), vpnConfiguration);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning() << "VpnConnection::switchVpnConfiguration: switching failed with error" << errorCode;
+        m_lastError = errorCode;
+        setConnectionState(Vpn::ConnectionState::Error);
+    }
+}
+
 void VpnConnection::disconnectFromVpn()
 {
     if (m_connectionState == Vpn::ConnectionState::Disconnected) {
@@ -137,20 +154,44 @@ void VpnConnection::onPlatformConnectionStateChanged(Vpn::ConnectionState state)
 
 #ifdef AMNEZIA_DESKTOP
 
+namespace
+{
+    TunnelConfig ipcTunnelConfig(const TunnelSettings &settings)
+    {
+        return TunnelConfig(static_cast<int>(settings.proto), settings.config, settings.dnsServers,
+                            static_cast<int>(settings.killSwitchMode), settings.allowedDnsServers,
+                            settings.includeRoutes, settings.excludeRoutes, static_cast<int>(settings.appsRouteMode),
+                            settings.apps, settings.mtu);
+    }
+}
+
 ErrorCode VpnConnection::startTunnel(const TunnelSettings &settings, const QJsonObject &vpnConfiguration)
 {
     Q_UNUSED(vpnConfiguration)
 
-    const TunnelConfig config(static_cast<int>(settings.proto), settings.config, settings.dnsServers,
-                              static_cast<int>(settings.killSwitchMode), settings.allowedDnsServers,
-                              settings.includeRoutes, settings.excludeRoutes, static_cast<int>(settings.appsRouteMode),
-                              settings.apps, settings.mtu);
+    const TunnelConfig config = ipcTunnelConfig(settings);
     return IpcClient::withInterface(
             [this, &config](QSharedPointer<IpcInterfaceReplica> iface) {
                 connect(iface.data(), &IpcInterfaceReplica::tunnelStatusChanged, this,
                         &VpnConnection::onTunnelStatusChanged, Qt::UniqueConnection);
 
                 auto reply = iface->tunnelUp(config);
+                if (!reply.waitForFinished()) {
+                    return ErrorCode::AmneziaServiceConnectionFailed;
+                }
+                return static_cast<ErrorCode>(reply.returnValue());
+            },
+            []() { return ErrorCode::AmneziaServiceNotRunning; });
+}
+
+ErrorCode VpnConnection::switchTunnelProxy(const TunnelSettings &settings, const QJsonObject &vpnConfiguration)
+{
+    Q_UNUSED(vpnConfiguration)
+
+    const TunnelConfig config = ipcTunnelConfig(settings);
+    return IpcClient::withInterface(
+            [&config](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto reply = iface->tunnelSwitchProxy(config);
                 if (!reply.waitForFinished()) {
                     return ErrorCode::AmneziaServiceConnectionFailed;
                 }
@@ -209,6 +250,12 @@ ErrorCode VpnConnection::startTunnel(const TunnelSettings &settings, const QJson
     return AndroidController::instance()->start(platformTunnelConfig(settings, vpnConfiguration));
 }
 
+ErrorCode VpnConnection::switchTunnelProxy(const TunnelSettings &settings, const QJsonObject &vpnConfiguration)
+{
+    AndroidController::instance()->switchProxy(platformTunnelConfig(settings, vpnConfiguration));
+    return ErrorCode::NoError;
+}
+
 void VpnConnection::stopTunnel()
 {
     AndroidController::instance()->stop();
@@ -226,6 +273,12 @@ ErrorCode VpnConnection::startTunnel(const TunnelSettings &settings, const QJson
     return IosController::Instance()->connectVpn(platformTunnelConfig(settings, vpnConfiguration))
             ? ErrorCode::NoError
             : ErrorCode::InternalError;
+}
+
+ErrorCode VpnConnection::switchTunnelProxy(const TunnelSettings &settings, const QJsonObject &vpnConfiguration)
+{
+    IosController::Instance()->switchProxy(platformTunnelConfig(settings, vpnConfiguration));
+    return ErrorCode::NoError;
 }
 
 void VpnConnection::stopTunnel()

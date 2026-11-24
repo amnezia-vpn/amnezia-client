@@ -90,6 +90,7 @@ signals:
     void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
     void backgroundPurchaseCompleted(const QString &message);
     void changeApiCountryFinished(const QString &message);
+    void apiCountryChanged(const QString &serverId);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
     void subscriptionRefreshNeeded();
@@ -135,7 +136,8 @@ private:
     } m_captchaState;
 
 private:
-    void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void emitUpdateSuccess(const QString &serverId, bool wasSubscriptionExpired, bool reloadServiceConfig,
+                           const QString &newCountryName);
     void finishCaptchaFlow();
     void emitCaptchaUpdateSuccess();
     void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);

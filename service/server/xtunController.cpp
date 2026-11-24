@@ -72,6 +72,11 @@ namespace
     }
 }
 
+XtunController::Proxy::~Proxy()
+{
+    libxtun_proxy_free(&handle);
+}
+
 XtunController::XtunController(QObject *parent) : QObject(parent)
 {
 }
@@ -85,14 +90,9 @@ ErrorCode XtunController::up(const TunnelConfig &config)
 {
     down();
 
-    const auto proto = proxyProto(static_cast<XtunProto>(config.proto()));
-    if (!proto) {
-        qWarning() << "XtunController::up: xtun does not support protocol" << config.proto();
-        return ErrorCode::NotImplementedError;
-    }
-
-    if (!config.apps().isEmpty()) {
-        qWarning() << "XtunController::up: xtun does not support app split tunneling yet";
+    std::unique_ptr<Proxy> proxy;
+    if (const ErrorCode error = createProxy(config, proxy); error != ErrorCode::NoError) {
+        return error;
     }
 
     const std::vector<std::string> dnsServers = toStdStrings(config.dnsServers());
@@ -117,32 +117,8 @@ ErrorCode XtunController::up(const TunnelConfig &config)
         return errorCode(error);
     }
 
-    m_proxy.loghandler = &XtunController::onLog;
-    m_proxy.loghandler_priv = this;
-    m_proxy.statushandler = &XtunController::onStatus;
-    m_proxy.statushandler_priv = this;
-
-    const std::vector<std::string> includeRoutes = toStdStrings(config.includeRoutes());
-    const std::vector<std::string> excludeRoutes = toStdStrings(config.excludeRoutes());
-    const std::vector<const char *> includeRoutesArgv = toArgv(includeRoutes);
-    const std::vector<const char *> excludeRoutesArgv = toArgv(excludeRoutes);
-
-    libxtun_proxy_opts proxyOpts {};
-    proxyOpts.size = sizeof(proxyOpts);
-    proxyOpts.includeRoutes = includeRoutesArgv.data();
-    proxyOpts.excludeRoutes = excludeRoutesArgv.data();
-
-    if (const int error = libxtun_proxy_new(&m_proxy, *proto, config.config().toStdString().c_str(), &proxyOpts);
-        error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to create proxy:" << libxtun_strerror(error);
-        down();
-        return errorCode(error);
-    }
-
-    if (const int error = libxtun_tunnel_attach_proxy(&m_tunnel, &m_proxy); error != LIBXTUN_OK) {
-        qCritical() << "XtunController::up: failed to attach proxy:" << libxtun_strerror(error);
-        down();
-        return errorCode(error);
+    if (const ErrorCode error = attachProxy(std::move(proxy)); error != ErrorCode::NoError) {
+        return error;
     }
 
     if (const int error = libxtun_tunnel_start(&m_tunnel); error != LIBXTUN_OK) {
@@ -154,14 +130,81 @@ ErrorCode XtunController::up(const TunnelConfig &config)
     return ErrorCode::NoError;
 }
 
+ErrorCode XtunController::switchProxy(const TunnelConfig &config)
+{
+    if (!m_tunnel.handle) {
+        qWarning() << "XtunController::switchProxy: the tunnel is not running";
+        return ErrorCode::InternalError;
+    }
+
+    std::unique_ptr<Proxy> proxy;
+    if (const ErrorCode error = createProxy(config, proxy); error != ErrorCode::NoError) {
+        down();
+        return error;
+    }
+
+    return attachProxy(std::move(proxy));
+}
+
 void XtunController::down()
 {
-    if (m_tunnel.handle && m_proxy.handle) {
-        libxtun_tunnel_detach_proxy(&m_tunnel, &m_proxy);
+    if (m_tunnel.handle && m_proxy) {
+        libxtun_tunnel_detach_proxy(&m_tunnel, &m_proxy->handle);
     }
-    libxtun_proxy_free(&m_proxy);
-    m_proxy = {};
+    m_proxy.reset();
     libxtun_tunnel_free(&m_tunnel);
+}
+
+ErrorCode XtunController::createProxy(const TunnelConfig &config, std::unique_ptr<Proxy> &proxy)
+{
+    const auto proto = proxyProto(static_cast<XtunProto>(config.proto()));
+    if (!proto) {
+        qWarning() << "XtunController::createProxy: xtun does not support protocol" << config.proto();
+        return ErrorCode::NotImplementedError;
+    }
+
+    if (!config.apps().isEmpty()) {
+        qWarning() << "XtunController::createProxy: xtun does not support app split tunneling yet";
+    }
+
+    auto created = std::make_unique<Proxy>();
+    created->controller = this;
+    created->generation = m_proxyGeneration + 1;
+    created->handle.loghandler = &XtunController::onLog;
+    created->handle.statushandler = &XtunController::onStatus;
+    created->handle.statushandler_priv = created.get();
+
+    const std::vector<std::string> includeRoutes = toStdStrings(config.includeRoutes());
+    const std::vector<std::string> excludeRoutes = toStdStrings(config.excludeRoutes());
+    const std::vector<const char *> includeRoutesArgv = toArgv(includeRoutes);
+    const std::vector<const char *> excludeRoutesArgv = toArgv(excludeRoutes);
+
+    libxtun_proxy_opts proxyOpts {};
+    proxyOpts.size = sizeof(proxyOpts);
+    proxyOpts.includeRoutes = includeRoutesArgv.data();
+    proxyOpts.excludeRoutes = excludeRoutesArgv.data();
+
+    if (const int error = libxtun_proxy_new(&created->handle, *proto, config.config().toStdString().c_str(), &proxyOpts);
+        error != LIBXTUN_OK) {
+        qCritical() << "XtunController::createProxy: failed to create proxy:" << libxtun_strerror(error);
+        return errorCode(error);
+    }
+
+    proxy = std::move(created);
+    return ErrorCode::NoError;
+}
+
+ErrorCode XtunController::attachProxy(std::unique_ptr<Proxy> proxy)
+{
+    if (const int error = libxtun_tunnel_attach_proxy(&m_tunnel, &proxy->handle); error != LIBXTUN_OK) {
+        qCritical() << "XtunController::attachProxy: failed to attach proxy:" << libxtun_strerror(error);
+        down();
+        return errorCode(error);
+    }
+
+    m_proxyGeneration = proxy->generation;
+    m_proxy = std::move(proxy);
+    return ErrorCode::NoError;
 }
 
 void XtunController::onLog(const char *line, void *controller)
@@ -170,11 +213,19 @@ void XtunController::onLog(const char *line, void *controller)
     qInfo().noquote() << "xtun:" << line;
 }
 
-void XtunController::onStatus(int status, void *controller)
+void XtunController::onStatus(int status, void *proxy)
 {
-    auto *self = static_cast<XtunController *>(controller);
+    const auto *source = static_cast<Proxy *>(proxy);
+    XtunController *self = source->controller;
+    const quint64 generation = source->generation;
     QMetaObject::invokeMethod(
-            self, [self, status]() { emit self->statusChanged(tunnelStatus(status)); }, Qt::QueuedConnection);
+            self,
+            [self, generation, status]() {
+                if (generation == self->m_proxyGeneration) {
+                    emit self->statusChanged(tunnelStatus(status));
+                }
+            },
+            Qt::QueuedConnection);
 }
 
 bool XtunController::setKillSwitchMode(KillSwitchMode mode)

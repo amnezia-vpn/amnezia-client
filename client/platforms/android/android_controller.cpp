@@ -144,6 +144,12 @@ ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
     return ErrorCode::NoError;
 }
 
+void AndroidController::switchProxy(const QJsonObject &vpnConfig)
+{
+    callActivityMethod("switchProxy", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(QJsonDocument(vpnConfig).toJson()).object<jstring>());
+}
+
 void AndroidController::stop()
 {
     callActivityMethod("stop", "()V");
