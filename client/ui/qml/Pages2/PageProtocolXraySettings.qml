@@ -17,58 +17,47 @@ PageType {
 
     focusOnActivation: false
 
-    readonly property bool hasWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
-
-    property string portText: ""
-
     function save() {
-        var errs = XrayConfigModel.validationErrors()
-        if (errs.length > 0) {
-            PageController.showErrorMessage(errs.join("\n"))
+        const errors = XraySettingsModel.validationErrors()
+        console.log("[XrayUI][Settings] save clicked, errors", errors.length, "preset", XraySettingsModel.presetId)
+        if (errors.length > 0) {
+            PageController.showErrorMessage(errors.join("\n"))
+            return
+        }
+        saveDialog.open()
+    }
+
+    function applySave() {
+        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+            console.log("[XrayUI][Settings] save blocked: active connection")
+            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
             return
         }
 
-        var headerText = qsTr("Save settings?")
-        var descriptionText = XrayConfigModel.saveDescription(root.portText)
-        var yesButtonText = qsTr("Continue")
-        var noButtonText = qsTr("Cancel")
-        var yesButtonFunction = function() {
-            if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                return
-            }
-
-            var touchesServer = XrayConfigModel.pendingChangeTouchesServer(root.portText)
-            if (touchesServer)
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
+        const touchesServer = XraySettingsModel.touchesServer()
+        console.log("[XrayUI][Settings] save confirmed, touchesServer", touchesServer, "port", XraySettingsModel.port)
+        if (touchesServer) {
+            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
         }
-        var noButtonFunction = function() {}
-        Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
     }
 
-    function formatTransport(value) {
-        if (value === "raw") return "RAW (TCP)"
-        if (value === "xhttp") return "XHTTP"
-        if (value === "mkcp") return "mKCP"
-        return value
-    }
+    Component.onCompleted: console.log("[XrayUI][Settings] opened, preset", XraySettingsModel.presetId, "edited", XraySettingsModel.presetEdited, "port", XraySettingsModel.port, "unsaved", XraySettingsModel.hasUnsavedChanges)
+    Component.onDestruction: console.log("[XrayUI][Settings] closed, unsaved", XraySettingsModel.hasUnsavedChanges)
 
-    function formatSecurity(value) {
-        if (value === "none") return "None"
-        if (value === "tls") return "TLS"
-        if (value === "reality") return "Reality"
-        return value
-    }
+    Connections {
+        target: XraySettingsModel
 
-    function formatFlow(value) {
-        return value === "" ? qsTr("Empty") : value
+        function onChanged() {
+            console.log("[XrayUI][Settings] model changed, preset", XraySettingsModel.presetId, "edited", XraySettingsModel.presetEdited, "port", XraySettingsModel.port, "unsaved", XraySettingsModel.hasUnsavedChanges)
+        }
     }
 
     Connections {
         target: InstallController
 
         function onXrayKeyMigrationNeedsConfirm(message) {
+            console.log("[XrayUI][Settings] key migration confirmation requested")
             PageController.showBusyIndicator(false)
             Dialogs.askQuestion(
                 qsTr("Recreate XRay with new keys?"),
@@ -76,11 +65,39 @@ PageType {
                 qsTr("Continue"),
                 qsTr("Cancel"),
                 function() {
+                    console.log("[XrayUI][Settings] key migration accepted")
                     InstallController.updateServerConfig(ServersUiController.processedServerId,
                                                          ServersUiController.processedContainerIndex,
                                                          ProtocolEnum.Xray, true, true)
                 },
-                function() {})
+                function() {
+                    console.log("[XrayUI][Settings] key migration declined")
+                })
+        }
+    }
+
+    AlertDialogType {
+        id: saveDialog
+
+        headerText: qsTr("Save settings?")
+        descriptionText: qsTr("The server configuration will be updated. Everyone you shared this connection with will lose access. Share it again after saving")
+        confirmButtonText: qsTr("Save")
+
+        onOpened: console.log("[XrayUI][Settings] save dialog opened")
+        onConfirmed: root.applySave()
+    }
+
+    AlertDialogType {
+        id: resetDialog
+
+        headerText: qsTr("Reset settings?")
+        descriptionText: qsTr("All XRay settings will be restored to defaults")
+        confirmButtonText: qsTr("Reset")
+
+        onOpened: console.log("[XrayUI][Settings] reset dialog opened")
+        onConfirmed: {
+            console.log("[XrayUI][Settings] reset confirmed, preset", XraySettingsModel.presetId)
+            XraySettingsModel.resetToPreset()
         }
     }
 
@@ -88,8 +105,8 @@ PageType {
         id: flickable
 
         anchors.top: parent.top
-        anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
-        anchors.bottomMargin: saveButton.visible ? 24 : 0
+        anchors.bottom: buttons.top
+        anchors.bottomMargin: 24
 
         contentHeight: content.implicitHeight
 
@@ -106,12 +123,6 @@ PageType {
                 Layout.fillWidth: true
 
                 title: qsTr("XRay VLESS settings")
-
-                IconButtonType {
-                    enabled: root.hasWriteAccess
-                    icon.source: "qrc:/images/controls/more-vertical.svg"
-                    onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
-                }
             }
 
             LinkButtonType {
@@ -124,55 +135,9 @@ PageType {
 
                 text: qsTr("More about settings")
 
-                onClicked: Qt.openUrlExternally("https://docs.amnezia.org")
-            }
-
-            TextFieldType {
-                id: portField
-
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: root.hasWriteAccess
-                headerText: qsTr("Port")
-                placeholderText: XrayConfigModel.portDefault()
-                checkEmptyText: true
-
-                Binding {
-                    target: portField.textField
-                    property: "text"
-                    value: XrayConfigModel.port
-                    when: !portField.textField.activeFocus
-                    restoreMode: Binding.RestoreNone
-                }
-
-                textField.maximumLength: 5
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^(|\d{1,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/
-                }
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus && textField.text === "" && XrayConfigModel.port !== "") {
-                        textField.text = XrayConfigModel.port
-                    }
-                }
-                textField.onTextChanged: root.portText = textField.text
-                textField.onTextEdited: XrayConfigModel.port = textField.text
-                textField.onEditingFinished: {
-                    var v = portField.textField.text
-                    if (v !== "") {
-                        var n = parseInt(v, 10)
-                        if (isNaN(n) || n < 1)
-                            n = 1
-                        if (n > 65535)
-                            n = 65535
-                        v = String(n)
-                        if (portField.textField.text !== v)
-                            portField.textField.text = v
-                    }
-                    if (v !== XrayConfigModel.port)
-                        XrayConfigModel.port = v
+                onClicked: {
+                    console.log("[XrayUI][Settings] more about settings clicked")
+                    Qt.openUrlExternally("https://docs.amnezia.org")
                 }
             }
 
@@ -182,70 +147,37 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: root.hasWriteAccess
-                text: qsTr("Transport")
-                subtitle: root.formatTransport(XrayConfigModel.transport)
+                text: qsTr("Preset")
+                subtitle: XraySettingsModel.presetEdited ? XraySettingsModel.presetName + " · " + qsTr("edited")
+                                                         : XraySettingsModel.presetName
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-
-                onClicked: PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
-            }
-
-            ListItemType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: root.hasWriteAccess
-                text: qsTr("Security")
-                subtitle: root.formatSecurity((XrayConfigModel.security === "reality" && XrayConfigModel.transport === "mkcp") ? "none" : XrayConfigModel.security)
-                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-
-                onClicked: PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
-            }
-
-            ListItemType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: root.hasWriteAccess
-                text: qsTr("Flow")
-                subtitle: root.formatFlow(((XrayConfigModel.transport === "" || XrayConfigModel.transport === "raw") && (XrayConfigModel.security === "tls" || XrayConfigModel.security === "reality")) ? XrayConfigModel.flow : "")
-                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-
-                onClicked: PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
-            }
-
-            ListItemType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                visible: root.hasWriteAccess
-                text: qsTr("Reset settings")
-                destructive: true
 
                 onClicked: {
-                    var yesButtonFunction = function() {
-                        PageController.showNotificationMessage(
-                            qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
-                        XrayConfigModel.resetToDefaults()
-                    }
-                    Dialogs.askQuestion(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
-                        qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {
-                        })
+                    console.log("[XrayUI][Settings] preset row clicked")
+                    PageController.goToPage(PageEnum.PageProtocolXrayPresets)
                 }
             }
 
-            Item {
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Edit config")
+                subtitle: "server.json · " + qsTr("port %1").arg(XraySettingsModel.port)
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
+                    console.log("[XrayUI][Settings] edit config clicked")
+                    XraySettingsModel.openEditor()
+                    PageController.goToPage(PageEnum.PageProtocolXrayConfigEditor)
+                }
             }
         }
     }
 
-    ButtonType {
-        id: saveButton
+    ColumnLayout {
+        id: buttons
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -254,13 +186,30 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: root.hasWriteAccess
-        enabled: XrayConfigModel.hasUnsavedChanges && root.portText !== ""
-        text: qsTr("Save")
+        spacing: 12
 
-        onClicked: {
-            saveButton.forceActiveFocus()
-            root.save()
+        ButtonType {
+            Layout.fillWidth: true
+
+            enabled: XraySettingsModel.hasUnsavedChanges
+            text: qsTr("Save")
+
+            onClicked: {
+                forceActiveFocus()
+                root.save()
+            }
+        }
+
+        ButtonType {
+            Layout.fillWidth: true
+
+            variant: ButtonType.Secondary
+            text: qsTr("Reset settings")
+
+            onClicked: {
+                console.log("[XrayUI][Settings] reset clicked, canReset", XraySettingsModel.canReset)
+                resetDialog.open()
+            }
         }
     }
 }

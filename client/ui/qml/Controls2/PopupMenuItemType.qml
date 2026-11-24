@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 import Style 1.0
@@ -10,6 +11,7 @@ AbstractButton {
     id: root
 
     property bool destructive: false
+    property string iconSource
 
     Layout.fillWidth: true
 
@@ -40,10 +42,26 @@ AbstractButton {
         }
     }
 
-    contentItem: BodyTextType {
-        text: root.text
-        color: root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textPrimary
-        verticalAlignment: Text.AlignVCenter
+    contentItem: RowLayout {
+        spacing: 12
+
+        IconImage {
+            Layout.preferredWidth: 24
+            Layout.preferredHeight: 24
+
+            visible: root.iconSource !== ""
+            source: root.iconSource
+            sourceSize: Qt.size(24, 24)
+            color: root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.iconDefault
+        }
+
+        BodyTextType {
+            Layout.fillWidth: true
+
+            text: root.text
+            color: root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textPrimary
+            verticalAlignment: Text.AlignVCenter
+        }
     }
 
     HoverHandler {

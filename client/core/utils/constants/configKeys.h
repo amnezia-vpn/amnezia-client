@@ -181,6 +181,8 @@ namespace amnezia
         // ── Xray-specific keys ────────────────────────────────────────
 
         constexpr QLatin1String xraySettingsVersion("xray_settings_version");
+        constexpr QLatin1String xrayInbound("xray_inbound");
+        constexpr QLatin1String xrayPresetId("xray_preset_id");
 
         // Security
         constexpr QLatin1String xraySecurity("xray_security");       // none | tls | reality

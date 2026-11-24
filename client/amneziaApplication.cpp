@@ -23,6 +23,7 @@
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
+#include "ui/models/utils/jsonSyntaxHighlighter.h"
 #include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
 #include "core/utils/appUiConfig.h"
@@ -249,6 +250,7 @@ void AmneziaApplication::registerTypes()
                              "ContainersModelFilters");
 
     qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
+    qmlRegisterType<JsonSyntaxHighlighter>("JsonSyntaxHighlighter", 1, 0, "JsonSyntaxHighlighter");
 
     qmlRegisterType<PublicHostInputValidator>("MtProxyConfig", 1, 0, "PublicHostInputValidator");
     qmlRegisterType<PublicHostInputValidator>("TelemtConfig", 1, 0, "PublicHostInputValidator");

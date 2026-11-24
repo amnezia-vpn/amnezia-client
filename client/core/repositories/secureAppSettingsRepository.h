@@ -105,8 +105,9 @@ public:
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();
 
-    QByteArray xraySavedConfigs() const;
-    void setXraySavedConfigs(const QByteArray &data);
+    QByteArray xrayPresets() const;
+    void setXrayPresets(const QByteArray &data);
+    QByteArray takeXrayLegacySnapshots();
 
     QString localProxyOwnerId() const;
     void setLocalProxyOwnerId(const QString &serverId);

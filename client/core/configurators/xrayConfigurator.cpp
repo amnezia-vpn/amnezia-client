@@ -20,6 +20,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/xrayInbound.h"
 
 namespace {
     Logger logger("XrayConfigurator");
@@ -324,12 +325,29 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     const QString portEff = srv.port.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultPort) : srv.port;
 
 
-    XrayServerInboundInputs inputs;
-    inputs.clients = clients;
-    inputs.realityPrivateKey = realityPrivateKey;
-    inputs.realityShortId = realityShortId;
-
-    const QJsonObject inboundJson = srv.toServerInboundJson(inputs);
+    QJsonObject inboundJson;
+    if (!srv.inboundTemplate.isEmpty()) {
+        const QJsonObject inboundTemplate = amnezia::xrayInbound::parse(srv.inboundTemplate);
+        if (inboundTemplate.isEmpty()) {
+            logger.error() << "Xray writeServerConfigForSetup: inbound template is not valid JSON, preset" << srv.presetId;
+            return ErrorCode::XrayServerConfigInvalid;
+        }
+        amnezia::xrayInbound::Secrets secrets;
+        secrets.clients = clients;
+        secrets.realityPrivateKey = realityPrivateKey;
+        secrets.realityShortId = realityShortId;
+        inboundJson = amnezia::xrayInbound::toServerJson(inboundTemplate, secrets);
+        logger.info() << "Xray writeServerConfigForSetup: built server.json from inbound template, preset" << srv.presetId
+                      << "port" << portEff << "security" << securityEff << "flow" << flowValue << "clients"
+                      << QString::number(clients.size()) << "atomic" << (useAtomicApply ? "yes" : "no");
+    } else {
+        XrayServerInboundInputs inputs;
+        inputs.clients = clients;
+        inputs.realityPrivateKey = realityPrivateKey;
+        inputs.realityShortId = realityShortId;
+        inboundJson = srv.toServerInboundJson(inputs);
+        logger.info() << "Xray writeServerConfigForSetup: built server.json from typed settings, port" << portEff;
+    }
     if (useAtomicApply) {
         errorCode = uploadServerConfigAtomically(credentials, container, portEff, inboundJson);
         if (errorCode != ErrorCode::NoError) {

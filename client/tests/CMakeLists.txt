@@ -179,24 +179,6 @@ if(NOT ANDROID)
         test_common
     )
 
-    add_executable(test_xray_config_model
-        testXrayConfigModel.cpp
-    )
-
-    target_link_libraries(test_xray_config_model PRIVATE
-        Qt6::Test
-        test_common
-    )
-
-    add_executable(test_xray_core_accepts
-        testXrayCoreAccepts.cpp
-    )
-
-    target_link_libraries(test_xray_core_accepts PRIVATE
-        Qt6::Test
-        test_common
-    )
-
     add_executable(test_ui_language_model_and_controller
         testUiLanguageModelAndController.cpp
     )
@@ -480,8 +462,6 @@ if(NOT ANDROID)
     add_test(NAME XraySerializationTest            COMMAND test_xray_serialization)
     add_test(NAME XrayServerInboundTest            COMMAND test_xray_server_inbound)
     add_test(NAME XrayGeneratorMatrixTest          COMMAND test_xray_generator_matrix)
-    add_test(NAME XrayConfigModelTest              COMMAND test_xray_config_model)
-    add_test(NAME XrayCoreAcceptsTest              COMMAND test_xray_core_accepts)
     add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
     add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
     add_test(NAME UiIpModelAndControllerTest       COMMAND test_ui_ip_model_and_controller)

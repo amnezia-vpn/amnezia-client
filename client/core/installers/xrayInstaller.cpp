@@ -12,6 +12,8 @@
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/configurators/xrayConfigurator.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/xrayInbound.h"
+#include "core/models/protocols/xrayPresets.h"
 #include "logger.h"
 
 namespace
@@ -71,8 +73,16 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     const amnezia::XrayServerJsonStatus status =
             XrayServerConfig::fromServerInboundJson(doc.object(), xrayConfig->serverConfig);
     if (status != amnezia::XrayServerJsonStatus::Ok) {
+        logger.error() << "extractConfigFromContainer:" << describeServerJsonStatus(status);
         return ErrorCode::InternalError;
     }
+
+    XrayServerConfig &srv = xrayConfig->serverConfig;
+    srv.inboundTemplate = xrayInbound::format(xrayInbound::toTemplate(xrayInbound::inboundFromServerJson(doc.object())));
+    srv.presetId = xrayPresets::matchBuiltin(srv.inboundTemplate, srv.site, srv.port);
+    logger.info() << "extractConfigFromContainer: inbound template restored from server.json, preset"
+                  << (srv.presetId.isEmpty() ? QStringLiteral("custom") : srv.presetId) << "port" << srv.port
+                  << "transport" << srv.transport << "security" << srv.security;
 
     return ErrorCode::NoError;
 }

@@ -10,6 +10,8 @@ Item {
 
     readonly property int defaultMargin: 20
 
+    readonly property string monospaceFontFamily: Qt.platform.os === "ios" || Qt.platform.os === "osx" ? "Menlo" : "monospace"
+
     function isMobile() {
         if (Qt.platform.os === "android" ||
                 Qt.platform.os === "ios") {

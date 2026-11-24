@@ -547,14 +547,23 @@ void SecureAppSettingsRepository::setInstallationUuid(const QString &uuid)
     m_settings->setValue("Conf/installationUuid", uuid);
 }
 
-QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
+QByteArray SecureAppSettingsRepository::xrayPresets() const
 {
-    return value("Xray/savedConfigs").toByteArray();
+    return value("Xray/presets").toByteArray();
 }
 
-void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
+void SecureAppSettingsRepository::setXrayPresets(const QByteArray &data)
 {
-    setValue("Xray/savedConfigs", data);
+    setValue("Xray/presets", data);
+}
+
+QByteArray SecureAppSettingsRepository::takeXrayLegacySnapshots()
+{
+    const QByteArray data = value("Xray/savedConfigs").toByteArray();
+    if (!data.isEmpty()) {
+        m_settings->remove("Xray/savedConfigs");
+    }
+    return data;
 }
 
 QString SecureAppSettingsRepository::localProxyOwnerId() const

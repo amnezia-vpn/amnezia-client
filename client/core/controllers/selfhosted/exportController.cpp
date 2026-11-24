@@ -14,6 +14,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "version.h"
 
 using namespace amnezia;
@@ -317,7 +318,7 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
     vlessServer.address = server.value(amnezia::protocols::xray::address).toString();
     vlessServer.port = server.value(amnezia::protocols::xray::port).toInt();
     vlessServer.id = user.value(amnezia::protocols::xray::id).toString();
-    vlessServer.flow = user.value(amnezia::protocols::xray::flow).toString("xtls-rprx-vision");
+    vlessServer.flow = user.value(amnezia::protocols::xray::flow).toString();
     vlessServer.encryption = user.value(amnezia::protocols::xray::encryption).toString("none");
 
     vlessServer.network = streamSettings.value(amnezia::protocols::xray::network).toString("tcp");
@@ -328,7 +329,8 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         vlessServer.serverName = realitySettings.value(amnezia::protocols::xray::serverName).toString();
         vlessServer.publicKey = realitySettings.value(amnezia::protocols::xray::publicKey).toString();
         vlessServer.shortId = realitySettings.value(amnezia::protocols::xray::shortId).toString();
-        vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint).toString(QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint));
+        vlessServer.fingerprint = amnezia::xrayEffective::realityFingerprint(
+                realitySettings.value(amnezia::protocols::xray::fingerprint).toString());
         vlessServer.spiderX = realitySettings.value(amnezia::protocols::xray::spiderX).toString("");
     } else if (vlessServer.security == "tls") {
         QJsonObject tlsSettings = streamSettings.value("tlsSettings").toObject();
@@ -340,8 +342,20 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         for (const QJsonValue &v : alpnArr) {
             alpnList << v.toString();
         }
-        // alpn goes into vless URI query param — handled by Serialize via serverName/alpn fields
-        // VlessServerObject doesn't have alpn field, so we embed in serverName if needed
+        vlessServer.alpn = alpnList.join(",");
+        vlessServer.tlsPin = tlsSettings.value(amnezia::protocols::xray::pinnedPeerCertSha256).toString();
+    }
+
+    if (vlessServer.network == "xhttp") {
+        QJsonObject xhttpSettings = streamSettings.value(amnezia::protocols::xray::xhttpSettings).toObject();
+        vlessServer.xhttpHost = xhttpSettings.value(amnezia::protocols::xray::xhttpHost).toString();
+        vlessServer.xhttpPath = xhttpSettings.value(amnezia::protocols::xray::xhttpPath).toString();
+        vlessServer.xhttpMode = xhttpSettings.value(amnezia::protocols::xray::xhttpMode).toString();
+        xhttpSettings.remove(amnezia::protocols::xray::xhttpHost);
+        xhttpSettings.remove(amnezia::protocols::xray::xhttpPath);
+        xhttpSettings.remove(amnezia::protocols::xray::xhttpMode);
+        if (!xhttpSettings.isEmpty())
+            vlessServer.xhttpExtra = QString::fromUtf8(QJsonDocument(xhttpSettings).toJson(QJsonDocument::Compact));
     }
 
     result.nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, APPLICATION_NAME);

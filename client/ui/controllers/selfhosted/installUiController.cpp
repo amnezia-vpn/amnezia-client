@@ -23,7 +23,7 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
-#include "ui/models/protocols/xrayConfigModel.h"
+#include "ui/models/protocols/xraySettingsModel.h"
 #ifdef Q_OS_WINDOWS
 #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -45,7 +45,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          AwgConfigModel *awgConfigModel,
                                          WireGuardConfigModel *wireGuardConfigModel,
                                          OpenVpnConfigModel *openVpnConfigModel,
-                                         XrayConfigModel *xrayConfigModel,
+                                         XraySettingsModel *xraySettingsModel,
                                          TorConfigModel *torConfigModel,
 #ifdef Q_OS_WINDOWS
                                          Ikev2ConfigModel *ikev2ConfigModel,
@@ -66,7 +66,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_awgConfigModel(awgConfigModel),
       m_wireGuardConfigModel(wireGuardConfigModel),
       m_openVpnConfigModel(openVpnConfigModel),
-      m_xrayConfigModel(xrayConfigModel),
+      m_xraySettingsModel(xraySettingsModel),
       m_torConfigModel(torConfigModel),
 #ifdef Q_OS_WINDOWS
       m_ikev2ConfigModel(ikev2ConfigModel),
@@ -242,7 +242,7 @@ bool InstallUiController::buildContainerConfigFromModel(int containerIndex, int 
     }
     case Proto::Xray:
     case Proto::SSXray: {
-        containerConfig.protocolConfig = m_xrayConfigModel->getProtocolConfig();
+        containerConfig.protocolConfig = m_xraySettingsModel->getProtocolConfig();
         break;
     }
     case Proto::TorWebSite: {
@@ -311,7 +311,7 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     Proto protocolType = static_cast<Proto>(protocolIndex);
 
     if (protocolType == Proto::Xray || protocolType == Proto::SSXray) {
-        const QStringList errs = m_xrayConfigModel->validationErrors();
+        const QStringList errs = m_xraySettingsModel->validationErrors();
         if (!errs.isEmpty()) {
             emit installationErrorOccurred(ErrorCode::XrayServerConfigInvalid);
             return;
@@ -752,7 +752,7 @@ void InstallUiController::updateProtocolConfigModel(const QString &serverId, int
     case Proto::WireGuard: updateIfPresent(m_wireGuardConfigModel, containerConfig.getWireGuardProtocolConfig()); break;
     case Proto::OpenVpn: updateIfPresent(m_openVpnConfigModel, containerConfig.getOpenVpnProtocolConfig()); break;
     case Proto::Xray:
-    case Proto::SSXray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
+    case Proto::SSXray: updateIfPresent(m_xraySettingsModel, containerConfig.getXrayProtocolConfig()); break;
     case Proto::TorWebSite: updateIfPresent(m_torConfigModel, containerConfig.getTorProtocolConfig()); break;
     case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;

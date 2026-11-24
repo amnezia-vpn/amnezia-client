@@ -22,7 +22,6 @@ public:
         IsWireGuardRole,
         IsAwgRole,
         IsOpenVpnRole,
-        IsXrayRole,
         IsSftpRole,
         IsIpsecRole,
         IsSocks5ProxyRole,

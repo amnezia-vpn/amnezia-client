@@ -71,8 +71,8 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
-#include "ui/models/protocols/xrayConfigModel.h"
-#include "ui/models/protocols/xrayConfigSnapshotsModel.h"
+#include "ui/models/protocols/xrayPresetsModel.h"
+#include "ui/models/protocols/xraySettingsModel.h"
 #include "ui/models/protocolsModel.h"
 #include "ui/models/services/torConfigModel.h"
 #include "ui/models/serversModel.h"
@@ -233,8 +233,8 @@ private:
     ApiDevicesModel* m_apiDevicesModel;
 
     OpenVpnConfigModel* m_openVpnConfigModel;
-    XrayConfigModel* m_xrayConfigModel;
-    XrayConfigSnapshotsModel* m_xrayConfigSnapshotsModel;
+    XrayPresetsModel* m_xrayPresetsModel;
+    XraySettingsModel* m_xraySettingsModel;
     TorConfigModel* m_torConfigModel;
     WireGuardConfigModel* m_wireGuardConfigModel;
     AwgConfigModel* m_awgConfigModel;
