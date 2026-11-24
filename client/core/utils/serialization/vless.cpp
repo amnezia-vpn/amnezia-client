@@ -110,30 +110,46 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     QJsonIO::SetValue(outbound, encryption, { "settings", "vnext", 0, "users", 0, "encryption" });
 
     // type-wise settings
+    if (type == "http" || type == "h2" || type == "h3" || type == "quic")
+    {
+        *errMessage = QObject::tr("transport \"%1\" was removed from Xray-core, use XHTTP").arg(type);
+        return QJsonObject();
+    }
+    if (query.queryItemValue("security") == "xtls")
+    {
+        *errMessage = QObject::tr("security \"xtls\" was removed from Xray-core, use TLS or REALITY with xtls-rprx-vision");
+        return QJsonObject();
+    }
     if (type == "kcp")
     {
-        const auto hasSeed = query.hasQueryItem("seed");
-        if (hasSeed)
-            QJsonIO::SetValue(stream, query.queryItemValue("seed"), { "kcpSettings", "seed" });
-
-        const auto hasHeaderType = query.hasQueryItem("headerType");
-        const auto headerType = hasHeaderType ? query.queryItemValue("headerType") : "none";
-        if (headerType != "none")
-            QJsonIO::SetValue(stream, headerType, { "kcpSettings", "header", "type" });
-    }
-    else if (type == "http")
-    {
-        const auto hasPath = query.hasQueryItem("path");
-        const auto path = hasPath ? QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()) : "/";
-        if (path != "/")
-            QJsonIO::SetValue(stream, path, { "httpSettings", "path" });
-
-        const auto hasHost = query.hasQueryItem("host");
-        if (hasHost)
+        const auto headerType = query.hasQueryItem("headerType") ? query.queryItemValue("headerType") : "none";
+        if (query.hasQueryItem("seed") || headerType != "none")
         {
-            const auto hosts = QJsonArray::fromStringList(query.queryItemValue("host").split(","));
-            QJsonIO::SetValue(stream, hosts, { "httpSettings", "host" });
+            *errMessage = QObject::tr("mKCP seed and header were removed from Xray-core");
+            return QJsonObject();
         }
+    }
+    else if (type == "xhttp" || type == "splithttp")
+    {
+        if (query.hasQueryItem("host"))
+            QJsonIO::SetValue(stream, query.queryItemValue("host"), { "xhttpSettings", "host" });
+        if (query.hasQueryItem("path"))
+            QJsonIO::SetValue(stream, QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()), { "xhttpSettings", "path" });
+        if (query.hasQueryItem("mode"))
+            QJsonIO::SetValue(stream, query.queryItemValue("mode"), { "xhttpSettings", "mode" });
+        if (query.hasQueryItem("extra"))
+        {
+            const auto extra = QJsonDocument::fromJson(QUrl::fromPercentEncoding(query.queryItemValue("extra").toUtf8()).toUtf8());
+            if (extra.isObject())
+                QJsonIO::SetValue(stream, extra.object(), { "xhttpSettings", "extra" });
+        }
+    }
+    else if (type == "httpupgrade")
+    {
+        if (query.hasQueryItem("host"))
+            QJsonIO::SetValue(stream, query.queryItemValue("host"), { "httpupgradeSettings", "host" });
+        if (query.hasQueryItem("path"))
+            QJsonIO::SetValue(stream, QUrl::fromPercentEncoding(query.queryItemValue("path").toUtf8()), { "httpupgradeSettings", "path" });
     }
     else if (type == "ws")
     {
@@ -145,27 +161,7 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
         const auto hasHost = query.hasQueryItem("host");
         if (hasHost)
         {
-            QJsonIO::SetValue(stream, query.queryItemValue("host"), { "wsSettings", "headers", "Host" });
-        }
-    }
-    else if (type == "quic")
-    {
-        const auto hasQuicSecurity = query.hasQueryItem("quicSecurity");
-        if (hasQuicSecurity)
-        {
-            const auto quicSecurity = query.queryItemValue("quicSecurity");
-            QJsonIO::SetValue(stream, quicSecurity, { "quicSettings", "security" });
-
-            if (quicSecurity != "none")
-            {
-                const auto key = query.queryItemValue("key");
-                QJsonIO::SetValue(stream, key, { "quicSettings", "key" });
-            }
-
-            const auto hasHeaderType = query.hasQueryItem("headerType");
-            const auto headerType = hasHeaderType ? query.queryItemValue("headerType") : "none";
-            if (headerType != "none")
-                QJsonIO::SetValue(stream, headerType, { "quicSettings", "header", "type" });
+            QJsonIO::SetValue(stream, query.queryItemValue("host"), { "wsSettings", "host" });
         }
     }
     else if (type == "grpc")
@@ -188,7 +184,7 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     // tls-wise settings
     const auto hasSecurity = query.hasQueryItem("security");
     const auto security = hasSecurity ? query.queryItemValue("security") : "none";
-    const auto tlsKey = security == "xtls" ? "xtlsSettings" : ( security == "tls" ? "tlsSettings" : "realitySettings" );
+    const auto tlsKey = security == "tls" ? "tlsSettings" : "realitySettings";
     if (security != "none")
     {
         QJsonIO::SetValue(stream, security, "security");
@@ -206,35 +202,37 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     {
         const auto alpnRaw = QUrl::fromPercentEncoding(query.queryItemValue("alpn").toUtf8());
         QStringList aplnElems = alpnRaw.split(",");
-        // h2 protocol is not supported by xray
-        aplnElems.removeAll("h2");
         if (!aplnElems.isEmpty()) {
             const auto alpnArray = QJsonArray::fromStringList(aplnElems);
             QJsonIO::SetValue(stream, alpnArray, { tlsKey, "alpn" });
         }
     }
-    // xtls-specific
-    if (security == "xtls" || security == "reality")
+    if (security == "tls" || security == "reality")
     {
         const auto flow = query.queryItemValue("flow");
         QJsonIO::SetValue(outbound, flow, { "settings", "vnext", 0, "users", 0, "flow" });
+        if (query.hasQueryItem("fp"))
+        {
+            const auto fp = QUrl::fromPercentEncoding(query.queryItemValue("fp").toUtf8());
+            QJsonIO::SetValue(stream, fp, { tlsKey, "fingerprint" });
+        }
+    }
+    if (security == "tls" && query.hasQueryItem("pcs"))
+    {
+        QJsonIO::SetValue(stream, query.queryItemValue("pcs"), { "tlsSettings", "pinnedPeerCertSha256" });
     }
 
     if (security == "reality")
     {
-        if (query.hasQueryItem("fp"))
-        {
-            const auto fp = QUrl::fromPercentEncoding(query.queryItemValue("fp").toUtf8());
-            QJsonIO::SetValue(stream, fp, { "realitySettings", "fingerprint" });
-        }
         if (query.hasQueryItem("pbk"))
         {
             const auto pbk = QUrl::fromPercentEncoding(query.queryItemValue("pbk").toUtf8());
             QJsonIO::SetValue(stream, pbk, { "realitySettings", "publicKey" });
         }
-        if (query.hasQueryItem("spiderX"))
+        const auto spiderXKey = query.hasQueryItem("spx") ? "spx" : "spiderX";
+        if (query.hasQueryItem(spiderXKey))
         {
-            const auto spiderX = QUrl::fromPercentEncoding(query.queryItemValue("spiderX").toUtf8());
+            const auto spiderX = QUrl::fromPercentEncoding(query.queryItemValue(spiderXKey).toUtf8());
             QJsonIO::SetValue(stream, spiderX, { "realitySettings", "spiderX" });
         }
         if (query.hasQueryItem("sid"))
@@ -277,20 +275,43 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
     if (!server.security.isEmpty() && server.security != "none") {
         query.addQueryItem("security", server.security);
     }
-    
-    if (!server.flow.isEmpty() && (server.security == "xtls" || server.security == "reality")) {
+
+    if (!server.flow.isEmpty() && (server.security == "reality" || server.security == "tls")) {
         query.addQueryItem("flow", server.flow);
     }
-    
+
     if (!server.serverName.isEmpty()) {
         query.addQueryItem("sni", server.serverName);
     }
-    
-    if (server.security == "reality") {
-        if (!server.fingerprint.isEmpty()) {
-            query.addQueryItem("fp", server.fingerprint);
+
+    if (!server.fingerprint.isEmpty() && (server.security == "reality" || server.security == "tls")) {
+        query.addQueryItem("fp", server.fingerprint);
+    }
+
+    if (!server.alpn.isEmpty() && server.security == "tls") {
+        query.addQueryItem("alpn", server.alpn);
+    }
+
+    if (server.network == "xhttp") {
+        if (!server.xhttpHost.isEmpty()) {
+            query.addQueryItem("host", server.xhttpHost);
         }
-        
+        if (!server.xhttpPath.isEmpty()) {
+            query.addQueryItem("path", server.xhttpPath);
+        }
+        if (!server.xhttpMode.isEmpty()) {
+            query.addQueryItem("mode", server.xhttpMode);
+        }
+        if (!server.xhttpExtra.isEmpty()) {
+            query.addQueryItem("extra", server.xhttpExtra);
+        }
+    }
+
+    if (!server.tlsPin.isEmpty() && server.security == "tls") {
+        query.addQueryItem("pcs", server.tlsPin);
+    }
+
+    if (server.security == "reality") {
         if (!server.publicKey.isEmpty()) {
             query.addQueryItem("pbk", server.publicKey);
         }
@@ -300,7 +321,7 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
         }
         
         if (!server.spiderX.isEmpty()) {
-            query.addQueryItem("spiderX", server.spiderX);
+            query.addQueryItem("spx", server.spiderX);
         }
     }
     

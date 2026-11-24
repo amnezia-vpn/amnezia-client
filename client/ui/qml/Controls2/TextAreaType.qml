@@ -15,17 +15,19 @@ Rectangle {
 
     property int maximumLength: 0
     property bool clearable: true
+    property string errorText
 
     readonly property bool atLimit: root.maximumLength > 0 && textArea.length >= root.maximumLength
+    readonly property bool hasError: root.errorText !== ""
 
     implicitWidth: 358
     implicitHeight: 180
 
     radius: 14
     color: AmneziaStyle.color.bgSurfaceAlt
-    border.width: textArea.activeFocus || root.atLimit || textArea.length === 0 ? 1 : 0
+    border.width: textArea.activeFocus || root.atLimit || root.hasError || textArea.length === 0 ? 1 : 0
     border.color: {
-        if (root.atLimit) {
+        if (root.atLimit || root.hasError) {
             return AmneziaStyle.color.statusDestructive
         }
         return textArea.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderField
@@ -115,14 +117,22 @@ Rectangle {
         SmallTextType {
             Layout.fillWidth: true
 
-            visible: root.maximumLength > 0
+            visible: root.hasError
+            text: root.errorText
+            color: AmneziaStyle.color.statusDestructive
+        }
+
+        SmallTextType {
+            Layout.fillWidth: true
+
+            visible: !root.hasError && root.maximumLength > 0
             text: textArea.length + "/" + root.maximumLength
             color: root.atLimit ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textQuaternary
         }
 
         Item {
             Layout.fillWidth: true
-            visible: root.maximumLength <= 0
+            visible: !root.hasError && root.maximumLength <= 0
         }
 
         IconButtonType {

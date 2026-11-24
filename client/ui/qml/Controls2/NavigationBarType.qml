@@ -12,6 +12,7 @@ Item {
     property string description
     property bool backButtonVisible: d.page === null || d.page.stackView === null || d.page.stackView.depth > 1
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
+    property var backAction: function() { PageController.closePage() }
 
     default property alias actions: actionsRow.data
 
@@ -23,7 +24,7 @@ Item {
 
     z: 2
 
-    onBackClicked: PageController.closePage()
+    onBackClicked: root.backAction()
 
     Component.onCompleted: {
         d.flickable = d.findFlickable()

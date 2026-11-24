@@ -15,6 +15,8 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/xrayInbound.h"
+#include "core/models/protocols/xrayPresets.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
@@ -94,6 +96,10 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             srv.sni = srv.site;
             srv.alpn = protocols::xray::defaultAlpn;
             srv.fingerprint = protocols::xray::defaultFingerprint;
+            if (protocol == Proto::Xray) {
+                srv.inboundTemplate = xrayInbound::templateFromServerConfig(srv);
+                srv.presetId = xrayPresets::matchBuiltin(srv.inboundTemplate, srv.site, srv.port);
+            }
             config.protocolConfig = xrayConfig;
             break;
         }

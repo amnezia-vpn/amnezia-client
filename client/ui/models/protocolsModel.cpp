@@ -38,7 +38,6 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
     roles[IsWireGuardRole] = "isWireGuard";
     roles[IsAwgRole] = "isAwg";
     roles[IsOpenVpnRole] = "isOpenVpn";
-    roles[IsXrayRole] = "isXray";
     roles[IsSftpRole] = "isSftp";
     roles[IsIpsecRole] = "isIpsec";
     roles[IsSocks5ProxyRole] = "isSocks5Proxy";
@@ -70,7 +69,6 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     case IsWireGuardRole: return proto == Proto::WireGuard;
     case IsAwgRole: return proto == Proto::Awg;
     case IsOpenVpnRole: return proto == Proto::OpenVpn;
-    case IsXrayRole: return proto == Proto::Xray;
     case IsSftpRole: return proto == Proto::Sftp;
     case IsIpsecRole: return proto == Proto::Ikev2;
     case IsSocks5ProxyRole: return proto == Proto::Socks5Proxy;

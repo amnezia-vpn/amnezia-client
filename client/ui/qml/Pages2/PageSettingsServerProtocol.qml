@@ -63,7 +63,7 @@ PageType {
             spacing: 0
 
             property bool isClientSettingsVisible: isWireGuard || isAwg
-            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess() || isXray
+            property bool isServerSettingsVisible: ServersUiController.isProcessedServerHasWriteAccess()
 
             ListItemType {
                 id: clientSettings

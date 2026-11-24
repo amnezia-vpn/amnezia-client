@@ -213,7 +213,7 @@ PageType {
                 selectionColor: AmneziaStyle.color.bgStateLayerAccent
                 selectedTextColor: AmneziaStyle.color.textPrimary
 
-                font.family: Qt.platform.os === "ios" || Qt.platform.os === "osx" ? "Menlo" : "monospace"
+                font.family: GC.monospaceFontFamily
                 font.pixelSize: 12
             }
         }

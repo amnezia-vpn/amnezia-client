@@ -91,11 +91,11 @@ void CoreController::initModels()
     m_awgConfigModel = new AwgConfigModel(this);
     setQmlContextProperty("AwgConfigModel", m_awgConfigModel);
 
-    m_xrayConfigModel = new XrayConfigModel(this);
-    setQmlContextProperty("XrayConfigModel", m_xrayConfigModel);
+    m_xrayPresetsModel = new XrayPresetsModel(m_appSettingsRepository, this);
+    setQmlContextProperty("XrayPresetsModel", m_xrayPresetsModel);
 
-    m_xrayConfigSnapshotsModel = new XrayConfigSnapshotsModel(m_appSettingsRepository, m_xrayConfigModel, this);
-    setQmlContextProperty("XrayConfigSnapshotsModel", m_xrayConfigSnapshotsModel);
+    m_xraySettingsModel = new XraySettingsModel(m_xrayPresetsModel, this);
+    setQmlContextProperty("XraySettingsModel", m_xraySettingsModel);
 
     m_torConfigModel = new TorConfigModel(this);
     setQmlContextProperty("TorConfigModel", m_torConfigModel);
@@ -192,7 +192,7 @@ void CoreController::initControllers()
     }
 
     m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,
-                                                     m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel, m_torConfigModel,
+                                                     m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xraySettingsModel, m_torConfigModel,
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif

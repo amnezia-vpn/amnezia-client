@@ -82,13 +82,10 @@ namespace PageLoader
 
         PageDevMenu,
 
-        PageProtocolXraySnapshots,
-        PageProtocolXrayTransportSettings,
-        PageProtocolXrayXmuxSettings,
-        PageProtocolXrayXPaddingSettings,
-        PageProtocolXrayFlowSettings,
-        PageProtocolXraySecuritySettings,
-        PageProtocolXrayXPaddingBytesSettings,
+        PageProtocolXrayPresets,
+        PageProtocolXrayConfigEditor,
+        PageProtocolXrayImportPreset,
+        PageProtocolXraySharePreset,
 
         PageSettingsLanguage,
 

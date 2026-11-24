@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/ui/qml">
         <file>Components/CopyableValueRow.qml</file>
+        <file>Components/XrayCodeEditor.qml</file>
+        <file>Components/XraySavePresetSheet.qml</file>
         <file>Components/CascadeSettings.qml</file>
         <file>Components/ConfigContentSheet.qml</file>
         <file>Components/QrCodeCard.qml</file>
@@ -116,14 +118,10 @@
         <file>Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>Pages2/PageProtocolXraySettings.qml</file>
 
-        <file>Pages2/PageProtocolXraySnapshots.qml</file>
-        <file>Pages2/PageProtocolXrayFlowSettings.qml</file>
-        <file>Pages2/PageProtocolXraySecuritySettings.qml</file>
-        <file>Pages2/PageProtocolXrayTransportSettings.qml</file>
-        <file>Pages2/PageProtocolXrayXmuxSettings.qml</file>
-        <file>Pages2/PageProtocolXrayXPaddingSettings.qml</file>
-        <file>Pages2/PageProtocolXrayXPaddingBytesSettings.qml</file>
-        <file>Controls2/MinMaxRowType.qml</file>
+        <file>Pages2/PageProtocolXrayPresets.qml</file>
+        <file>Pages2/PageProtocolXrayConfigEditor.qml</file>
+        <file>Pages2/PageProtocolXrayImportPreset.qml</file>
+        <file>Pages2/PageProtocolXraySharePreset.qml</file>
         <file>Controls2/NavigationBarType.qml</file>
         <file>Controls2/PopupMenuType.qml</file>
         <file>Controls2/PopupMenuItemType.qml</file>
