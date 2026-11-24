@@ -84,6 +84,8 @@ private slots:
     void udp443FlowStaysOnTheDevice();
     void mkcpTlsOutboundHasNoFingerprint();
     void xhttpPathGetsLeadingSlash();
+    void emptyRangeStaysCoreDefault();
+    void halfEmptyRangeUsesCoreDefault();
 };
 
 void TestXrayServerInbound::serverInboundCarriesNoDeviceSettings_data()
@@ -241,6 +243,38 @@ void TestXrayServerInbound::xhttpPathGetsLeadingSlash()
 
     const QString inbound = compact(c.toServerInboundJson(inboundInputs()));
     QVERIFY2(inbound.contains(QStringLiteral("\"path\":\"/text\"")), qPrintable(inbound));
+}
+
+void TestXrayServerInbound::emptyRangeStaysCoreDefault()
+{
+    XrayServerConfig c = fullyConfigured();
+    c.xhttp.scStreamUpServerSecsMin.clear();
+    c.xhttp.scStreamUpServerSecsMax.clear();
+    c.xhttp.scMaxEachPostBytesMin.clear();
+    c.xhttp.scMaxEachPostBytesMax.clear();
+
+    const QJsonObject inbound = c.toServerInboundJson(inboundInputs());
+    const QString text = compact(inbound);
+    QVERIFY2(!text.contains(QStringLiteral("scStreamUpServerSecs")), qPrintable(text));
+    QVERIFY2(!text.contains(QStringLiteral("scMaxEachPostBytes")), qPrintable(text));
+
+    XrayServerConfig rebuilt;
+    QCOMPARE(XrayServerConfig::fromServerInboundJson(inbound, rebuilt), XrayServerJsonStatus::Ok);
+    rebuilt.applyDefaults(false);
+    QVERIFY(rebuilt.xhttp.scStreamUpServerSecsMin.isEmpty());
+    QVERIFY(rebuilt.xhttp.scStreamUpServerSecsMax.isEmpty());
+    QVERIFY(rebuilt.xhttp.scMaxEachPostBytesMin.isEmpty());
+    QVERIFY(rebuilt.xhttp.scMaxEachPostBytesMax.isEmpty());
+}
+
+void TestXrayServerInbound::halfEmptyRangeUsesCoreDefault()
+{
+    XrayServerConfig c = fullyConfigured();
+    c.xhttp.scStreamUpServerSecsMin.clear();
+    c.xhttp.scStreamUpServerSecsMax = "50";
+
+    const QString inbound = compact(c.toServerInboundJson(inboundInputs()));
+    QVERIFY2(inbound.contains(QStringLiteral("\"scStreamUpServerSecs\":\"20-50\"")), qPrintable(inbound));
 }
 
 QTEST_APPLESS_MAIN(TestXrayServerInbound)
