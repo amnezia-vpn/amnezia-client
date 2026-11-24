@@ -17,6 +17,7 @@ function(codesign_sign_files files signature keychain)
         list(APPEND args --keychain "${keychain}")
     endif()
 
+    list(REMOVE_ITEM files "")
     foreach(file IN LISTS files)
         set(cmd ${CODESIGN_COMMAND} ${args} "${file}")
 
