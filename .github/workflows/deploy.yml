@@ -332,7 +332,7 @@ jobs:
     if: ${{ always() }}
 
     env:
-      QT_VERSION: 6.10.1
+      QT_VERSION: 6.9.3
       KEYCHAIN_PASSWORD: ""
 
       PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
