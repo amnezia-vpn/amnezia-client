@@ -179,11 +179,20 @@ if(NOT ANDROID)
         test_common
     )
 
-    add_executable(test_xray_config_model
-        testXrayConfigModel.cpp
+    add_executable(test_xray_inbound_validator
+        testXrayInboundValidator.cpp
     )
 
-    target_link_libraries(test_xray_config_model PRIVATE
+    target_link_libraries(test_xray_inbound_validator PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_xray_presets
+        testXrayPresets.cpp
+    )
+
+    target_link_libraries(test_xray_presets PRIVATE
         Qt6::Test
         test_common
     )
@@ -193,6 +202,15 @@ if(NOT ANDROID)
     )
 
     target_link_libraries(test_xray_core_accepts PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_xray_runtime
+        testXrayRuntime.cpp
+    )
+
+    target_link_libraries(test_xray_runtime PRIVATE
         Qt6::Test
         test_common
     )
@@ -463,6 +481,7 @@ endif()
 if(NOT ANDROID)
     add_subdirectory(selfHostedAdmin)
     add_subdirectory(api)
+    add_subdirectory(ui/xray)
 endif()
 
 enable_testing()
@@ -480,8 +499,10 @@ if(NOT ANDROID)
     add_test(NAME XraySerializationTest            COMMAND test_xray_serialization)
     add_test(NAME XrayServerInboundTest            COMMAND test_xray_server_inbound)
     add_test(NAME XrayGeneratorMatrixTest          COMMAND test_xray_generator_matrix)
-    add_test(NAME XrayConfigModelTest              COMMAND test_xray_config_model)
+    add_test(NAME XrayInboundValidatorTest         COMMAND test_xray_inbound_validator)
+    add_test(NAME XrayPresetsTest                  COMMAND test_xray_presets)
     add_test(NAME XrayCoreAcceptsTest              COMMAND test_xray_core_accepts)
+    add_test(NAME XrayRuntimeTest                  COMMAND test_xray_runtime)
     add_test(NAME ConfigFormatVersionTest          COMMAND test_config_format_version)
     add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
     add_test(NAME UiIpModelAndControllerTest       COMMAND test_ui_ip_model_and_controller)
