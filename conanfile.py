@@ -17,7 +17,7 @@ class AmneziaVPN(ConanFile):
 
         self.requires("libagw/1.0.8@amnezia")
         if has_service:
-            self.requires("xtun/0.0.2-rc3@amnezia")
+            self.requires("xtun/0.0.2-rc4@amnezia")
         self.requires("libssh/0.11.3@amnezia")
         self.requires("openssl/[>=1.1]@amnezia")
         self.requires("zlib/1.3.2")
