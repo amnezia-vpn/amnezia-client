@@ -310,6 +310,14 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     Proto protocolType = static_cast<Proto>(protocolIndex);
 
+    if (protocolType == Proto::Xray || protocolType == Proto::SSXray) {
+        const QStringList errs = m_xrayConfigModel->validationErrors();
+        if (!errs.isEmpty()) {
+            emit installationErrorOccurred(ErrorCode::XrayServerConfigInvalid);
+            return;
+        }
+    }
+
     ContainerConfig containerConfig;
     if (!buildContainerConfigFromModel(containerIndex, protocolIndex, containerConfig)) {
         return;
@@ -496,6 +504,18 @@ void InstallUiController::rebootServer(const QString &serverId)
     const auto errorCode = m_installController->rebootServer(serverId);
     if (errorCode == ErrorCode::NoError) {
         emit rebootServerFinished(tr("Server '%1' was rebooted").arg(serverName));
+    } else {
+        emit installationErrorOccurred(errorCode);
+    }
+}
+
+void InstallUiController::updateServerPackages(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+
+    const auto errorCode = m_installController->updateServerPackages(serverId);
+    if (errorCode == ErrorCode::NoError) {
+        emit updateServerPackagesFinished(tr("Packages on server '%1' were updated").arg(serverName));
     } else {
         emit installationErrorOccurred(errorCode);
     }

@@ -12,6 +12,8 @@ namespace amnezia
 
 struct WireGuardServerConfig {
     QString port;
+    QString cascadeEndpoint;
+    QString cascadePort;
     QString transportProto;
     QString subnetAddress;
     QString subnetMask;
@@ -28,6 +30,8 @@ struct WireGuardClientConfig {
     QString nativeConfig;
     QString hostName;
     int port;
+    QString cascadeEndpoint;
+    QString cascadePort;
     QString clientIp;
     QString clientPrivateKey;
     QString clientPublicKey;
@@ -40,6 +44,8 @@ struct WireGuardClientConfig {
 
     QMap<QString, QString> awgParams;
     bool isObfuscationEnabled = false;
+
+    void setCascade(const QString &newEndpoint, const QString &newPort);
 
     QJsonObject toJson() const;
     static WireGuardClientConfig fromJson(const QJsonObject& json);

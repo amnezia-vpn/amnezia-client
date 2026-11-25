@@ -176,19 +176,24 @@ private slots:
         }
     }
 
-    void testGatewayEndpointSignals() {
-        QSignalSpy gatewayEndpointChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::gatewayEndpointChanged);
+    void testDevGatewaySignals()
+    {
+        QSignalSpy devGatewayConfigChangedSpy(m_coreController->m_settingsUiController,
+                                              &SettingsUiController::devGatewayConfigChanged);
         QSignalSpy devGatewayEnvChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::devGatewayEnvChanged);
 
-        QString initialEndpoint = m_coreController->m_settingsController->getGatewayEndpoint();
         QString newEndpoint = "https://test-gateway.example.com";
+        QString newProxyStorages = "https://storage-1.example.com, https://storage-2.example.com";
+        QString newPublicKey = "dGVzdC1rZXk=";
 
-        m_coreController->m_settingsUiController->setGatewayEndpoint(newEndpoint);
-        QVERIFY2(gatewayEndpointChangedSpy.count() == 1, "gatewayEndpointChanged signal should be emitted");
-        QVERIFY2(gatewayEndpointChangedSpy.at(0).at(0).toString() == newEndpoint, "gatewayEndpointChanged should emit correct endpoint");
-        QVERIFY2(m_coreController->m_settingsController->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be updated in SettingsController");
-        QVERIFY2(m_coreController->m_settingsUiController->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be available in SettingsUiController");
-        QVERIFY2(m_coreController->m_appSettingsRepository->getGatewayEndpoint() == newEndpoint, "Gateway endpoint should be available in SecureAppSettingsRepository");
+        m_coreController->m_settingsUiController->saveDevGatewayConfig(newEndpoint, newProxyStorages, newPublicKey);
+        QVERIFY2(devGatewayConfigChangedSpy.count() == 1, "devGatewayConfigChanged signal should be emitted");
+        QVERIFY2(m_coreController->m_settingsUiController->getDevGatewayEndpoint() == newEndpoint,
+                 "Dev gateway endpoint should be available in SettingsUiController");
+        QVERIFY2(m_coreController->m_settingsUiController->getDevGatewayProxyStorages() == newProxyStorages,
+                 "Dev gateway proxy storages should be available in SettingsUiController");
+        QVERIFY2(m_coreController->m_settingsUiController->getDevGatewayPublicKey() == newPublicKey,
+                 "Dev gateway public key should be available in SettingsUiController");
 
         bool initialDevEnv = m_coreController->m_settingsController->isDevGatewayEnv();
         m_coreController->m_settingsUiController->toggleDevGatewayEnv(!initialDevEnv);

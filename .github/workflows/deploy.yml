@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+.[0-9]+'
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
@@ -71,12 +73,12 @@ jobs:
     env:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -186,12 +188,12 @@ jobs:
     env:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -330,15 +332,15 @@ jobs:
     if: ${{ always() }}
 
     env:
-      QT_VERSION: 6.10.1
+      QT_VERSION: 6.9.3
       KEYCHAIN_PASSWORD: ""
 
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -375,7 +377,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.0'
+        xcode-version: '26.4'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -415,12 +417,24 @@ jobs:
         APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
         APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
         APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+        CONFIGURE_ONLY: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || '' }}
+      shell: bash
       run: |
-        sh deploy/build.sh -t ios | \
-          sed -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/,/-Xcc/ { /-Xcc/!d; }' -e '/-Xcc -DDEV_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
-          sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
+        sh deploy/build.sh -t ios | sed -f deploy/hide_secrets.sed
+
+    - name: 'Archive for App Store'
+      if: startsWith(github.ref, 'refs/tags/')
+      working-directory: deploy
+      shell: bash
+      run: fastlane ios archive 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload App Store package'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/ios/AmneziaVPN.ipa
+        archive: false
+        retention-days: 7
 
 # ------------------------------------------------------
 
@@ -481,12 +495,12 @@ jobs:
       QT_VERSION: 6.10.1
       KEYCHAIN_PASSWORD: ""
 
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -629,19 +643,14 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      KEYCHAIN_PASSWORD: ""
 
-      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
-
-      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
-      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
-      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
-
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -652,13 +661,37 @@ jobs:
         submodules: 'true'
         fetch-depth: 10
 
-    - uses: ./.github/actions/apple-setup-provisioning-profile
+    - uses: ./.github/actions/apple-setup-keychain
+      id: setup-keychain
       with:
-        provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
 
-    - uses: ./.github/actions/apple-setup-provisioning-profile
+    - name: 'Install signing certificate'
+      uses: ./.github/actions/apple-install-cert
       with:
-        provisioning_profile_base64: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        cert-password: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+
+    - name: 'Install installer certificate'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: ./.github/actions/apple-install-cert
+      with:
+        keychain-path: ${{ steps.setup-keychain.outputs.keychain-path }}
+        keychain-password: ${{ env.KEYCHAIN_PASSWORD }}
+        cert-base64: ${{ secrets.MAC_APPSTORE_INSTALLER_CERT_BASE64 }}
+        cert-password: ${{ secrets.MAC_APPSTORE_INSTALLER_CERT_PASSWORD }}
+
+    - name: 'Install app provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.APPSTORE_CONNECT_MAC_PROVISIONING }}
+
+    - name: 'Install NE provisioning profile'
+      uses: ./.github/actions/apple-setup-provisioning-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.APPSTORE_CONNECT_MAC_NE_PROVISIONING }}
 
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
@@ -677,18 +710,6 @@ jobs:
         set-env: 'true'
         extra: '--base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install go'
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24'
-        cache: false
-
-    - name: 'Setup gomobile'
-      run: |
-          export PATH=$PATH:~/go/bin
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
-
     - name: 'Setup python'
       uses: actions/setup-python@v6
       with:
@@ -698,15 +719,32 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Build project'
-      run: |
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos_ne.sh
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        CONFIGURE_ONLY: ${{ startsWith(github.ref, 'refs/tags/') && 'true' || '' }}
+      shell: bash
+      run: deploy/build.sh -t macos-ne | sed -f deploy/hide_secrets.sed
 
     - name: 'Upload unpacked artifact'
+      if: ${{ !startsWith(github.ref, 'refs/tags/') }}
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
+        path: deploy/build/client/Release/AmneziaVPN.app
+        retention-days: 7
+
+    - name: 'Archive for App Store'
+      if: startsWith(github.ref, 'refs/tags/')
+      working-directory: deploy
+      shell: bash
+      run: fastlane mac archive 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload App Store package'
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/osx/AmneziaVPN.pkg
+        archive: false
         retention-days: 7
 
 # ------------------------------------------------------
@@ -802,12 +840,14 @@ jobs:
       APP_ANDROID_MIN_SDK: ${{ matrix.min_sdk }}
       APP_ANDROID_MAX_SDK: ${{ matrix.max_sdk }}
       APP_ANDROID_VERSION_CODE_OFFSET: ${{ matrix.version_code_offset }}
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      SANDBOX_AGW_PUBLIC_KEY_B64: ${{ secrets.SANDBOX_AGW_PUBLIC_KEY_B64 }}
+      SANDBOX_AGW_ENDPOINT: ${{ secrets.SANDBOX_AGW_ENDPOINT }}
+      SANDBOX_S3_ENDPOINT: ${{ secrets.SANDBOX_S3_ENDPOINT }}
       FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
@@ -896,6 +936,12 @@ jobs:
     - name: 'Install conan'
       run: pip install "conan==2.28.0"
 
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: android-${{ matrix.label }}
+        max-size: 1G
+
     - name: 'Decode keystore secret to file'
       env:
         KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
@@ -933,8 +979,7 @@ jobs:
         fi
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
-          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
-          mv deploy/build/${abi}/client/android-build/AmneziaVPN.apk \
+          mv deploy/build/client/android-build/build/outputs/apk/oss/release/*-${abi}-release.apk \
              $OUT/AmneziaVPN_${VERSION}_${LABEL}_${abi}.apk
         done
 
@@ -953,9 +998,9 @@ jobs:
         OUT=deploy/artifacts
         VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
 
-        deploy/build.sh -t android --sign --aab --play --build ./deploy/build/play
+        deploy/build.sh -t android --sign --aab --play
 
-        mv deploy/build/play/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
+        mv deploy/build/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
            $OUT/AmneziaVPN_${VERSION}_${LABEL}_play.aab
 
     - name: 'Upload universal APK'
@@ -1049,6 +1094,10 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
@@ -1140,6 +1189,17 @@ jobs:
             -name "test_*" \
             -exec chmod +x {} \;
 
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
+
       - name: Run tests
         env:
           AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
@@ -1216,6 +1276,16 @@ jobs:
             -name "test_*" \
             -exec chmod +x {} \;
 
+      - name: Download Xray core
+        shell: bash
+        run: |
+          XRAY_RELEASE=$(sed -n 's/^ARG XRAY_RELEASE="\(.*\)"/\1/p' client/server_scripts/xray/Dockerfile)
+          curl -fsSL -o "$RUNNER_TEMP/xray.zip" \
+            "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip"
+          unzip -q -o "$RUNNER_TEMP/xray.zip" xray -d "$RUNNER_TEMP/xray"
+          chmod +x "$RUNNER_TEMP/xray/xray"
+          echo "XRAY_BIN=$RUNNER_TEMP/xray/xray" >> "$GITHUB_ENV"
+
       - name: Run tests
         shell: bash
         run: |
@@ -1225,7 +1295,8 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
 
           ctest --test-dir deploy/build/client/tests --output-on-failure -VV \
-            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest)$"
+            --timeout 3600 \
+            -R "^(SelfHostedServerSetupTest|MultipleExportsTest|AdminSelfHostedExportTest|XrayVpsMatrixTest)$"
 
 # ------------------------------------------------------
 
@@ -1247,6 +1318,10 @@ jobs:
           - SettingsSignalsTest
           - UiServersModelAndControllerTest
           - XraySerializationTest
+          - XrayServerInboundTest
+          - XrayGeneratorMatrixTest
+          - XrayConfigModelTest
+          - XrayCoreAcceptsTest
           - UiLanguageModelAndControllerTest
           - UiIpModelAndControllerTest
           - UiAppSTModelAndControllerTest
@@ -1327,6 +1402,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+
+      - name: Download Xray core
+        if: matrix.filter == 'XrayCoreAcceptsTest'
+        shell: pwsh
+        run: |
+          $release = (Select-String -Path client/server_scripts/xray/Dockerfile -Pattern '^ARG XRAY_RELEASE="(.*)"').Matches[0].Groups[1].Value
+          $zip = Join-Path $env:RUNNER_TEMP "xray.zip"
+          $dir = Join-Path $env:RUNNER_TEMP "xray"
+          Invoke-WebRequest -Uri "https://github.com/XTLS/Xray-core/releases/download/$release/Xray-windows-64.zip" -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dir -Force
+          "XRAY_BIN=$(Join-Path $dir 'xray.exe')" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Run tests
         env:
@@ -1627,3 +1713,150 @@ jobs:
           disable-animations: true
           script: bash ci_run_android_tests.sh
 
+# ------------------------------------------------------
+
+  Pre-Release:
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') }}
+    needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: 'Check builds'
+      working-directory: .
+      env:
+        NEEDS: ${{ toJSON(needs) }}
+      run: |
+        jq -c 'map_values(.result)' <<< "$NEEDS"
+        jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+
+    - name: 'Get release notes template'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: .github/release-notes.md
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download Android APKs'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_{android11+,android9-10}_{arm64-v8a,armeabi-v7a,x86,x86_64}.apk'
+        path: dist
+        merge-multiple: true
+
+    - name: 'Download desktop installers'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_{linux_x64.run,macos_x64.pkg}'
+        path: dist
+        merge-multiple: true
+
+    - name: 'Publish pre-release'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        ls -l dist
+        if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+        else
+          export VERSION="$TAG"
+          export PREVIOUS_TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName)
+          envsubst '$VERSION $PREVIOUS_TAG' < .github/release-notes.md > release-notes.md
+
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" \
+            --title "$TAG" --notes-file release-notes.md --draft --prerelease --verify-tag
+        fi
+
+# ------------------------------------------------------
+
+  TestFlight:
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') }}
+    needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
+    runs-on: macos-26
+
+    env:
+      APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+      APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+      APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+
+    defaults:
+      run:
+        working-directory: deploy
+        shell: bash
+
+    steps:
+    - name: 'Check builds'
+      working-directory: .
+      env:
+        NEEDS: ${{ toJSON(needs) }}
+      run: |
+        jq -c 'map_values(.result)' <<< "$NEEDS"
+        jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+
+    - name: 'Get fastlane config'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          deploy/fastlane
+          deploy/hide_secrets.sed
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download iOS package'
+      uses: actions/download-artifact@v8
+      with:
+        name: AmneziaVPN.ipa
+        path: deploy/build/ios
+
+    - name: 'Download macOS package'
+      uses: actions/download-artifact@v8
+      with:
+        name: AmneziaVPN.pkg
+        path: deploy/build/osx
+
+    - name: 'Upload iOS build to TestFlight'
+      run: fastlane ios testflight_upload 2>&1 | sed -f hide_secrets.sed
+
+    - name: 'Upload macOS build to TestFlight'
+      run: fastlane mac testflight_upload 2>&1 | sed -f hide_secrets.sed
+
+# ------------------------------------------------------
+
+  Google-Play:
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/') }}
+    needs: [Build-Linux-Ubuntu, Build-Windows, Build-iOS, Build-MacOS, Build-MacOS-NE, Build-Android]
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: deploy
+        shell: bash
+
+    steps:
+    - name: 'Check builds'
+      working-directory: .
+      env:
+        NEEDS: ${{ toJSON(needs) }}
+      run: |
+        jq -c 'map_values(.result)' <<< "$NEEDS"
+        jq -e 'all(.[]; .result == "success" or .result == "skipped")' <<< "$NEEDS"
+
+    - name: 'Get fastlane config'
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          deploy/fastlane
+          deploy/hide_secrets.sed
+        sparse-checkout-cone-mode: false
+
+    - name: 'Download Play AABs'
+      uses: actions/download-artifact@v8
+      with:
+        pattern: 'AmneziaVPN_*_play.aab'
+        path: deploy/build/android
+        merge-multiple: true
+
+    - name: 'Upload to Google Play beta'
+      env:
+        GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      run: fastlane android play_upload 2>&1 | sed -f hide_secrets.sed

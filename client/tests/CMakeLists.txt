@@ -93,6 +93,42 @@ if(NOT ANDROID)
     add_new_test(test_connection                          testConnection.cpp)
     add_new_test(test_logs_controller                     testLogsController.cpp)
     add_new_test(test_openssl_library                     testOpenSSLLibrary.cpp)
+    
+    add_executable(test_xray_server_inbound
+        testXrayServerInbound.cpp
+    )
+
+    target_link_libraries(test_xray_server_inbound PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_xray_generator_matrix
+        testXrayGeneratorMatrix.cpp
+    )
+
+    target_link_libraries(test_xray_generator_matrix PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_xray_config_model
+        testXrayConfigModel.cpp
+    )
+
+    target_link_libraries(test_xray_config_model PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_xray_core_accepts
+        testXrayCoreAccepts.cpp
+    )
+
+    target_link_libraries(test_xray_core_accepts PRIVATE
+        Qt6::Test
+        test_common
+    )
 
     add_executable(test_favorite_locations_restore
         testFavoriteLocationsRestore.cpp
@@ -314,6 +350,10 @@ if(NOT ANDROID)
     add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
     add_test(NAME UiServersModelAndControllerTest  COMMAND test_ui_servers_model_and_controller)
     add_test(NAME XraySerializationTest            COMMAND test_xray_serialization)
+    add_test(NAME XrayServerInboundTest            COMMAND test_xray_server_inbound)
+    add_test(NAME XrayGeneratorMatrixTest          COMMAND test_xray_generator_matrix)
+    add_test(NAME XrayConfigModelTest              COMMAND test_xray_config_model)
+    add_test(NAME XrayCoreAcceptsTest              COMMAND test_xray_core_accepts)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).

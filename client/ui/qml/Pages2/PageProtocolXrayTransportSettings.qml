@@ -15,6 +15,11 @@ import "../Components"
 PageType {
     id: root
 
+    readonly property bool packetUpEffective: {
+        var m = XrayConfigModel.xhttpMode.toLowerCase()
+        return m === "packet-up" || ((m === "" || m === "auto") && XrayConfigModel.security !== "reality")
+    }
+
     function clampInt(text, lo, hi) {
         if (text === "")
             return ""
@@ -60,7 +65,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("RAW (TCP)")
                 checked: XrayConfigModel.transport === "raw"
-                onToggled: if (checked && XrayConfigModel.transport !== "raw") XrayConfigModel.transport = "raw"
+                onClicked: if (XrayConfigModel.transport !== "raw") XrayConfigModel.transport = "raw"
             }
 
             RadioItemType {
@@ -70,7 +75,7 @@ PageType {
                 text: qsTr("XHTTP")
                 subtitle: qsTr("Advanced users")
                 checked: XrayConfigModel.transport === "xhttp"
-                onToggled: if (checked && XrayConfigModel.transport !== "xhttp") XrayConfigModel.transport = "xhttp"
+                onClicked: if (XrayConfigModel.transport !== "xhttp") XrayConfigModel.transport = "xhttp"
             }
 
             RadioItemType {
@@ -79,7 +84,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("mKCP")
                 checked: XrayConfigModel.transport === "mkcp"
-                onToggled: if (checked && XrayConfigModel.transport !== "mkcp") XrayConfigModel.transport = "mkcp"
+                onClicked: if (XrayConfigModel.transport !== "mkcp") XrayConfigModel.transport = "mkcp"
             }
 
             ColumnLayout {
@@ -264,8 +269,9 @@ PageType {
                     textField.onTextEdited: XrayConfigModel.xhttpPath = textField.text
                     textField.onEditingFinished: {
                         var v = textField.text.trim()
+                        if (v !== "" && v.charAt(0) !== "/") v = "/" + v
+                        if (v !== textField.text) textField.text = v
                         if (v !== XrayConfigModel.xhttpPath) XrayConfigModel.xhttpPath = v
-                        pathField.errorText = XrayConfigModel.isValidPath(v) ? "" : qsTr("Path must start with \"/\"")
                     }
                 }
 
@@ -371,6 +377,7 @@ PageType {
 
                 DropDownType {
                     id: seqPlacementDropDown
+                    visible: root.packetUpEffective
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xhttpSeqPlacement
@@ -403,6 +410,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    visible: root.packetUpEffective
                     headerText: qsTr("SeqKey")
                     textField.text: XrayConfigModel.xhttpSeqKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -415,6 +423,7 @@ PageType {
 
                 DropDownType {
                     id: uplinkDataPlacementDropDown
+                    visible: root.packetUpEffective
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xhttpUplinkDataPlacement
@@ -447,6 +456,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    visible: root.packetUpEffective
                     headerText: qsTr("UplinkDataKey")
                     textField.text: XrayConfigModel.xhttpUplinkDataKey
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
@@ -589,6 +599,7 @@ PageType {
         enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
+            saveButton.forceActiveFocus()
             var errs = XrayConfigModel.validationErrors()
             if (errs.length > 0) {
                 PageController.showErrorMessage(errs.join("\n"))
@@ -603,8 +614,10 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
             var noButtonFunction = function () {}
             Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

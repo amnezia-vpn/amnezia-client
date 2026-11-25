@@ -1,5 +1,8 @@
 #include "installerBase.h"
 
+#include <QRandomGenerator>
+#include <iterator>
+
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -85,8 +88,10 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             srv.transport = protocols::xray::defaultTransport;
             srv.security = protocols::xray::defaultSecurity;
             srv.flow = protocols::xray::defaultFlow;
-            srv.site = protocols::xray::defaultSite;
-            srv.sni = protocols::xray::defaultSni;
+            const int siteIndex =
+                    QRandomGenerator::global()->bounded(static_cast<int>(std::size(protocols::xray::defaultSites)));
+            srv.site = protocols::xray::defaultSites[siteIndex];
+            srv.sni = srv.site;
             srv.alpn = protocols::xray::defaultAlpn;
             srv.fingerprint = protocols::xray::defaultFingerprint;
             config.protocolConfig = xrayConfig;

@@ -50,8 +50,9 @@ PageType {
 
                 ListItemType {
                     Layout.fillWidth: true
+                    enabled: XrayConfigModel.xPaddingObfsMode
                     text: qsTr("xPaddingBytes")
-                    subtitle: (XrayConfigModel.xPaddingBytesMin !== "" ? XrayConfigModel.xPaddingBytesMin : "0") + "—" + (XrayConfigModel.xPaddingBytesMax !== "" ? XrayConfigModel.xPaddingBytesMax : "0")
+                    subtitle: (XrayConfigModel.xPaddingBytesMin === "" && XrayConfigModel.xPaddingBytesMax === "") ? qsTr("Default") : (XrayConfigModel.xPaddingBytesMin !== "" ? XrayConfigModel.xPaddingBytesMin : XrayConfigModel.xPaddingBytesMinDefault()) + "—" + (XrayConfigModel.xPaddingBytesMax !== "" ? XrayConfigModel.xPaddingBytesMax : XrayConfigModel.xPaddingBytesMaxDefault())
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                     onClicked: {
                         PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
@@ -68,6 +69,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    enabled: XrayConfigModel.xPaddingObfsMode
                     Layout.topMargin: 12
                     headerText: qsTr("xPaddingKey")
                     placeholderText: XrayConfigModel.xPaddingKeyDefault()
@@ -82,6 +84,7 @@ PageType {
 
                 TextFieldType {
                     Layout.fillWidth: true
+                    enabled: XrayConfigModel.xPaddingObfsMode
                     headerText: qsTr("xPaddingHeader")
                     placeholderText: XrayConfigModel.xPaddingHeaderDefault()
                     textField.text: XrayConfigModel.xPaddingHeader
@@ -95,6 +98,7 @@ PageType {
 
                 DropDownType {
                     id: placementDropDown
+                    enabled: XrayConfigModel.xPaddingObfsMode
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xPaddingPlacement
@@ -127,6 +131,7 @@ PageType {
 
                 DropDownType {
                     id: methodDropDown
+                    enabled: XrayConfigModel.xPaddingObfsMode
                     fitContent: true
                     Layout.fillWidth: true
                     text: XrayConfigModel.xPaddingMethod
@@ -179,6 +184,12 @@ PageType {
         enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -188,8 +199,10 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
             var noButtonFunction = function () {}
             Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

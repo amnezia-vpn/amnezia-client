@@ -14,6 +14,9 @@ endif()
 if(NOT CLIENT_MACOS_APP_ICON_PATH)
     set(CLIENT_MACOS_APP_ICON_PATH "${_CLIENT_SRC_DIR}/images/AppIcon.icon" CACHE PATH "macOS app icon (Icon Composer .icon)")
 endif()
+if(NOT CLIENT_MACOS_APP_ICNS_PATH)
+    set(CLIENT_MACOS_APP_ICNS_PATH "${_CLIENT_SRC_DIR}/macos/app/AppIcon.icns" CACHE FILEPATH "macOS app icon (.icns) for builds without Xcode 26 and macOS 26")
+endif()
 
 if(NOT CLIENT_MACOS_EXTRA_PLIST_ENTRIES)
     set(CLIENT_MACOS_EXTRA_PLIST_ENTRIES "" CACHE STRING "Extra macOS Info.plist entries appended verbatim (e.g. appearance pinning)")
@@ -21,7 +24,7 @@ endif()
 
 # -- signing
 if(NOT CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER)
-    set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.AmneziaVPN" CACHE STRING "macOS app provisioning profile specifier for release")
+    set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.amneziaVPN" CACHE STRING "macOS app provisioning profile specifier for release")
 endif()
 if(NOT CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER_DEBUG)
     set(CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER_DEBUG "dev macos.org.amnezia.AmneziaVPN" CACHE STRING "macOS app provisioning profile specifier for debug")

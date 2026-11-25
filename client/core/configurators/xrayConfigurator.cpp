@@ -24,9 +24,9 @@
 namespace {
     Logger logger("XrayConfigurator");
 
-    QString effectiveClientFlow(const amnezia::XrayServerConfig &srv)
+    QString effectiveServerFlow(const amnezia::XrayServerConfig &srv)
     {
-        return amnezia::xrayEffective::clientFlow(srv);
+        return amnezia::xrayEffective::serverFlow(srv);
     }
 
     QString effectiveSecurity(const amnezia::XrayServerConfig &srv)
@@ -139,7 +139,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
         return ErrorCode::NoError;
     }
 
-    const QString flowValue = effectiveClientFlow(srv);
+    const QString flowValue = effectiveServerFlow(srv);
     QString realityPublicKey;
     QString realityShortId;
     if (effectiveSecurity(srv) == QLatin1String("reality")) {
@@ -314,7 +314,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
             return errorCode;
     }
 
-    const QString flowValue = effectiveClientFlow(srv);
+    const QString flowValue = effectiveServerFlow(srv);
     const QJsonArray clients = collectServerClients(credentials, container, flowValue, clientId, errorCode);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Xray writeServerConfigForSetup: upload failed, error=" << static_cast<int>(errorCode);

@@ -64,6 +64,7 @@ PageType {
                 SwitchRowType {
                     Layout.fillWidth: true
                     text: qsTr("xmux")
+                    descriptionText: qsTr("Set either maxConcurrency or maxConnections, not both")
                     checked: XrayConfigModel.xmuxEnabled
                     onToggled: XrayConfigModel.xmuxEnabled = checked
                 }
@@ -187,6 +188,12 @@ PageType {
         enabled: XrayConfigModel.hasUnsavedChanges
         text: qsTr("Save")
         onClicked: {
+            saveButton.forceActiveFocus()
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -196,8 +203,10 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                var touchesServer = XrayConfigModel.pendingChangeTouchesServer("")
+                if (touchesServer)
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray, touchesServer)
             }
             var noButtonFunction = function () {}
             Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

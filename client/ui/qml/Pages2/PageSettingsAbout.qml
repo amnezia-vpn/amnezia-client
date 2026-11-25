@@ -119,6 +119,16 @@ PageType {
                         ListItemType {
                             Layout.fillWidth: true
 
+                            text: qsTr("Amnezia Hub Telegram Bot")
+                            subtitle: qsTr("Ask us anything")
+                            icon.source: "qrc:/images/controls/telegram.svg"
+
+                            onClicked: Qt.openUrlExternally("https://telegram.me/amneziahub_bot?start=utm_ioIdiSEUDN")
+                        }
+
+                        ListItemType {
+                            Layout.fillWidth: true
+
                             text: qsTr("support@amnezia.org")
                             subtitle: qsTr("For reviews and bug reports")
                             icon.source: "qrc:/images/controls/mail.svg"
