@@ -335,6 +335,8 @@ extension PacketTunnelProvider {
           udp: 'udp'
         misc:
           task-stack-size: 20480
+          tcp-buffer-size: 16384
+          max-session-count: 128
           connect-timeout: 5000
           read-write-timeout: 60000
           log-file: '\(hevSocksLogFile())'

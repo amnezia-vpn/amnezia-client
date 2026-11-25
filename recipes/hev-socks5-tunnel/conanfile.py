@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Git
-from conan.tools.files import copy, collect_libs
+from conan.tools.files import copy, collect_libs, patch
 from conan.internal.model.pkg_type import PackageType
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.apple import is_apple_os
@@ -16,6 +16,7 @@ required_conan_version = ">=2.26"
 class HevSocks5Tunnel(ConanFile):
     name = "hev-socks5-tunnel"
     version = "2.15.0"
+    exports = "patches/*"
     settings = "os", "arch", "compiler"
     options = {
         "shared": [True, False],
@@ -52,6 +53,7 @@ class HevSocks5Tunnel(ConanFile):
         tc.generate()
 
     def build(self):
+        patch(self, patch_file=os.path.join(self.recipe_folder, "patches", "0001-rotate-evicted-session-to-tail.patch"))
         autotools = Autotools(self)
         autotools.make("shared" if self.options.shared else "static")
 

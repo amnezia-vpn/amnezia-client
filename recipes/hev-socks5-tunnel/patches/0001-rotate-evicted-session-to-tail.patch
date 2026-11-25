@@ -1,0 +1,15 @@
+From: NickVs2015 <nv@amnezia.org>
+Subject: [PATCH] rotate the evicted session to the tail so each insert evicts a live one
+
+---
+--- a/src/hev-socks5-tunnel.c	2026-11-25 21:59:33.681519817 +0300
++++ b/src/hev-socks5-tunnel.c	2026-11-25 21:59:33.716009460 +0300
+@@ -126,6 +126,8 @@
+     node = hev_list_first (&session_set);
+     sd = container_of (node, HevSocks5SessionData, node);
+     hev_socks5_session_terminate (sd->self);
++    hev_list_del (&session_set, node);
++    hev_list_add_tail (&session_set, node);
+ }
+ 
+ static void
