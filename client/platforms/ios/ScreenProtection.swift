@@ -81,9 +81,8 @@ class ScreenProtection {
 
   public func enable(for view: UIView) {
     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-      view.subviews.forEach {
-        self.pairs.append(ProtectionPair(from: $0))
-      }
+      guard self.pairs.isEmpty else { return }
+      self.pairs.append(ProtectionPair(from: view))
     }
   }
 
@@ -128,7 +127,7 @@ struct ProtectionPair {
   }
 
   func removeProtection() {
-    textField.superview?.superview?.layer.addSublayer(layer)
+    textField.layer.superlayer?.insertSublayer(layer, above: textField.layer)
     textField.layer.removeFromSuperlayer()
     textField.removeFromSuperview()
   }
