@@ -10,7 +10,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import <UserNotifications/UserNotifications.h>
-#import <QResource>
 
 MacOSStatusIcon::MacOSStatusIcon(QObject* parent) : QObject(parent) {
   MZ_COUNT_CTOR(MacOSStatusIcon);
@@ -30,22 +29,27 @@ MacOSStatusIcon::~MacOSStatusIcon() {
   m_statusItem = nullptr;
 }
 
-void MacOSStatusIcon::setIcon(const QString& iconPath) {
-  QResource resource(iconPath);
-  if (!resource.isValid()) {
-    qWarning() << "MacOSStatusIcon: invalid icon resource" << iconPath;
+void MacOSStatusIcon::setIcon(const QImage& icon, bool isTemplate) {
+  CGImageRef cgImage = icon.toCGImage();
+  if (!cgImage) {
+    qWarning() << "MacOSStatusIcon: invalid icon image";
     return;
   }
 
-  NSImage* image = [[NSImage alloc] initWithData:resource.uncompressedData().toNSData()];
   CGFloat side = [[NSStatusBar systemStatusBar] thickness] - 4.0;
-  image.size = NSMakeSize(side, side);
+  NSImage* image = [[NSImage alloc] initWithCGImage:cgImage size:NSMakeSize(side, side)];
+  CGImageRelease(cgImage);
+  [image setTemplate:isTemplate];
   static_cast<NSStatusItem*>(m_statusItem).button.image = image;
   [image release];
 }
 
 void MacOSStatusIcon::setMenu(QMenu* menu) {
   static_cast<NSStatusItem*>(m_statusItem).menu = menu ? menu->toNSMenu() : nil;
+}
+
+void MacOSStatusIcon::setToolTip(const QString& toolTip) {
+  static_cast<NSStatusItem*>(m_statusItem).button.toolTip = toolTip.toNSString();
 }
 
 void MacOSStatusIcon::showMessage(const QString& title, const QString& message) {

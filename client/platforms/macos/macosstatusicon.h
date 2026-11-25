@@ -5,6 +5,7 @@
 #ifndef MACOSSTATUSICON_H
 #define MACOSSTATUSICON_H
 
+#include <QImage>
 #include <QObject>
 #include <QString>
 
@@ -18,8 +19,9 @@ class MacOSStatusIcon final : public QObject {
   explicit MacOSStatusIcon(QObject* parent);
   ~MacOSStatusIcon();
 
-  void setIcon(const QString& iconPath);
+  void setIcon(const QImage& icon, bool isTemplate);
   void setMenu(QMenu* menu);
+  void setToolTip(const QString& toolTip);
   void showMessage(const QString& title, const QString& message);
 
  private:

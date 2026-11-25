@@ -57,6 +57,9 @@ public:
     bool isScreenshotsEnabled() const;
     void toggleScreenshotsEnabled(bool enable);
 
+    Qt::ColorScheme colorScheme() const;
+    void setColorScheme(Qt::ColorScheme scheme);
+
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
 

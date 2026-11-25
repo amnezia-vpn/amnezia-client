@@ -4,6 +4,8 @@
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 #include <QFile>
+#include <QGuiApplication>
+#include <QStyleHints>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -37,6 +39,8 @@ SettingsUiController::SettingsUiController(SettingsController* settingsControlle
     if (m_settingsController->isDevGatewayEnv()) {
         m_settingsController->enableDevMode();
     }
+
+    applyColorScheme();
 }
 
 void SettingsUiController::toggleAmneziaDns(bool enable)
@@ -135,6 +139,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+        applyColorScheme();
 
         if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
             emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
@@ -155,6 +160,7 @@ void SettingsUiController::clearSettings()
     emit autoStartChanged();
     emit startMinimizedChanged();
     emit resetLanguageToSystem();
+    applyColorScheme();
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
@@ -204,6 +210,23 @@ bool SettingsUiController::isScreenshotsEnabled()
 void SettingsUiController::toggleScreenshotsEnabled(bool enable)
 {
     m_settingsController->toggleScreenshotsEnabled(enable);
+}
+
+Qt::ColorScheme SettingsUiController::colorScheme()
+{
+    return m_settingsController->colorScheme();
+}
+
+void SettingsUiController::setColorScheme(Qt::ColorScheme scheme)
+{
+    m_settingsController->setColorScheme(scheme);
+    applyColorScheme();
+}
+
+void SettingsUiController::applyColorScheme()
+{
+    QGuiApplication::styleHints()->setColorScheme(m_settingsController->colorScheme());
+    emit colorSchemeChanged();
 }
 
 bool SettingsUiController::isNewsNotificationsEnabled()

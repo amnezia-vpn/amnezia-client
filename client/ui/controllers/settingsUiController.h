@@ -33,6 +33,7 @@ public:
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(Qt::ColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY colorSchemeChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -75,6 +76,9 @@ public slots:
 
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
+
+    Qt::ColorScheme colorScheme();
+    void setColorScheme(Qt::ColorScheme scheme);
 
     bool isCameraPresent();
 
@@ -138,8 +142,11 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void autoStartChanged();
     void startMinimizedChanged();
+    void colorSchemeChanged();
 
 private:
+    void applyColorScheme();
+
     SettingsController* m_settingsController;
     ServersController* m_serversController;
 };

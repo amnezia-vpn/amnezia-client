@@ -384,6 +384,16 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+Qt::ColorScheme SecureAppSettingsRepository::colorScheme() const
+{
+    return static_cast<Qt::ColorScheme>(value("Conf/colorScheme", static_cast<int>(Qt::ColorScheme::Unknown)).toInt());
+}
+
+void SecureAppSettingsRepository::setColorScheme(Qt::ColorScheme scheme)
+{
+    setValue("Conf/colorScheme", static_cast<int>(scheme));
+}
+
 int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
 {
     return value("Conf/countryListSortMode/" + listId, 0).toInt();

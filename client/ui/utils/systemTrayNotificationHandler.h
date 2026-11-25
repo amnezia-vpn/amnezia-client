@@ -7,8 +7,12 @@
 
 #include "notificationHandler.h"
 
+#include <QColor>
+#include <QElapsedTimer>
+#include <QImage>
 #include <QMenu>
 #include <QSystemTrayIcon>
+#include <QTimer>
 
 class MacOSStatusIcon;
 
@@ -36,7 +40,10 @@ private:
     void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
-    void setTrayIcon(const QString &iconPath);
+    QColor trayIconColor() const;
+    void updateTrayIcon();
+    void setTrayIcon(const QImage &icon, bool isTemplate);
+    void updateTrayToolTip();
 
 private:
     QMenu m_menu;
@@ -54,9 +61,13 @@ private:
     QAction* m_statusLabel = nullptr;    
     QAction* m_separator = nullptr;
 
-    const QString ConnectedTrayIconName = "active.png";
-    const QString DisconnectedTrayIconName = "default.png";
-    const QString ErrorTrayIconName = "error.png";
+    const QColor ConnectedTrayIconColor = QColor(0xFD, 0xBA, 0x74);
+    const QColor ErrorTrayIconColor = QColor(0xF8, 0x71, 0x71);
+    const int PulsePeriodMs = 1600;
+    QImage m_trayIconBase;
+    QTimer m_pulseTimer;
+    QElapsedTimer m_pulseClock;
+    Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Disconnected;
     QString  websiteUrl = "https://amnezia.org";
 };
 
