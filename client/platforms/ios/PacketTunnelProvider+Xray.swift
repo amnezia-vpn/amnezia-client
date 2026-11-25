@@ -296,6 +296,10 @@ extension PacketTunnelProvider {
         }
         LibXraySetSockCallback(cb, ctx)
 
+        setenv("AMNEZIA_H2_STREAM_WINDOW", "131072", 1)
+        setenv("AMNEZIA_H2_STREAM_WINDOW_MAX", "4194304", 1)
+        setenv("AMNEZIA_H2_WINDOW_GROWTH_BUDGET", "2097152", 1)
+
         LibXrayRunXray(nil,
                        path,
                        Int64.max)
