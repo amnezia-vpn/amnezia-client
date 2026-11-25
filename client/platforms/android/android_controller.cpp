@@ -202,6 +202,11 @@ void AndroidController::shareFile(const QString &path, const QString &mime)
                        QJniObject::fromString(mime).object<jstring>());
 }
 
+void AndroidController::installApk(const QString &path)
+{
+    callActivityMethod("installApk", "(Ljava/lang/String;)V", QJniObject::fromString(path).object<jstring>());
+}
+
 QString AndroidController::openFile(const QString &filter)
 {
     QEventLoop wait;

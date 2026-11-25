@@ -38,6 +38,14 @@ download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${
 download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_macos_x64.pkg
 download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_windows_x64.exe 
 
+for label in android11+ android9-10; do
+    for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+        apk=AmneziaVPN_${VERSION}_${label}_${abi}.apk
+        download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/${apk}
+        download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/${apk}.sha256
+    done
+done
+
 cd ../
 
 echo "Syncing to R2..."
