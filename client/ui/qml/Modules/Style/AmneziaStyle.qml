@@ -5,7 +5,9 @@ import QtQuick
 QtObject {
     id: root
 
-    readonly property bool isLight: Application.styleHints.colorScheme === Qt.ColorScheme.Light
+    property int requestedColorScheme: Qt.ColorScheme.Unknown
+    readonly property bool isLight: (requestedColorScheme !== Qt.ColorScheme.Unknown ? requestedColorScheme
+                                                                                     : Application.styleHints.colorScheme) === Qt.ColorScheme.Light
 
     property QtObject color: QtObject {
         readonly property color transparent: 'transparent'

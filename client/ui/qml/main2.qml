@@ -15,6 +15,12 @@ import "Pages2"
 Window  {
     id: root
 
+    Binding {
+        target: AmneziaStyle
+        property: "requestedColorScheme"
+        value: SettingsController.colorScheme
+    }
+
     Connections {
         target: Qt.application
         function onStateChanged() {

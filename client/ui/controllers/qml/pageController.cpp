@@ -3,6 +3,7 @@
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/appUiConfig.h"
+#include <QStyleHints>
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
@@ -26,8 +27,12 @@ PageController::PageController(ServersController* serversController, SettingsCon
     : QObject(parent), m_serversController(serversController), m_settingsController(settingsController)
 {
 #ifdef Q_OS_ANDROID
-    auto initialPageNavigationBarColor = getInitialPageNavigationBarColor();
-    AndroidController::instance()->setNavigationBarColor(initialPageNavigationBarColor);
+    auto updateSystemBarsColors = [this]() {
+        AndroidController::instance()->setNavigationBarColor(getInitialPageNavigationBarColor());
+        AndroidController::instance()->setStatusBarColor(isLightColorScheme() ? 0xFFF4F4F5 : 0xFF101012);
+    };
+    updateSystemBarsColors();
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, updateSystemBarsColors);
 
     connect(AndroidController::instance(), &AndroidController::imeInsetsChanged, this, [this](int heightDp) {
         m_imeHeight = heightDp;
@@ -92,10 +97,15 @@ void PageController::hideWindow()
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
     if (m_serversController->getServersCount()) {
-        return 0xFF1F1F23;
+        return isLightColorScheme() ? 0xFFEDEDF0 : 0xFF1F1F23;
     } else {
-        return 0xFF101012;
+        return isLightColorScheme() ? 0xFFF4F4F5 : 0xFF101012;
     }
+}
+
+bool PageController::isLightColorScheme() const
+{
+    return QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Light;
 }
 
 void PageController::updateNavigationBarColor(const int color)

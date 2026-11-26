@@ -92,6 +92,8 @@ signals:
     void safeAreaBottomMarginChanged();
 
 private:
+    bool isLightColorScheme() const;
+
     ServersController* m_serversController;
     SettingsController* m_settingsController;
 

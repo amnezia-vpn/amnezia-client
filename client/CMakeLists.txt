@@ -53,6 +53,7 @@ set(LIBS ${LIBS}
     amnezia::libagw
 )
 
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 find_package(Qt6 QUIET OPTIONAL_COMPONENTS CorePrivate)
 if(TARGET Qt6::CorePrivate)
     set(LIBS ${LIBS} Qt6::CorePrivate)
