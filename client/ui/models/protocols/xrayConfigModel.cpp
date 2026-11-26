@@ -759,7 +759,7 @@ QStringList XrayConfigModel::transportOptions()
 
 QStringList XrayConfigModel::fingerprintOptions()
 {
-    return { "hellochrome_120", "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
+    return { "chrome", "firefox", "safari", "ios", "android", "edge", "360", "qq", "random" };
 }
 
 QStringList XrayConfigModel::realityFingerprintOptions()
@@ -836,11 +836,6 @@ QString XrayConfigModel::mkcpDefaultCwndMultiplier()
 QString XrayConfigModel::portDefault()
 {
     return QString::fromLatin1(protocols::xray::defaultPort);
-}
-
-QString XrayConfigModel::sniDefault()
-{
-    return QString::fromLatin1(protocols::xray::defaultSni);
 }
 
 QString XrayConfigModel::xhttpHostDefault()
@@ -938,10 +933,7 @@ bool XrayConfigModel::isValidHost(const QString &host)
 bool XrayConfigModel::isValidSni(const QString &sni)
 {
     const QString t = sni.trimmed();
-    if (t.isEmpty()) {
-        return true;
-    }
-    if (t.contains(QLatin1Char('*'))) {
+    if (t.isEmpty() || t.contains(QLatin1Char('*'))) {
         return false;
     }
     return isValidSingleHost(t);

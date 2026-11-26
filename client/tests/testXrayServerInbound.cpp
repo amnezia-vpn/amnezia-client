@@ -241,8 +241,9 @@ void TestXrayServerInbound::legacyDefaultFingerprintIsReplacedForRealityOnly_dat
     QTest::addColumn<QString>("security");
     QTest::addColumn<QString>("fingerprint");
     QTest::addColumn<QString>("expected");
-    QTest::newRow("reality, old default") << "reality" << "hellochrome_120" << "chrome";
-    QTest::newRow("reality, chosen") << "reality" << "firefox" << "firefox";
+    QTest::newRow("reality, old default") << "reality" << "hellochrome_120"
+                                          << QString::fromLatin1(protocols::xray::defaultFingerprint);
+    QTest::newRow("reality, chosen") << "reality" << "safari" << "safari";
     QTest::newRow("tls, old default") << "tls" << "hellochrome_120" << "hellochrome_120";
 }
 

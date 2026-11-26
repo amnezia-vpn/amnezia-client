@@ -252,7 +252,6 @@ public:
     Q_INVOKABLE static QString mkcpDefaultCwndMultiplier();
 
     Q_INVOKABLE static QString portDefault();
-    Q_INVOKABLE static QString sniDefault();
     Q_INVOKABLE static QString xhttpHostDefault();
     Q_INVOKABLE static QString xhttpUplinkChunkSizeDefault();
     Q_INVOKABLE static QString scMaxEachPostBytesMinDefault();
