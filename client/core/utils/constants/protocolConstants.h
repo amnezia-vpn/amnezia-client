@@ -80,6 +80,7 @@ namespace amnezia
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "firefox";
+            constexpr char legacyDefaultFingerprint[] = "hellochrome_120";
             constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Stream-one";

@@ -3,7 +3,11 @@
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QNetworkProxy>
 #include <QProcess>
+#include <QScopeGuard>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -27,7 +31,10 @@ namespace
     {
         QList<CoreCase> out;
         for (const QString &security : { QStringLiteral("tls"), QStringLiteral("reality") }) {
-            for (const QString &fp : XrayConfigModel::fingerprintOptions()) {
+            const QStringList fingerprints = security == QLatin1String("reality")
+                    ? XrayConfigModel::realityFingerprintOptions()
+                    : XrayConfigModel::fingerprintOptions();
+            for (const QString &fp : fingerprints) {
                 XrayServerConfig srv = baseConfig("raw", security, "xtls-rprx-vision");
                 srv.fingerprint = fp;
                 out.append({ QStringLiteral("option/raw/%1/fingerprint=%2").arg(security, fp), srv });
@@ -85,6 +92,25 @@ namespace
         return all;
     }
 
+    quint16 freePort()
+    {
+        QTcpServer probe;
+        probe.listen(QHostAddress::LocalHost);
+        return probe.serverPort();
+    }
+
+    bool waitForPort(quint16 port)
+    {
+        for (int attempt = 0; attempt < 50; ++attempt) {
+            QTcpSocket probe;
+            probe.connectToHost(QHostAddress::LocalHost, port);
+            if (probe.waitForConnected(100))
+                return true;
+            QTest::qWait(100);
+        }
+        return false;
+    }
+
     QString fileNameFor(const QString &name)
     {
         QString out = name;
@@ -106,6 +132,8 @@ private slots:
     void generatedConfigs();
     void coreRejectsWhatWeRelyOn_data();
     void coreRejectsWhatWeRelyOn();
+    void realityHandshake_data();
+    void realityHandshake();
 
 private:
     struct Run
@@ -114,7 +142,9 @@ private:
         QString output;
     };
 
+    QString writeConfig(const QJsonObject &config, const QString &fileName);
     Run xrayTest(const QJsonObject &config, const QString &fileName);
+    bool startXray(QProcess &process, const QJsonObject &config, const QString &fileName, quint16 port);
     void useLocalCertificate(QJsonObject &serverConfig) const;
 
     QString m_xray;
@@ -149,14 +179,21 @@ void TestXrayCoreAccepts::initTestCase()
              qPrintable(QString::fromUtf8(cert.readAllStandardError())));
 }
 
-TestXrayCoreAccepts::Run TestXrayCoreAccepts::xrayTest(const QJsonObject &config, const QString &fileName)
+QString TestXrayCoreAccepts::writeConfig(const QJsonObject &config, const QString &fileName)
 {
     const QString path = m_dir.filePath(fileName + QStringLiteral(".json"));
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-        return { -1, QStringLiteral("cannot write ") + path };
+        return {};
     file.write(QJsonDocument(config).toJson());
-    file.close();
+    return path;
+}
+
+TestXrayCoreAccepts::Run TestXrayCoreAccepts::xrayTest(const QJsonObject &config, const QString &fileName)
+{
+    const QString path = writeConfig(config, fileName);
+    if (path.isEmpty())
+        return { -1, QStringLiteral("cannot write ") + fileName };
 
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
@@ -168,6 +205,16 @@ TestXrayCoreAccepts::Run TestXrayCoreAccepts::xrayTest(const QJsonObject &config
     run.exitCode = process.exitStatus() == QProcess::NormalExit ? process.exitCode() : -1;
     run.output = QString::fromUtf8(process.readAll()).trimmed();
     return run;
+}
+
+bool TestXrayCoreAccepts::startXray(QProcess &process, const QJsonObject &config, const QString &fileName, quint16 port)
+{
+    const QString path = writeConfig(config, fileName);
+    if (path.isEmpty())
+        return false;
+    process.setProcessChannelMode(QProcess::MergedChannels);
+    process.start(m_xray, { QStringLiteral("run"), QStringLiteral("-c"), path });
+    return process.waitForStarted() && waitForPort(port);
 }
 
 void TestXrayCoreAccepts::useLocalCertificate(QJsonObject &serverConfig) const
@@ -272,6 +319,101 @@ void TestXrayCoreAccepts::coreRejectsWhatWeRelyOn()
     const Run run = xrayTest(config, QStringLiteral("negative_") + what);
     QVERIFY2(run.exitCode != 0, qPrintable(QStringLiteral("xray accepted it: ") + compact(config)));
     QVERIFY2(run.output.contains(expected), qPrintable(run.output));
+}
+
+void TestXrayCoreAccepts::realityHandshake_data()
+{
+    QTest::addColumn<QString>("fingerprint");
+    QTest::newRow("default") << QString::fromLatin1(protocols::xray::defaultFingerprint);
+    QTest::newRow("saved legacy default") << QString::fromLatin1(protocols::xray::legacyDefaultFingerprint);
+    for (const QString &fp : XrayConfigModel::realityFingerprintOptions())
+        QTest::newRow(qPrintable(QStringLiteral("option ") + fp)) << fp;
+}
+
+void TestXrayCoreAccepts::realityHandshake()
+{
+    QFETCH(QString, fingerprint);
+
+    QProcess keygen;
+    keygen.start(m_xray, { QStringLiteral("x25519") });
+    QVERIFY(keygen.waitForFinished(30000));
+    const QStringList keys = QString::fromUtf8(keygen.readAllStandardOutput()).split(QLatin1Char('\n'));
+    QVERIFY(keys.size() >= 2);
+    const QString privateKey = keys.at(0).section(QStringLiteral(": "), 1).trimmed();
+    const QString publicKey = keys.at(1).section(QStringLiteral(": "), 1).trimmed();
+
+    QTcpServer origin;
+    QVERIFY(origin.listen(QHostAddress::LocalHost));
+    connect(&origin, &QTcpServer::newConnection, &origin, [&origin] {
+        QTcpSocket *peer = origin.nextPendingConnection();
+        connect(peer, &QTcpSocket::readyRead, peer, [peer] { peer->write("pong:" + peer->readAll()); });
+    });
+
+    const quint16 decoyPort = freePort();
+    XrayServerConfig decoySrv = baseConfig("raw", "tls", "");
+    decoySrv.port = QString::number(decoyPort);
+    QJsonObject decoy = serverJson(decoySrv);
+    useLocalCertificate(decoy);
+
+    XrayServerConfig srv = baseConfig("raw", "reality", "xtls-rprx-vision");
+    srv.port = QString::number(freePort());
+    srv.fingerprint = fingerprint;
+
+    XrayServerInboundInputs serverInputs = inboundInputs(srv);
+    serverInputs.realityPrivateKey = privateKey;
+    QJsonObject server = srv.toServerInboundJson(serverInputs);
+    QJsonArray inbounds = server.value("inbounds").toArray();
+    QJsonObject inbound = inbounds.first().toObject();
+    QJsonObject stream = streamOf(inbound);
+    QJsonObject reality = stream.value("realitySettings").toObject();
+    reality["dest"] = QStringLiteral("127.0.0.1:%1").arg(decoyPort);
+    stream["realitySettings"] = reality;
+    inbound["streamSettings"] = stream;
+    inbounds[0] = inbound;
+    server["inbounds"] = inbounds;
+    const QJsonObject allowLoopback { { "finalRules", QJsonArray { QJsonObject { { "action", "allow" } } } } };
+    server["outbounds"] = QJsonArray { QJsonObject { { "protocol", "freedom" }, { "settings", allowLoopback } } };
+
+    XrayClientOutboundInputs clientInputs = outboundInputs();
+    clientInputs.serverAddress = QStringLiteral("127.0.0.1");
+    clientInputs.realityPublicKey = publicKey;
+    XrayProtocolConfig cfg;
+    cfg.serverConfig = srv;
+    QJsonObject client =
+            QJsonDocument::fromJson(sanitizeNativeConfig(compact(cfg.toClientOutboundJson(clientInputs))).toUtf8()).object();
+    const quint16 socksPort = freePort();
+    QJsonArray clientInbounds = client.value("inbounds").toArray();
+    QJsonObject socks = clientInbounds.first().toObject();
+    socks["port"] = socksPort;
+    clientInbounds[0] = socks;
+    client["inbounds"] = clientInbounds;
+
+    QProcess decoyProcess;
+    QProcess serverProcess;
+    QProcess clientProcess;
+    const auto stopProcesses = qScopeGuard([&] {
+        for (QProcess *process : { &clientProcess, &serverProcess, &decoyProcess }) {
+            process->kill();
+            process->waitForFinished();
+        }
+    });
+    QVERIFY2(startXray(decoyProcess, decoy, QStringLiteral("handshake_decoy"), decoyPort),
+             qPrintable(decoyProcess.readAll()));
+    QVERIFY2(startXray(serverProcess, server, QStringLiteral("handshake_server"), srv.port.toUShort()),
+             qPrintable(serverProcess.readAll()));
+    QVERIFY2(startXray(clientProcess, client, QStringLiteral("handshake_client"), socksPort),
+             qPrintable(clientProcess.readAll()));
+
+    QTcpSocket socket;
+    socket.setProxy(QNetworkProxy(QNetworkProxy::Socks5Proxy, QStringLiteral("127.0.0.1"), socksPort));
+    QByteArray reply;
+    connect(&socket, &QTcpSocket::connected, &socket, [&socket] { socket.write("ping"); });
+    connect(&socket, &QTcpSocket::readyRead, &socket, [&socket, &reply] { reply += socket.readAll(); });
+    socket.connectToHost(QStringLiteral("127.0.0.1"), origin.serverPort());
+
+    QTRY_VERIFY2_WITH_TIMEOUT(
+            reply == "pong:ping",
+            qPrintable(QStringLiteral("fingerprint %1 was not proxied\n").arg(fingerprint) + compact(client)), 10000);
 }
 
 QTEST_GUILESS_MAIN(TestXrayCoreAccepts)

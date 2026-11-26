@@ -234,6 +234,7 @@ public:
     Q_INVOKABLE static QStringList securityOptions();
     Q_INVOKABLE static QStringList transportOptions();
     Q_INVOKABLE static QStringList fingerprintOptions();
+    Q_INVOKABLE static QStringList realityFingerprintOptions();
     Q_INVOKABLE static QStringList alpnOptions();
     Q_INVOKABLE static QStringList xhttpModeOptions();
     Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();

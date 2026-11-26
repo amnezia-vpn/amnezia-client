@@ -189,7 +189,7 @@ PageType {
                     listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
-                                var opts = XrayConfigModel.fingerprintOptions()
+                                var opts = XrayConfigModel.realityFingerprintOptions()
                                 for (var i = 0; i < opts.length; i++) {
                                     append({name: opts[i]})
                                 }
