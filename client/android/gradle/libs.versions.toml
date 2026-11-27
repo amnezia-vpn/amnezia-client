@@ -13,7 +13,7 @@ androidx-datastore = "1.1.1"
 kotlinx-coroutines = "1.8.1"
 kotlinx-serialization = "1.6.3"
 google-mlkit = "17.3.0"
-amnezia-xtun = "0.0.2-rc2"
+amnezia-xtun = "0.0.2-rc4"
 
 [libraries]
 android-billing = { module = "com.android.billingclient:billing-ktx", version.ref = "android-billing" }

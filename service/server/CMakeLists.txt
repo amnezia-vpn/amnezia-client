@@ -103,6 +103,9 @@ if(WIN32)
     find_package(OpenSSL REQUIRED)
     set(CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
 
+    find_package(wintun REQUIRED)
+    list(APPEND CONAN_BINS $<TARGET_FILE:amnezia::wintun>)
+
     add_custom_command(TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CONAN_BINS}
