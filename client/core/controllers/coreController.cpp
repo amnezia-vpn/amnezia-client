@@ -26,6 +26,10 @@
     #include "core/utils/swiftBridge.h"
 #endif
 
+#ifdef AMNEZIA_DESKTOP
+    #include "core/utils/ipcClient.h"
+#endif
+
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
                                QQmlApplicationEngine *engine, QObject *parent,
                                bool skipPlatformControllerInit)
@@ -295,6 +299,10 @@ void CoreController::initLogging()
         }
     }
     Logger::setServiceLogsEnabled(enabled);
+#endif
+#ifdef AMNEZIA_DESKTOP
+    connect(&IpcClient::Instance(), &IpcClient::serviceConnected, this,
+            [this]() { Logger::setServiceLogsEnabled(m_appSettingsRepository->isSaveLogs()); });
 #endif
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     if (m_appSettingsRepository->isSaveLogs()) {

@@ -45,6 +45,7 @@ public:
         return onSuccess(iface);
     }
 signals:
+    void serviceConnected();
 
 private:
     QRemoteObjectNode m_node;
