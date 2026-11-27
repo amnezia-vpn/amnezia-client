@@ -4247,6 +4247,11 @@ Create one from the current settings.</source>
         <source>Theme</source>
         <translation>ธีม</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>สีเน้น</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7209,6 +7214,34 @@ For more detailed information, you can
         <location filename="../core/repositories/secureServersRepository.cpp" line="238"/>
         <source>Server</source>
         <translation>เซิร์ฟเวอร์</translation>
+    </message>
+</context>
+<context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>สีส้ม</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>สีม่วง</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>สีเขียวขุ่น</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>สีฟ้า</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>สีเน้น</translation>
     </message>
 </context>
 <context>

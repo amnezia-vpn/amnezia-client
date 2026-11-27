@@ -255,6 +255,16 @@ void SettingsController::setColorScheme(Qt::ColorScheme scheme)
     m_appSettingsRepository->setColorScheme(scheme);
 }
 
+int SettingsController::accentColor() const
+{
+    return m_appSettingsRepository->accentColor();
+}
+
+void SettingsController::setAccentColor(int accent)
+{
+    m_appSettingsRepository->setAccentColor(accent);
+}
+
 bool SettingsController::isNewsNotificationsEnabled() const
 {
     return m_appSettingsRepository->isNewsNotifications();

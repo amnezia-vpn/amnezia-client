@@ -4247,6 +4247,11 @@ Buat satu dari pengaturan saat ini.</translation>
         <source>Theme</source>
         <translation>Tema</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>Warna aksen</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7209,6 +7214,34 @@ Untuk informasi lebih terperinci, Anda dapat
         <location filename="../core/repositories/secureServersRepository.cpp" line="238"/>
         <source>Server</source>
         <translation>Server</translation>
+    </message>
+</context>
+<context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>Oranye</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>Ungu</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>Toska</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>Biru</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>Warna aksen</translation>
     </message>
 </context>
 <context>

@@ -394,6 +394,16 @@ void SecureAppSettingsRepository::setColorScheme(Qt::ColorScheme scheme)
     setValue("Conf/colorScheme", static_cast<int>(scheme));
 }
 
+int SecureAppSettingsRepository::accentColor() const
+{
+    return value("Conf/accentColor", 0).toInt();
+}
+
+void SecureAppSettingsRepository::setAccentColor(int accent)
+{
+    setValue("Conf/accentColor", accent);
+}
+
 int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
 {
     return value("Conf/countryListSortMode/" + listId, 0).toInt();

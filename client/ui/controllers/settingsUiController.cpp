@@ -140,6 +140,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit autoStartChanged();
         emit startMinimizedChanged();
         applyColorScheme();
+        emit accentColorChanged();
 
         if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
             emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
@@ -161,6 +162,7 @@ void SettingsUiController::clearSettings()
     emit startMinimizedChanged();
     emit resetLanguageToSystem();
     applyColorScheme();
+    emit accentColorChanged();
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
@@ -227,6 +229,17 @@ void SettingsUiController::applyColorScheme()
 {
     QGuiApplication::styleHints()->setColorScheme(m_settingsController->colorScheme());
     emit colorSchemeChanged();
+}
+
+int SettingsUiController::accentColor()
+{
+    return m_settingsController->accentColor();
+}
+
+void SettingsUiController::setAccentColor(int accent)
+{
+    m_settingsController->setAccentColor(accent);
+    emit accentColorChanged();
 }
 
 bool SettingsUiController::isNewsNotificationsEnabled()

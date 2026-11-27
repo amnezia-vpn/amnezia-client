@@ -80,6 +80,8 @@ public:
     void setScreenshotsEnabled(bool enabled);
     Qt::ColorScheme colorScheme() const;
     void setColorScheme(Qt::ColorScheme scheme);
+    int accentColor() const;
+    void setAccentColor(int accent);
 
     int countryListSortMode(const QString &listId) const;
     void setCountryListSortMode(const QString &listId, int mode);

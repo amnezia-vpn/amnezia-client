@@ -4248,6 +4248,11 @@ Create one from the current settings.</source>
         <source>Theme</source>
         <translation>Тема</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>Цвет акцента</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7221,6 +7226,34 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../core/repositories/secureServersRepository.cpp" line="238"/>
         <source>Server</source>
         <translation>Сервер</translation>
+    </message>
+</context>
+<context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>Оранжевый</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>Фиолетовый</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>Бирюзовый</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>Голубой</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>Цвет акцента</translation>
     </message>
 </context>
 <context>

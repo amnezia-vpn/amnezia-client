@@ -4247,6 +4247,11 @@ Create one from the current settings.</source>
         <source>Theme</source>
         <translation>Тема</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>Колір акценту</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7215,6 +7220,34 @@ For more detailed information, you can
         <location filename="../core/repositories/secureServersRepository.cpp" line="238"/>
         <source>Server</source>
         <translation>Сервер</translation>
+    </message>
+</context>
+<context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>Помаранчевий</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>Фіолетовий</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>Бірюзовий</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>Блакитний</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>Колір акценту</translation>
     </message>
 </context>
 <context>

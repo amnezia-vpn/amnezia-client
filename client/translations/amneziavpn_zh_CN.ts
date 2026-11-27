@@ -4247,6 +4247,11 @@ Create one from the current settings.</source>
         <source>Theme</source>
         <translation>主题</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>强调色</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7209,6 +7214,34 @@ For more detailed information, you can
         <location filename="../core/repositories/secureServersRepository.cpp" line="238"/>
         <source>Server</source>
         <translation>服务器</translation>
+    </message>
+</context>
+<context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>橙色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>紫色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>青绿色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>蓝色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>强调色</translation>
     </message>
 </context>
 <context>

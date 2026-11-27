@@ -60,6 +60,9 @@ public:
     Qt::ColorScheme colorScheme() const;
     void setColorScheme(Qt::ColorScheme scheme);
 
+    int accentColor() const;
+    void setAccentColor(int accent);
+
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
 

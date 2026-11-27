@@ -21,6 +21,12 @@ Window  {
         value: SettingsController.colorScheme
     }
 
+    Binding {
+        target: AmneziaStyle
+        property: "requestedAccent"
+        value: SettingsController.accentColor
+    }
+
     Connections {
         target: Qt.application
         function onStateChanged() {

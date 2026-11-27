@@ -34,6 +34,7 @@ public:
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
     Q_PROPERTY(Qt::ColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY colorSchemeChanged)
+    Q_PROPERTY(int accentColor READ accentColor WRITE setAccentColor NOTIFY accentColorChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -79,6 +80,9 @@ public slots:
 
     Qt::ColorScheme colorScheme();
     void setColorScheme(Qt::ColorScheme scheme);
+
+    int accentColor();
+    void setAccentColor(int accent);
 
     bool isCameraPresent();
 
@@ -143,6 +147,7 @@ signals:
     void autoStartChanged();
     void startMinimizedChanged();
     void colorSchemeChanged();
+    void accentColorChanged();
 
 private:
     void applyColorScheme();
