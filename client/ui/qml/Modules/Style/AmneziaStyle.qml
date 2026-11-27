@@ -52,7 +52,7 @@ QtObject {
         readonly property color borderField: root.isLight ? '#D4D4D8' : '#52525B'
         readonly property color borderFocus: root.isLight ? '#27272A' : '#E4E4E7'
 
-        readonly property color accentLight: root.isLight ? '#F97316' : '#FDBA74'
+        readonly property color accentLight: '#FDBA74'
         readonly property color accentDefault: root.isLight ? '#EA580C' : '#F59E0B'
         readonly property color accentDark: root.isLight ? '#C2410C' : '#D97706'
         readonly property color accentDeep: root.isLight ? '#FDBA74' : '#78350F'
@@ -74,6 +74,6 @@ QtObject {
 
         readonly property color shadowLayer1: root.isLight ? '#14000000' : '#26000000'
         readonly property color shadowLayer2: root.isLight ? '#26000000' : '#4D000000'
-        readonly property color shadowGlow: root.isLight ? '#F97316' : '#FBB751'
+        readonly property color shadowGlow: '#FBB751'
     }
 }
