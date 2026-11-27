@@ -2,12 +2,12 @@
 #define IOS_CONTROLLER_H
 
 #include "core/protocols/vpnProtocol.h"
+#include "core/utils/tunnelSettings.h"
 #include <functional>
 #include <QVariant>
 #include <QVariantMap>
 #include <QStringList>
 #include <QList>
-#include <QElapsedTimer>
 #include <atomic>
 
 #ifdef __OBJC__
@@ -19,11 +19,8 @@ using namespace amnezia;
 
 struct Action
 {
-    static const char *start;
-    static const char *restart;
-    static const char *stop;
-    static const char *getTunnelId;
     static const char *getStatus;
+    static const char *switchProxy;
 };
 
 struct MessageKey
@@ -31,12 +28,6 @@ struct MessageKey
     static const char *action;
     static const char *tunnelId;
     static const char *config;
-    static const char *errorCode;
-    static const char *host;
-    static const char *port;
-    static const char *isOnDemand;
-    static const char *SplitTunnelType;
-    static const char *SplitTunnelSites;
 };
 
 class IosController : public QObject
@@ -49,7 +40,8 @@ public:
     virtual ~IosController() override = default;
 
     bool initialize();
-    bool connectVpn(amnezia::Proto proto, const QJsonObject &configuration);
+    bool connectVpn(const QJsonObject &configuration);
+    void switchProxy(const QJsonObject &configuration);
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);
@@ -104,7 +96,6 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-    void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void importConfigFromOutside(const QString);
     void importBackupFromOutside(const QString);
     void storeTransactionUpdated(const QVariantMap &transaction);
@@ -116,17 +107,8 @@ protected slots:
 private:
     explicit IosController();
 
-    bool setupOpenVPN();
-    bool setupWireGuard();
-    bool setupAwg();
-    bool setupXray();
-    bool setupSSXray();
-
-    bool startOpenVPN(const QString &config);
-    bool startWireGuard(const QString &jsonConfig);
-    bool startXray(const QString &jsonConfig);
-
     void startTunnel();
+    void saveProviderConfiguration(const QJsonObject &configuration);
     void emitConnectionStateIfChanged(Vpn::ConnectionState state);
 
 private:
@@ -138,14 +120,8 @@ private:
     void sendVpnExtensionMessage(NSDictionary *message, std::function<void(NSDictionary *)> callback = nullptr);
 #endif
 
-    amnezia::Proto m_proto;
-    QJsonObject m_rawConfig;
     QString m_tunnelId;
-    uint64_t m_txBytes = 0;
-    uint64_t m_rxBytes = 0;
-    bool m_handshakeAwaiting = false;
-    bool m_handshakeConfirmed = false;
-    QElapsedTimer m_handshakeTimer;
+    bool m_isTunnelConnected = false;
     Vpn::ConnectionState m_lastEmittedState = Vpn::ConnectionState::Unknown;
     std::atomic_bool m_statusRequestInFlight { false };
 };

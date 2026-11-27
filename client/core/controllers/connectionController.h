@@ -38,11 +38,9 @@ public:
 
     ErrorCode openConnection(const QString &serverId);
 
-    void closeConnection();
+    ErrorCode switchConnection(const QString &serverId);
 
-#ifdef Q_OS_ANDROID
-    void restoreConnection();
-#endif
+    void closeConnection();
 
     void onKillSwitchModeChanged(bool enabled);
 
@@ -66,12 +64,9 @@ public:
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void switchConnectionRequested(DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
-
-#ifdef Q_OS_ANDROID
-    void restoreConnectionRequested();
-#endif
 
 private:
     ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;

@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "macosstatusicon.h"
-#include "leakdetector.h"
 
 #include <QDebug>
 #include <QMenu>
@@ -13,16 +12,12 @@
 #import <QResource>
 
 MacOSStatusIcon::MacOSStatusIcon(QObject* parent) : QObject(parent) {
-  MZ_COUNT_CTOR(MacOSStatusIcon);
-
   NSStatusItem* item = [[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength];
   item.visible = YES;
   m_statusItem = [item retain];
 }
 
 MacOSStatusIcon::~MacOSStatusIcon() {
-  MZ_COUNT_DTOR(MacOSStatusIcon);
-
   NSStatusItem* item = static_cast<NSStatusItem*>(m_statusItem);
   item.menu = nil;
   [[NSStatusBar systemStatusBar] removeStatusItem:item];

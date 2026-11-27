@@ -7,6 +7,12 @@ IpcClient::IpcClient(QObject *parent) : QObject(parent)
 {
     m_node.connectToNode(QUrl("local:" + amnezia::getIpcServiceUrl()));
     m_interface.reset(m_node.acquire<IpcInterfaceReplica>());
+
+    connect(m_interface.data(), &QRemoteObjectReplica::stateChanged, this, [this](QRemoteObjectReplica::State state) {
+        if (state == QRemoteObjectReplica::Valid) {
+            emit serviceConnected();
+        }
+    });
 }
 
 IpcClient& IpcClient::Instance()
@@ -30,45 +36,4 @@ QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
         qWarning() << "IpcClient::Interface(): Replica is invalid";
     }
     return rep;
-}
-
-QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
-{
-    return withInterface([](QSharedPointer<IpcInterfaceReplica> &iface) -> QSharedPointer<IpcProcessInterfaceReplica> {
-        auto createPrivilegedProcess = iface->createPrivilegedProcess();
-        if (!createPrivilegedProcess.waitForFinished()) {
-            qCritical() << "Failed to create privileged process";
-            return nullptr;
-        }
-
-        const int pid = createPrivilegedProcess.returnValue();
-
-        auto* node = new QRemoteObjectNode();
-        node->connectToNode(QUrl(QString("local:%1").arg(amnezia::getIpcProcessUrl(pid))));
-
-        QSharedPointer<IpcProcessInterfaceReplica> rep(
-            node->acquire<IpcProcessInterfaceReplica>(),
-            [node] (IpcProcessInterfaceReplica *ptr) {
-                delete ptr;
-                node->deleteLater();
-            }
-        );
-        if (rep.isNull()) {
-            qCritical() << "IpcClient::CreatePrivilegedProcess(): Failed to acquire replica";
-            return nullptr;
-        }
-        if (!rep->waitForSource()) {
-            qCritical() << "IpcClient::CreatePrivilegedProcess(): Failed to initialize replica";
-            return nullptr;
-        }
-        if (!rep->isReplicaValid()) {
-            qCritical() << "IpcClient::CreatePrivilegedProcess(): Replica is invalid";
-            return nullptr;
-        }
-
-        return rep;
-    },
-    []() -> QSharedPointer<IpcProcessInterfaceReplica> {
-        return nullptr;
-    });
 }

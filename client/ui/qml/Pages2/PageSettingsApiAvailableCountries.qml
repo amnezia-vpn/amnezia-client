@@ -65,10 +65,6 @@ PageType {
             PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
             return
         }
-        if (ConnectionController.isConnected) {
-            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-            return
-        }
         root.selectConnectionCountry(countryCode, countryName)
     }
 

@@ -31,6 +31,7 @@ public:
     };
 
     ErrorCode start(const QJsonObject &vpnConfig);
+    void switchProxy(const QJsonObject &vpnConfig);
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
@@ -78,7 +79,6 @@ signals:
     void vpnPermissionRejected();
     void notificationStateChanged();
     void vpnStateChanged(ConnectionState state);
-    void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
     void fileSaved(bool success, bool cancelled);
     void configImported(QString config);
@@ -114,7 +114,6 @@ private:
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
     static void onNotificationStateChanged(JNIEnv *env, jobject thiz);
     static void onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateCode);
-    static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
     static void onFileSaved(JNIEnv *env, jobject thiz, jboolean success, jboolean cancelled);

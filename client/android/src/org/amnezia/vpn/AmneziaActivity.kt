@@ -58,10 +58,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
-import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.json.JSONException
@@ -124,12 +122,6 @@ class AmneziaActivity : QtActivity() {
                         }
                     }
 
-                    ServiceEvent.STATISTICS_UPDATE -> {
-                        msg.data?.getStatistics()?.let { (rxBytes, txBytes) ->
-                            QtAndroidController.onStatisticsUpdate(rxBytes, txBytes)
-                        }
-                    }
-
                     ServiceEvent.ERROR -> {
                         msg.data?.getString(MSG_ERROR)?.let { error ->
                             Log.e(TAG, "From VpnService: $error")
@@ -189,7 +181,6 @@ class AmneziaActivity : QtActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity")
-        loadLibs()
 
         // Configure window for edge-to-edge display
         configureWindowForEdgeToEdge()
@@ -216,14 +207,6 @@ class AmneziaActivity : QtActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
-    }
-
-    private fun loadLibs() {
-        listOf(
-            "rsapss"
-        ).forEach {
-            loadSharedLibrary(this.applicationContext, it)
-        }
     }
 
     private fun registerBroadcastReceivers() {
@@ -650,12 +633,13 @@ class AmneziaActivity : QtActivity() {
 
     private fun getVpnProto(vpnConfig: String): VpnProto? = try {
         require(vpnConfig.isNotBlank()) { "Blank VPN config" }
-        VpnProto.get(JSONObject(vpnConfig).getString("protocol"))
+        JSONObject(vpnConfig)
+        VpnProto.XTUN
     } catch (e: JSONException) {
         Log.e(TAG, "Invalid VPN config json format: ${e.message}")
         null
     } catch (e: IllegalArgumentException) {
-        Log.e(TAG, "Protocol not found: ${e.message}")
+        Log.e(TAG, "Invalid VPN config: ${e.message}")
         null
     }
 
@@ -678,6 +662,16 @@ class AmneziaActivity : QtActivity() {
             } catch (e: SecurityException) {
                 Log.e(TAG, "Failed to start ${proto.serviceClass.simpleName}: $e")
                 QtAndroidController.onServiceError()
+            }
+        }
+    }
+
+    @MainThread
+    private fun switchVpnProxy(vpnConfig: String) {
+        Log.d(TAG, "Switch VPN proxy")
+        vpnServiceMessenger.send {
+            Action.SWITCH_PROXY.packToMessage {
+                putString(MSG_VPN_CONFIG, vpnConfig)
             }
         }
     }
@@ -706,6 +700,14 @@ class AmneziaActivity : QtActivity() {
                     startVpn(vpnConfig)
                 }
             }
+        }
+    }
+
+    @Suppress("unused")
+    fun switchProxy(vpnConfig: String) {
+        Log.v(TAG, "Switch VPN proxy")
+        mainScope.launch {
+            switchVpnProxy(vpnConfig)
         }
     }
 

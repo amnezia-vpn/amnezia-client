@@ -76,16 +76,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
-    ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
-    ${CLIENT_ROOT_DIR}/core/utils/constants.h
-)
-
-# Mozilla headres
-set(HEADERS ${HEADERS}
-    ${CLIENT_ROOT_DIR}/mozilla/models/server.h
-    ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.h
-    ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.h
-    ${CLIENT_ROOT_DIR}/mozilla/controllerimpl.h
+    ${CLIENT_ROOT_DIR}/core/utils/tunnelSettings.h
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -145,7 +136,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/mtProxyPublicHostInput.cpp
-    ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
     ${CLIENT_ROOT_DIR}/core/utils/networkUtilities.cpp
     ${CLIENT_ROOT_DIR}/core/utils/payloadSender.cpp
@@ -167,14 +157,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
     ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp
-    ${CLIENT_ROOT_DIR}/core/utils/managementServer.cpp
-)
-
-# Mozilla sources
-set(SOURCES ${SOURCES}
-    ${CLIENT_ROOT_DIR}/mozilla/models/server.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/shared/ipaddress.cpp
-    ${CLIENT_ROOT_DIR}/mozilla/shared/leakdetector.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/tunnelSettings.cpp
 )
 
 if(NOT IOS AND NOT MACOS_NE)
@@ -270,14 +253,6 @@ set(SOURCES ${SOURCES}
 )
 
 if(WIN32)
-    set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
-    )
-
     set(RESOURCES ${RESOURCES}
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
@@ -290,21 +265,11 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
-        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.h
-        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
-        ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
-        ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
 endif()
 

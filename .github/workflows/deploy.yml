@@ -34,6 +34,10 @@ jobs:
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
+    env:
+      CC: gcc-12
+      CXX: g++-12
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -71,6 +75,8 @@ jobs:
     if: ${{ always() }}
 
     env:
+      CC: gcc-12
+      CXX: g++-12
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY_B64: ${{ secrets.PROD_AGW_PUBLIC_KEY_B64 }}

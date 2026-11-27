@@ -632,7 +632,7 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
                                                                              &captchaInfo, &usedProtocolData);
 
     if (errorCode == ErrorCode::NoError) {
-        emitUpdateSuccess(wasSubscriptionExpired, reloadServiceConfig, newCountryName);
+        emitUpdateSuccess(serverId, wasSubscriptionExpired, reloadServiceConfig, newCountryName);
         return true;
     } else if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfo.isRequired) {
         m_captchaState = CaptchaState{};
@@ -658,7 +658,8 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
     }
 }
 
-void SubscriptionUiController::emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName)
+void SubscriptionUiController::emitUpdateSuccess(const QString &serverId, bool wasSubscriptionExpired,
+                                                 bool reloadServiceConfig, const QString &newCountryName)
 {
     if (wasSubscriptionExpired) {
         emit subscriptionRefreshNeeded();
@@ -669,6 +670,7 @@ void SubscriptionUiController::emitUpdateSuccess(bool wasSubscriptionExpired, bo
         emit updateServerFromApiFinished();
     } else {
         emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
+        emit apiCountryChanged(serverId);
     }
 }
 
@@ -684,6 +686,7 @@ void SubscriptionUiController::emitCaptchaUpdateSuccess()
     const bool wasSubscriptionExpired = m_captchaState.wasSubscriptionExpired;
     const bool reloadServiceConfig = m_captchaState.reloadServiceConfig;
     const QString newCountryName = m_captchaState.newCountryName;
+    const QString serverId = m_captchaState.serverId;
 
     finishCaptchaFlow();
 
@@ -691,7 +694,7 @@ void SubscriptionUiController::emitCaptchaUpdateSuccess()
         emit configValidated(true);
         return;
     }
-    emitUpdateSuccess(wasSubscriptionExpired, reloadServiceConfig, newCountryName);
+    emitUpdateSuccess(serverId, wasSubscriptionExpired, reloadServiceConfig, newCountryName);
 }
 
 

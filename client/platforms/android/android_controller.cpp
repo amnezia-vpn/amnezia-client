@@ -95,7 +95,6 @@ bool AndroidController::initialize()
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
         {"onNotificationStateChanged", "()V", reinterpret_cast<void *>(onNotificationStateChanged)},
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
-        {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onFileSaved", "(ZZ)V", reinterpret_cast<void *>(onFileSaved)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
@@ -143,6 +142,12 @@ ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
                        QJniObject::fromString(config).object<jstring>());
 
     return ErrorCode::NoError;
+}
+
+void AndroidController::switchProxy(const QJsonObject &vpnConfig)
+{
+    callActivityMethod("switchProxy", "(Ljava/lang/String;)V",
+                       QJniObject::fromString(QJsonDocument(vpnConfig).toJson()).object<jstring>());
 }
 
 void AndroidController::stop()
@@ -616,15 +621,6 @@ void AndroidController::onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateC
     auto state = ConnectionState(stateCode);
 
     emit AndroidController::instance()->vpnStateChanged(state);
-}
-
-// static
-void AndroidController::onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes)
-{
-    Q_UNUSED(env);
-    Q_UNUSED(thiz);
-
-    emit AndroidController::instance()->statisticsUpdated((quint64) rxBytes, (quint64) txBytes);
 }
 
 // static

@@ -1244,7 +1244,7 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
             if (stdOut.isEmpty()) {
                 return ErrorCode::NoError;
             } else {
-#ifdef MZ_DEBUG
+#ifdef QT_DEBUG
                 qDebug().noquote() << stdOut;
 #endif
                 emit serverIsBusy(true);

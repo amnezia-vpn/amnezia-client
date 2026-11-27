@@ -68,6 +68,7 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initApiCountryChangedHandler();
     initCountryListSortModeHandler();
     initCountryListStateHandler();
     initSubscriptionRefreshHandler();
@@ -277,6 +278,22 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
                                                            apiV2->apiConfig.serverCountryCode,
                                                            apiV2->apiConfig.userCountryCode);
     });
+}
+
+void CoreSignalHandlers::initApiCountryChangedHandler()
+{
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::apiCountryChanged, this,
+            [this](const QString &serverId) {
+                if (!m_coreController->m_connectionController->isConnected()
+                    || serverId != m_coreController->m_serversController->getDefaultServerId()) {
+                    return;
+                }
+
+                const ErrorCode errorCode = m_coreController->m_connectionController->switchConnection(serverId);
+                if (errorCode != ErrorCode::NoError) {
+                    qWarning() << "CoreSignalHandlers: failed to switch the connection to the new country" << errorCode;
+                }
+            });
 }
 
 void CoreSignalHandlers::initSubscriptionRefreshHandler()
@@ -491,10 +508,6 @@ void CoreSignalHandlers::initAndroidSettingsHandler()
 void CoreSignalHandlers::initAndroidConnectionHandler()
 {
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
-        m_coreController->m_connectionUiController->onConnectionStateChanged(state);
-        m_coreController->m_connectionController->restoreConnection();
-    });
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
         emit m_coreController->m_pageController->goToPageHome();
         m_coreController->m_importController->extractConfigFromData(data);

@@ -74,7 +74,6 @@ target_compile_definitions(${PROJECT} PRIVATE
 
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
-    qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
 
 qt6_add_resources(QRC ${QRC}
@@ -151,10 +150,6 @@ else()
     message("MACOS_NE is OFF")
 endif()
 
-include_directories(mozilla)
-include_directories(mozilla/shared)
-include_directories(mozilla/models)
-
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/core/utils)
 configure_file(
@@ -176,10 +171,6 @@ configure_file(
     ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     @ONLY
 )
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
-endif()
 
 if(WIN32)
     configure_file(
@@ -244,7 +235,6 @@ endif()
 list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
-target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 
@@ -304,30 +294,9 @@ install(SCRIPT ${QT_DEPLOY_SCRIPT}
 )
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
-    list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
-    )
-endif()
-if (LINUX AND NOT ANDROID)
-    list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/linux/update-resolv-conf.sh")
-endif()
-
-if(OVPN_SCRIPTS)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${OVPN_SCRIPTS}
-        "$<TARGET_FILE_DIR:${PROJECT}>"
-    )
-
-    install(FILES ${OVPN_SCRIPTS}
-        DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT AmneziaVPN
-        PERMISSIONS
-            OWNER_READ OWNER_EXECUTE
-            GROUP_READ GROUP_EXECUTE
-            WORLD_READ WORLD_EXECUTE
     )
 endif()
 

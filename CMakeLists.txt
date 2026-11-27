@@ -1,18 +1,21 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT AmneziaVPN)
 if(NOT AMNEZIAVPN_VERSION)
-    set(AMNEZIAVPN_VERSION 5.1.1.11 CACHE STRING "Client app version")
+    set(AMNEZIAVPN_VERSION 5.2.0.1 CACHE STRING "Client app version")
 endif()
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
+include(${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_bootstrap.cmake)
+execute_process(
+    COMMAND ${CONAN_COMMAND} remote add recipes "https://artifactory.amnezia.org/artifactory/api/conan/recipes" --force -vquiet
+)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     ${CMAKE_SOURCE_DIR}/cmake/platform_settings.cmake
-    ${CMAKE_SOURCE_DIR}/cmake/recipes_bootstrap.cmake
-    ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake
+    ${CMAKE_SOURCE_DIR}/cmake/cmake-conan/conan_provider.cmake
     CACHE STRING "" FORCE)
 
 project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
@@ -39,42 +42,7 @@ if(DEFINED APP_ANDROID_VERSION_CODE_OFFSET)
     math(EXPR APP_ANDROID_VERSION_CODE "${APP_ANDROID_VERSION_CODE} + ${APP_ANDROID_VERSION_CODE_OFFSET}")
 endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(MZ_PLATFORM_NAME "linux")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(MZ_PLATFORM_NAME "windows")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(MZ_PLATFORM_NAME "macos")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-    set(MZ_PLATFORM_NAME "android")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-    set(MZ_PLATFORM_NAME "ios")
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    set(MZ_PLATFORM_NAME "wasm")
-endif()
-
 set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
-
-if(APPLE AND NOT IOS)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(AMN_PF_RULE_IDENTITY "user { root }")
-    else()
-        set(AMN_PF_RULE_IDENTITY "group { amnvpn }")
-    endif()
-
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        @ONLY
-    )
-
-    file(COPY_FILE
-        "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
-        ONLY_IF_DIFFERENT
-    )
-endif()
-
 
 add_subdirectory(client)
 

@@ -5,4 +5,3 @@ sealed class ProtocolException(message: String? = null, cause: Throwable? = null
 class BadConfigException(message: String? = null, cause: Throwable? = null) : ProtocolException(message, cause)
 
 class VpnStartException(message: String? = null, cause: Throwable? = null) : ProtocolException(message, cause)
-class VpnException(message: String? = null, cause: Throwable? = null) : ProtocolException(message, cause)

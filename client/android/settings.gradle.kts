@@ -16,6 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://maven.amnezia.org/releases")
     }
 }
 
@@ -32,11 +33,7 @@ include(":qt")
 include(":utils")
 include(":billing")
 include(":protocolApi")
-include(":wireguard")
-include(":awg")
-include(":openvpn")
-include(":xray")
-include(":xray:libXray")
+include(":xtun")
 
 // get values from gradle or local properties
 val androidBuildToolsVersion: String by gradleProperties

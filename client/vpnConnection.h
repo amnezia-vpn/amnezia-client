@@ -1,27 +1,19 @@
 #ifndef VPNCONNECTION_H
 #define VPNCONNECTION_H
 
+#include <QJsonObject>
 #include <QObject>
-#include <QMetaObject>
-#include <QString>
-#include <QScopedPointer>
-#include <QRemoteObjectNode>
 #include <QTimer>
 
-#include "core/protocols/vpnProtocol.h"
-#include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
-#include "core/repositories/secureServersRepository.h"
-#include "core/repositories/secureAppSettingsRepository.h"
-
 #ifdef AMNEZIA_DESKTOP
-#include "core/utils/ipcClient.h"
+    #include <QRemoteObjectReplica>
 #endif
 
-#ifdef Q_OS_ANDROID
-#include "core/protocols/androidVpnProtocol.h"
-#endif
+#include "core/protocols/vpnProtocol.h"
+#include "core/repositories/secureAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/tunnelSettings.h"
 
 using namespace amnezia;
 
@@ -30,72 +22,46 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
-    ~VpnConnection() override;
-
-    static QString bytesPerSecToText(quint64 bytes);
+    explicit VpnConnection(SecureServersRepository *serversRepository,
+                           SecureAppSettingsRepository *appSettingsRepository, QObject *parent = nullptr);
 
     ErrorCode lastError() const;
     Vpn::ConnectionState connectionState() const;
 
-    QSharedPointer<VpnProtocol> vpnProtocol() const;
-
-    const QString &remoteAddress() const;
-    void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
-
-#ifdef Q_OS_ANDROID
-    void restoreConnection();
-#endif
-
 public slots:
-    void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
+    void setRepositories(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
-    void reconnectToVpn();
+    void switchVpnConfiguration(DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
-
     void onKillSwitchModeChanged(bool enabled);
+#ifdef AMNEZIA_DESKTOP
     void disconnectSlots();
-
-    void setConnectionState(Vpn::ConnectionState state);
+#endif
 
 signals:
-    void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
-    void vpnProtocolError(amnezia::ErrorCode error);
-
-    void serviceIsNotReady();
-
-protected slots:
-    void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(Vpn::ConnectionState state);
-
-protected:
-    QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
-    SecureServersRepository* m_serversRepository;
-    SecureAppSettingsRepository* m_appSettingsRepository;
-
-    QJsonObject m_vpnConfiguration;
-    QJsonObject m_routeMode;
-    QString m_remoteAddress;
-
-    // Only for iOS for now, check counters
-    QTimer m_checkTimer;
-
-#ifdef Q_OS_ANDROID
-   AndroidVpnProtocol* androidVpnProtocol = nullptr;
-
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
-   void createAndroidConnections();
+    void setConnectionState(Vpn::ConnectionState state);
+    ErrorCode startTunnel(const TunnelSettings &settings, const QJsonObject &vpnConfiguration);
+    ErrorCode switchTunnelProxy(const TunnelSettings &settings, const QJsonObject &vpnConfiguration);
+    void stopTunnel();
+#ifdef AMNEZIA_DESKTOP
+    void onTunnelStatusChanged(int status);
+    void onServiceStateChanged(QRemoteObjectReplica::State state);
+#else
+    void onPlatformConnectionStateChanged(Vpn::ConnectionState state);
 #endif
 
-   Vpn::ConnectionState m_connectionState;
+    SecureServersRepository *m_serversRepository;
+    SecureAppSettingsRepository *m_appSettingsRepository;
 
-   void createProtocolConnections();
+    Vpn::ConnectionState m_connectionState = Vpn::ConnectionState::Disconnected;
+    ErrorCode m_lastError = ErrorCode::NoError;
 
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QTimer m_checkTimer;
+#endif
 };
 
 #endif // VPNCONNECTION_H
