@@ -5,6 +5,10 @@
 #include <QObject>
 #include <QTimer>
 
+#ifdef AMNEZIA_DESKTOP
+    #include <QRemoteObjectReplica>
+#endif
+
 #include "core/protocols/vpnProtocol.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/repositories/secureServersRepository.h"
@@ -44,6 +48,7 @@ private:
     void stopTunnel();
 #ifdef AMNEZIA_DESKTOP
     void onTunnelStatusChanged(int status);
+    void onServiceStateChanged(QRemoteObjectReplica::State state);
 #else
     void onPlatformConnectionStateChanged(Vpn::ConnectionState state);
 #endif

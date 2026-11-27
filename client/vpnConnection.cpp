@@ -174,6 +174,8 @@ ErrorCode VpnConnection::startTunnel(const TunnelSettings &settings, const QJson
             [this, &config](QSharedPointer<IpcInterfaceReplica> iface) {
                 connect(iface.data(), &IpcInterfaceReplica::tunnelStatusChanged, this,
                         &VpnConnection::onTunnelStatusChanged, Qt::UniqueConnection);
+                connect(iface.data(), &QRemoteObjectReplica::stateChanged, this, &VpnConnection::onServiceStateChanged,
+                        Qt::UniqueConnection);
 
                 auto reply = iface->tunnelUp(config);
                 if (!reply.waitForFinished()) {
@@ -241,6 +243,22 @@ void VpnConnection::onTunnelStatusChanged(int status)
     if (m_connectionState == Vpn::ConnectionState::Connected) {
         setConnectionState(Vpn::ConnectionState::Reconnecting);
     }
+}
+
+void VpnConnection::onServiceStateChanged(QRemoteObjectReplica::State state)
+{
+    if (state != QRemoteObjectReplica::Suspect) {
+        return;
+    }
+
+    if (m_connectionState != Vpn::ConnectionState::Connected && m_connectionState != Vpn::ConnectionState::Connecting
+        && m_connectionState != Vpn::ConnectionState::Reconnecting) {
+        return;
+    }
+
+    qWarning() << "VpnConnection::onServiceStateChanged: lost connection to the service";
+    m_lastError = ErrorCode::AmneziaServiceNotRunning;
+    setConnectionState(Vpn::ConnectionState::Error);
 }
 
 #elif defined(Q_OS_ANDROID)
