@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QJsonDocument>
 #include <QMetaEnum>
+#include <QMutex>
 #include <QStandardPaths>
 
 #include "core/utils/utilities.h"
@@ -18,6 +19,11 @@ QFile Logger::m_file;
 QTextStream Logger::m_textStream;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 QString Logger::m_serviceLogFileName = QString("%1.log").arg(SERVICE_NAME);
+
+namespace
+{
+    QMutex logFileMutex;
+}
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -62,14 +68,22 @@ bool Logger::init(bool isServiceLogger)
         return false;
     }
 
-    m_file.setFileName(appDir.filePath(logFileName));
-    if (!m_file.open(QIODevice::Append)) {
+    bool isOpened = false;
+    {
+        QMutexLocker locker(&logFileMutex);
+        m_file.close();
+        m_file.setFileName(appDir.filePath(logFileName));
+        isOpened = m_file.open(QIODevice::Append);
+        if (isOpened) {
+            m_file.setTextModeEnabled(true);
+            m_textStream.setDevice(&m_file);
+        }
+    }
+
+    if (!isOpened) {
         qWarning() << "Cannot open log file:" << logFileName;
         return false;
     }
-
-    m_file.setTextModeEnabled(true);
-    m_textStream.setDevice(&m_file);
 
     qInstallMessageHandler(messageHandler);
 
@@ -78,6 +92,7 @@ bool Logger::init(bool isServiceLogger)
 
 void Logger::deInit()
 {
+    QMutexLocker locker(&logFileMutex);
     m_textStream.setDevice(nullptr);
     m_file.close();
 }
@@ -131,14 +146,18 @@ QString Logger::serviceLogsFilePath()
 
 void Logger::clearLogs(bool isServiceLogger)
 {
-    bool isLogActive = m_file.isOpen();
-    m_file.close();
+    bool isLogActive = false;
+    {
+        QMutexLocker locker(&logFileMutex);
+        isLogActive = m_file.isOpen();
+        m_file.close();
 
-    QFile file(isServiceLogger ? serviceLogsFilePath() : userLogsFilePath());
+        QFile file(isServiceLogger ? serviceLogsFilePath() : userLogsFilePath());
 
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.resize(0);
-    file.close();
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.resize(0);
+        file.close();
+    }
 
     if (isLogActive) {
         init(isServiceLogger);
@@ -186,6 +205,7 @@ Logger::LogStreamer::~LogStreamer()
                                     .arg(QDateTime::currentDateTimeUtc().toString("[yyyy-MM-dd hh:mm:ss.zzzZ]"),
                                          logLevelString, APPLICATION_NAME, m_logger->className(), m_data->m_buffer.trimmed());
 
+    QMutexLocker locker(&logFileMutex);
     if (m_file.isOpen()) {
         QTextStream logToFile(&m_file);
         logToFile << message << Qt::endl << Qt::flush;
