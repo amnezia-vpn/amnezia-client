@@ -538,8 +538,6 @@ open class AmneziaVpnService : VpnService() {
 
         Log.d(TAG, "Reconnect VPN")
 
-        protocolState.value = RECONNECTING
-
         connectionJob = connectionScope.launch {
             vpnProto?.protocol?.reconnectVpn(Builder(), ::protect)
         }

@@ -32,8 +32,6 @@ class Xtun : Protocol() {
     private lateinit var tunBuilder: Builder
     @Volatile
     private var proxyGeneration = 0
-    @Volatile
-    private var isTunnelConnected = false
 
     override fun internalInit() {}
 
@@ -91,13 +89,11 @@ class Xtun : Protocol() {
 
     override fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
         tunnel?.networkChanged()
-        if (isTunnelConnected) state.value = CONNECTED
     }
 
     private fun onStatus(status: Int) {
         Log.d(TAG, "xtun status: $status")
-        isTunnelConnected = status == STATUS_CONNECTED
-        if (isTunnelConnected) {
+        if (status == STATUS_CONNECTED) {
             state.value = CONNECTED
         } else if (state.value == CONNECTED) {
             state.value = RECONNECTING
@@ -149,7 +145,6 @@ class Xtun : Protocol() {
     }
 
     private fun close() {
-        isTunnelConnected = false
         val currentTunnel = tunnel
         val currentProxy = proxy
         tunnel = null
