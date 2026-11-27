@@ -39,6 +39,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.Insets
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
@@ -1036,10 +1037,16 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun setStatusBarColor(color: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
         Log.v(TAG, "Change status bar color: ${"#%08X".format(color)}")
+        val isLightBackground = ColorUtils.calculateLuminance(color) > 0.5
         mainScope.launch {
-            window.statusBarColor = color
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = isLightBackground
+                isAppearanceLightNavigationBars = isLightBackground
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                window.statusBarColor = color
+            }
         }
     }
 

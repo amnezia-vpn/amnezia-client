@@ -1,6 +1,7 @@
 #ifndef SETTINGSUICONTROLLER_H
 #define SETTINGSUICONTROLLER_H
 
+#include <QColor>
 #include <QObject>
 
 #include "core/controllers/settingsController.h"
@@ -35,6 +36,7 @@ public:
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
     Q_PROPERTY(Qt::ColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY colorSchemeChanged)
     Q_PROPERTY(int accentColor READ accentColor WRITE setAccentColor NOTIFY accentColorChanged)
+    Q_PROPERTY(QColor trayAccentColor MEMBER m_trayAccentColor NOTIFY trayAccentColorChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -148,11 +150,13 @@ signals:
     void startMinimizedChanged();
     void colorSchemeChanged();
     void accentColorChanged();
+    void trayAccentColorChanged(const QColor &color);
 
 private:
     void applyColorScheme();
 
     SettingsController* m_settingsController;
+    QColor m_trayAccentColor;
     ServersController* m_serversController;
 };
 

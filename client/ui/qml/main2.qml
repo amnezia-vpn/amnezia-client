@@ -27,6 +27,12 @@ Window  {
         value: SettingsController.accentColor
     }
 
+    Binding {
+        target: SettingsController
+        property: "trayAccentColor"
+        value: AmneziaStyle.color.accentLight
+    }
+
     Connections {
         target: Qt.application
         function onStateChanged() {

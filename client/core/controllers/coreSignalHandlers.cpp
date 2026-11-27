@@ -544,6 +544,8 @@ void CoreSignalHandlers::initNotificationHandler()
 
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_coreController->m_notificationHandler);
     connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::trayAccentColorChanged, trayHandler,
+            &SystemTrayNotificationHandler::setConnectedTrayIconColor);
 #endif    
 }
 

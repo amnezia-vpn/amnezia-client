@@ -28,6 +28,7 @@ public:
     void onTranslationsUpdated() override;
 
 public slots:
+    void setConnectedTrayIconColor(const QColor &color);
     void updateWebsiteUrl(const QString &newWebsiteUrl);
 
 protected:
@@ -61,10 +62,11 @@ private:
     QAction* m_statusLabel = nullptr;    
     QAction* m_separator = nullptr;
 
-    const QColor ConnectedTrayIconColor = QColor(0xFD, 0xBA, 0x74);
+    QColor m_connectedTrayIconColor = QColor(0xFD, 0xBA, 0x74);
     const QColor ErrorTrayIconColor = QColor(0xF8, 0x71, 0x71);
     const int PulsePeriodMs = 1600;
     QImage m_trayIconBase;
+    QColor m_trayIconColor;
     QTimer m_pulseTimer;
     QElapsedTimer m_pulseClock;
     Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Disconnected;
