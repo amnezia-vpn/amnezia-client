@@ -12,6 +12,7 @@ import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.VpnService
@@ -38,6 +39,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.Insets
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
@@ -422,6 +424,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     private fun configureWindowForEdgeToEdge() {
+        val isSystemLight = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             window.apply {
                 addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -431,8 +434,8 @@ class AmneziaActivity : QtActivity() {
             }
 
             WindowInsetsControllerCompat(window, window.decorView).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+                isAppearanceLightStatusBars = isSystemLight
+                isAppearanceLightNavigationBars = isSystemLight
             }
 
             // Workaround for Android 14 (API 34+) IME adjustResize bug
@@ -442,12 +445,12 @@ class AmneziaActivity : QtActivity() {
         } else {
             window.apply {
                 addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                statusBarColor = getColor(R.color.black)
+                statusBarColor = getColor(R.color.window_background)
             }
 
             WindowInsetsControllerCompat(window, window.decorView).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+                isAppearanceLightStatusBars = isSystemLight
+                isAppearanceLightNavigationBars = isSystemLight
             }
         }
     }
@@ -1029,6 +1032,21 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Change navigation bar color: ${"#%08X".format(color)}")
         mainScope.launch {
             window.navigationBarColor = color
+        }
+    }
+
+    @Suppress("unused")
+    fun setStatusBarColor(color: Int) {
+        Log.v(TAG, "Change status bar color: ${"#%08X".format(color)}")
+        val isLightBackground = ColorUtils.calculateLuminance(color) > 0.5
+        mainScope.launch {
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = isLightBackground
+                isAppearanceLightNavigationBars = isLightBackground
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                window.statusBarColor = color
+            }
         }
     }
 

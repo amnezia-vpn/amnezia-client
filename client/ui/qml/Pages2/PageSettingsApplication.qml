@@ -246,6 +246,34 @@ PageType {
                 }
 
                 ListItemType {
+                    id: labelWithButtonTheme
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Theme")
+                    subtitle: selectThemeDrawer.currentThemeName
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        selectThemeDrawer.open()
+                    }
+                }
+
+                ListItemType {
+                    id: labelWithButtonAccent
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Accent color")
+                    subtitle: selectAccentDrawer.currentAccentName
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        selectAccentDrawer.open()
+                    }
+                }
+
+                ListItemType {
                     id: labelWithButtonLogging
 
                     Layout.fillWidth: true
@@ -295,5 +323,13 @@ PageType {
 
     SelectLanguageDrawer {
         id: selectLanguageDrawer
+    }
+
+    SelectThemeDrawer {
+        id: selectThemeDrawer
+    }
+
+    SelectAccentDrawer {
+        id: selectAccentDrawer
     }
 }

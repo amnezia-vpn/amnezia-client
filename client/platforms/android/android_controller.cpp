@@ -282,6 +282,11 @@ void AndroidController::setNavigationBarColor(unsigned int color)
     callActivityMethod("setNavigationBarColor", "(I)V", color);
 }
 
+void AndroidController::setStatusBarColor(unsigned int color)
+{
+    callActivityMethod("setStatusBarColor", "(I)V", color);
+}
+
 void AndroidController::minimizeApp()
 {
     callActivityMethod("minimizeApp", "()V");

@@ -4242,6 +4242,16 @@ Buat satu dari pengaturan saat ini.</translation>
         <source>Cannot reset settings during active connection</source>
         <translation>Tidak dapat mengatur ulang pengaturan selama koneksi aktif</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="253"/>
+        <source>Theme</source>
+        <translation>Tema</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>Warna aksen</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7207,6 +7217,34 @@ Untuk informasi lebih terperinci, Anda dapat
     </message>
 </context>
 <context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>Oranye</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>Ungu</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>Toska</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>Biru</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>Warna aksen</translation>
+    </message>
+</context>
+<context>
     <name>SelectLanguageDrawer</name>
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="41"/>
@@ -7217,6 +7255,29 @@ Untuk informasi lebih terperinci, Anda dapat
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="56"/>
         <source>Choose language</source>
         <translation>Pilih bahasa</translation>
+    </message>
+</context>
+<context>
+    <name>SelectThemeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="12"/>
+        <source>System</source>
+        <translation>Sistem</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="13"/>
+        <source>Light</source>
+        <translation>Terang</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="14"/>
+        <source>Dark</source>
+        <translation>Gelap</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="38"/>
+        <source>Theme</source>
+        <translation>Tema</translation>
     </message>
 </context>
 <context>

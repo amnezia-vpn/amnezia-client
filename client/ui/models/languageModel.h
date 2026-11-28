@@ -11,6 +11,7 @@ namespace LanguageSettings
         English,
         Russian,
         China_cn,
+        Belarusian,
         Ukrainian,
         Persian,
         Arabic,
@@ -21,7 +22,8 @@ namespace LanguageSettings
         Korean,
         French,
         Thai,
-        Indonesian
+        Indonesian,
+        Hebrew
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 

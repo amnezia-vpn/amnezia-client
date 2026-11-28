@@ -245,6 +245,26 @@ void SettingsController::toggleScreenshotsEnabled(bool enable)
     m_appSettingsRepository->setScreenshotsEnabled(enable);
 }
 
+Qt::ColorScheme SettingsController::colorScheme() const
+{
+    return m_appSettingsRepository->colorScheme();
+}
+
+void SettingsController::setColorScheme(Qt::ColorScheme scheme)
+{
+    m_appSettingsRepository->setColorScheme(scheme);
+}
+
+int SettingsController::accentColor() const
+{
+    return m_appSettingsRepository->accentColor();
+}
+
+void SettingsController::setAccentColor(int accent)
+{
+    m_appSettingsRepository->setAccentColor(accent);
+}
+
 bool SettingsController::isNewsNotificationsEnabled() const
 {
     return m_appSettingsRepository->isNewsNotifications();

@@ -1,6 +1,7 @@
 #ifndef SETTINGSUICONTROLLER_H
 #define SETTINGSUICONTROLLER_H
 
+#include <QColor>
 #include <QObject>
 
 #include "core/controllers/settingsController.h"
@@ -33,6 +34,9 @@ public:
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(Qt::ColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY colorSchemeChanged)
+    Q_PROPERTY(int accentColor READ accentColor WRITE setAccentColor NOTIFY accentColorChanged)
+    Q_PROPERTY(QColor trayAccentColor MEMBER m_trayAccentColor NOTIFY trayAccentColorChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -75,6 +79,12 @@ public slots:
 
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
+
+    Qt::ColorScheme colorScheme();
+    void setColorScheme(Qt::ColorScheme scheme);
+
+    int accentColor();
+    void setAccentColor(int accent);
 
     bool isCameraPresent();
 
@@ -138,9 +148,15 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void autoStartChanged();
     void startMinimizedChanged();
+    void colorSchemeChanged();
+    void accentColorChanged();
+    void trayAccentColorChanged(const QColor &color);
 
 private:
+    void applyColorScheme();
+
     SettingsController* m_settingsController;
+    QColor m_trayAccentColor;
     ServersController* m_serversController;
 };
 

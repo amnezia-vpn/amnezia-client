@@ -15,6 +15,24 @@ import "Pages2"
 Window  {
     id: root
 
+    Binding {
+        target: AmneziaStyle
+        property: "requestedColorScheme"
+        value: SettingsController.colorScheme
+    }
+
+    Binding {
+        target: AmneziaStyle
+        property: "requestedAccent"
+        value: SettingsController.accentColor
+    }
+
+    Binding {
+        target: SettingsController
+        property: "trayAccentColor"
+        value: AmneziaStyle.color.accentLight
+    }
+
     Connections {
         target: Qt.application
         function onStateChanged() {

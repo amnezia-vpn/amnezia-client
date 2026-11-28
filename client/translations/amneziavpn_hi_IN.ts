@@ -4242,6 +4242,16 @@ Create one from the current settings.</source>
         <source>Cannot reset settings during active connection</source>
         <translation>सक्रिय कनेक्शन के दौरान सेटिंग्स रीसेट नहीं की जा सकतीं</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="253"/>
+        <source>Theme</source>
+        <translation>थीम</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="267"/>
+        <source>Accent color</source>
+        <translation>एक्सेंट रंग</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -7210,6 +7220,34 @@ For more detailed information, you can
     </message>
 </context>
 <context>
+    <name>SelectAccentDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Orange</source>
+        <translation>नारंगी</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Purple</source>
+        <translation>बैंगनी</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Teal</source>
+        <translation>फ़िरोज़ी</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="13"/>
+        <source>Blue</source>
+        <translation>नीला</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectAccentDrawer.qml" line="33"/>
+        <source>Accent color</source>
+        <translation>एक्सेंट रंग</translation>
+    </message>
+</context>
+<context>
     <name>SelectLanguageDrawer</name>
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="41"/>
@@ -7220,6 +7258,29 @@ For more detailed information, you can
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="56"/>
         <source>Choose language</source>
         <translation>भाषा चुनें</translation>
+    </message>
+</context>
+<context>
+    <name>SelectThemeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="12"/>
+        <source>System</source>
+        <translation>सिस्टम</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="13"/>
+        <source>Light</source>
+        <translation>लाइट</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="14"/>
+        <source>Dark</source>
+        <translation>डार्क</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="38"/>
+        <source>Theme</source>
+        <translation>थीम</translation>
     </message>
 </context>
 <context>
